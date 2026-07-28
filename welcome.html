@@ -6,16 +6,14 @@
 
 <title>Welcome to NourisHer Foundations</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@display=swap
-
-<style>
-
-:root{
-    --purple:#6a2b8a;
-    --purple-dark:#4f1d6c;
+<link rel="preconnect" href="https rel="preconnect" href="httpsref="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheetry:#6a2c91;
+    --primary-dark:#4b1f68;
     --gold:#f5c518;
-    --bg:#faf8fc;
-    --text:#333;
+    --bg:#faf7fc;
+    --white:#ffffff;
+    --text:#2d2d2d;
+    --muted:#6f6f6f;
+    --success:#28a745;
 }
 
 *{
@@ -26,32 +24,31 @@
 
 body{
     font-family:'DM Sans',sans-serif;
-    background:linear-gradient(180deg,#faf8fc 0%,#ffffff 100%);
-    min-height:100vh;
+    background:linear-gradient(180deg,#faf7fc 0%,#ffffff 100%);
     color:var(--text);
+    min-height:100vh;
 }
 
 .container{
-    max-width:850px;
+    max-width:900px;
     margin:auto;
     padding:60px 20px;
 }
 
 .card{
-    background:white;
-    border-radius:24px;
+    background:var(--white);
+    border-radius:30px;
     padding:60px;
+    box-shadow:0 20px 50px rgba(0,0,0,.08);
     text-align:center;
-    box-shadow:0 20px 60px rgba(0,0,0,.08);
 }
 
-.success-badge{
+.success-icon{
     width:100px;
     height:100px;
-    margin:auto;
-    margin-bottom:25px;
+    margin:0 auto 30px;
     border-radius:50%;
-    background:#f7f0fb;
+    background:rgba(40,167,69,.12);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -59,113 +56,136 @@ body{
 }
 
 .eyebrow{
-    color:var(--purple);
-    font-size:.8rem;
-    font-weight:700;
-    letter-spacing:2px;
     text-transform:uppercase;
+    letter-spacing:2px;
+    font-size:.8rem;
+    color:var(--primary);
+    font-weight:700;
     margin-bottom:15px;
 }
 
 h1{
     font-family:'Playfair Display',serif;
+    color:var(--primary-dark);
     font-size:48px;
-    color:var(--purple-dark);
     margin-bottom:20px;
 }
 
-.lead{
+.subtitle{
     font-size:22px;
+    color:var(--muted);
     margin-bottom:30px;
-    color:#555;
 }
 
 .message{
     max-width:650px;
     margin:auto;
     line-height:1.8;
+    color:var(--muted);
     margin-bottom:40px;
+}
+
+.message p{
+    margin-bottom:15px;
 }
 
 .next-steps{
     background:#faf4fd;
-    border-left:5px solid var(--purple);
-    border-radius:16px;
-    padding:30px;
+    border-left:5px solid var(--primary);
+    border-radius:18px;
     text-align:left;
+    padding:35px;
     margin-bottom:40px;
 }
 
 .next-steps h2{
-    color:var(--purple-dark);
+    color:var(--primary-dark);
     margin-bottom:20px;
-    font-size:24px;
+    font-size:26px;
+}
+
+.next-steps ol{
+    padding-left:20px;
 }
 
 .next-steps li{
-    margin-bottom:14px;
+    margin-bottom:18px;
     line-height:1.7;
 }
 
 .highlight{
-    color:var(--purple);
+    color:var(--primary);
     font-weight:700;
 }
 
 .button{
     display:inline-block;
-    background:var(--purple);
+    background:var(--primary);
     color:white;
     text-decoration:none;
-    padding:16px 34px;
-    border-radius:40px;
+    padding:16px 36px;
+    border-radius:50px;
     font-weight:700;
     transition:.3s;
 }
 
 .button:hover{
-    background:var(--purple-dark);
+    background:var(--primary-dark);
 }
 
 .quote{
-    margin-top:45px;
-    padding-top:35px;
+    margin-top:50px;
     border-top:1px solid #eee;
+    padding-top:35px;
+}
+
+.quote-text{
     font-style:italic;
-    color:#666;
+    color:var(--muted);
     line-height:1.8;
+    font-size:18px;
 }
 
 .signature{
     margin-top:20px;
+    color:var(--primary-dark);
     font-weight:700;
-    color:var(--purple-dark);
 }
 
 .footer-note{
     margin-top:35px;
-    font-size:14px;
     color:#777;
+    font-size:14px;
+}
+
+.logo{
+    margin-bottom:30px;
+    color:var(--primary);
+    font-weight:700;
+    font-size:22px;
 }
 
 @media(max-width:768px){
 
     .card{
-        padding:35px 25px;
+        padding:40px 25px;
     }
 
     h1{
         font-size:36px;
     }
 
-    .lead{
+    .subtitle{
         font-size:18px;
+    }
+
+    .next-steps{
+        padding:25px;
     }
 
 }
 
 </style>
-
 </head>
 
 <body>
@@ -174,7 +194,11 @@ h1{
 
     <div class="card">
 
-        <div class="success-badge">
+        <div class="logo">
+            NourisHer by Eat Well Live Well
+        </div>
+
+        <div class="success-icon">
             🎉
         </div>
 
@@ -186,23 +210,22 @@ h1{
             Welcome to NourisHer Foundations
         </h1>
 
-        <p class="lead">
+        <p class="subtitle">
             Your spot has been successfully reserved.
         </p>
 
         <div class="message">
 
             <p>
-                Congratulations on taking the first step towards building the habits,
-                confidence, and consistency that support lasting health and sustainable
-                weight loss.
+                Congratulations on taking an important step towards building
+                the habits, confidence, and consistency that support lasting
+                health and sustainable weight loss.
             </p>
 
-            <br>
-
             <p>
-                You're now part of a community of women who are committed to improving
-                their health through simple, practical, and sustainable changes.
+                You're now part of a community of women who are committed to
+                improving their health through simple, practical, and
+                sustainable changes.
             </p>
 
         </div>
@@ -219,4 +242,62 @@ h1{
 
                 <li>
                     Watch for a welcome email with details about
-                    <span class="highlight">NourisHer Foundations.</
+                    <span class="highlight">NourisHer Foundations.</span>
+                </li>
+
+                <li>
+                    You'll receive access instructions to the private
+                    NourisHer Foundations community before the program begins.
+                </li>
+
+                <li>
+                    We'll share your onboarding information, program calendar,
+                    and important next steps shortly.
+                </li>
+
+                <li>
+                    Please save our email address and WhatsApp contact so you
+                    don't miss any updates.
+                </li>
+
+            </ol>
+
+        </div>
+
+        <a href="https://eatwelllivewell.in" class="button">
+            Visit Eat Well Live Well
+        </a>
+
+        <div class="quote">
+
+            <div class="quote-text">
+
+                “You don't need to be perfect.
+                You simply need to keep showing up.
+                Small actions repeated consistently can create
+                extraordinary results over time.”
+
+            </div>
+
+            <div class="signature">
+
+                — Sushma<br>
+                NourisHer by Eat Well Live Well
+
+            </div>
+
+        </div>
+
+        <div class="footer-note">
+
+            If you don't receive your confirmation email within
+            15 minutes, please contact us for assistance.
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
