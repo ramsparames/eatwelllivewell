@@ -1,17 +1,23 @@
-console.log("NourisHer Foundations Loaded");
+"use strict";
 
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e){
-        e.preventDefault();
+console.log("NourisHer Foundations loaded");
 
-        const target = document.querySelector(
-            this.getAttribute('href')
-        );
+document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+  anchor.addEventListener("click", (event) => {
+    const targetId = anchor.getAttribute("href");
 
-        if(target){
-            target.scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
-    });
+    if (!targetId || targetId === "#") {
+      return;
+    }
+
+    const target = document.querySelector(targetId);
+
+    if (target) {
+      event.preventDefault();
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  });
 });
