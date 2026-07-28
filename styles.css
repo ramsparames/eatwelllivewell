@@ -1,1 +1,224 @@
-body{font-family:Inter,Arial,sans-serif;margin:0;color:#333;line-height:1.6}.container{max-width:1100px;margin:auto;padding:0 20px}.section{padding:70px 0}.hero{background:#faf4fa;padding:80px 0}.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}.eyebrow{color:#7c2a8a;font-weight:700;font-size:.8rem}.coach-image img{width:100%;border-radius:30px}.btn{background:#7c2a8a;color:#fff;padding:14px 26px;border-radius:30px;text-decoration:none;display:inline-block}.alt{background:#f5f5f5}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.card{background:#fff;padding:20px;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.08)}.journey{text-align:center}.arrow{font-size:40px;margin:20px 0}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:12px}.cta{text-align:center;background:#2d103e;color:#fff}.price{font-size:52px;font-weight:bold;margin:20px 0}@media(max-width:768px){.hero-grid,.grid{grid-template-columns:1fr}}
+:root{
+    --primary:#6a2c91;
+    --primary-dark:#471860;
+    --text:#333;
+    --light:#f8f3fa;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:'DM Sans',sans-serif;
+    color:var(--text);
+    line-height:1.7;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:0 24px;
+}
+
+.section{
+    padding:90px 0;
+}
+
+.center{
+    text-align:center;
+}
+
+.narrow{
+    max-width:850px;
+    margin:auto;
+}
+
+.hero{
+    background:linear-gradient(135deg,#fffaf4,#f8ecf6);
+    padding:100px 0;
+}
+
+.hero-grid{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:60px;
+    align-items:center;
+}
+
+.hero-image img{
+    width:100%;
+    max-width:420px;
+    display:block;
+    margin-left:auto;
+    border-radius:32px;
+    box-shadow:0 20px 50px rgba(0,0,0,.15);
+}
+
+.eyebrow{
+    color:var(--primary);
+    text-transform:uppercase;
+    font-size:.85rem;
+    font-weight:700;
+    letter-spacing:2px;
+}
+
+h1,h2{
+    font-family:'Playfair Display',serif;
+    color:var(--primary-dark);
+}
+
+h1{
+    font-size:72px;
+    line-height:1.05;
+}
+
+h2{
+    font-size:48px;
+}
+
+.hero-lead{
+    font-size:24px;
+}
+
+.hero-price{
+    font-weight:700;
+    color:var(--primary);
+    margin:24px 0;
+}
+
+.hero-buttons{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    background:var(--primary);
+    color:white;
+    text-decoration:none;
+    padding:16px 30px;
+    border-radius:999px;
+    font-weight:700;
+}
+
+.btn-secondary{
+    background:white;
+    color:var(--primary);
+    border:2px solid var(--primary);
+}
+
+.trust-section{
+    padding:30px 0;
+}
+
+.trust-bar{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    text-align:center;
+    font-weight:600;
+}
+
+.light{
+    background:#fafafa;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:24px;
+    margin-top:40px;
+}
+
+.card,.testimonial{
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+.framework-card{
+    border-top:5px solid var(--primary);
+}
+
+.score-box{
+    background:white;
+    padding:40px;
+    border-radius:24px;
+}
+
+.score-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:16px;
+    margin:25px 0;
+}
+
+.score-grid div{
+    background:#f4edf7;
+    padding:18px;
+    border-radius:12px;
+}
+
+.strong{
+    font-weight:700;
+}
+
+.journey-box{
+    background:#faf5fc;
+    padding:40px;
+    border-radius:24px;
+}
+
+.arrow{
+    font-size:48px;
+    color:var(--primary);
+    margin:20px 0;
+}
+
+.pricing{
+    background:#4b1d68;
+    color:white;
+    padding:90px 0;
+}
+
+.pricing h2{
+    color:white;
+}
+
+.price{
+    font-size:72px;
+    font-weight:700;
+}
+
+.final{
+    background:#fff;
+}
+
+footer{
+    padding:30px;
+    text-align:center;
+    color:#666;
+}
+
+@media(max-width:768px){
+
+    .hero-grid{
+        grid-template-columns:1fr;
+    }
+
+    h1{
+        font-size:48px;
+    }
+
+    h2{
+        font-size:34px;
+    }
+
+    .trust-bar{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
