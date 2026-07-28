@@ -218,3 +218,19 @@ footer{
         grid-template-columns:1fr 1fr;
     }
 }
+.hero-image{
+    text-align:center;
+}
+
+.hero-image img{
+    object-fit:cover;
+}
+
+.hero-buttons{
+    margin-top:24px;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    transition:.2s ease;
+}
