@@ -3593,36 +3593,59 @@ button {
   .story-preview-featured{transform:none}
   .foundation-enrolment-status{font-size:38px}
 }
-.field-group {
-    max-width: 520px;
-    margin: 18px auto;
+/* Snapshot name and email section */
+
+.snapshot-contact-fields {
+    width: min(100%, 520px);
+    margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.snapshot-contact-fields .field-group {
+    width: 100%;
+    margin: 0;
     text-align: left;
-}
-
-.field-group label {
     display: block;
-    margin-bottom: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #24352f;
 }
 
-.field-group input {
+.snapshot-contact-fields .field-group label {
+    display: block;
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #26352f;
+}
+
+.snapshot-contact-fields .field-group input {
     display: block;
     width: 100%;
-    padding: 15px 18px;
+    height: 54px;
+    padding: 0 16px;
     border: 1px solid #cfd8d4;
     border-radius: 12px;
-    font-family: inherit;
-    font-size: 1rem;
     background: #ffffff;
+    font-family: inherit;
+    font-size: 17px;
+    line-height: 1;
     box-sizing: border-box;
 }
 
-.field-group input:focus {
+.snapshot-contact-fields .field-group input:focus {
     outline: none;
-    border-color: #247961;
-    box-shadow: 0 0 0 3px rgba(36, 121, 97, 0.12);
+    border-color: #267a63;
+    box-shadow: 0 0 0 4px rgba(38, 122, 99, 0.12);
+}
+
+.snapshot-contact-fields + .snapshot-start {
+    margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+    .snapshot-contact-fields {
+        width: 100%;
+    }
 }
 .snapshot-contact-fields {
     max-width: 520px;
