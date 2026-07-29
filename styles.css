@@ -3594,32 +3594,33 @@ button {
   .foundation-enrolment-status{font-size:38px}
 }
 .field-group {
-    margin: 18px 0;
+    max-width: 520px;
+    margin: 18px auto;
     text-align: left;
-    max-width: 420px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .field-group label {
     display: block;
     margin-bottom: 8px;
+    font-size: 1rem;
     font-weight: 600;
-    color: #2b2b2b;
+    color: #24352f;
 }
 
 .field-group input {
+    display: block;
     width: 100%;
-    padding: 14px 16px;
-    font-size: 1rem;
-    border: 1px solid #d8d8d8;
+    padding: 15px 18px;
+    border: 1px solid #cfd8d4;
     border-radius: 12px;
-    box-sizing: border-box;
     font-family: inherit;
+    font-size: 1rem;
+    background: #ffffff;
+    box-sizing: border-box;
 }
 
 .field-group input:focus {
     outline: none;
-    border-color: #c73b61;
-    box-shadow: 0 0 0 3px rgba(199,59,97,0.15);
+    border-color: #247961;
+    box-shadow: 0 0 0 3px rgba(36, 121, 97, 0.12);
 }
