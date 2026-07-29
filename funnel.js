@@ -84,16 +84,12 @@ if(form){
     const formData = Object.fromEntries(
         new FormData(form).entries()
     );
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
 
-    const name = formData.name;
-    const email = formData.email;
+    sendSnapshotToBackend(answers, name, email);
 
-    delete formData.name;
-    delete formData.email;
-
-    sendSnapshotToBackend(formData, name, email);
-
-    save(A, calculate(formData));
+    save(A, calculate(answers));
     location.href = "results.html";
   }},260);})));
  back.addEventListener("click",()=>current>0&&show(current-1)); show(0);
