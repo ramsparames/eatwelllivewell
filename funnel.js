@@ -1,3 +1,24 @@
+async function sendSnapshotToBackend(answers) {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/snapshot", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: "Test User",
+                email: "test@example.com",
+                answers: answers
+            })
+        });
+
+        const data = await response.json();
+        console.log("Backend replied:", data);
+
+    } catch (err) {
+        console.error("Backend error:", err);
+    }
+}
 (() => {
 "use strict";
 const A="nourisherAssessment", P="nourisherApplication";
@@ -59,7 +80,12 @@ if(form){
     window.scrollTo({top:Math.max(0,targetTop),behavior:"smooth"});
   });
  };
- qs.forEach((q,i)=>q.querySelectorAll("input").forEach(input=>input.addEventListener("change",()=>{q.querySelectorAll("label").forEach(l=>l.classList.toggle("selected",l.contains(input)&&input.checked));setTimeout(()=>{if(i<qs.length-1)show(i+1);else{save(A,calculate(Object.fromEntries(new FormData(form).entries())));location.href="results.html";}},260);})));
+ qs.forEach((q,i)=>q.querySelectorAll("input").forEach(input=>input.addEventListener("change",()=>{q.querySelectorAll("label").forEach(l=>l.classList.toggle("selected",l.contains(input)&&input.checked));setTimeout(()=>{if(i<qs.length-1)show(i+1);else{
+    const answers = Object.fromEntries(new FormData(form).entries());
+    sendSnapshotToBackend(answers);
+    save(A, calculate(answers));
+    location.href = "results.html";
+  }},260);})));
  back.addEventListener("click",()=>current>0&&show(current-1)); show(0);
 }
 const page=document.querySelector("[data-results-page]");
