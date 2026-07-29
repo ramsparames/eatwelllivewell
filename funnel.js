@@ -95,9 +95,6 @@ if(form){
 
     save(A, calculate(formData));
     location.href = "results.html";
-    }
-    save(A, calculate(answers));
-    location.href = "results.html";
   }},260);})));
  back.addEventListener("click",()=>current>0&&show(current-1)); show(0);
 }
