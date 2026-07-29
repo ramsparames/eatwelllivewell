@@ -1,3 +1,4 @@
+from app.database import create_database, save_snapshot
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -14,7 +15,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+@app.on_event("startup")
+def startup():
+    create_database()
+    
 class SnapshotSubmission(BaseModel):
     name: str
     email: str
@@ -33,10 +37,17 @@ def health():
 
 @app.post("/snapshot")
 def receive_snapshot(submission: SnapshotSubmission):
-    print("Snapshot received:", submission.model_dump())
+    submission_id = save_snapshot(
+        name=submission.name,
+        email=submission.email,
+        answers=submission.answers
+    )
+
+    print("Snapshot saved with ID:", submission_id)
 
     return {
-        "status": "received",
+        "status": "saved",
+        "submission_id": submission_id,
         "name": submission.name,
         "answer_count": len(submission.answers)
     }
