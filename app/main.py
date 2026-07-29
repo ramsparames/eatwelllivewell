@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI(title="NourisHer Backend")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -13,11 +14,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 class SnapshotSubmission(BaseModel):
     name: str
     email: str
     answers: dict[str, int]
-    
+
 @app.get("/")
 def root():
     return {
@@ -25,9 +27,16 @@ def root():
         "message": "NourisHer backend is running"
     }
 
-
 @app.get("/health")
 def health():
+    return {"status": "healthy"}
+
+@app.post("/snapshot")
+def receive_snapshot(submission: SnapshotSubmission):
+    print("Snapshot received:", submission.model_dump())
+
     return {
-        "status": "healthy"
+        "status": "received",
+        "name": submission.name,
+        "answer_count": len(submission.answers)
     }
