@@ -39,12 +39,12 @@ def health():
 def receive_snapshot(submission: SnapshotSubmission):
     result = calculate_score(submission.answers)
 
-  submission_id = save_snapshot(
-    name=submission.name,
-    email=submission.email,
-    answers=submission.answers,
-    result=result,
-)
+    submission_id = save_snapshot(
+        name=submission.name,
+        email=submission.email,
+        answers=submission.answers,
+        result=result,
+    )
 
     print("Snapshot saved with ID:", submission_id)
     print("Calculated score:", result)
@@ -53,5 +53,5 @@ def receive_snapshot(submission: SnapshotSubmission):
         "status": "saved",
         "submission_id": submission_id,
         "name": submission.name,
-        "result": result
+        "result": result,
     }
