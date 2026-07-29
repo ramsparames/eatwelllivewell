@@ -3651,3 +3651,6 @@ button {
     max-width: 520px;
     margin: 28px auto;
 }
+[hidden] {
+    display: none !important;
+}
