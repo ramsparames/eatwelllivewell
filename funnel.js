@@ -99,9 +99,9 @@ if(form){
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
 
-    sendSnapshotToBackend(answers, name, email);
+    sendSnapshotToBackend(formData, name, email);
 
-    save(A, calculate(answers));
+    save(A, calculate(formData));
     location.href = "results.html";
   }},260);})));
  back.addEventListener("click",()=>current>0&&show(current-1)); show(0);
