@@ -9,33 +9,29 @@ def create_database():
     with sqlite3.connect(DATABASE_PATH) as connection:
         connection.execute(
             """
-        connection.execute(
-    """
-    CREATE TABLE IF NOT EXISTS snapshot_submissions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
+            CREATE TABLE IF NOT EXISTS snapshot_submissions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
 
-        answers TEXT NOT NULL,
+                answers TEXT NOT NULL,
 
-        total_score INTEGER NOT NULL,
+                total_score INTEGER NOT NULL,
 
-        recovery INTEGER NOT NULL,
-        metabolic INTEGER NOT NULL,
-        nutrition INTEGER NOT NULL,
-        behaviour INTEGER NOT NULL,
-        confidence INTEGER NOT NULL,
+                recovery INTEGER NOT NULL,
+                metabolic INTEGER NOT NULL,
+                nutrition INTEGER NOT NULL,
+                behaviour INTEGER NOT NULL,
+                confidence INTEGER NOT NULL,
 
-        opportunity TEXT NOT NULL,
-        strength TEXT NOT NULL,
+                opportunity TEXT NOT NULL,
+                strength TEXT NOT NULL,
 
-        body_profile TEXT,
-        feeling TEXT,
+                body_profile TEXT,
+                feeling TEXT,
 
-        submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """
-)
+                submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
             """
         )
         connection.commit()
@@ -49,15 +45,12 @@ def save_snapshot(
 ) -> int:
 
     answers_json = json.dumps(answers)
-
     d = result["dimensions"]
 
     with sqlite3.connect(DATABASE_PATH) as connection:
-
         cursor = connection.execute(
             """
             INSERT INTO snapshot_submissions (
-
                 name,
                 email,
                 answers,
@@ -75,9 +68,7 @@ def save_snapshot(
 
                 body_profile,
                 feeling
-
             )
-
             VALUES (
                 ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
@@ -106,5 +97,8 @@ def save_snapshot(
         )
 
         connection.commit()
+
+        if cursor.lastrowid is None:
+            raise RuntimeError("Snapshot could not be saved")
 
         return cursor.lastrowid
