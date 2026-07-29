@@ -18,7 +18,7 @@ app.add_middleware(
 class SnapshotSubmission(BaseModel):
     name: str
     email: str
-    answers: dict[str, int]
+    answers: dict[str, str]
 
 @app.get("/")
 def root():
