@@ -1,13 +1,13 @@
-async function sendSnapshotToBackend(answers) {
+async function sendSnapshotToBackend(answers, name, email) {
     try {
         const response = await fetch("http://127.0.0.1:8000/snapshot", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                name: "Test User",
-                email: "test@example.com",
+           body: JSON.stringify({
+                name: name,
+                email: email,
                 answers: answers
             })
         });
@@ -81,8 +81,22 @@ if(form){
   });
  };
  qs.forEach((q,i)=>q.querySelectorAll("input").forEach(input=>input.addEventListener("change",()=>{q.querySelectorAll("label").forEach(l=>l.classList.toggle("selected",l.contains(input)&&input.checked));setTimeout(()=>{if(i<qs.length-1)show(i+1);else{
-    const answers = Object.fromEntries(new FormData(form).entries());
-    sendSnapshotToBackend(answers);
+    const formData = Object.fromEntries(
+        new FormData(form).entries()
+    );
+
+    const name = formData.name;
+    const email = formData.email;
+
+    delete formData.name;
+    delete formData.email;
+
+    sendSnapshotToBackend(formData, name, email);
+
+    save(A, calculate(formData));
+    location.href = "results.html";
+    }
+);
     save(A, calculate(answers));
     location.href = "results.html";
   }},260);})));
