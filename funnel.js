@@ -50,7 +50,19 @@ function calculate(d){
 }
 const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
 document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
- intro.hidden=true;
+     const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+
+    if (!nameInput.value.trim()) {
+        nameInput.reportValidity();
+        return;
+    }
+
+    if (!emailInput.checkValidity()) {
+        emailInput.reportValidity();
+        return;
+    }
+    intro.hidden=true;
  assessment.hidden=false;
  requestAnimationFrame(()=>{
   assessment.classList.add("active");
