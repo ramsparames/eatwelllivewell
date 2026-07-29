@@ -3624,3 +3624,7 @@ button {
     border-color: #247961;
     box-shadow: 0 0 0 3px rgba(36, 121, 97, 0.12);
 }
+.snapshot-contact-fields {
+    max-width: 520px;
+    margin: 28px auto;
+}
