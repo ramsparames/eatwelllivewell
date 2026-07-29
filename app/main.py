@@ -1,8 +1,8 @@
-from app.database import create_database, save_snapshot
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-
+from app.database import create_database, save_snapshot
+from app.scoring import calculate_score
 app = FastAPI(title="NourisHer Backend")
 
 app.add_middleware(
@@ -37,6 +37,8 @@ def health():
 
 @app.post("/snapshot")
 def receive_snapshot(submission: SnapshotSubmission):
+    result = calculate_score(submission.answers)
+
     submission_id = save_snapshot(
         name=submission.name,
         email=submission.email,
@@ -44,10 +46,11 @@ def receive_snapshot(submission: SnapshotSubmission):
     )
 
     print("Snapshot saved with ID:", submission_id)
+    print("Calculated score:", result)
 
     return {
         "status": "saved",
         "submission_id": submission_id,
         "name": submission.name,
-        "answer_count": len(submission.answers)
+        "result": result
     }
