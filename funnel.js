@@ -96,7 +96,6 @@ if(form){
     save(A, calculate(formData));
     location.href = "results.html";
     }
-);
     save(A, calculate(answers));
     location.href = "results.html";
   }},260);})));
