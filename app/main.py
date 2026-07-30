@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from app.database import create_database, save_snapshot
 from app.scoring import calculate_score
+from fastapi import Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 app = FastAPI(title="NourisHer Backend")
 
 app.add_middleware(
