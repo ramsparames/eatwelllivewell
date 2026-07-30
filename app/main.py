@@ -39,7 +39,7 @@ def startup():
     
 class SnapshotSubmission(BaseModel):
     name: str
-    email: str
+    phone: str
     answers: dict[str, str]
 
 @app.get("/")
