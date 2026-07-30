@@ -63,7 +63,7 @@ document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
 
     separateDialCode: true,
 
-    nationalMode: false,
+    nationalMode: true,
 
     strictMode: true
 
