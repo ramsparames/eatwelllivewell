@@ -102,3 +102,29 @@ def save_snapshot(
             raise RuntimeError("Snapshot could not be saved")
 
         return cursor.lastrowid
+import sqlite3
+
+def get_all_leads():
+    conn = sqlite3.connect("app/nourisher.db")
+    conn.row_factory = sqlite3.Row
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            id,
+            name,
+            email,
+            total_score,
+            opportunity,
+            strength,
+            submitted_at
+        FROM snapshot_submissions
+        ORDER BY submitted_at DESC
+    """)
+
+    leads = [dict(row) for row in cursor.fetchall()]
+
+    conn.close()
+
+    return leads
