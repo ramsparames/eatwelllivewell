@@ -128,3 +128,25 @@ def get_all_leads():
     conn.close()
 
     return leads
+def get_lead_by_id(lead_id: int):
+    conn = sqlite3.connect("app/nourisher.db")
+    conn.row_factory = sqlite3.Row
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM snapshot_submissions
+        WHERE id = ?
+        """,
+        (lead_id,)
+    )
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if row is None:
+        return None
+
+    return dict(row)
