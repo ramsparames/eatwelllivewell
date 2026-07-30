@@ -7,6 +7,7 @@ from app.scoring import calculate_score
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from app.database import get_all_leads
 app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -67,9 +68,13 @@ def receive_snapshot(submission: SnapshotSubmission):
     }
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request):
+
+    leads = get_all_leads()
+
     return templates.TemplateResponse(
         "dashboard.html",
         {
-            "request": request
+            "request": request,
+            "leads": leads
         }
     )
