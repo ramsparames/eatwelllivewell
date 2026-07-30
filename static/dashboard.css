@@ -127,19 +127,35 @@ h2{
 
     border-radius:50%;
 
-    background:#5B0E91;
-
-    color:white;
-
     display:flex;
 
     justify-content:center;
 
     align-items:center;
 
-    font-size:26px;
+    color:white;
+
+    font-size:24px;
 
     font-weight:bold;
+
+}
+
+.success{
+
+    background:var(--success);
+
+}
+
+.warning{
+
+    background:var(--warning);
+
+}
+
+.danger{
+
+    background:var(--danger);
 
 }
 
