@@ -1,4 +1,4 @@
-    import intlTelInput from
+import intlTelInput from
     "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+esm";
     async function sendSnapshotToBackend(answers, name, phone) {
         try {
@@ -15,6 +15,9 @@
             });
     
             const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || `Snapshot request failed (${response.status})`);
+            }
             console.log("Backend replied:", data);
     
         } catch (err) {
@@ -69,7 +72,7 @@
             )
         });
     }
-    phoneInput.addEventListener("input", function () {
+    phoneInput?.addEventListener("input", function () {
         phoneInput.setCustomValidity("");
     });
         
@@ -78,6 +81,11 @@
     ?.addEventListener("click", async function () {
 
         const nameInput = document.getElementById("name");
+
+        if (!nameInput || !intro || !assessment) {
+            console.error("Assessment page elements were not found.");
+            return;
+        }
 
         if (!nameInput.checkValidity()) {
             nameInput.reportValidity();
@@ -132,14 +140,15 @@
     const form=document.querySelector("[data-assessment-form]");
     if(form){
      const qs=[...form.querySelectorAll("[data-question]")], fill=document.querySelector("[data-progress-fill]"),txt=document.querySelector("[data-progress-text]"),pct=document.querySelector("[data-progress-percent]"),back=document.querySelector("[data-back]"); let current=0;
+     if (!qs.length) return;
      const show=i=>{
       qs.forEach((q,j)=>q.classList.toggle("active",i===j));
       current=i;
       const p=Math.round((i+1)/qs.length*100);
-      fill.style.width=p+"%";
-      txt.textContent=`Question ${i+1} of ${qs.length}`;
-      pct.textContent=`${p}% complete`;
-      back.disabled=i===0;
+      if (fill) fill.style.width=p+"%";
+      if (txt) txt.textContent=`Question ${i+1} of ${qs.length}`;
+      if (pct) pct.textContent=`${p}% complete`;
+      if (back) back.disabled=i===0;
       requestAnimationFrame(()=>{
         const activeQuestion=qs[i];
         const header=document.querySelector(".site-header");
@@ -154,15 +163,16 @@
     new FormData(form).entries()
     );
 
-    const name = document.getElementById("name").value.trim();
-    const phone = iti.getNumber();
+    const nameInput = document.getElementById("name");
+    const name = nameInput ? nameInput.value.trim() : "";
+    const phone = iti ? iti.getNumber() : "";
 
     sendSnapshotToBackend(formData, name, phone);
 
     save(A, calculate(formData));
     location.href = "results.html";
       }},260);})));
-    back.addEventListener("click", function () {
+    back?.addEventListener("click", function () {
     if (current > 0) {
         show(current - 1);
     }
