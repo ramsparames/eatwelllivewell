@@ -64,35 +64,37 @@ document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
 
     strictMode: true
 
-});
-
+    });
+    phoneInput.addEventListener("input", function () {
+    phoneInput.setCustomValidity("");
+    });
     const nameInput = document.getElementById("name");
 
     const name = nameInput.value.trim();
     const phone = iti.getNumber();
 
-if (!nameInput.checkValidity()) {
-    nameInput.reportValidity();
-    return;
-}
-
-if (!phoneInput.value.trim()) {
-    phoneInput.setCustomValidity("Please enter your mobile number.");
-    phoneInput.reportValidity();
-    return;
-}
-
-phoneInput.setCustomValidity("");
-
-if (!iti.isValidNumber()) {
-    phoneInput.setCustomValidity(
-        "Please enter a valid mobile number for the selected country."
-    );
-    phoneInput.reportValidity();
-    return;
-}
-
-phoneInput.setCustomValidity("");
+    if (!nameInput.checkValidity()) {
+        nameInput.reportValidity();
+        return;
+    }
+    
+    if (!phoneInput.value.trim()) {
+        phoneInput.setCustomValidity("Please enter your mobile number.");
+        phoneInput.reportValidity();
+        return;
+    }
+    
+    phoneInput.setCustomValidity("");
+    
+    if (!iti.isValidNumber()) {
+        phoneInput.setCustomValidity(
+            "Please enter a valid mobile number for the selected country."
+        );
+        phoneInput.reportValidity();
+        return;
+    }
+    
+    phoneInput.setCustomValidity("");
     
     intro.hidden=true;
  assessment.hidden=false;
