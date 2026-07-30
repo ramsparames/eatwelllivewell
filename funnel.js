@@ -49,60 +49,67 @@ function calculate(d){
  return {answers:d,dimensions,total,opportunity:ordered[0][0],strength:ordered.at(-1)[0],bodyProfile:d.body,feeling:d.feeling,createdAt:new Date().toISOString()};
 }
 const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
-document.querySelector("[data-start-snapshot]")?.addEventListener("click",async function ()=>{
-    
-    const phoneInput = document.getElementById("phone");
 
-    const iti = window.intlTelInput(phoneInput, {
-        initialCountry: "in",
-        separateDialCode: true,
-        nationalMode: true,
-        strictMode: true,
+const phoneInput = document.getElementById("phone");
 
-        loadUtils: () =>
-            import(
-                "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
+const iti = window.intlTelInput(phoneInput, {
+    initialCountry: "in",
+    separateDialCode: true,
+    nationalMode: true,
+    strictMode: true,
+
+    loadUtils: () =>
+        import(
+            "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
         )
-    });
+});
 
-    phoneInput.addEventListener("input", function () {
+phoneInput.addEventListener("input", function () {
+    phoneInput.setCustomValidity("");
+});
+    
+document
+    .querySelector("[data-start-snapshot]")
+    ?.addEventListener("click", async function () {
+
+        const nameInput = document.getElementById("name");
+
+        const name = nameInput.value.trim();
+
+        if (!nameInput.checkValidity()) {
+            nameInput.reportValidity();
+            return;
+        }
+
+        if (!phoneInput.value.trim()) {
+            phoneInput.setCustomValidity(
+                "Please enter your mobile number."
+            );
+            phoneInput.reportValidity();
+            return;
+        }
+
         phoneInput.setCustomValidity("");
+
+        await iti.promise;
+
+        if (!iti.isValidNumber()) {
+            phoneInput.setCustomValidity(
+                "Please enter a valid mobile number for the selected country."
+            );
+            phoneInput.reportValidity();
+            return;
+        }
+
+        phoneInput.setCustomValidity("");
+
+        const phone = iti.getNumber();
+
+        console.log("Name:", name);
+        console.log("Phone:", phone);
+
+        // Keep the existing code here that opens the assessment questions.
     });
-    const nameInput = document.getElementById("name");
-
-    const nameInput = document.getElementById("name");
-    const phoneInput = document.getElementById("phone");
-
-    const name = nameInput.value.trim();
-
-    if (!nameInput.checkValidity()) {
-        nameInput.reportValidity();
-        return;
-    }
-
-    if (!phoneInput.value.trim()) {
-        phoneInput.setCustomValidity(
-            "Please enter your mobile number."
-        );
-        phoneInput.reportValidity();
-        return;
-    }
-
-    phoneInput.setCustomValidity("");
-
-    await iti.promise;
-
-    if (!iti.isValidNumber()) {
-        phoneInput.setCustomValidity(
-            "Please enter a valid mobile number for the selected country."
-        );
-        phoneInput.reportValidity();
-        return;
-    }
-
-    phoneInput.setCustomValidity("");
-
-    const phone = iti.getNumber();
     
     intro.hidden=true;
  assessment.hidden=false;
