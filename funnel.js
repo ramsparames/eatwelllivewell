@@ -1,3 +1,5 @@
+    import intlTelInput from
+    "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+esm";
     async function sendSnapshotToBackend(answers, name, phone) {
         try {
             const response = await fetch("http://127.0.0.1:8000/snapshot", {
@@ -51,8 +53,8 @@
     const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
     
     const phoneInput = document.getElementById("phone");
-
-    const iti = window.intlTelInput(phoneInput, {
+    
+    const iti = intlTelInput(phoneInput, {
     initialCountry: "in",
     separateDialCode: true,
     nationalMode: true,
@@ -71,52 +73,53 @@
     .querySelector("[data-start-snapshot]")
     ?.addEventListener("click", async function () {
 
-    const nameInput = document.getElementById("name");
-    
-    if (!nameInput.checkValidity()) {
-        nameInput.reportValidity();
-        return;
-    }
-    await iti.promise;
+        const nameInput = document.getElementById("name");
 
-    if (!iti.isValidNumber()) {
-        phoneInput.setCustomValidity(
-            "Please enter a valid phone number."
-        );
-        phoneInput.reportValidity();
-        return;
-    }
+        if (!nameInput.checkValidity()) {
+            nameInput.reportValidity();
+            return;
+        }
 
-    phoneInput.setCustomValidity("");
+        await iti.promise;
 
-    const phone = iti.getNumber();
+        if (!iti.isValidNumber()) {
+            phoneInput.setCustomValidity(
+                "Please enter a valid phone number."
+            );
+            phoneInput.reportValidity();
+            return;
+        }
 
-        
+        phoneInput.setCustomValidity("");
+
         const name = nameInput.value.trim();
-        
+        const phone = iti.getNumber();
+
         console.log("Name:", name);
         console.log("Phone:", phone);
-        
+
         intro.hidden = true;
         assessment.hidden = false;
-        
+
         requestAnimationFrame(() => {
             assessment.classList.add("active");
-        
-            const header = document.querySelector(".site-header");
-            const offset = (header?.offsetHeight || 78) + 16;
-        
+
+            const header =
+                document.querySelector(".site-header");
+
+            const offset =
+                (header?.offsetHeight || 78) + 16;
+
             const targetTop =
                 assessment.getBoundingClientRect().top +
                 window.scrollY -
                 offset;
-        
+
             window.scrollTo({
                 top: Math.max(0, targetTop),
                 behavior: "smooth"
             });
-        });
-        
+        }); 
     });
     const form=document.querySelector("[data-assessment-form]");
     if(form){
