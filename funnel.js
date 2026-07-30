@@ -104,8 +104,6 @@
         const name = document.getElementById("name").value.trim();
         const phone = iti.getNumber();
 
-        sendSnapshotToBackend(formData, name, phone);
-
         console.log("Name:", name);
         console.log("Phone:", phone);
 
@@ -150,18 +148,19 @@
       });
      };
      qs.forEach((q,i)=>q.querySelectorAll("input").forEach(input=>input.addEventListener("change",()=>{q.querySelectorAll("label").forEach(l=>l.classList.toggle("selected",l.contains(input)&&input.checked));setTimeout(()=>{if(i<qs.length-1)show(i+1);else{
-        const formData = Object.fromEntries(
-            new FormData(form).entries()
-        );
-        const name = document.getElementById("name").value.trim();
-        const phone = document.getElementById("phone").value.trim();
-    
-        sendSnapshotToBackend(formData, name, phone);
-    
-        save(A, calculate(formData));
-        location.href = "results.html";
+     const formData = Object.fromEntries(
+    new FormData(form).entries()
+    );
+
+    const name = document.getElementById("name").value.trim();
+    const phone = iti.getNumber();
+
+    sendSnapshotToBackend(formData, name, phone);
+
+    save(A, calculate(formData));
+    location.href = "results.html";
       }},260);})));
-     back.addEventListener("click", function () {
+    back.addEventListener("click", function () {
     if (current > 0) {
         show(current - 1);
     }
