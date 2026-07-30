@@ -28,6 +28,10 @@ app.mount(
     StaticFiles(directory=str(BASE_DIR / "static")),
     name="static"
 )
+@app.get("/transformation")
+def foundations():
+    return FileResponse(BASE_DIR / "transformation.html")
+    
 @app.get("/foundations")
 def foundations():
     return FileResponse(BASE_DIR / "foundations.html")
