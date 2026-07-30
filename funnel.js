@@ -58,10 +58,10 @@
         nationalMode: true,
         strictMode: true,
     
-        loadUtils: () =>
-            import(
-                "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
-            )
+       loadUtils: () =>
+        import(
+            "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/dist/js/utils.js"
+        )
     });
     
     phoneInput.addEventListener("input", function () {
