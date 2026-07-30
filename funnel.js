@@ -52,21 +52,21 @@ const intro=document.querySelector("[data-snapshot-intro]"), assessment=document
 document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
     
     const phoneInput = document.getElementById("phone");
+
     const iti = window.intlTelInput(phoneInput, {
+        initialCountry: "in",
+        separateDialCode: true,
+        nationalMode: true,
+        strictMode: true,
 
-    initialCountry: "in",
-
-    preferredCountries: ["in", "us"],
-
-    separateDialCode: true,
-
-    nationalMode: true,
-
-    strictMode: true
-
+        loadUtils: () =>
+            import(
+                "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
+        )
     });
+
     phoneInput.addEventListener("input", function () {
-    phoneInput.setCustomValidity("");
+        phoneInput.setCustomValidity("");
     });
     const nameInput = document.getElementById("name");
 
