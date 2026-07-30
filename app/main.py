@@ -10,14 +10,19 @@ from fastapi import HTTPException
 from fastapi.templating import Jinja2Templates
 from app.database import get_all_leads
 from app.database import get_all_leads, get_lead_by_id
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 templates = Jinja2Templates(
     directory=str(BASE_DIR / "templates")
 )
-
+app.mount(
+    "/static",
+    StaticFiles(directory=str(BASE_DIR / "static")),
+    name="static"
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
