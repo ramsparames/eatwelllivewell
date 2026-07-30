@@ -49,7 +49,7 @@ function calculate(d){
  return {answers:d,dimensions,total,opportunity:ordered[0][0],strength:ordered.at(-1)[0],bodyProfile:d.body,feeling:d.feeling,createdAt:new Date().toISOString()};
 }
 const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
-document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
+document.querySelector("[data-start-snapshot]")?.addEventListener("click",async function ()=>{
     
     const phoneInput = document.getElementById("phone");
 
@@ -70,22 +70,28 @@ document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
     });
     const nameInput = document.getElementById("name");
 
+    const nameInput = document.getElementById("name");
+    const phoneInput = document.getElementById("phone");
+
     const name = nameInput.value.trim();
-    const phone = iti.getNumber();
 
     if (!nameInput.checkValidity()) {
         nameInput.reportValidity();
         return;
     }
-    
+
     if (!phoneInput.value.trim()) {
-        phoneInput.setCustomValidity("Please enter your mobile number.");
+        phoneInput.setCustomValidity(
+            "Please enter your mobile number."
+        );
         phoneInput.reportValidity();
         return;
     }
-    
+
     phoneInput.setCustomValidity("");
-    
+
+    await iti.promise;
+
     if (!iti.isValidNumber()) {
         phoneInput.setCustomValidity(
             "Please enter a valid mobile number for the selected country."
@@ -93,8 +99,10 @@ document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
         phoneInput.reportValidity();
         return;
     }
-    
+
     phoneInput.setCustomValidity("");
+
+    const phone = iti.getNumber();
     
     intro.hidden=true;
  assessment.hidden=false;
@@ -138,7 +146,7 @@ if(form){
     save(A, calculate(formData));
     location.href = "results.html";
   }},260);})));
- back.addEventListener("click",()=>current>0&&show(current-1)); show(0);
+ back.addEventListener("click",async function ()=>current>0&&show(current-1)); show(0);
 }
 const page=document.querySelector("[data-results-page]");
 if(page){
