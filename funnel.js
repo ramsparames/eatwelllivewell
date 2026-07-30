@@ -53,18 +53,22 @@
     const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
     
     const phoneInput = document.getElementById("phone");
-    
-    const iti = intlTelInput(phoneInput, {
-    initialCountry: "in",
-    separateDialCode: true,
-    nationalMode: true,
-    strictMode: true,
 
-    loadUtils: () =>
-        import(
-            "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
-        )
-    });
+    let iti = null;
+
+    if (phoneInput) {
+    iti = intlTelInput(phoneInput, {
+        initialCountry: "in",
+        separateDialCode: true,
+        nationalMode: true,
+        strictMode: true,
+
+        loadUtils: () =>
+            import(
+                "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
+            )
+        });
+    }
     phoneInput.addEventListener("input", function () {
         phoneInput.setCustomValidity("");
     });
@@ -77,6 +81,10 @@
 
         if (!nameInput.checkValidity()) {
             nameInput.reportValidity();
+            return;
+        }
+        if (!iti || !phoneInput) {
+            console.error("Phone input was not found on this page.");
             return;
         }
 
@@ -93,7 +101,7 @@
         phoneInput.setCustomValidity("");
 
         const name = nameInput.value.trim();
-        const phone = iti.getNumber();
+        const phone = iti ? iti.getNumber() : "";
 
         console.log("Name:", name);
         console.log("Phone:", phone);
