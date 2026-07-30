@@ -51,7 +51,7 @@
     const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
     
     const phoneInput = document.getElementById("phone");
-    
+
     phoneInput.addEventListener("input", function () {
         phoneInput.setCustomValidity("");
     });
@@ -60,49 +60,54 @@
     .querySelector("[data-start-snapshot]")
     ?.addEventListener("click", async function () {
 
-        const nameInput = document.getElementById("name");
-
-        if (!nameInput.checkValidity()) {
-            nameInput.reportValidity();
-            return;
-        }
-
-        if (!phoneInput.value.trim()) {
-            phoneInput.setCustomValidity(
-                "Please enter your mobile number."
-            );
-            phoneInput.reportValidity();
-            return;
-        }
+    const nameInput = document.getElementById("name");
+    
+    if (!nameInput.checkValidity()) {
+        nameInput.reportValidity();
+        return;
+    }
+    
+    const phone = phoneInput.value
+        .trim()
+        .replace(/[\s()-]/g, "");
+    
+    const internationalPhonePattern = /^\+[1-9]\d{7,14}$/;
+    
+    if (!internationalPhonePattern.test(phone)) {
+        phoneInput.setCustomValidity(
+            "Please enter your number with country code, for example +91 8056038128."
+        );
+        phoneInput.reportValidity();
+        return;
+    }
 
         phoneInput.setCustomValidity("");
-        phoneInput.setCustomValidity("");
-
-        const name = document.getElementById("name").value.trim();
-        const phone = iti.getNumber();
-
+        
+        const name = nameInput.value.trim();
+        
         console.log("Name:", name);
         console.log("Phone:", phone);
-
+        
         intro.hidden = true;
         assessment.hidden = false;
-
+        
         requestAnimationFrame(() => {
             assessment.classList.add("active");
-
+        
             const header = document.querySelector(".site-header");
             const offset = (header?.offsetHeight || 78) + 16;
-
+        
             const targetTop =
                 assessment.getBoundingClientRect().top +
                 window.scrollY -
                 offset;
-
+        
             window.scrollTo({
                 top: Math.max(0, targetTop),
                 behavior: "smooth"
             });
         });
+        
     });
     const form=document.querySelector("[data-assessment-form]");
     if(form){
