@@ -51,14 +51,16 @@
     const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
     
     const phoneInput = document.getElementById("phone");
+
     const iti = window.intlTelInput(phoneInput, {
     initialCountry: "in",
     separateDialCode: true,
     nationalMode: true,
     strictMode: true,
+
     loadUtils: () =>
         import(
-            "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/25.3.2/build/js/utils.js"
+            "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
         )
     });
     phoneInput.addEventListener("input", function () {
