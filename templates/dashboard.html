@@ -18,10 +18,25 @@
 
 <h2>Coach Dashboard</h2>
 
-<p class="count">
-Total Leads:
-<strong>{{ leads|length }}</strong>
-</p>
+<div class="summary-card">
+
+    <div>
+
+        <span class="label">
+
+            Total Leads
+
+        </span>
+
+        <div class="number">
+
+            {{ leads|length }}
+
+        </div>
+
+    </div>
+
+</div>
 
 {% for lead in leads %}
 
