@@ -47,12 +47,15 @@ class SnapshotSubmission(BaseModel):
     phone: str
     answers: dict[str, str]
 
+from fastapi.responses import FileResponse
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
 @app.get("/")
 def root():
-    return {
-        "status": "ok",
-        "message": "NourisHer backend is running"
-    }
+    return FileResponse(BASE_DIR / "index.html")
 
 @app.get("/health")
 def health():
