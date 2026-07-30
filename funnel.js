@@ -53,8 +53,7 @@ document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
      const nameInput = document.getElementById("name");
      
 
-    const phoneInput = document.querySelector("#phone");
-
+    const phoneInput = document.getElementById("phone");
     const iti = window.intlTelInput(phoneInput, {
 
     initialCountry: "in",
@@ -68,14 +67,13 @@ document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
     strictMode: true
 
 });
-const phone = iti.getNumber();
-    if (!nameInput.value.trim()) {
-        nameInput.reportValidity();
+    const phone = iti.getNumber();
+    if (!phoneInput.checkValidity()) {
+        phoneInput.reportValidity();
         return;
     }
-
-    if (!phone.checkValidity()) {
-        phone.reportValidity();
+    if (!nameInput.value.trim()) {
+        nameInput.reportValidity();
         return;
     }
     intro.hidden=true;
