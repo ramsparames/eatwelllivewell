@@ -50,9 +50,7 @@ function calculate(d){
 }
 const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
 document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
-     const nameInput = document.getElementById("name");
-     
-
+    
     const phoneInput = document.getElementById("phone");
     const iti = window.intlTelInput(phoneInput, {
 
@@ -67,15 +65,35 @@ document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
     strictMode: true
 
 });
+
+    const nameInput = document.getElementById("name");
+
+    const name = nameInput.value.trim();
     const phone = iti.getNumber();
-    if (!phoneInput.checkValidity()) {
-        phoneInput.reportValidity();
-        return;
-    }
-    if (!nameInput.value.trim()) {
-        nameInput.reportValidity();
-        return;
-    }
+
+if (!nameInput.checkValidity()) {
+    nameInput.reportValidity();
+    return;
+}
+
+if (!phoneInput.value.trim()) {
+    phoneInput.setCustomValidity("Please enter your mobile number.");
+    phoneInput.reportValidity();
+    return;
+}
+
+phoneInput.setCustomValidity("");
+
+if (!iti.isValidNumber()) {
+    phoneInput.setCustomValidity(
+        "Please enter a valid mobile number for the selected country."
+    );
+    phoneInput.reportValidity();
+    return;
+}
+
+phoneInput.setCustomValidity("");
+    
     intro.hidden=true;
  assessment.hidden=false;
  requestAnimationFrame(()=>{
