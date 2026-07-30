@@ -7,41 +7,67 @@
 
     <link rel="stylesheet"
           href="/static/dashboard.css">
+
 </head>
 
 <body>
+
+<div class="container">
 
 <h1>Eat Well Live Well</h1>
 
 <h2>Coach Dashboard</h2>
 
-<table border="1" cellpadding="8">
-
-<tr>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Score</th>
-    <th>Opportunity</th>
-    <th>Date</th>
-</tr>
+<p class="count">
+Total Leads:
+<strong>{{ leads|length }}</strong>
+</p>
 
 {% for lead in leads %}
 
-<tr>
-    <<td>
-    <a href="/dashboard/leads/{{ lead.id }}">
-        {{ lead.name }}
-    </a>
-    </td>
-    <td>{{ lead.email }}</td>
-    <td>{{ lead.total_score }}</td>
-    <td>{{ lead.opportunity }}</td>
-    <td>{{ lead.submitted_at }}</td>
-</tr>
+<a class="card"
+   href="/dashboard/leads/{{ lead.id }}">
+
+    <div class="top">
+
+        <div>
+
+            <h3>{{ lead.name }}</h3>
+
+            <p>{{ lead.email }}</p>
+
+        </div>
+
+        <div class="score">
+
+            {{ lead.total_score }}
+
+        </div>
+
+    </div>
+
+    <div class="bottom">
+
+        <span>
+
+            Opportunity:
+            {{ lead.opportunity }}
+
+        </span>
+
+        <span>
+
+            {{ lead.submitted_at }}
+
+        </span>
+
+    </div>
+
+</a>
 
 {% endfor %}
 
-</table>
+</div>
 
 </body>
 
