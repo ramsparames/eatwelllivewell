@@ -7,13 +7,33 @@
 
 <body>
 
-    <h1>Eat Well Live Well</h1>
+<h1>Eat Well Live Well</h1>
 
-    <h2>Coach Dashboard</h2>
+<h2>Coach Dashboard</h2>
 
-    <hr>
+<table border="1" cellpadding="8">
 
-    <h3>Dashboard coming soon...</h3>
+<tr>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Score</th>
+    <th>Opportunity</th>
+    <th>Date</th>
+</tr>
+
+{% for lead in leads %}
+
+<tr>
+    <td>{{ lead.name }}</td>
+    <td>{{ lead.email }}</td>
+    <td>{{ lead.total_score }}</td>
+    <td>{{ lead.opportunity }}</td>
+    <td>{{ lead.submitted_at }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
 
 </body>
 
