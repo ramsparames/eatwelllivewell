@@ -52,18 +52,6 @@
     
     const phoneInput = document.getElementById("phone");
     
-    const iti = window.intlTelInput(phoneInput, {
-        initialCountry: "in",
-        separateDialCode: true,
-        nationalMode: true,
-        strictMode: true,
-    
-       loadUtils: () =>
-        import(
-            "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/dist/js/utils.js"
-        )
-    });
-    
     phoneInput.addEventListener("input", function () {
         phoneInput.setCustomValidity("");
     });
@@ -88,17 +76,6 @@
         }
 
         phoneInput.setCustomValidity("");
-
-        await iti.promise;
-
-        if (!iti.isValidNumber()) {
-            phoneInput.setCustomValidity(
-                "Please enter a valid mobile number for the selected country."
-            );
-            phoneInput.reportValidity();
-            return;
-        }
-
         phoneInput.setCustomValidity("");
 
         const name = document.getElementById("name").value.trim();
