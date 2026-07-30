@@ -24,7 +24,11 @@
 {% for lead in leads %}
 
 <tr>
-    <td>{{ lead.name }}</td>
+    <<td>
+    <a href="/dashboard/leads/{{ lead.id }}">
+        {{ lead.name }}
+    </a>
+    </td>
     <td>{{ lead.email }}</td>
     <td>{{ lead.total_score }}</td>
     <td>{{ lead.opportunity }}</td>
