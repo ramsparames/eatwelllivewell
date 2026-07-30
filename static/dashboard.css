@@ -1,3 +1,30 @@
+:root{
+
+    --primary:#5B0E91;
+
+    --primary-light:#F3E9FB;
+
+    --gold:#F5C518;
+
+    --success:#2E7D32;
+
+    --warning:#EF6C00;
+
+    --danger:#C62828;
+
+    --background:#F7F8FC;
+
+    --card:#FFFFFF;
+
+    --text:#222;
+
+    --muted:#777;
+
+    --border:#E6E8EE;
+
+    --shadow:0 8px 30px rgba(0,0,0,.08);
+
+}
 body{
 
     margin:0;
