@@ -1,4 +1,4 @@
-async function sendSnapshotToBackend(answers, name, email) {
+async function sendSnapshotToBackend(answers, name, phone) {
     try {
         const response = await fetch("http://127.0.0.1:8000/snapshot", {
             method: "POST",
@@ -7,7 +7,7 @@ async function sendSnapshotToBackend(answers, name, email) {
             },
            body: JSON.stringify({
                 name: name,
-                email: email,
+                phone: phone,
                 answers: answers
             })
         });
@@ -51,7 +51,7 @@ function calculate(d){
 const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
 document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
      const nameInput = document.getElementById("name");
-    const emailInput = document.getElementById("email");
+     const phone = document.getElementById("phone").value.trim();
 
     if (!nameInput.value.trim()) {
         nameInput.reportValidity();
@@ -97,9 +97,9 @@ if(form){
         new FormData(form).entries()
     );
     const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("phone").value.trim();
 
-    sendSnapshotToBackend(formData, name, email);
+    sendSnapshotToBackend(formData, name, phone);
 
     save(A, calculate(formData));
     location.href = "results.html";
