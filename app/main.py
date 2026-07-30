@@ -28,6 +28,45 @@ app.mount(
     StaticFiles(directory=str(BASE_DIR / "static")),
     name="static"
 )
+@app.get("/foundations")
+def foundations():
+    return FileResponse(BASE_DIR / "foundations.html")
+
+
+@app.get("/success-stories")
+def success_stories():
+    return FileResponse(BASE_DIR / "success-stories.html")
+
+
+@app.get("/journal")
+def journal():
+    return FileResponse(BASE_DIR / "journal.html")
+
+
+@app.get("/assessment")
+def assessment():
+    return FileResponse(BASE_DIR / "assessment.html")
+
+
+@app.get("/results")
+def results():
+    return FileResponse(BASE_DIR / "results.html")
+
+
+@app.get("/join")
+def join():
+    return FileResponse(BASE_DIR / "join.html")
+
+
+@app.get("/thank-you")
+def thank_you():
+    return FileResponse(BASE_DIR / "thank-you.html")
+
+
+@app.get("/welcome")
+def welcome():
+    return FileResponse(BASE_DIR / "welcome.html")
+    
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
