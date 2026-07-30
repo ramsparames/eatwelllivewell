@@ -6,8 +6,10 @@ from app.database import create_database, save_snapshot
 from app.scoring import calculate_score
 from fastapi import Request
 from fastapi.responses import HTMLResponse
+from fastapi import HTTPException
 from fastapi.templating import Jinja2Templates
 from app.database import get_all_leads
+from app.database import get_all_leads, get_lead_by_id
 app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,5 +78,23 @@ def dashboard(request: Request):
         {
             "request": request,
             "leads": leads
+        }
+    )
+@app.get("/dashboard/leads/{lead_id}", response_class=HTMLResponse)
+def lead_detail(request: Request, lead_id: int):
+
+    lead = get_lead_by_id(lead_id)
+
+    if lead is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Lead not found"
+        )
+
+    return templates.TemplateResponse(
+        "lead.html",
+        {
+            "request": request,
+            "lead": lead
         }
     )
