@@ -12,7 +12,7 @@ def create_database():
             CREATE TABLE IF NOT EXISTS snapshot_submissions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                email TEXT NOT NULL,
+                phone TEXT NOT NULL,
 
                 answers TEXT NOT NULL,
 
