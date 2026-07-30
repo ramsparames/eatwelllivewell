@@ -147,11 +147,7 @@
     );
 
     const name = document.getElementById("name").value.trim();
-    const phone = document
-    .getElementById("phone")
-    .value
-    .trim()
-    .replace(/[\s()-]/g, "");
+    const phone = iti.getNumber();
 
     sendSnapshotToBackend(formData, name, phone);
 
