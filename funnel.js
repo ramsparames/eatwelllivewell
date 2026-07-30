@@ -51,7 +51,16 @@
     const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
     
     const phoneInput = document.getElementById("phone");
-
+    const iti = window.intlTelInput(phoneInput, {
+    initialCountry: "in",
+    separateDialCode: true,
+    nationalMode: true,
+    strictMode: true,
+    loadUtils: () =>
+        import(
+            "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/25.3.2/build/js/utils.js"
+        )
+    });
     phoneInput.addEventListener("input", function () {
         phoneInput.setCustomValidity("");
     });
@@ -66,22 +75,20 @@
         nameInput.reportValidity();
         return;
     }
-    
-    const phone = phoneInput.value
-        .trim()
-        .replace(/[\s()-]/g, "");
-    
-    const internationalPhonePattern = /^\+[1-9]\d{7,14}$/;
-    
-    if (!internationalPhonePattern.test(phone)) {
+    await iti.promise;
+
+    if (!iti.isValidNumber()) {
         phoneInput.setCustomValidity(
-            "Please enter your number with country code, for example +91 8056038128."
+            "Please enter a valid phone number."
         );
         phoneInput.reportValidity();
         return;
     }
 
-        phoneInput.setCustomValidity("");
+    phoneInput.setCustomValidity("");
+
+    const phone = iti.getNumber();
+
         
         const name = nameInput.value.trim();
         
