@@ -59,7 +59,7 @@ def receive_snapshot(submission: SnapshotSubmission):
 
     submission_id = save_snapshot(
         name=submission.name,
-        email=submission.email,
+        phone=submission.phone,
         answers=submission.answers,
         result=result,
     )
