@@ -2,14 +2,19 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from database import create_database, save_snapshot
-from scoring import calculate_score
+from app.database import (
+    create_database,
+    save_snapshot,
+    get_all_leads,
+    get_lead_by_id,
+)
+
+from app.scoring import calculate_score
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi import HTTPException
 from fastapi.templating import Jinja2Templates
-from database import get_all_leads
-from database import get_all_leads, get_lead_by_id
+
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 app = FastAPI()
