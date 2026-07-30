@@ -154,3 +154,25 @@ def lead_detail(request: Request, lead_id: int):
             "lead": lead
         }
     )
+from pathlib import Path
+from fastapi import HTTPException
+from fastapi.responses import FileResponse
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+@app.get("/{page_name}")
+def serve_html_page(page_name: str):
+    # Allow both /transformation and /transformation.html
+    clean_name = page_name.removesuffix(".html")
+
+    # Basic safety check
+    if not clean_name.replace("-", "").replace("_", "").isalnum():
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    html_file = BASE_DIR / f"{clean_name}.html"
+
+    if html_file.is_file():
+        return FileResponse(html_file)
+
+    raise HTTPException(status_code=404, detail="Not Found")
