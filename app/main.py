@@ -6,7 +6,8 @@ from app.scoring import calculate_score
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-app = FastAPI(title="NourisHer Backend")
+app = FastAPI()
+templates = Jinja2Templates(directory="app/templates")
 
 app.add_middleware(
     CORSMiddleware,
@@ -58,3 +59,11 @@ def receive_snapshot(submission: SnapshotSubmission):
         "name": submission.name,
         "result": result,
     }
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard(request: Request):
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request
+        }
+    )
