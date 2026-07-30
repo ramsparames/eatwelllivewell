@@ -51,15 +51,31 @@ function calculate(d){
 const intro=document.querySelector("[data-snapshot-intro]"), assessment=document.querySelector("[data-snapshot-assessment]");
 document.querySelector("[data-start-snapshot]")?.addEventListener("click",()=>{
      const nameInput = document.getElementById("name");
-     const phone = document.getElementById("phone").value.trim();
+     
 
+    const phoneInput = document.querySelector("#phone");
+
+    const iti = window.intlTelInput(phoneInput, {
+
+    initialCountry: "in",
+
+    preferredCountries: ["in", "us"],
+
+    separateDialCode: true,
+
+    nationalMode: false,
+
+    strictMode: true
+
+});
+const phone = iti.getNumber();
     if (!nameInput.value.trim()) {
         nameInput.reportValidity();
         return;
     }
 
-    if (!emailInput.checkValidity()) {
-        emailInput.reportValidity();
+    if (!phone.checkValidity()) {
+        phone.reportValidity();
         return;
     }
     intro.hidden=true;
