@@ -39,7 +39,7 @@ def create_database():
 
 def save_snapshot(
     name: str,
-    email: str,
+    phone: str,
     answers: dict[str, str],
     result: dict,
 ) -> int:
@@ -52,7 +52,7 @@ def save_snapshot(
             """
             INSERT INTO snapshot_submissions (
                 name,
-                email,
+                phone,
                 answers,
 
                 total_score,
@@ -77,7 +77,7 @@ def save_snapshot(
             """,
             (
                 name,
-                email,
+                phone,
                 answers_json,
 
                 result["total"],
@@ -114,7 +114,7 @@ def get_all_leads():
         SELECT
             id,
             name,
-            email,
+            phone,
             total_score,
             opportunity,
             strength,
