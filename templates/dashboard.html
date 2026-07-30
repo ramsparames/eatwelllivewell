@@ -53,9 +53,25 @@
 
         </div>
 
-        <div class="score">
+       <div class="
+        score
 
-            {{ lead.total_score }}
+        {% if lead.total_score < 40 %}
+
+            danger
+
+        {% elif lead.total_score < 60 %}
+
+            warning
+
+        {% else %}
+
+            success
+
+        {% endif %}
+        ">
+
+        {{ lead.total_score }}
 
         </div>
 
@@ -63,20 +79,33 @@
 
     <div class="bottom">
 
-        <span>
+    <div>
 
-            Opportunity:
-            {{ lead.opportunity }}
+        <strong>Opportunity</strong>
 
-        </span>
+        <br>
 
-        <span>
-
-            {{ lead.submitted_at }}
-
-        </span>
+        {{ lead.opportunity }}
 
     </div>
+
+    <div>
+
+        <strong>Strength</strong>
+
+        <br>
+
+        {{ lead.strength }}
+
+    </div>
+
+    <div>
+
+        {{ lead.submitted_at }}
+
+    </div>
+
+</div>
 
 </a>
 
