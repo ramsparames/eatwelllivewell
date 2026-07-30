@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ lead.name }} | Coach Dashboard</title>
+</head>
+
+<body>
+
+    <a href="/dashboard">← Back to dashboard</a>
+
+    <h1>{{ lead.name }}</h1>
+
+    <p>
+        <strong>Email:</strong>
+        {{ lead.email }}
+    </p>
+
+    <p>
+        <strong>Submitted:</strong>
+        {{ lead.submitted_at }}
+    </p>
+
+    <hr>
+
+    <h2>Snapshot Summary</h2>
+
+    <p>
+        <strong>Total score:</strong>
+        {{ lead.total_score }}
+    </p>
+
+    <p>
+        <strong>Biggest opportunity:</strong>
+        {{ lead.opportunity }}
+    </p>
+
+    <p>
+        <strong>Strongest area:</strong>
+        {{ lead.strength }}
+    </p>
+
+    <hr>
+
+    <h2>Area Scores</h2>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Area</th>
+            <th>Score</th>
+        </tr>
+
+        <tr>
+            <td>Recovery</td>
+            <td>{{ lead.recovery }}</td>
+        </tr>
+
+        <tr>
+            <td>Metabolic</td>
+            <td>{{ lead.metabolic }}</td>
+        </tr>
+
+        <tr>
+            <td>Nutrition</td>
+            <td>{{ lead.nutrition }}</td>
+        </tr>
+
+        <tr>
+            <td>Behaviour</td>
+            <td>{{ lead.behaviour }}</td>
+        </tr>
+
+        <tr>
+            <td>Confidence</td>
+            <td>{{ lead.confidence }}</td>
+        </tr>
+    </table>
+
+    <hr>
+
+    <h2>Additional Details</h2>
+
+    <p>
+        <strong>Body profile:</strong>
+        {{ lead.body_profile }}
+    </p>
+
+    <p>
+        <strong>Current feeling:</strong>
+        {{ lead.feeling }}
+    </p>
+
+    <hr>
+
+    <h2>Raw Assessment Answers</h2>
+
+    <pre>{{ lead.answers }}</pre>
+
+</body>
+
+</html>
