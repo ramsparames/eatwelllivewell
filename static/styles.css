@@ -719,9 +719,11 @@ button {
 }
 
 .testimonial-card.featured {
-  transform: translateY(-10px);
+  /*transform: translateY(-10px);
   border-color: var(--green-200);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-2);*/
+  background: white;
+  color: inherit;
 }
 
 .quote-mark {
