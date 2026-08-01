@@ -27,59 +27,80 @@
 
 <main class="container">
 
+    {% set assessment_leads =
+        leads
+        | selectattr("total_score", "defined")
+        | rejectattr("total_score", "none")
+        | list
+    %}
+
+    {% set applications =
+        leads
+        | selectattr("has_application", "equalto", true)
+        | list
+    %}
+
     <section class="summary-grid">
+
         <article class="summary-card">
-            <span class="summary-label">Total assessment leads</span>
+            <span class="summary-label">Total leads</span>
             <strong class="summary-number">{{ leads|length }}</strong>
-            <span class="summary-note">All submitted NourisHer assessments</span>
+            <span class="summary-note">
+                Assessments and Transformation applications
+            </span>
+        </article>
+
+        <article class="summary-card">
+            <span class="summary-label">Transformation applicants</span>
+            <strong class="summary-number">{{ applications|length }}</strong>
+            <span class="summary-note">
+                Leads who submitted an application
+            </span>
         </article>
 
         <article class="summary-card">
             <span class="summary-label">Needs focused support</span>
 
             <strong class="summary-number">
-                {{ leads | selectattr("total_score", "lt", 40) | list | length }}
-            </strong>
-
-            <span class="summary-note">Scores below 40</span>
-        </article>
-
-        <article class="summary-card">
-            <span class="summary-label">Building foundation</span>
-
-            <strong class="summary-number">
-                {{ leads
-                    | selectattr("total_score", "ge", 40)
-                    | selectattr("total_score", "lt", 60)
+                {{
+                    assessment_leads
+                    | selectattr("total_score", "lt", 40)
                     | list
                     | length
                 }}
             </strong>
 
-            <span class="summary-note">Scores between 40 and 59</span>
+            <span class="summary-note">Assessment scores below 40</span>
         </article>
 
         <article class="summary-card">
             <span class="summary-label">Steady foundation</span>
 
             <strong class="summary-number">
-                {{ leads | selectattr("total_score", "ge", 60) | list | length }}
+                {{
+                    assessment_leads
+                    | selectattr("total_score", "ge", 60)
+                    | list
+                    | length
+                }}
             </strong>
 
-            <span class="summary-note">Scores of 60 or above</span>
+            <span class="summary-note">Assessment scores of 60 or above</span>
         </article>
+
     </section>
 
     <section class="leads-section">
 
         <div class="section-heading">
             <div>
-                <p class="eyebrow">Assessment enquiries</p>
+                <p class="eyebrow">Coach workspace</p>
                 <h2>Latest leads</h2>
             </div>
 
             <span class="lead-count">
-                {{ leads|length }} lead{% if leads|length != 1 %}s{% endif %}
+                {{ leads|length }}
+                lead{% if leads|length != 1 %}s{% endif %}
             </span>
         </div>
 
@@ -89,12 +110,14 @@
 
             {% for lead in leads %}
 
-            <a class="lead-card"
+            <a
+                class="lead-card"
                 {% if lead.snapshot_id %}
                     href="/dashboard/leads/assessment/{{ lead.snapshot_id }}"
                 {% else %}
                     href="/dashboard/leads/application/{{ lead.application_id }}"
                 {% endif %}
+            >
 
                 <div class="lead-main">
 
@@ -105,58 +128,93 @@
                     <div class="lead-identity">
                         <h3>{{ lead.name }}</h3>
                         <p>{{ lead.phone }}</p>
+
+                        {% if lead.has_application %}
+                            <span class="application-badge">
+                                Applied to Transformation
+                            </span>
+                        {% else %}
+                            <span class="assessment-badge">
+                                Assessment only
+                            </span>
+                        {% endif %}
                     </div>
 
                 </div>
 
                 <div class="lead-detail">
                     <span>Biggest opportunity</span>
-                    <strong>{{ lead.opportunity|replace("_", " ")|title }}</strong>
+
+                    <strong>
+                        {% if lead.opportunity %}
+                            {{ lead.opportunity
+                                | replace("_", " ")
+                                | title
+                            }}
+                        {% else %}
+                            No assessment
+                        {% endif %}
+                    </strong>
                 </div>
 
                 <div class="lead-detail">
                     <span>Strongest area</span>
-                    <strong>{{ lead.strength|replace("_", " ")|title }}</strong>
+
+                    <strong>
+                        {% if lead.strength %}
+                            {{ lead.strength
+                                | replace("_", " ")
+                                | title
+                            }}
+                        {% else %}
+                            No assessment
+                        {% endif %}
+                    </strong>
                 </div>
 
                 <div class="lead-date">
                     <span>Latest activity</span>
+
                     <strong>
                         {% set activity_date =
                             lead.application_submitted_at
                             or lead.assessment_submitted_at
                         %}
-                
-                        {{ activity_date.strftime("%d %b %Y, %I:%M %p")
-                           if activity_date
-                           else "—" }}
+
+                        {% if activity_date %}
+                            {{ activity_date.strftime(
+                                "%d %b %Y, %I:%M %p"
+                            ) }}
+                        {% else %}
+                            —
+                        {% endif %}
                     </strong>
                 </div>
 
                 {% if lead.total_score is not none %}
 
-                <div class="
-                    score
-                    {% if lead.total_score < 40 %}
-                        danger
-                    {% elif lead.total_score < 60 %}
-                        warning
-                    {% else %}
-                        success
-                    {% endif %}
-                ">
-                    <strong>{{ lead.total_score }}</strong>
-                    <span>/100</span>
-                </div>
-                
-                {% else %}
-                
-                <div class="score no-score">
-                    <strong>—</strong>
-                    <span>No assessment</span>
-                </div>
+                    <div class="
+                        score
+                        {% if lead.total_score < 40 %}
+                            danger
+                        {% elif lead.total_score < 60 %}
+                            warning
+                        {% else %}
+                            success
+                        {% endif %}
+                    ">
+                        <strong>{{ lead.total_score }}</strong>
+                        <span>/100</span>
+                    </div>
 
-{% endif %}
+                {% else %}
+
+                    <div class="score no-score">
+                        <strong>—</strong>
+                        <span>No assessment</span>
+                    </div>
+
+                {% endif %}
 
                 <span class="open-arrow">→</span>
 
@@ -170,8 +228,11 @@
 
         <div class="empty-state">
             <div class="empty-icon">♡</div>
-            <h3>No assessment leads yet</h3>
-            <p>New NourisHer assessment submissions will appear here.</p>
+            <h3>No leads yet</h3>
+            <p>
+                New assessments and Transformation applications will
+                appear here.
+            </p>
         </div>
 
         {% endif %}
