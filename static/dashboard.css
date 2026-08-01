@@ -717,3 +717,24 @@ a {
     font-weight: 750;
     text-decoration: none;
 }
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logout-link {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.logout-link:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 560px) {
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
