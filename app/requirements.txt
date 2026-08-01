@@ -19,3 +19,5 @@ uvloop==0.22.1
 watchfiles==1.2.0
 websockets==16.1.1
 psycopg[binary]==3.3.4
+itsdangerous==2.2.0
+python-multipart==0.0.20
