@@ -1,104 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ lead.name }} | Coach Dashboard</title>
+    <title>{{ lead.name }} | NourisHer Coach Dashboard</title>
+
+    <link rel="stylesheet" href="/static/dashboard.css">
 </head>
 
 <body>
 
-    <a href="/dashboard">← Back to dashboard</a>
+<header class="dashboard-header">
+    <div class="dashboard-header-inner">
+        <div>
+            <p class="brand-kicker">Eat Well Live Well</p>
+            <h1>Lead details</h1>
+        </div>
 
-    <h1>{{ lead.name }}</h1>
+        <a class="site-link" href="/dashboard">← Back to dashboard</a>
+    </div>
+</header>
 
-    <p>
-        <strong>Email:</strong>
-        {{ lead.email }}
-    </p>
+<main class="container detail-container">
 
-    <p>
-        <strong>Submitted:</strong>
-        {{ lead.submitted_at }}
-    </p>
+    <section class="lead-profile-card">
 
-    <hr>
+        <div class="lead-profile-main">
 
-    <h2>Snapshot Summary</h2>
+            <div class="lead-avatar large">
+                {{ lead.name[0]|upper }}
+            </div>
 
-    <p>
-        <strong>Total score:</strong>
-        {{ lead.total_score }}
-    </p>
+            <div>
+                <p class="eyebrow">Assessment lead</p>
+                <h2>{{ lead.name }}</h2>
 
-    <p>
-        <strong>Biggest opportunity:</strong>
-        {{ lead.opportunity }}
-    </p>
+                <div class="contact-row">
+                    <a href="tel:{{ lead.phone }}">{{ lead.phone }}</a>
 
-    <p>
-        <strong>Strongest area:</strong>
-        {{ lead.strength }}
-    </p>
+                    {% if lead.submitted_at %}
+                    <span>
+                        Submitted
+                        {{ lead.submitted_at.strftime("%d %b %Y, %I:%M %p") }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
 
-    <hr>
+        </div>
 
-    <h2>Area Scores</h2>
+        <div class="
+            score score-large
+            {% if lead.total_score < 40 %}
+                danger
+            {% elif lead.total_score < 60 %}
+                warning
+            {% else %}
+                success
+            {% endif %}
+        ">
+            <strong>{{ lead.total_score }}</strong>
+            <span>/100</span>
+        </div>
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>Area</th>
-            <th>Score</th>
-        </tr>
+    </section>
 
-        <tr>
-            <td>Recovery</td>
-            <td>{{ lead.recovery }}</td>
-        </tr>
+    <section class="detail-grid">
 
-        <tr>
-            <td>Metabolic</td>
-            <td>{{ lead.metabolic }}</td>
-        </tr>
+        <article class="detail-card highlight-card">
+            <span class="detail-label">Biggest opportunity</span>
 
-        <tr>
-            <td>Nutrition</td>
-            <td>{{ lead.nutrition }}</td>
-        </tr>
+            <h3>
+                {{ lead.opportunity|replace("_", " ")|title }}
+            </h3>
 
-        <tr>
-            <td>Behaviour</td>
-            <td>{{ lead.behaviour }}</td>
-        </tr>
+            <p>
+                This is currently the area where focused support may create
+                the biggest positive difference.
+            </p>
+        </article>
 
-        <tr>
-            <td>Confidence</td>
-            <td>{{ lead.confidence }}</td>
-        </tr>
-    </table>
+        <article class="detail-card">
+            <span class="detail-label">Strongest area</span>
 
-    <hr>
+            <h3>
+                {{ lead.strength|replace("_", " ")|title }}
+            </h3>
 
-    <h2>Additional Details</h2>
+            <p>
+                This is the strongest part of the lead’s current wellness
+                foundation.
+            </p>
+        </article>
 
-    <p>
-        <strong>Body profile:</strong>
-        {{ lead.body_profile }}
-    </p>
+        <article class="detail-card">
+            <span class="detail-label">Body-change profile</span>
 
-    <p>
-        <strong>Current feeling:</strong>
-        {{ lead.feeling }}
-    </p>
+            <h3>
+                {{ lead.body_profile|replace("-", " ")|title
+                   if lead.body_profile
+                   else "Not provided" }}
+            </h3>
+        </article>
 
-    <hr>
+        <article class="detail-card">
+            <span class="detail-label">Current feeling</span>
 
-    <h2>Raw Assessment Answers</h2>
+            <h3>
+                {{ lead.feeling|replace("-", " ")|title
+                   if lead.feeling
+                   else "Not provided" }}
+            </h3>
+        </article>
 
-    <pre>{{ lead.answers }}</pre>
+    </section>
+
+    <section class="dashboard-panel">
+
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Assessment results</p>
+                <h2>Area scores</h2>
+            </div>
+        </div>
+
+        <div class="score-bars">
+
+            {% set dimensions = [
+                ("Recovery", lead.recovery),
+                ("Energy & metabolic rhythm", lead.metabolic),
+                ("Nutrition & cravings", lead.nutrition),
+                ("Consistency", lead.behaviour),
+                ("Confidence & self-trust", lead.confidence)
+            ] %}
+
+            {% for label, value in dimensions %}
+
+            <div class="score-row">
+
+                <div class="score-row-heading">
+                    <span>{{ label }}</span>
+                    <strong>{{ value }}/100</strong>
+                </div>
+
+                <div class="score-track">
+                    <span style="width: {{ value }}%"></span>
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+    <section class="dashboard-panel">
+
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Submitted responses</p>
+                <h2>Assessment answers</h2>
+            </div>
+        </div>
+
+        {% if lead.answers is mapping %}
+
+        <div class="answer-list">
+
+            {% for question, answer in lead.answers.items() %}
+
+            <div class="answer-item">
+                <span>
+                    {{ question|replace("_", " ")|title }}
+                </span>
+
+                <strong>
+                    {{ answer|replace("-", " ")|title }}
+                </strong>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <pre class="raw-answers">{{ lead.answers }}</pre>
+
+        {% endif %}
+
+    </section>
+
+    <section class="lead-actions">
+
+        <a class="action-button whatsapp-button"
+           href="https://wa.me/{{ lead.phone|replace('+', '')|replace(' ', '')|replace('-', '') }}"
+           target="_blank"
+           rel="noopener">
+            Message on WhatsApp
+        </a>
+
+        <a class="action-button secondary-button"
+           href="tel:{{ lead.phone }}">
+            Call lead
+        </a>
+
+        <a class="action-button secondary-button"
+           href="/dashboard">
+            Back to all leads
+        </a>
+
+    </section>
+
+</main>
 
 </body>
-
 </html>
