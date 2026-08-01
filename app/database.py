@@ -1,152 +1,155 @@
 import json
-import sqlite3
-from pathlib import Path
+import os
+from typing import Any
 
-DATABASE_PATH = Path(__file__).parent / "nourisher.db"
+import psycopg
+from psycopg.rows import dict_row
 
 
-def create_database():
-    with sqlite3.connect(DATABASE_PATH) as connection:
-        connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS snapshot_submissions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                phone TEXT NOT NULL,
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-                answers TEXT NOT NULL,
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL environment variable is not set")
 
-                total_score INTEGER NOT NULL,
 
-                recovery INTEGER NOT NULL,
-                metabolic INTEGER NOT NULL,
-                nutrition INTEGER NOT NULL,
-                behaviour INTEGER NOT NULL,
-                confidence INTEGER NOT NULL,
+def get_connection():
+    return psycopg.connect(
+        DATABASE_URL,
+        row_factory=dict_row,
+    )
 
-                opportunity TEXT NOT NULL,
-                strength TEXT NOT NULL,
 
-                body_profile TEXT,
-                feeling TEXT,
+def create_database() -> None:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS snapshot_submissions (
+                    id BIGSERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    phone TEXT NOT NULL,
+                    answers JSONB NOT NULL,
 
-                submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    total_score INTEGER NOT NULL,
+
+                    recovery INTEGER NOT NULL,
+                    metabolic INTEGER NOT NULL,
+                    nutrition INTEGER NOT NULL,
+                    behaviour INTEGER NOT NULL,
+                    confidence INTEGER NOT NULL,
+
+                    opportunity TEXT NOT NULL,
+                    strength TEXT NOT NULL,
+
+                    body_profile TEXT,
+                    feeling TEXT,
+
+                    submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+                """
             )
-            """
-        )
-        connection.commit()
 
 
 def save_snapshot(
     name: str,
     phone: str,
     answers: dict[str, str],
-    result: dict,
+    result: dict[str, Any],
 ) -> int:
+    dimensions = result["dimensions"]
 
-    answers_json = json.dumps(answers)
-    d = result["dimensions"]
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO snapshot_submissions (
+                    name,
+                    phone,
+                    answers,
 
-    with sqlite3.connect(DATABASE_PATH) as connection:
-        cursor = connection.execute(
-            """
-            INSERT INTO snapshot_submissions (
-                name,
-                phone,
-                answers,
+                    total_score,
 
-                total_score,
+                    recovery,
+                    metabolic,
+                    nutrition,
+                    behaviour,
+                    confidence,
 
-                recovery,
-                metabolic,
-                nutrition,
-                behaviour,
-                confidence,
+                    opportunity,
+                    strength,
 
-                opportunity,
-                strength,
+                    body_profile,
+                    feeling
+                )
+                VALUES (
+                    %s, %s, %s,
+                    %s,
+                    %s, %s, %s, %s, %s,
+                    %s, %s,
+                    %s, %s
+                )
+                RETURNING id
+                """,
+                (
+                    name,
+                    phone,
+                    json.dumps(answers),
 
-                body_profile,
-                feeling
+                    result["total"],
+
+                    dimensions["recovery"],
+                    dimensions["metabolic"],
+                    dimensions["nutrition"],
+                    dimensions["behaviour"],
+                    dimensions["confidence"],
+
+                    result["opportunity"],
+                    result["strength"],
+
+                    result.get("bodyProfile"),
+                    result.get("feeling"),
+                ),
             )
-            VALUES (
-                ?, ?, ?,
-                ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?
+
+            row = cursor.fetchone()
+
+            if not row:
+                raise RuntimeError("Snapshot could not be saved")
+
+            return int(row["id"])
+
+
+def get_all_leads() -> list[dict[str, Any]]:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    name,
+                    phone,
+                    total_score,
+                    opportunity,
+                    strength,
+                    submitted_at
+                FROM snapshot_submissions
+                ORDER BY submitted_at DESC
+                """
             )
-            """,
-            (
-                name,
-                phone,
-                answers_json,
 
-                result["total"],
+            return cursor.fetchall()
 
-                d["recovery"],
-                d["metabolic"],
-                d["nutrition"],
-                d["behaviour"],
-                d["confidence"],
 
-                result["opportunity"],
-                result["strength"],
+def get_lead_by_id(lead_id: int) -> dict[str, Any] | None:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM snapshot_submissions
+                WHERE id = %s
+                """,
+                (lead_id,),
+            )
 
-                result["bodyProfile"],
-                result["feeling"],
-            ),
-        )
-
-        connection.commit()
-
-        if cursor.lastrowid is None:
-            raise RuntimeError("Snapshot could not be saved")
-
-        return cursor.lastrowid
-import sqlite3
-
-def get_all_leads():
-    conn = sqlite3.connect("app/nourisher.db")
-    conn.row_factory = sqlite3.Row
-
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT
-            id,
-            name,
-            phone,
-            total_score,
-            opportunity,
-            strength,
-            submitted_at
-        FROM snapshot_submissions
-        ORDER BY submitted_at DESC
-    """)
-
-    leads = [dict(row) for row in cursor.fetchall()]
-
-    conn.close()
-
-    return leads
-def get_lead_by_id(lead_id: int):
-    conn = sqlite3.connect("app/nourisher.db")
-    conn.row_factory = sqlite3.Row
-
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT *
-        FROM snapshot_submissions
-        WHERE id = ?
-        """,
-        (lead_id,)
-    )
-
-    row = cursor.fetchone()
-    conn.close()
-
-    if row is None:
-        return None
-
-    return dict(row)
+            return cursor.fetchone()
