@@ -153,20 +153,168 @@ def get_all_leads() -> list[dict[str, Any]]:
             cursor.execute(
                 """
                 SELECT
-                    id,
-                    name,
-                    phone,
-                    total_score,
-                    opportunity,
-                    strength,
-                    submitted_at
-                FROM snapshot_submissions
-                ORDER BY submitted_at DESC
+                    s.id AS snapshot_id,
+                    s.name,
+                    s.phone,
+                    s.total_score,
+                    s.opportunity,
+                    s.strength,
+                    s.submitted_at AS assessment_submitted_at,
+
+                    a.id AS application_id,
+                    a.email,
+                    a.age_range,
+                    a.status,
+                    a.submitted_at AS application_submitted_at,
+
+                    CASE
+                        WHEN a.id IS NOT NULL THEN TRUE
+                        ELSE FALSE
+                    END AS has_application
+
+                FROM snapshot_submissions AS s
+
+                LEFT JOIN LATERAL (
+                    SELECT *
+                    FROM transformation_applications
+                    WHERE snapshot_id = s.id
+                    ORDER BY submitted_at DESC
+                    LIMIT 1
+                ) AS a ON TRUE
+
+                ORDER BY
+                    COALESCE(
+                        a.submitted_at,
+                        s.submitted_at
+                    ) DESC
                 """
             )
 
-            return cursor.fetchall()
+            assessment_leads = cursor.fetchall()
 
+            cursor.execute(
+                """
+                SELECT
+                    NULL::BIGINT AS snapshot_id,
+                    a.name,
+                    a.phone,
+                    NULL::INTEGER AS total_score,
+                    NULL::TEXT AS opportunity,
+                    NULL::TEXT AS strength,
+                    NULL::TIMESTAMPTZ AS assessment_submitted_at,
+
+                    a.id AS application_id,
+                    a.email,
+                    a.age_range,
+                    a.status,
+                    a.submitted_at AS application_submitted_at,
+
+                    TRUE AS has_application
+
+                FROM transformation_applications AS a
+
+                WHERE a.snapshot_id IS NULL
+
+                ORDER BY a.submitted_at DESC
+                """
+            )
+
+            application_only_leads = cursor.fetchall()
+
+            combined = assessment_leads + application_only_leads
+
+            combined.sort(
+                key=lambda lead:
+                    lead["application_submitted_at"]
+                    or lead["assessment_submitted_at"],
+                reverse=True,
+            )
+
+            return combined
+
+def get_lead_profile(
+    snapshot_id: int | None = None,
+    application_id: int | None = None,
+) -> dict[str, Any] | None:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+
+            if snapshot_id is not None:
+                cursor.execute(
+                    """
+                    SELECT
+                        s.*,
+
+                        a.id AS application_id,
+                        a.email,
+                        a.age_range,
+                        a.why_now,
+                        a.tried,
+                        a.success_goal,
+                        a.support_needed,
+                        a.consent,
+                        a.status,
+                        a.coach_notes,
+                        a.submitted_at AS application_submitted_at,
+                        a.updated_at AS application_updated_at
+
+                    FROM snapshot_submissions AS s
+
+                    LEFT JOIN LATERAL (
+                        SELECT *
+                        FROM transformation_applications
+                        WHERE snapshot_id = s.id
+                        ORDER BY submitted_at DESC
+                        LIMIT 1
+                    ) AS a ON TRUE
+
+                    WHERE s.id = %s
+                    """,
+                    (snapshot_id,),
+                )
+
+                return cursor.fetchone()
+
+            if application_id is not None:
+                cursor.execute(
+                    """
+                    SELECT
+                        s.*,
+
+                        a.id AS application_id,
+                        a.name AS application_name,
+                        a.email,
+                        a.phone AS application_phone,
+                        a.age_range,
+                        a.why_now,
+                        a.tried,
+                        a.success_goal,
+                        a.support_needed,
+                        a.consent,
+                        a.status,
+                        a.coach_notes,
+                        a.submitted_at AS application_submitted_at,
+                        a.updated_at AS application_updated_at
+
+                    FROM transformation_applications AS a
+
+                    LEFT JOIN snapshot_submissions AS s
+                        ON s.id = a.snapshot_id
+
+                    WHERE a.id = %s
+                    """,
+                    (application_id,),
+                )
+
+                row = cursor.fetchone()
+
+                if row and row.get("id") is None:
+                    row["name"] = row["application_name"]
+                    row["phone"] = row["application_phone"]
+
+                return row
+
+            return None
 
 def get_lead_by_id(lead_id: int) -> dict[str, Any] | None:
     with get_connection() as connection:
