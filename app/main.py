@@ -1,5 +1,10 @@
 from app.dashboard import router as dashboard_router
 from app.dashboard import set_templates
+from starlette.middleware.sessions import SessionMiddleware
+
+from app.auth import router as auth_router
+from app.auth import set_templates as set_auth_templates
+from app.config import SESSION_SECRET, validate_required_settings
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,12 +25,22 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 app = FastAPI()
+validate_required_settings()
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET,
+    https_only=False,
+    same_site="lax",
+    max_age=60 * 60 * 12,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(
     directory=str(BASE_DIR / "templates")
 )
 set_templates(templates)
+set_auth_templates(templates)
 app.mount(
     "/static",
     StaticFiles(directory=str(BASE_DIR / "static")),
@@ -134,6 +149,7 @@ from fastapi.responses import FileResponse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+app.include_router(auth_router)
 app.include_router(dashboard_router)
 @app.get("/{page_name}")
 def serve_html_page(page_name: str):
