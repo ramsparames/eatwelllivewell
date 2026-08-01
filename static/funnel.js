@@ -2,7 +2,7 @@ import intlTelInput from
     "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+esm";
     async function sendSnapshotToBackend(answers, name, phone) {
         try {
-            const response = await fetch("http://127.0.0.1:8000/snapshot", {
+            const response = await fetch("/snapshot", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
