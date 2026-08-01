@@ -212,6 +212,113 @@ show(0);
      put("[data-recommendation-title]",rec[0]);put("[data-recommendation-copy]",rec[1]);document.querySelector("[data-recommendation-points]").innerHTML=rec[2].map(x=>`<li>${x}</li>`).join("");
      const a=document.querySelector("[data-primary-recommendation]"),b=document.querySelector("[data-secondary-recommendation]");a.textContent=rec[3];a.href=rec[4];b.textContent=rec[5];b.href=rec[6];
     }
-    const app=document.querySelector("[data-application-form]");
+    /*const app=document.querySelector("[data-application-form]");*/
+    const applicationForm = document.querySelector("[data-application-form]");
+
+if (applicationForm) {
+    const phoneInput = document.getElementById("phone");
+
+    let applicationPhoneInput = null;
+
+    if (phoneInput && window.intlTelInput) {
+        applicationPhoneInput = window.intlTelInput(phoneInput, {
+            initialCountry: "in",
+            separateDialCode: true,
+            nationalMode: true,
+            strictMode: true,
+            loadUtils: () =>
+                import(
+                    "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
+                ),
+        });
+    }
+
+    applicationForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const submitButton = applicationForm.querySelector(
+            'button[type="submit"]'
+        );
+
+        if (!applicationForm.checkValidity()) {
+            applicationForm.reportValidity();
+            return;
+        }
+
+        let phone = phoneInput?.value.trim() || "";
+
+        if (applicationPhoneInput) {
+            await applicationPhoneInput.promise;
+
+            if (!applicationPhoneInput.isValidNumber()) {
+                phoneInput.setCustomValidity(
+                    "Please enter a valid mobile number."
+                );
+                phoneInput.reportValidity();
+                return;
+            }
+
+            phoneInput.setCustomValidity("");
+            phone = applicationPhoneInput.getNumber();
+        }
+
+        const payload = {
+            name: document.getElementById("name").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            phone,
+            age_range: document.getElementById("age").value,
+            why_now: document.getElementById("why-now").value.trim(),
+            tried: document.getElementById("tried").value.trim(),
+            success_goal: document.getElementById("success").value.trim(),
+            support_needed: document.getElementById("support").value,
+            consent: document.getElementById("consent").checked,
+        };
+
+        try {
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = "Submitting…";
+            }
+
+            const response = await fetch("/application", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.status !== "saved") {
+                throw new Error(
+                    data.message || "The application could not be submitted."
+                );
+            }
+
+            localStorage.setItem(
+                "nourisherApplication",
+                JSON.stringify({
+                    ...payload,
+                    applicationId: data.application_id,
+                    submittedAt: new Date().toISOString(),
+                })
+            );
+
+            window.location.href = "/thank-you";
+        } catch (error) {
+            console.error("Application submission failed:", error);
+
+            alert(
+                "We could not submit your application. Please try again."
+            );
+
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = "Submit my application →";
+            }
+        }
+    });
+}
     if(app)app.addEventListener("submit",e=>{e.preventDefault();if(!app.checkValidity()){app.reportValidity();return;}const d=Object.fromEntries(new FormData(app).entries());d.createdAt=new Date().toISOString();d.snapshot=load(A);save(P,d);location.href="thank-you.html";});
     })();
