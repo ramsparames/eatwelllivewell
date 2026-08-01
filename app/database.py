@@ -48,6 +48,34 @@ def create_database() -> None:
                 )
                 """
             )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS transformation_applications (
+                    id BIGSERIAL PRIMARY KEY,
+            
+                    snapshot_id BIGINT REFERENCES snapshot_submissions(id)
+                        ON DELETE SET NULL,
+            
+                    name TEXT NOT NULL,
+                    email TEXT NOT NULL,
+                    phone TEXT NOT NULL,
+                    age_range TEXT NOT NULL,
+            
+                    why_now TEXT NOT NULL,
+                    tried TEXT NOT NULL,
+                    success_goal TEXT NOT NULL,
+                    support_needed TEXT NOT NULL,
+            
+                    consent BOOLEAN NOT NULL DEFAULT FALSE,
+            
+                    status TEXT NOT NULL DEFAULT 'new',
+                    coach_notes TEXT,
+            
+                    submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+                """
+            )
 
 
 def save_snapshot(
@@ -153,3 +181,75 @@ def get_lead_by_id(lead_id: int) -> dict[str, Any] | None:
             )
 
             return cursor.fetchone()
+def save_application(
+    name: str,
+    email: str,
+    phone: str,
+    age_range: str,
+    why_now: str,
+    tried: str,
+    success_goal: str,
+    support_needed: str,
+    consent: bool,
+) -> int:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+
+            # Link the application to the most recent assessment
+            # submitted with the same phone number.
+            cursor.execute(
+                """
+                SELECT id
+                FROM snapshot_submissions
+                WHERE phone = %s
+                ORDER BY submitted_at DESC
+                LIMIT 1
+                """,
+                (phone,),
+            )
+
+            snapshot = cursor.fetchone()
+            snapshot_id = snapshot["id"] if snapshot else None
+
+            cursor.execute(
+                """
+                INSERT INTO transformation_applications (
+                    snapshot_id,
+                    name,
+                    email,
+                    phone,
+                    age_range,
+                    why_now,
+                    tried,
+                    success_goal,
+                    support_needed,
+                    consent
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s
+                )
+                RETURNING id
+                """,
+                (
+                    snapshot_id,
+                    name,
+                    email,
+                    phone,
+                    age_range,
+                    why_now,
+                    tried,
+                    success_goal,
+                    support_needed,
+                    consent,
+                ),
+            )
+
+            row = cursor.fetchone()
+
+            if not row:
+                raise RuntimeError(
+                    "Transformation application could not be saved"
+                )
+
+            return int(row["id"])
