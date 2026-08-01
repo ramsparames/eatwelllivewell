@@ -50,6 +50,8 @@
 
         </div>
 
+        {% if lead.total_score is not none %}
+
         <div class="
             score score-large
             {% if lead.total_score < 40 %}
@@ -63,6 +65,15 @@
             <strong>{{ lead.total_score }}</strong>
             <span>/100</span>
         </div>
+        
+        {% else %}
+        
+        <div class="score score-large no-score">
+            <strong>—</strong>
+            <span>No assessment</span>
+        </div>
+
+{% endif %}
 
     </section>
 
