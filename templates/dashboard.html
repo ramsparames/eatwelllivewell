@@ -1,118 +1,161 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Coach Dashboard</title>
+    <title>Coach Dashboard | NourisHer</title>
 
-    <link rel="stylesheet"
-          href="/static/dashboard.css">
-
+    <link rel="stylesheet" href="/static/dashboard.css">
 </head>
 
 <body>
 
-<div class="container">
-
-<h1>Eat Well Live Well</h1>
-
-<h2>Coach Dashboard</h2>
-
-<div class="summary-card">
-
-    <div>
-
-        <span class="label">
-
-            Total Leads
-
-        </span>
-
-        <div class="number">
-
-            {{ leads|length }}
-
-        </div>
-
-    </div>
-
-</div>
-
-{% for lead in leads %}
-
-<a class="card"
-   href="/dashboard/leads/{{ lead.id }}">
-
-    <div class="top">
-
+<header class="dashboard-header">
+    <div class="dashboard-header-inner">
         <div>
-
-            <h3>{{ lead.name }}</h3>
-
-            <p>{{ lead.phone }}</p>
-
+            <p class="brand-kicker">Eat Well Live Well</p>
+            <h1>NourisHer Coach Dashboard</h1>
         </div>
 
-       <div class="
-        score
+        <a class="site-link" href="/">View website →</a>
+    </div>
+</header>
 
-        {% if lead.total_score < 40 %}
+<main class="container">
 
-            danger
+    <section class="summary-grid">
+        <article class="summary-card">
+            <span class="summary-label">Total assessment leads</span>
+            <strong class="summary-number">{{ leads|length }}</strong>
+            <span class="summary-note">All submitted NourisHer assessments</span>
+        </article>
 
-        {% elif lead.total_score < 60 %}
+        <article class="summary-card">
+            <span class="summary-label">Needs focused support</span>
 
-            warning
+            <strong class="summary-number">
+                {{ leads | selectattr("total_score", "lt", 40) | list | length }}
+            </strong>
+
+            <span class="summary-note">Scores below 40</span>
+        </article>
+
+        <article class="summary-card">
+            <span class="summary-label">Building foundation</span>
+
+            <strong class="summary-number">
+                {{ leads
+                    | selectattr("total_score", "ge", 40)
+                    | selectattr("total_score", "lt", 60)
+                    | list
+                    | length
+                }}
+            </strong>
+
+            <span class="summary-note">Scores between 40 and 59</span>
+        </article>
+
+        <article class="summary-card">
+            <span class="summary-label">Steady foundation</span>
+
+            <strong class="summary-number">
+                {{ leads | selectattr("total_score", "ge", 60) | list | length }}
+            </strong>
+
+            <span class="summary-note">Scores of 60 or above</span>
+        </article>
+    </section>
+
+    <section class="leads-section">
+
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Assessment enquiries</p>
+                <h2>Latest leads</h2>
+            </div>
+
+            <span class="lead-count">
+                {{ leads|length }} lead{% if leads|length != 1 %}s{% endif %}
+            </span>
+        </div>
+
+        {% if leads %}
+
+        <div class="lead-list">
+
+            {% for lead in leads %}
+
+            <a class="lead-card"
+               href="/dashboard/leads/{{ lead.id }}">
+
+                <div class="lead-main">
+
+                    <div class="lead-avatar">
+                        {{ lead.name[0]|upper }}
+                    </div>
+
+                    <div class="lead-identity">
+                        <h3>{{ lead.name }}</h3>
+                        <p>{{ lead.phone }}</p>
+                    </div>
+
+                </div>
+
+                <div class="lead-detail">
+                    <span>Biggest opportunity</span>
+                    <strong>{{ lead.opportunity|replace("_", " ")|title }}</strong>
+                </div>
+
+                <div class="lead-detail">
+                    <span>Strongest area</span>
+                    <strong>{{ lead.strength|replace("_", " ")|title }}</strong>
+                </div>
+
+                <div class="lead-date">
+                    <span>Submitted</span>
+                    <strong>
+                        {{ lead.submitted_at.strftime("%d %b %Y, %I:%M %p")
+                           if lead.submitted_at
+                           else "—" }}
+                    </strong>
+                </div>
+
+                <div class="
+                    score
+                    {% if lead.total_score < 40 %}
+                        danger
+                    {% elif lead.total_score < 60 %}
+                        warning
+                    {% else %}
+                        success
+                    {% endif %}
+                ">
+                    <strong>{{ lead.total_score }}</strong>
+                    <span>/100</span>
+                </div>
+
+                <span class="open-arrow">→</span>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
 
         {% else %}
 
-            success
-
-        {% endif %}
-        ">
-
-        {{ lead.total_score }}
-
+        <div class="empty-state">
+            <div class="empty-icon">♡</div>
+            <h3>No assessment leads yet</h3>
+            <p>New NourisHer assessment submissions will appear here.</p>
         </div>
 
-    </div>
+        {% endif %}
 
-    <div class="bottom">
+    </section>
 
-    <div>
-
-        <strong>Opportunity</strong>
-
-        <br>
-
-        {{ lead.opportunity }}
-
-    </div>
-
-    <div>
-
-        <strong>Strength</strong>
-
-        <br>
-
-        {{ lead.strength }}
-
-    </div>
-
-    <div>
-
-        {{ lead.submitted_at }}
-
-    </div>
-
-</div>
-
-</a>
-
-{% endfor %}
-
-</div>
+</main>
 
 </body>
-
 </html>
