@@ -253,3 +253,61 @@ def save_application(
                 )
 
             return int(row["id"])
+def get_all_applications() -> list[dict[str, Any]]:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    a.id,
+                    a.snapshot_id,
+                    a.name,
+                    a.email,
+                    a.phone,
+                    a.age_range,
+                    a.status,
+                    a.submitted_at,
+
+                    s.total_score,
+                    s.opportunity,
+                    s.strength
+                FROM transformation_applications AS a
+                LEFT JOIN snapshot_submissions AS s
+                    ON s.id = a.snapshot_id
+                ORDER BY a.submitted_at DESC
+                """
+            )
+
+            return cursor.fetchall()
+
+
+def get_application_by_id(
+    application_id: int,
+) -> dict[str, Any] | None:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    a.*,
+
+                    s.total_score,
+                    s.recovery,
+                    s.metabolic,
+                    s.nutrition,
+                    s.behaviour,
+                    s.confidence,
+                    s.opportunity,
+                    s.strength,
+                    s.body_profile,
+                    s.feeling,
+                    s.answers AS assessment_answers
+                FROM transformation_applications AS a
+                LEFT JOIN snapshot_submissions AS s
+                    ON s.id = a.snapshot_id
+                WHERE a.id = %s
+                """,
+                (application_id,),
+            )
+
+            return cursor.fetchone()
