@@ -738,3 +738,37 @@ a {
         flex-wrap: wrap;
     }
 }
+.application-response-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.application-response-card {
+    padding: 21px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    background: var(--background);
+}
+
+.application-response-card span {
+    display: block;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.application-response-card p {
+    margin: 10px 0 0;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+@media (max-width: 760px) {
+    .application-response-grid {
+        grid-template-columns: 1fr;
+    }
+}
