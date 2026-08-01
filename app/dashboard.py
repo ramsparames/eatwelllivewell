@@ -37,15 +37,15 @@ def dashboard(request: Request):
             "leads": leads,
         },
     )
-
-if not coach_is_logged_in(request):
+    
+@router.get("/dashboard/leads/{lead_id}", response_class=HTMLResponse)
+def lead_detail(request: Request, lead_id: int):
+    if not coach_is_logged_in(request):
     return RedirectResponse(
         "/coach/login",
         status_code=303,
     )
     
-@router.get("/dashboard/leads/{lead_id}", response_class=HTMLResponse)
-def lead_detail(request: Request, lead_id: int):
     if templates is None:
         raise RuntimeError("Templates are not configured")
 
