@@ -1,7 +1,7 @@
 from app.dashboard import router as dashboard_router
 from app.dashboard import set_templates
 from starlette.middleware.sessions import SessionMiddleware
-
+from app.application import router as application_router
 from app.auth import router as auth_router
 from app.auth import set_templates as set_auth_templates
 from app.config import SESSION_SECRET, validate_required_settings
@@ -151,6 +151,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 app.include_router(auth_router)
 app.include_router(dashboard_router)
+app.include_router(application_router)
 @app.get("/{page_name}")
 def serve_html_page(page_name: str):
     # Allow both /transformation and /transformation.html
