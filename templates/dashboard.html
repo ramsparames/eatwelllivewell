@@ -90,7 +90,11 @@
             {% for lead in leads %}
 
             <a class="lead-card"
-               href="/dashboard/leads/{{ lead.id }}">
+                {% if lead.snapshot_id %}
+                    href="/dashboard/leads/assessment/{{ lead.snapshot_id }}"
+                {% else %}
+                    href="/dashboard/leads/application/{{ lead.application_id }}"
+                {% endif %}
 
                 <div class="lead-main">
 
@@ -116,13 +120,20 @@
                 </div>
 
                 <div class="lead-date">
-                    <span>Submitted</span>
+                    <span>Latest activity</span>
                     <strong>
-                        {{ lead.submitted_at.strftime("%d %b %Y, %I:%M %p")
-                           if lead.submitted_at
+                        {% set activity_date =
+                            lead.application_submitted_at
+                            or lead.assessment_submitted_at
+                        %}
+                
+                        {{ activity_date.strftime("%d %b %Y, %I:%M %p")
+                           if activity_date
                            else "—" }}
                     </strong>
                 </div>
+
+                {% if lead.total_score is not none %}
 
                 <div class="
                     score
@@ -137,6 +148,15 @@
                     <strong>{{ lead.total_score }}</strong>
                     <span>/100</span>
                 </div>
+                
+                {% else %}
+                
+                <div class="score no-score">
+                    <strong>—</strong>
+                    <span>No assessment</span>
+                </div>
+
+{% endif %}
 
                 <span class="open-arrow">→</span>
 
