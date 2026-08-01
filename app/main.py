@@ -1,3 +1,5 @@
+from app.dashboard import router as dashboard_router
+from app.dashboard import set_templates
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,6 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(
     directory=str(BASE_DIR / "templates")
 )
+set_templates(templates)
 app.mount(
     "/static",
     StaticFiles(directory=str(BASE_DIR / "static")),
@@ -124,43 +127,14 @@ def receive_snapshot(submission: SnapshotSubmission):
         "name": submission.name,
         "result": result,
     }
-@app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request):
 
-    leads = get_all_leads()
-
-    return templates.TemplateResponse(
-        "dashboard.html",
-        {
-            "request": request,
-            "leads": leads
-        }
-    )
-@app.get("/dashboard/leads/{lead_id}", response_class=HTMLResponse)
-def lead_detail(request: Request, lead_id: int):
-
-    lead = get_lead_by_id(lead_id)
-
-    if lead is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Lead not found"
-        )
-
-    return templates.TemplateResponse(
-        "lead.html",
-        {
-            "request": request,
-            "lead": lead
-        }
-    )
 from pathlib import Path
 from fastapi import HTTPException
 from fastapi.responses import FileResponse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+app.include_router(dashboard_router)
 @app.get("/{page_name}")
 def serve_html_page(page_name: str):
     # Allow both /transformation and /transformation.html
