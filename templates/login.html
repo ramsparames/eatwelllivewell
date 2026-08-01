@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Coach Login | NourisHer</title>
+
+    <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+
+<body class="login-page">
+
+<main class="login-shell">
+
+    <section class="login-card">
+
+        <p class="brand-kicker login-kicker">Eat Well Live Well</p>
+
+        <h1>Coach Login</h1>
+
+        <p class="login-intro">
+            Sign in to view NourisHer assessments and lead details.
+        </p>
+
+        {% if error %}
+        <div class="login-error">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" action="/coach/login" class="login-form">
+
+            <label for="username">Username</label>
+            <input
+                id="username"
+                name="username"
+                type="text"
+                autocomplete="username"
+                required
+            >
+
+            <label for="password">Password</label>
+            <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+            >
+
+            <button type="submit" class="login-button">
+                Sign in
+            </button>
+
+        </form>
+
+        <a href="/" class="login-back">← Back to website</a>
+
+    </section>
+
+</main>
+
+</body>
+</html>
