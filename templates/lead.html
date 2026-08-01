@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ lead.name }} | NourisHer Coach Dashboard</title>
+    {% set display_name = lead.name or lead.application_name or "Lead" %}
+
+    <title>{{ display_name }} | NourisHer Coach Dashboard</title>
 
     <link rel="stylesheet" href="/static/dashboard.css">
 </head>
@@ -15,42 +17,85 @@
     <div class="dashboard-header-inner">
         <div>
             <p class="brand-kicker">Eat Well Live Well</p>
-            <h1>Lead details</h1>
+            <h1>Lead profile</h1>
         </div>
 
-        <a class="site-link" href="/dashboard">← Back to dashboard</a>
+        <div class="header-actions">
+            <a class="site-link" href="/dashboard">← Back to dashboard</a>
+            <a class="site-link logout-link" href="/coach/logout">Log out</a>
+        </div>
     </div>
 </header>
 
 <main class="container detail-container">
+
+    {% set display_name = lead.name or lead.application_name or "Lead" %}
+    {% set display_phone = lead.phone or lead.application_phone %}
+    {% set has_assessment = lead.total_score is not none %}
+    {% set has_application = lead.application_id is not none %}
 
     <section class="lead-profile-card">
 
         <div class="lead-profile-main">
 
             <div class="lead-avatar large">
-                {{ lead.name[0]|upper }}
+                {{ display_name[0]|upper }}
             </div>
 
             <div>
-                <p class="eyebrow">Assessment lead</p>
-                <h2>{{ lead.name }}</h2>
+                <p class="eyebrow">
+                    {% if has_assessment and has_application %}
+                        Assessment + Transformation application
+                    {% elif has_application %}
+                        Transformation applicant
+                    {% else %}
+                        Assessment lead
+                    {% endif %}
+                </p>
+
+                <h2>{{ display_name }}</h2>
 
                 <div class="contact-row">
-                    <a href="tel:{{ lead.phone }}">{{ lead.phone }}</a>
 
-                    {% if lead.submitted_at %}
+                    {% if display_phone %}
+                    <a href="tel:{{ display_phone }}">
+                        {{ display_phone }}
+                    </a>
+                    {% endif %}
+
+                    {% if lead.email %}
+                    <a href="mailto:{{ lead.email }}">
+                        {{ lead.email }}
+                    </a>
+                    {% endif %}
+
+                    {% if lead.age_range %}
+                    <span>Age: {{ lead.age_range }}</span>
+                    {% endif %}
+
+                    {% if lead.application_submitted_at %}
                     <span>
-                        Submitted
-                        {{ lead.submitted_at.strftime("%d %b %Y, %I:%M %p") }}
+                        Applied
+                        {{ lead.application_submitted_at.strftime(
+                            "%d %b %Y, %I:%M %p"
+                        ) }}
+                    </span>
+
+                    {% elif lead.submitted_at %}
+                    <span>
+                        Assessed
+                        {{ lead.submitted_at.strftime(
+                            "%d %b %Y, %I:%M %p"
+                        ) }}
                     </span>
                     {% endif %}
+
                 </div>
             </div>
 
         </div>
 
-        {% if lead.total_score is not none %}
+        {% if has_assessment %}
 
         <div class="
             score score-large
@@ -65,25 +110,70 @@
             <strong>{{ lead.total_score }}</strong>
             <span>/100</span>
         </div>
-        
+
         {% else %}
-        
+
         <div class="score score-large no-score">
             <strong>—</strong>
             <span>No assessment</span>
         </div>
 
-{% endif %}
+        {% endif %}
 
     </section>
 
     <section class="detail-grid">
 
         <article class="detail-card highlight-card">
+            <span class="detail-label">Lead journey</span>
+
+            <h3>
+                {% if has_assessment and has_application %}
+                    Assessment completed and applied
+                {% elif has_application %}
+                    Applied directly to Transformation
+                {% else %}
+                    Assessment completed
+                {% endif %}
+            </h3>
+
+            <p>
+                {% if has_assessment and has_application %}
+                    This lead has completed the NourisHer Assessment and
+                    submitted a Transformation application.
+                {% elif has_application %}
+                    This lead applied directly without completing an
+                    assessment first.
+                {% else %}
+                    This lead has completed the assessment but has not yet
+                    submitted a Transformation application.
+                {% endif %}
+            </p>
+        </article>
+
+        <article class="detail-card">
+            <span class="detail-label">Current status</span>
+
+            <h3>
+                {{ lead.status|replace("_", " ")|title
+                   if lead.status
+                   else "New" }}
+            </h3>
+
+            <p>
+                Coach status and follow-up controls will be added here next.
+            </p>
+        </article>
+
+        {% if has_assessment %}
+
+        <article class="detail-card">
             <span class="detail-label">Biggest opportunity</span>
 
             <h3>
-                {{ lead.opportunity|replace("_", " ")|title }}
+                {{ lead.opportunity|replace("_", " ")|title
+                   if lead.opportunity
+                   else "Not available" }}
             </h3>
 
             <p>
@@ -96,7 +186,9 @@
             <span class="detail-label">Strongest area</span>
 
             <h3>
-                {{ lead.strength|replace("_", " ")|title }}
+                {{ lead.strength|replace("_", " ")|title
+                   if lead.strength
+                   else "Not available" }}
             </h3>
 
             <p>
@@ -125,7 +217,50 @@
             </h3>
         </article>
 
+        {% endif %}
+
     </section>
+
+    {% if has_application %}
+
+    <section class="dashboard-panel">
+
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Transformation application</p>
+                <h2>Application responses</h2>
+            </div>
+        </div>
+
+        <div class="application-response-grid">
+
+            <article class="application-response-card">
+                <span>Why are you looking for support now?</span>
+                <p>{{ lead.why_now or "Not provided" }}</p>
+            </article>
+
+            <article class="application-response-card">
+                <span>What have you already tried?</span>
+                <p>{{ lead.tried or "Not provided" }}</p>
+            </article>
+
+            <article class="application-response-card">
+                <span>What would success look like?</span>
+                <p>{{ lead.success_goal or "Not provided" }}</p>
+            </article>
+
+            <article class="application-response-card">
+                <span>Support needed</span>
+                <p>{{ lead.support_needed or "Not provided" }}</p>
+            </article>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+    {% if has_assessment %}
 
     <section class="dashboard-panel">
 
@@ -204,22 +339,61 @@
 
     </section>
 
+    {% else %}
+
+    <section class="dashboard-panel">
+
+        <div class="empty-state">
+            <div class="empty-icon">♡</div>
+            <h3>No assessment completed</h3>
+            <p>
+                This person applied directly to the Transformation programme.
+            </p>
+        </div>
+
+    </section>
+
+    {% endif %}
+
     <section class="lead-actions">
 
-        <a class="action-button whatsapp-button"
-           href="https://wa.me/{{ lead.phone|replace('+', '')|replace(' ', '')|replace('-', '') }}"
-           target="_blank"
-           rel="noopener">
+        {% if display_phone %}
+
+        <a
+            class="action-button whatsapp-button"
+            href="https://wa.me/{{ display_phone
+                | replace('+', '')
+                | replace(' ', '')
+                | replace('-', '')
+            }}"
+            target="_blank"
+            rel="noopener"
+        >
             Message on WhatsApp
         </a>
 
-        <a class="action-button secondary-button"
-           href="tel:{{ lead.phone }}">
+        <a
+            class="action-button secondary-button"
+            href="tel:{{ display_phone }}"
+        >
             Call lead
         </a>
 
-        <a class="action-button secondary-button"
-           href="/dashboard">
+        {% endif %}
+
+        {% if lead.email %}
+        <a
+            class="action-button secondary-button"
+            href="mailto:{{ lead.email }}"
+        >
+            Email lead
+        </a>
+        {% endif %}
+
+        <a
+            class="action-button secondary-button"
+            href="/dashboard"
+        >
             Back to all leads
         </a>
 
