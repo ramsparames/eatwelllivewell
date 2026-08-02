@@ -22,7 +22,56 @@ def set_templates(template_engine: Jinja2Templates) -> None:
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request):
+def dashboard(
+    request: Request,
+    q: str = "",
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    if templates is None:
+        raise RuntimeError("Templates are not configured")
+
+    leads = get_all_leads()
+
+    search_query = q.strip().lower()
+
+    if search_query:
+        filtered_leads = []
+
+        for lead in leads:
+            searchable_values = [
+                lead.get("name"),
+                lead.get("phone"),
+                lead.get("email"),
+                lead.get("opportunity"),
+                lead.get("strength"),
+                lead.get("status"),
+                lead.get("application_status"),
+            ]
+
+            searchable_text = " ".join(
+                str(value)
+                for value in searchable_values
+                if value is not None
+            ).lower()
+
+            if search_query in searchable_text:
+                filtered_leads.append(lead)
+
+        leads = filtered_leads
+
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request,
+            "leads": leads,
+            "search_query": q,
+        },
+    )
     if not coach_is_logged_in(request):
         return RedirectResponse(
             "/coach/login",
