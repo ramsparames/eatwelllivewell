@@ -19,6 +19,15 @@ import intlTelInput from
                 throw new Error(data.detail || `Snapshot request failed (${response.status})`);
             }
             console.log("Backend replied:", data);
+            localStorage.setItem(
+                "nourisherLead",
+                JSON.stringify({
+                snapshotId: data.submission_id,
+                name: name,
+                phone: phone,
+                assessmentResult: data.result,
+                })
+            );
     
         } catch (err) {
             console.error("Backend error:", err);
@@ -318,16 +327,6 @@ if (applicationForm) {
                     data.message || "The application could not be submitted."
                 );
             }
-
-           localStorage.setItem(
-                "nourisherLead",
-                JSON.stringify({
-                snapshotId: data.submission_id,
-                name,
-                phone,
-                assessmentResult: data.result,
-            })
-        );
 
             window.location.href = "/thank-you";
         } catch (error) {
