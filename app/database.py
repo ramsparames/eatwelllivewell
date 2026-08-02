@@ -44,6 +44,10 @@ def create_database() -> None:
                     body_profile TEXT,
                     feeling TEXT,
 
+                    status TEXT NOT NULL DEFAULT 'new',
+                    coach_notes TEXT,
+                    follow_up_date DATE,
+                    
                     submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
                 """
@@ -74,6 +78,33 @@ def create_database() -> None:
                     submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
+                """
+            )
+            cursor.execute(
+                """
+                ALTER TABLE snapshot_submissions
+                ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'new'
+                """
+            )
+            
+            cursor.execute(
+                """
+                ALTER TABLE snapshot_submissions
+                ADD COLUMN IF NOT EXISTS coach_notes TEXT
+                """
+            )
+            
+            cursor.execute(
+                """
+                ALTER TABLE snapshot_submissions
+                ADD COLUMN IF NOT EXISTS follow_up_date DATE
+                """
+            )
+            
+            cursor.execute(
+                """
+                ALTER TABLE transformation_applications
+                ADD COLUMN IF NOT EXISTS follow_up_date DATE
                 """
             )
 
