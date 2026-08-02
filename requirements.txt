@@ -29,3 +29,4 @@ uvloop==0.22.1
 watchfiles==1.2.0
 websockets==16.1.1
 resend==2.35.0
+httpx==YOUR_VERSION
