@@ -9,6 +9,8 @@ router = APIRouter()
 
 
 class TransformationApplicationSubmission(BaseModel):
+    snapshot_id: int | None = None
+    
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
     phone: str = Field(min_length=7, max_length=30)
@@ -33,6 +35,7 @@ def receive_application(
         }
 
     application_id = save_application(
+        snapshot_id=submission.snapshot_id,
         name=submission.name.strip(),
         email=str(submission.email).strip().lower(),
         phone=submission.phone.strip(),
