@@ -370,6 +370,7 @@ def get_lead_by_id(lead_id: int) -> dict[str, Any] | None:
 
             return cursor.fetchone()
 def save_application(
+    snapshot_id: int | None,
     name: str,
     email: str,
     phone: str,
@@ -383,21 +384,41 @@ def save_application(
     with get_connection() as connection:
         with connection.cursor() as cursor:
 
-            # Link the application to the most recent assessment
-            # submitted with the same phone number.
-            cursor.execute(
-                """
-                SELECT id
-                FROM snapshot_submissions
-                WHERE phone = %s
-                ORDER BY submitted_at DESC
-                LIMIT 1
-                """,
-                (phone,),
-            )
+            linked_snapshot_id = snapshot_id
 
-            snapshot = cursor.fetchone()
-            snapshot_id = snapshot["id"] if snapshot else None
+            # First preference:
+            # use the exact assessment ID sent from the browser.
+            if linked_snapshot_id is not None:
+                cursor.execute(
+                    """
+                    SELECT id
+                    FROM snapshot_submissions
+                    WHERE id = %s
+                    """,
+                    (linked_snapshot_id,),
+                )
+
+                if cursor.fetchone() is None:
+                    linked_snapshot_id = None
+
+            # Fallback:
+            # if there is no valid assessment ID, match by phone.
+            if linked_snapshot_id is None:
+                cursor.execute(
+                    """
+                    SELECT id
+                    FROM snapshot_submissions
+                    WHERE phone = %s
+                    ORDER BY submitted_at DESC
+                    LIMIT 1
+                    """,
+                    (phone,),
+                )
+
+                snapshot = cursor.fetchone()
+
+                if snapshot:
+                    linked_snapshot_id = snapshot["id"]
 
             cursor.execute(
                 """
@@ -420,7 +441,7 @@ def save_application(
                 RETURNING id
                 """,
                 (
-                    snapshot_id,
+                    linked_snapshot_id,
                     name,
                     email,
                     phone,
