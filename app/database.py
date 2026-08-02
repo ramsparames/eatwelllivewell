@@ -284,8 +284,9 @@ def get_lead_profile(
                         a.success_goal,
                         a.support_needed,
                         a.consent,
-                        a.status,
-                        a.coach_notes,
+                        a.status AS application_status,
+                        a.coach_notes AS application_coach_notes,
+                        a.follow_up_date AS application_follow_up_date,
                         a.submitted_at AS application_submitted_at,
                         a.updated_at AS application_updated_at
 
@@ -490,3 +491,50 @@ def get_application_by_id(
             )
 
             return cursor.fetchone()
+def update_lead_crm(
+    lead_type: str,
+    lead_id: int,
+    status: str,
+    coach_notes: str | None,
+    follow_up_date: str | None,
+) -> bool:
+    allowed_statuses = {
+        "new",
+        "contacted",
+        "clarity_call_booked",
+        "joined_foundations",
+        "joined_transformation",
+        "follow_up_later",
+        "closed",
+    }
+
+    if status not in allowed_statuses:
+        raise ValueError("Invalid lead status")
+
+    if lead_type == "assessment":
+        table_name = "snapshot_submissions"
+    elif lead_type == "application":
+        table_name = "transformation_applications"
+    else:
+        raise ValueError("Invalid lead type")
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                UPDATE {table_name}
+                SET
+                    status = %s,
+                    coach_notes = %s,
+                    follow_up_date = %s
+                WHERE id = %s
+                """,
+                (
+                    status,
+                    coach_notes or None,
+                    follow_up_date or None,
+                    lead_id,
+                ),
+            )
+
+            return cursor.rowcount > 0
