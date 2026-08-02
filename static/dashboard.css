@@ -853,3 +853,60 @@ a {
         grid-column: auto;
     }
 }
+.lead-status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.status-badge,
+.follow-up-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 850;
+}
+
+.status-new {
+    color: #226e59;
+    background: #eaf7f2;
+}
+
+.status-contacted {
+    color: #8a4b00;
+    background: #fff3e6;
+}
+
+.status-clarity_call_booked {
+    color: #1e4f91;
+    background: #eaf2ff;
+}
+
+.status-joined_foundations {
+    color: #725400;
+    background: #fff8d6;
+}
+
+.status-joined_transformation {
+    color: #5b0e91;
+    background: #f3e9fb;
+}
+
+.status-follow_up_later {
+    color: #7a4b00;
+    background: #fff0d8;
+}
+
+.status-closed {
+    color: #666;
+    background: #eceef2;
+}
+
+.follow-up-badge {
+    color: #5b0e91;
+    background: #f7effc;
+}
