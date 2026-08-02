@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, Field
 from app.email import send_application_notification
 from app.email import send_assessment_notification
 from app.database import save_application
-
+from app.synamate import sync_transformation_applicant
 
 router = APIRouter()
 
@@ -47,6 +47,13 @@ def receive_application(
         consent=submission.consent,
     )
 
+    sync_transformation_applicant(
+    application_id=application_id,
+    name=submission.name,
+    email=str(submission.email),
+    phone=submission.phone,
+    )
+    
     send_application_notification(
         application_id=application_id,
         name=submission.name,
