@@ -122,6 +122,99 @@
 
     </section>
 
+    <section class="dashboard-panel">
+
+    {% if saved %}
+    <div class="save-success">
+        Lead details updated successfully.
+    </div>
+    {% endif %}
+
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">Coach workspace</p>
+            <h2>Lead management</h2>
+        </div>
+    </div>
+
+    <form
+        method="post"
+        action="/dashboard/leads/{{ lead_type }}/{{ lead_id }}/update"
+        class="crm-form"
+    >
+
+        <div class="crm-field">
+            <label for="status">Lead status</label>
+
+            <select id="status" name="status" required>
+                <option value="new"
+                    {% if lead.status == "new" %}selected{% endif %}>
+                    New
+                </option>
+
+                <option value="contacted"
+                    {% if lead.status == "contacted" %}selected{% endif %}>
+                    Contacted
+                </option>
+
+                <option value="clarity_call_booked"
+                    {% if lead.status == "clarity_call_booked" %}selected{% endif %}>
+                    Clarity Call Booked
+                </option>
+
+                <option value="joined_foundations"
+                    {% if lead.status == "joined_foundations" %}selected{% endif %}>
+                    Joined Foundations
+                </option>
+
+                <option value="joined_transformation"
+                    {% if lead.status == "joined_transformation" %}selected{% endif %}>
+                    Joined Transformation
+                </option>
+
+                <option value="follow_up_later"
+                    {% if lead.status == "follow_up_later" %}selected{% endif %}>
+                    Follow Up Later
+                </option>
+
+                <option value="closed"
+                    {% if lead.status == "closed" %}selected{% endif %}>
+                    Closed
+                </option>
+            </select>
+        </div>
+
+        <div class="crm-field">
+            <label for="follow_up_date">Follow-up date</label>
+
+            <input
+                id="follow_up_date"
+                name="follow_up_date"
+                type="date"
+                value="{{ lead.follow_up_date or '' }}"
+            >
+        </div>
+
+        <div class="crm-field full">
+            <label for="coach_notes">Coach notes</label>
+
+            <textarea
+                id="coach_notes"
+                name="coach_notes"
+                placeholder="Add notes from calls, follow-ups, or anything important..."
+            >{{ lead.coach_notes or '' }}</textarea>
+        </div>
+
+        <div class="crm-actions">
+            <button type="submit" class="action-button crm-save-button">
+                Save lead details
+            </button>
+        </div>
+
+    </form>
+
+    </section>
+    
     <section class="detail-grid">
 
         <article class="detail-card highlight-card">
