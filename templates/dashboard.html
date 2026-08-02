@@ -138,6 +138,34 @@
                                 Assessment only
                             </span>
                         {% endif %}
+                        <div class="lead-status-row">
+                        
+                            {% set display_status =
+                                lead.application_status
+                                if lead.has_application and lead.application_status
+                                else lead.status
+                            %}
+                        
+                            <span class="status-badge status-{{ display_status or 'new' }}">
+                                {{ (display_status or "new")
+                                    | replace("_", " ")
+                                    | title
+                                }}
+                            </span>
+                        
+                            {% set follow_up =
+                                lead.application_follow_up_date
+                                if lead.has_application and lead.application_follow_up_date
+                                else lead.follow_up_date
+                            %}
+                        
+                            {% if follow_up %}
+                                <span class="follow-up-badge">
+                                    Follow up: {{ follow_up.strftime("%d %b %Y") }}
+                                </span>
+                            {% endif %}
+                        
+                        </div>
                     </div>
 
                 </div>
