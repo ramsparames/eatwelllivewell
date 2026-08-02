@@ -216,6 +216,22 @@ show(0);
     const applicationForm = document.querySelector("[data-application-form]");
 
 if (applicationForm) {
+    const savedLead = JSON.parse(
+    localStorage.getItem("nourisherLead") || "null"
+    );
+
+    if (savedLead) {
+        const nameField = document.getElementById("name");
+        const phoneField = document.getElementById("phone");
+
+        if (nameField && savedLead.name) {
+            nameField.value = savedLead.name;
+        }
+    
+        if (phoneField && savedLead.phone) {
+            phoneField.value = savedLead.phone;
+        }
+    }
     const phoneInput = document.getElementById("phone");
 
     let applicationPhoneInput = null;
@@ -231,7 +247,13 @@ if (applicationForm) {
                     "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
                 ),
         });
-    }
+        if (
+            applicationPhoneInput &&
+            savedLead?.phone
+            ) {
+            applicationPhoneInput.setNumber(savedLead.phone);
+            }
+        }
 
     applicationForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -263,6 +285,7 @@ if (applicationForm) {
         }
 
         const payload = {
+            snapshot_id: savedLead?.snapshotId || null,
             name: document.getElementById("name").value.trim(),
             email: document.getElementById("email").value.trim(),
             phone,
@@ -296,14 +319,15 @@ if (applicationForm) {
                 );
             }
 
-            localStorage.setItem(
-                "nourisherApplication",
+           localStorage.setItem(
+                "nourisherLead",
                 JSON.stringify({
-                    ...payload,
-                    applicationId: data.application_id,
-                    submittedAt: new Date().toISOString(),
-                })
-            );
+                snapshotId: data.submission_id,
+                name,
+                phone,
+                assessmentResult: data.result,
+            })
+        );
 
             window.location.href = "/thank-you";
         } catch (error) {
