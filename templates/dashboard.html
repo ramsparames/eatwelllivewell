@@ -91,8 +91,33 @@
     </section>
 
     <section class="leads-section">
-
+        
         <div class="section-heading">
+            <form method="get" action="/dashboard" class="dashboard-search">
+        
+            <div class="search-input-wrap">
+                <span class="search-icon">⌕</span>
+        
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ search_query or '' }}"
+                    placeholder="Search by name, phone, email, status or assessment area"
+                    aria-label="Search leads"
+                >
+            </div>
+        
+            <button type="submit" class="search-button">
+                Search
+            </button>
+        
+            {% if search_query %}
+            <a href="/dashboard" class="clear-search">
+                Clear
+            </a>
+            {% endif %}
+        
+            </form>
             <div>
                 <p class="eyebrow">Coach workspace</p>
                 <h2>Latest leads</h2>
