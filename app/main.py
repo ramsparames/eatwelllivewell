@@ -24,6 +24,8 @@ from fastapi.templating import Jinja2Templates
 
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from app.email import send_assessment_notification
+
 app = FastAPI()
 validate_required_settings()
 
@@ -140,7 +142,7 @@ def receive_snapshot(submission: SnapshotSubmission):
         name=submission.name,
         phone=submission.phone,
         result=result,
-    )
+        )
 
     return {
         "status": "saved",
