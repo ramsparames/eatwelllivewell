@@ -772,3 +772,84 @@ a {
         grid-template-columns: 1fr;
     }
 }
+.save-success {
+    margin-bottom: 20px;
+    padding: 13px 15px;
+    border-radius: 12px;
+    color: var(--success);
+    background: var(--success-light);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.crm-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.crm-field {
+    display: grid;
+    gap: 8px;
+}
+
+.crm-field.full {
+    grid-column: 1 / -1;
+}
+
+.crm-field label {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.crm-field select,
+.crm-field input,
+.crm-field textarea {
+    width: 100%;
+    padding: 14px 15px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    outline: none;
+    color: var(--text);
+    background: #fff;
+    font: inherit;
+}
+
+.crm-field textarea {
+    min-height: 145px;
+    resize: vertical;
+}
+
+.crm-field select:focus,
+.crm-field input:focus,
+.crm-field textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(91, 14, 145, 0.11);
+}
+
+.crm-actions {
+    grid-column: 1 / -1;
+}
+
+.crm-save-button {
+    border: 0;
+    color: #fff;
+    background: var(--primary);
+    cursor: pointer;
+}
+
+.crm-save-button:hover {
+    background: var(--primary-dark);
+}
+
+@media (max-width: 760px) {
+    .crm-form {
+        grid-template-columns: 1fr;
+    }
+
+    .crm-field.full,
+    .crm-actions {
+        grid-column: auto;
+    }
+}
