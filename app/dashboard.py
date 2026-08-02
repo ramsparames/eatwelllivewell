@@ -4,7 +4,12 @@ from fastapi.templating import Jinja2Templates
 
 from app.auth import coach_is_logged_in
 from app.database import get_all_leads, get_lead_profile
-
+from app.database import (
+    get_all_leads,
+    get_lead_profile,
+    update_lead_crm,
+)
+from fastapi import Form
 
 router = APIRouter()
 
@@ -76,4 +81,43 @@ def lead_profile(
             "lead": lead,
             "lead_type": lead_type,
         },
+    )
+@router.post("/dashboard/leads/{lead_type}/{lead_id}/update")
+def update_lead(
+    request: Request,
+    lead_type: str,
+    lead_id: int,
+    status: str = Form(...),
+    coach_notes: str = Form(""),
+    follow_up_date: str = Form(""),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    try:
+        updated = update_lead_crm(
+            lead_type=lead_type,
+            lead_id=lead_id,
+            status=status,
+            coach_notes=coach_notes.strip() or None,
+            follow_up_date=follow_up_date or None,
+        )
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        ) from error
+
+    if not updated:
+        raise HTTPException(
+            status_code=404,
+            detail="Lead not found",
+        )
+
+    return RedirectResponse(
+        url=f"/dashboard/leads/{lead_type}/{lead_id}?saved=1",
+        status_code=303,
     )
