@@ -133,8 +133,14 @@ def receive_snapshot(submission: SnapshotSubmission):
         result=result,
     )
 
-    print("Snapshot saved with ID:", submission_id)
-    print("Calculated score:", result)
+    from app.email import send_assessment_notification
+
+        send_assessment_notification(
+        submission_id=submission_id,
+        name=submission.name,
+        phone=submission.phone,
+        result=result,
+    )
 
     return {
         "status": "saved",
