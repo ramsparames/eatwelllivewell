@@ -143,6 +143,17 @@
 <span>Educational wellness guidance—not medical diagnosis or treatment.</span>
 </div>
 </footer>
+<script>
+const lead = JSON.parse(localStorage.getItem("nourisherLead") || "{}");
+
+if (lead.name) {
+    document.getElementById("thank-you-title").textContent =
+        `Thank you, ${lead.name.split(" ")[0]}!`;
+
+    document.getElementById("thank-you-message").textContent =
+        "Your Transformation application has been received. I'm excited to learn more about you. The next step is to book your complimentary Clarity Call below.";
+}
+</script>
 <script src="/static/script.js"></script>
 </body>
 </html>
