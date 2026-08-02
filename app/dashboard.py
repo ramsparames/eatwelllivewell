@@ -100,9 +100,6 @@ def update_lead(
         )
 
     try:
-        print("Status:", status)
-        print("Notes:", coach_notes)
-        print("Follow-up:", follow_up_date)
         updated = update_lead_crm(
             lead_type=lead_type,
             lead_id=lead_id,
