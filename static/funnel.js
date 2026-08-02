@@ -229,6 +229,13 @@ if (applicationForm) {
     localStorage.getItem("nourisherLead") || "null"
     );
 
+    const applicationNameField = document.getElementById("name");
+    const applicationPhoneField = document.getElementById("phone");
+
+    if (savedLead?.name && applicationNameField) {
+        applicationNameField.value = savedLead.name;
+    }
+    
     if (savedLead) {
         const nameField = document.getElementById("name");
         const phoneField = document.getElementById("phone");
@@ -256,12 +263,10 @@ if (applicationForm) {
                     "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
                 ),
         });
-        if (
-            applicationPhoneInput &&
-            savedLead?.phone
-            ) {
+        if (savedLead?.phone && applicationPhoneInput) {
             applicationPhoneInput.setNumber(savedLead.phone);
-            }
+        } else if (savedLead?.phone && applicationPhoneField) {
+            applicationPhoneField.value = savedLead.phone;
         }
 
     applicationForm.addEventListener("submit", async (event) => {
@@ -343,5 +348,3 @@ if (applicationForm) {
         }
     });
 }
-    if(app)app.addEventListener("submit",e=>{e.preventDefault();if(!app.checkValidity()){app.reportValidity();return;}const d=Object.fromEntries(new FormData(app).entries());d.createdAt=new Date().toISOString();d.snapshot=load(A);save(P,d);location.href="thank-you.html";});
-    })();
