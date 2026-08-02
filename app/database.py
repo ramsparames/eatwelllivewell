@@ -312,7 +312,7 @@ def get_lead_profile(
                     """
                     SELECT
                         s.*,
-
+                    
                         a.id AS application_id,
                         a.name AS application_name,
                         a.email,
@@ -325,6 +325,7 @@ def get_lead_profile(
                         a.consent,
                         a.status,
                         a.coach_notes,
+                        a.follow_up_date,
                         a.submitted_at AS application_submitted_at,
                         a.updated_at AS application_updated_at
 
