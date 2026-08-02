@@ -190,6 +190,9 @@ def get_all_leads() -> list[dict[str, Any]]:
                     s.total_score,
                     s.opportunity,
                     s.strength,
+                    s.status,
+                    s.follow_up_date,
+                    s.coach_notes,
                     s.submitted_at AS assessment_submitted_at,
 
                     a.id AS application_id,
@@ -232,12 +235,16 @@ def get_all_leads() -> list[dict[str, Any]]:
                     NULL::INTEGER AS total_score,
                     NULL::TEXT AS opportunity,
                     NULL::TEXT AS strength,
+                    a.status,
+                    a.follow_up_date,
+                    a.coach_notes,            
                     NULL::TIMESTAMPTZ AS assessment_submitted_at,
 
                     a.id AS application_id,
                     a.email,
                     a.age_range,
-                    a.status,
+                    a.status AS application_status,
+                    a.follow_up_date AS application_follow_up_date,
                     a.submitted_at AS application_submitted_at,
 
                     TRUE AS has_application
