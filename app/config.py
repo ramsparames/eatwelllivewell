@@ -11,6 +11,16 @@ COACH_PASSWORD_SALT = os.getenv("COACH_PASSWORD_SALT")
 COACH_PASSWORD_HASH = os.getenv("COACH_PASSWORD_HASH")
 COACH_NOTIFICATION_EMAIL = os.getenv("COACH_NOTIFICATION_EMAIL")
 
+APP_BASE_URL = os.getenv(
+    "APP_BASE_URL",
+    "http://127.0.0.1:8000",
+)
+
+RESEND_FROM_EMAIL = os.getenv(
+    "RESEND_FROM_EMAIL",
+    "NourisHer <onboarding@resend.dev>",
+)
+
 def validate_required_settings() -> None:
     missing = []
 
