@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL")
 SESSION_SECRET = os.getenv("SESSION_SECRET")
 
