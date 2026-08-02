@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, EmailStr, Field
-
+from app.email import send_application_notification
 from app.database import save_application
 
 
@@ -45,12 +45,14 @@ def receive_application(
 
     from app.email import send_assessment_notification
 
-    send_assessment_notification(
-        submission_id=submission_id,
-        name=submission.name,
-        phone=submission.phone,
-        result=result,
-    )
+       send_application_notification(
+            application_id=application_id,
+            name=submission.name,
+            email=str(submission.email),
+            phone=submission.phone,
+            age_range=submission.age_range,
+            why_now=submission.why_now,
+        )
     
     return {
         "status": "saved",
