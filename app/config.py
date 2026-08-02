@@ -9,7 +9,7 @@ SESSION_SECRET = os.getenv("SESSION_SECRET")
 COACH_USERNAME = os.getenv("COACH_USERNAME")
 COACH_PASSWORD_SALT = os.getenv("COACH_PASSWORD_SALT")
 COACH_PASSWORD_HASH = os.getenv("COACH_PASSWORD_HASH")
-
+COACH_NOTIFICATION_EMAIL = os.getenv("COACH_NOTIFICATION_EMAIL")
 
 def validate_required_settings() -> None:
     missing = []
