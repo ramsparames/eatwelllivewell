@@ -80,6 +80,8 @@ def lead_profile(
             "request": request,
             "lead": lead,
             "lead_type": lead_type,
+            "lead_id": lead_id,
+            "saved": request.query_params.get("saved") == "1",
         },
     )
 @router.post("/dashboard/leads/{lead_type}/{lead_id}/update")
