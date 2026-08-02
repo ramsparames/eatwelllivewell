@@ -43,6 +43,15 @@ def receive_application(
         consent=submission.consent,
     )
 
+    from app.email import send_assessment_notification
+
+    send_assessment_notification(
+        submission_id=submission_id,
+        name=submission.name,
+        phone=submission.phone,
+        result=result,
+    )
+    
     return {
         "status": "saved",
         "application_id": application_id,
