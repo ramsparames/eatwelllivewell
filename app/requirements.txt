@@ -22,3 +22,4 @@ psycopg[binary]==3.3.4
 itsdangerous==2.2.0
 python-multipart==0.0.20
 email-validator==2.2.0
+resend=2.35.0
