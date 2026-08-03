@@ -54,6 +54,31 @@ def create_database() -> None:
             )
             cursor.execute(
                 """
+                CREATE TABLE IF NOT EXISTS lead_events (
+                    id BIGSERIAL PRIMARY KEY,
+            
+                    snapshot_id BIGINT REFERENCES snapshot_submissions(id)
+                        ON DELETE CASCADE,
+            
+                    application_id BIGINT REFERENCES transformation_applications(id)
+                        ON DELETE CASCADE,
+            
+                    event_type TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    details TEXT,
+            
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            
+                    CONSTRAINT lead_event_has_owner
+                    CHECK (
+                        snapshot_id IS NOT NULL
+                        OR application_id IS NOT NULL
+                    )
+                )
+                """
+            )
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS transformation_applications (
                     id BIGSERIAL PRIMARY KEY,
             
@@ -567,3 +592,89 @@ def update_lead_crm(
             )
 
             return cursor.rowcount > 0
+def add_lead_event(
+    *,
+    snapshot_id: int | None = None,
+    application_id: int | None = None,
+    event_type: str,
+    title: str,
+    details: str | None = None,
+) -> int:
+    if snapshot_id is None and application_id is None:
+        raise ValueError(
+            "A timeline event requires a snapshot or application ID"
+        )
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO lead_events (
+                    snapshot_id,
+                    application_id,
+                    event_type,
+                    title,
+                    details
+                )
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (
+                    snapshot_id,
+                    application_id,
+                    event_type,
+                    title,
+                    details,
+                ),
+            )
+
+            row = cursor.fetchone()
+
+            if not row:
+                raise RuntimeError("Timeline event could not be saved")
+
+            return int(row["id"])
+
+
+def get_lead_events(
+    *,
+    snapshot_id: int | None = None,
+    application_id: int | None = None,
+) -> list[dict[str, Any]]:
+    if snapshot_id is None and application_id is None:
+        return []
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    snapshot_id,
+                    application_id,
+                    event_type,
+                    title,
+                    details,
+                    created_at
+                FROM lead_events
+                WHERE
+                    (
+                        %s IS NOT NULL
+                        AND snapshot_id = %s
+                    )
+                    OR
+                    (
+                        %s IS NOT NULL
+                        AND application_id = %s
+                    )
+                ORDER BY created_at DESC, id DESC
+                """,
+                (
+                    snapshot_id,
+                    snapshot_id,
+                    application_id,
+                    application_id,
+                ),
+            )
+
+            return cursor.fetchall()
