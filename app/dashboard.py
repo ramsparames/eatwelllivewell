@@ -229,24 +229,69 @@ def dashboard(
         },
     )
     
-    @router.get("/dashboard/leads/{lead_type}/{lead_id}", response_class=HTMLResponse)
-
-    def lead_profile(
+@router.get(
+    "/dashboard/leads/{lead_type}/{lead_id}",
+    response_class=HTMLResponse,
+)
+def lead_profile(
     request: Request,
     lead_type: str,
     lead_id: int,
-    ):
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
 
-    @router.post("/dashboard/leads/{lead_type}/{lead_id}/update")
+    if templates is None:
+        raise RuntimeError("Templates are not configured")
 
-    def update_lead(
+    if lead_type == "assessment":
+        lead = get_lead_profile(snapshot_id=lead_id)
+
+    elif lead_type == "application":
+        lead = get_lead_profile(application_id=lead_id)
+
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="Lead type not found",
+        )
+
+    if lead is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Lead not found",
+        )
+
+    events = get_lead_events(
+        snapshot_id=lead.get("snapshot_id"),
+        application_id=lead.get("application_id"),
+    )
+
+    return templates.TemplateResponse(
+        "lead.html",
+        {
+            "request": request,
+            "lead": lead,
+            "lead_type": lead_type,
+            "lead_id": lead_id,
+            "saved": request.query_params.get("saved") == "1",
+            "events": events,
+        },
+    )
+
+
+@router.post("/dashboard/leads/{lead_type}/{lead_id}/update")
+def update_lead(
     request: Request,
     lead_type: str,
     lead_id: int,
     status: str = Form(...),
     coach_notes: str = Form(""),
     follow_up_date: str = Form(""),
-    ):
+):
     if not coach_is_logged_in(request):
         return RedirectResponse(
             "/coach/login",
@@ -261,6 +306,7 @@ def dashboard(
             coach_notes=coach_notes.strip() or None,
             follow_up_date=follow_up_date or None,
         )
+
     except ValueError as error:
         raise HTTPException(
             status_code=400,
