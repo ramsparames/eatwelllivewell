@@ -146,6 +146,156 @@
 
     </section>
 
+
+    <section class="dashboard-panel action-centre">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Action centre</p>
+                <h2>Who needs your attention today?</h2>
+            </div>
+        </div>
+
+        <div class="action-centre-grid">
+
+            <article class="action-column">
+                <div class="action-column-heading">
+                    <div><span class="action-icon">🔴</span><h3>Follow-ups due</h3></div>
+                    <span class="action-count">{{ today_followups|length }}</span>
+                </div>
+
+                {% if today_followups %}
+                <div class="action-list">
+                    {% for item in today_followups %}
+                    <div class="action-item">
+                        <div class="action-item-main">
+                            <strong>{{ item.name }}</strong>
+                            <span class="due-label {% if item.is_overdue %}overdue{% else %}due-today{% endif %}">
+                                {% if item.is_overdue %}Overdue{% else %}Today{% endif %}
+                                · {{ item.follow_up_date.strftime("%d %b %Y") }}
+                            </span>
+                        </div>
+
+                        <div class="action-item-buttons">
+                            <a class="mini-action primary"
+                               href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}">
+                                Open lead
+                            </a>
+
+                            {% if item.phone %}
+                            <a class="mini-action"
+                               href="https://wa.me/{{ item.phone|replace('+','')|replace(' ','')|replace('-','') }}"
+                               target="_blank"
+                               rel="noopener">
+                                WhatsApp
+                            </a>
+
+                            <a class="mini-action" href="tel:{{ item.phone }}">
+                                Call
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="action-empty">
+                    <span>✓</span>
+                    <p>No follow-ups are due today.</p>
+                </div>
+                {% endif %}
+            </article>
+
+            <article class="action-column">
+                <div class="action-column-heading">
+                    <div><span class="action-icon">🟣</span><h3>New applications</h3></div>
+                    <span class="action-count">{{ new_applications|length }}</span>
+                </div>
+
+                {% if new_applications %}
+                <div class="action-list">
+                    {% for item in new_applications[:5] %}
+                    <div class="action-item">
+                        <div class="action-item-main">
+                            <strong>{{ item.name }}</strong>
+                            <span>
+                                {% if item.submitted_at %}
+                                    Applied {{ item.submitted_at.strftime("%d %b, %I:%M %p") }}
+                                {% else %}
+                                    New Transformation application
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="action-item-buttons">
+                            <a class="mini-action primary"
+                               href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}">
+                                Review
+                            </a>
+
+                            {% if item.phone %}
+                            <a class="mini-action"
+                               href="https://wa.me/{{ item.phone|replace('+','')|replace(' ','')|replace('-','') }}"
+                               target="_blank"
+                               rel="noopener">
+                                WhatsApp
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="action-empty">
+                    <span>✓</span>
+                    <p>No new applications are waiting.</p>
+                </div>
+                {% endif %}
+            </article>
+
+            <article class="action-column">
+                <div class="action-column-heading">
+                    <div><span class="action-icon">⭐</span><h3>Priority applicants</h3></div>
+                    <span class="action-count">{{ priority_applicants|length }}</span>
+                </div>
+
+                {% if priority_applicants %}
+                <div class="action-list">
+                    {% for item in priority_applicants[:5] %}
+                    <div class="action-item">
+                        <div class="action-item-main">
+                            <strong>{{ item.name }}</strong>
+                            <span>
+                                Score {{ item.total_score }}/100
+                                {% if item.opportunity %}
+                                    · {{ item.opportunity|replace("_"," ")|title }}
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="action-item-buttons">
+                            <a class="mini-action primary"
+                               href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}">
+                                Open lead
+                            </a>
+
+                            {% if item.phone %}
+                            <a class="mini-action" href="tel:{{ item.phone }}">Call</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="action-empty">
+                    <span>✓</span>
+                    <p>No priority applicants right now.</p>
+                </div>
+                {% endif %}
+            </article>
+
+        </div>
+    </section>
+
     <section class="leads-section">
         
         <div class="section-heading">
