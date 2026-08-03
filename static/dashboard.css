@@ -994,3 +994,11 @@ a {
         width: 100%;
     }
 }
+.attention-card {
+    border-color: rgba(198, 40, 40, 0.28);
+    background: #fff7f7;
+}
+
+.attention-card .summary-number {
+    color: var(--danger);
+}
