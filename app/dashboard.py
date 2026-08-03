@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
+from datetime import date
 from app.auth import coach_is_logged_in
 from app.database import get_all_leads, get_lead_profile
 from app.database import (
@@ -35,9 +35,63 @@ def dashboard(
     if templates is None:
         raise RuntimeError("Templates are not configured")
 
-    leads = get_all_leads()
+    all_leads = get_all_leads()
+    today = date.today()
+
+    total_leads = len(all_leads)
+
+    total_applications = sum(
+        1
+        for lead in all_leads
+        if lead.get("has_application")
+    )
+
+    new_leads = sum(
+        1
+        for lead in all_leads
+        if (
+            lead.get("application_status")
+            or lead.get("status")
+            or "new"
+        ) == "new"
+    )
+
+    clarity_calls_booked = sum(
+        1
+        for lead in all_leads
+        if (
+            lead.get("application_status")
+            or lead.get("status")
+        ) == "clarity_call_booked"
+    )
+
+    follow_ups_due = 0
+
+    for lead in all_leads:
+        follow_up_date = (
+            lead.get("application_follow_up_date")
+            or lead.get("follow_up_date")
+        )
+
+        status = (
+            lead.get("application_status")
+            or lead.get("status")
+            or "new"
+        )
+
+        if (
+            follow_up_date
+            and follow_up_date <= today
+            and status not in {
+                "joined_foundations",
+                "joined_transformation",
+                "closed",
+            }
+        ):
+            follow_ups_due += 1
 
     search_query = q.strip().lower()
+    leads = all_leads
 
     if search_query:
         filtered_leads = []
@@ -70,6 +124,12 @@ def dashboard(
             "request": request,
             "leads": leads,
             "search_query": q,
+            "total_leads": total_leads,
+            "total_applications": total_applications,
+            "new_leads": new_leads,
+            "clarity_calls_booked": clarity_calls_booked,
+            "follow_ups_due": follow_ups_due,
+            "today": today,
         },
     )
     if not coach_is_logged_in(request):
