@@ -3,7 +3,6 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from datetime import date
 from app.auth import coach_is_logged_in
-from app.database import get_all_leads, get_lead_profile
 from app.database import (
     get_all_leads,
     get_lead_profile,
@@ -47,39 +46,42 @@ def dashboard(
         if lead.get("has_application")
     )
 
-    new_leads = sum(
-        1
-        for lead in all_leads
-        if (
-            lead.get("application_status")
-            or lead.get("status")
-            or "new"
-        ) == "new"
-    )
+    new_leads = 0
+    clarity_calls_booked = 0
 
-    clarity_calls_booked = sum(
-        1
-        for lead in all_leads
-        if (
-            lead.get("application_status")
-            or lead.get("status")
-        ) == "clarity_call_booked"
-    )
-
-    follow_ups_due = 0
+    # These lists will power the new Action Centre.
+    today_followups = []
+    new_applications = []
+    priority_applicants = []
 
     for lead in all_leads:
-        follow_up_date = (
-            lead.get("application_follow_up_date")
-            or lead.get("follow_up_date")
-        )
-
         status = (
             lead.get("application_status")
             or lead.get("status")
             or "new"
         )
 
+        follow_up_date = (
+            lead.get("application_follow_up_date")
+            or lead.get("follow_up_date")
+        )
+
+        # Use the assessment route when an assessment exists.
+        # Otherwise, open the direct application route.
+        if lead.get("snapshot_id"):
+            lead_type = "assessment"
+            lead_id = lead["snapshot_id"]
+        else:
+            lead_type = "application"
+            lead_id = lead.get("application_id")
+
+        if status == "new":
+            new_leads += 1
+
+        if status == "clarity_call_booked":
+            clarity_calls_booked += 1
+
+        # Due today or overdue.
         if (
             follow_up_date
             and follow_up_date <= today
@@ -89,7 +91,72 @@ def dashboard(
                 "closed",
             }
         ):
-            follow_ups_due += 1
+            today_followups.append(
+                {
+                    "name": lead.get("name") or "Lead",
+                    "phone": lead.get("phone"),
+                    "follow_up_date": follow_up_date,
+                    "is_overdue": follow_up_date < today,
+                    "lead_type": lead_type,
+                    "lead_id": lead_id,
+                }
+            )
+
+        # Newly submitted Transformation applications.
+        if lead.get("has_application") and status == "new":
+            new_applications.append(
+                {
+                    "name": lead.get("name") or "Lead",
+                    "phone": lead.get("phone"),
+                    "email": lead.get("email"),
+                    "submitted_at": lead.get(
+                        "application_submitted_at"
+                    ),
+                    "lead_type": lead_type,
+                    "lead_id": lead_id,
+                }
+            )
+
+        # Applicants with a lower assessment score may need
+        # faster personal attention.
+        total_score = lead.get("total_score")
+
+        if (
+            lead.get("has_application")
+            and total_score is not None
+            and total_score < 45
+            and status not in {
+                "joined_foundations",
+                "joined_transformation",
+                "closed",
+            }
+        ):
+            priority_applicants.append(
+                {
+                    "name": lead.get("name") or "Lead",
+                    "phone": lead.get("phone"),
+                    "total_score": total_score,
+                    "opportunity": lead.get("opportunity"),
+                    "lead_type": lead_type,
+                    "lead_id": lead_id,
+                }
+            )
+
+    # Overdue follow-ups appear before today's follow-ups.
+    today_followups.sort(
+        key=lambda item: item["follow_up_date"]
+    )
+
+    new_applications.sort(
+        key=lambda item: item["submitted_at"] or date.min,
+        reverse=True,
+    )
+
+    priority_applicants.sort(
+        key=lambda item: item["total_score"]
+    )
+
+    follow_ups_due = len(today_followups)
 
     search_query = q.strip().lower()
     leads = all_leads
@@ -97,7 +164,7 @@ def dashboard(
     if search_query:
         filtered_leads = []
 
-        for lead in leads:
+        for lead in all_leads:
             searchable_values = [
                 lead.get("name"),
                 lead.get("phone"),
@@ -154,75 +221,21 @@ def dashboard(
             "follow_ups_due": follow_ups_due,
             "today": today,
             "today_focus": today_focus,
+
+            # New Action Centre data
+            "today_followups": today_followups,
+            "new_applications": new_applications,
+            "priority_applicants": priority_applicants,
         },
     )
-    if not coach_is_logged_in(request):
-        return RedirectResponse(
-            "/coach/login",
-            status_code=303,
-        )
-
-    if templates is None:
-        raise RuntimeError("Templates are not configured")
-
-    leads = get_all_leads()
-
-    return templates.TemplateResponse(
-        "dashboard.html",
-        {
-            "request": request,
-            "leads": leads,
-            "today_focus": today_focus,
-        },
-    )
-
-
+    
 @router.get("/dashboard/leads/{lead_type}/{lead_id}", response_class=HTMLResponse)
 def lead_profile(
     request: Request,
     lead_type: str,
     lead_id: int,
 ):
-    if not coach_is_logged_in(request):
-        return RedirectResponse(
-            "/coach/login",
-            status_code=303,
-        )
 
-    if templates is None:
-        raise RuntimeError("Templates are not configured")
-
-    if lead_type == "assessment":
-        lead = get_lead_profile(snapshot_id=lead_id)
-    elif lead_type == "application":
-        lead = get_lead_profile(application_id=lead_id)
-    else:
-        raise HTTPException(
-            status_code=404,
-            detail="Lead type not found",
-        )
-
-    if lead is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Lead not found",
-        )
-    events = get_lead_events(
-        snapshot_id=lead.get("snapshot_id"),
-        application_id=lead.get("application_id"),
-    )
-    
-    return templates.TemplateResponse(
-        "lead.html",
-        {
-            "request": request,
-            "lead": lead,
-            "lead_type": lead_type,
-            "lead_id": lead_id,
-            "saved": request.query_params.get("saved") == "1",
-            "events": events,
-        },
-    )
 @router.post("/dashboard/leads/{lead_type}/{lead_id}/update")
 def update_lead(
     request: Request,
