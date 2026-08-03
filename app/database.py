@@ -4,7 +4,7 @@ from typing import Any
 
 import psycopg
 from psycopg.rows import dict_row
-
+from datetime import date
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -630,30 +630,59 @@ def update_lead_crm(
             }
 
             # Record status changes.
-            if status != old_status:
-                cursor.execute(
-                    """
-                    INSERT INTO lead_events (
-                        snapshot_id,
-                        application_id,
-                        event_type,
-                        title,
-                        details
-                    )
-                    VALUES (%s, %s, %s, %s, %s)
-                    """,
-                    (
-                        event_owner["snapshot_id"],
-                        event_owner["application_id"],
-                        "status_changed",
-                        "Lead status changed",
-                        (
-                            f"{old_status.replace('_', ' ').title()} "
-                            f"→ {status.replace('_', ' ').title()}"
-                        ),
-                    ),
+        if status != old_status:
+            status_event_types = {
+                "clarity_call_booked": "clarity_call_booked",
+                "joined_foundations": "joined_foundations",
+                "joined_transformation": "joined_transformation",
+                "closed": "lead_closed",
+            }
+        
+            status_titles = {
+                "new": "Lead moved to New",
+                "contacted": "Lead contacted",
+                "clarity_call_booked": "Clarity Call Booked",
+                "joined_foundations": "Joined Foundations",
+                "joined_transformation": "Joined Transformation",
+                "follow_up_later": "Follow-up Later",
+                "closed": "Lead closed",
+            }
+        
+            event_type = status_event_types.get(
+                status,
+                "status_changed",
+            )
+        
+            event_title = status_titles.get(
+                status,
+                "Lead status changed",
+            )
+        
+            previous_status = (
+                old_status.replace("_", " ").title()
+                if old_status
+                else "Not set"
+            )
+        
+            cursor.execute(
+                """
+                INSERT INTO lead_events (
+                    snapshot_id,
+                    application_id,
+                    event_type,
+                    title,
+                    details
                 )
-
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                (
+                    event_owner["snapshot_id"],
+                    event_owner["application_id"],
+                    event_type,
+                    event_title,
+                    f"Previous status: {previous_status}",
+                ),
+            )
             # Every non-empty note becomes permanent timeline history.
             if clean_note:
                 cursor.execute(
@@ -689,15 +718,19 @@ def update_lead_crm(
 
                 if new_follow_up_text:
                     event_title = "Follow-up scheduled"
-                    event_details = new_follow_up_text
+                
+                    event_details = date.fromisoformat(
+                        new_follow_up_text
+                    ).strftime("%d %b %Y")
+                
                 else:
                     event_title = "Follow-up removed"
+                
                     event_details = (
-                        old_follow_up_text
-                        if old_follow_up_text
+                        old_follow_up.strftime("%d %b %Y")
+                        if old_follow_up
                         else None
                     )
-
                 cursor.execute(
                     """
                     INSERT INTO lead_events (
