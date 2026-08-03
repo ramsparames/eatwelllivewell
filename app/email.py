@@ -453,8 +453,7 @@ def send_application_confirmation(
     clean_name = name.strip() or "there"
 
     booking_url = (
-        "https://share.synamate.com/widget/bookings/"
-        "sushma-s-personal-calendar-4st5xtqy6"
+        "https://share.synamate.com/widget/bookings/clarity-call-with-sushma"
     )
 
     body = f"""
