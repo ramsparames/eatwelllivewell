@@ -203,20 +203,33 @@
                                     {{ icons.get(event.event_type, "•") }}
                                 </div>
                 
-                                <div class="timeline-content">
-                
+                                <div class="
+                                    timeline-content
+                                    {% if event.event_type == 'coach_note' %}
+                                        timeline-note-card
+                                    {% endif %}
+                                ">
+                                
                                     <div class="timeline-heading">
-                                        <h3>{{ event.title }}</h3>
-                
+                                
+                                        <div>
+                                            {% if event.event_type == "coach_note" %}
+                                                <span class="timeline-author">Sushma</span>
+                                            {% endif %}
+                                
+                                            <h3>{{ event.title }}</h3>
+                                        </div>
+                                
                                         <time>
                                             {{ event.created_at.strftime("%d %b %Y, %I:%M %p") }}
                                         </time>
+                                
                                     </div>
-                
+                                
                                     {% if event.details %}
                                     <p>{{ event.details }}</p>
                                     {% endif %}
-                
+                                
                                 </div>
                 
                             </article>
