@@ -1633,3 +1633,57 @@ a {
         grid-template-columns: 1fr;
     }
 }
+.timeline-assessment_completed {
+    background: #eef3ff;
+    color: #3155a4;
+}
+
+.timeline-application_submitted {
+    background: #f5edff;
+    color: #650da1;
+}
+
+.timeline-coach_note {
+    background: #f5edff;
+    color: #650da1;
+}
+
+.timeline-status_changed {
+    background: #eaf4ff;
+    color: #1769aa;
+}
+
+.timeline-follow_up {
+    background: #fff2df;
+    color: #a95b00;
+}
+
+.timeline-clarity_call_booked {
+    background: #e8f7ec;
+    color: #26723b;
+}
+
+.timeline-joined_foundations {
+    background: #f4eaff;
+    color: #6b159e;
+}
+
+.timeline-joined_transformation {
+    background: #fff5d8;
+    color: #946500;
+}
+
+.timeline-email_sent {
+    background: #edf7ff;
+    color: #16679a;
+}
+
+.timeline-synamate_synced {
+    background: #edf8f5;
+    color: #18715b;
+}
+
+.timeline-lead_closed {
+    background: #f1f1f1;
+    color: #666;
+}
