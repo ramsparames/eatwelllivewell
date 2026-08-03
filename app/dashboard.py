@@ -117,7 +117,27 @@ def dashboard(
                 filtered_leads.append(lead)
 
         leads = filtered_leads
+    today_focus = []
 
+if follow_ups_due:
+    today_focus.append(
+        f"🔴 {follow_ups_due} follow-up"
+        + ("s" if follow_ups_due != 1 else "")
+        + " due"
+    )
+
+if clarity_calls_booked:
+    today_focus.append(
+        f"📞 {clarity_calls_booked} clarity call"
+        + ("s" if clarity_calls_booked != 1 else "")
+        + " booked"
+    )
+
+if new_leads:
+    today_focus.append(
+        f"🆕 {new_leads} new lead"
+        + ("s" if new_leads != 1 else "")
+    )
     return templates.TemplateResponse(
         "dashboard.html",
         {
@@ -148,6 +168,7 @@ def dashboard(
         {
             "request": request,
             "leads": leads,
+            "today_focus": today_focus,
         },
     )
 
