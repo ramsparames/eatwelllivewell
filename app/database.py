@@ -635,7 +635,6 @@ def add_lead_event(
 
             return int(row["id"])
 
-
 def get_lead_events(
     *,
     snapshot_id: int | None = None,
@@ -644,10 +643,23 @@ def get_lead_events(
     if snapshot_id is None and application_id is None:
         return []
 
+    conditions = []
+    parameters = []
+
+    if snapshot_id is not None:
+        conditions.append("snapshot_id = %s")
+        parameters.append(snapshot_id)
+
+    if application_id is not None:
+        conditions.append("application_id = %s")
+        parameters.append(application_id)
+
+    where_clause = " OR ".join(conditions)
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
                 SELECT
                     id,
                     snapshot_id,
@@ -657,24 +669,11 @@ def get_lead_events(
                     details,
                     created_at
                 FROM lead_events
-                WHERE
-                    (
-                        %s IS NOT NULL
-                        AND snapshot_id = %s
-                    )
-                    OR
-                    (
-                        %s IS NOT NULL
-                        AND application_id = %s
-                    )
+                WHERE {where_clause}
                 ORDER BY created_at DESC, id DESC
                 """,
-                (
-                    snapshot_id,
-                    snapshot_id,
-                    application_id,
-                    application_id,
-                ),
+                tuple(parameters),
             )
 
             return cursor.fetchall()
+
