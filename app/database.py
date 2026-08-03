@@ -691,7 +691,7 @@ def update_lead_crm(
             if clean_note:
                 create_event(
                     event_type="coach_note",
-                    title="Coach note added",
+                    title="Sushma added",
                     details=clean_note,
                 )
 
