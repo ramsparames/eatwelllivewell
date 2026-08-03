@@ -5,7 +5,10 @@ from app.email import (
     send_application_confirmation,
     send_application_notification,
 )
-from app.database import save_application
+from app.database import (
+    save_application,
+    add_lead_event,
+)
 from app.synamate import sync_transformation_applicant
 
 router = APIRouter()
@@ -49,7 +52,13 @@ def receive_application(
         support_needed=submission.support_needed.strip(),
         consent=submission.consent,
     )
-
+    add_lead_event(
+    snapshot_id=submission.snapshot_id,
+    application_id=application_id,
+    event_type="application_submitted",
+    title="Transformation application submitted",
+    details="Completed the NourisHer Transformation application.",
+    )
     sync_transformation_applicant(
     application_id=application_id,
     name=submission.name,
