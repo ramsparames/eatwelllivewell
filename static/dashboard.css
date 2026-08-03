@@ -1687,3 +1687,23 @@ a {
     background: #f1f1f1;
     color: #666;
 }
+.timeline-group {
+    display: grid;
+    gap: 0;
+    margin-bottom: 22px;
+}
+
+.timeline-group:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-group-heading {
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
