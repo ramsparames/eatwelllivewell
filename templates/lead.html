@@ -169,7 +169,7 @@
                 {% if events %}
 
                 <div class="timeline">
-
+                
                     {% set icons = {
                         "assessment_completed":"📋",
                         "application_submitted":"✨",
@@ -184,43 +184,59 @@
                         "lead_closed":"✓",
                         "test_event":"🧪"
                     } %}
-
-                    {% for event in events %}
-
-                    <article class="timeline-item">
-
-                        <div class="timeline-icon timeline-{{ event.event_type }}">
-                            {{ icons.get(event.event_type, "•") }}
-                        </div>
-
-                        <div class="timeline-content">
-
-                            <div class="timeline-heading">
-                                <h3>{{ event.title }}</h3>
-
-                                <time>
-                                    {{ event.created_at.strftime("%d %b %Y, %I:%M %p") }}
-                                </time>
+                
+                    {% for group_name, group_events in timeline_groups.items() %}
+                
+                        {% if group_events %}
+                
+                        <div class="timeline-group">
+                
+                            <div class="timeline-group-heading">
+                                {{ group_name }}
                             </div>
-
-                            {% if event.details %}
-                            <p>{{ event.details }}</p>
-                            {% endif %}
-
+                
+                            {% for event in group_events %}
+                
+                            <article class="timeline-item">
+                
+                                <div class="timeline-icon timeline-{{ event.event_type }}">
+                                    {{ icons.get(event.event_type, "•") }}
+                                </div>
+                
+                                <div class="timeline-content">
+                
+                                    <div class="timeline-heading">
+                                        <h3>{{ event.title }}</h3>
+                
+                                        <time>
+                                            {{ event.created_at.strftime("%d %b %Y, %I:%M %p") }}
+                                        </time>
+                                    </div>
+                
+                                    {% if event.details %}
+                                    <p>{{ event.details }}</p>
+                                    {% endif %}
+                
+                                </div>
+                
+                            </article>
+                
+                            {% endfor %}
+                
                         </div>
-
-                    </article>
-
+                
+                        {% endif %}
+                
                     {% endfor %}
-
+                
                 </div>
-
+                
                 {% else %}
-
+                
                 <div class="empty-state compact">
                     <p>No timeline activity yet.</p>
                 </div>
-
+                
                 {% endif %}
             </section>
 
