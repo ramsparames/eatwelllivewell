@@ -230,21 +230,23 @@ def dashboard(
     )
     
     @router.get("/dashboard/leads/{lead_type}/{lead_id}", response_class=HTMLResponse)
-def lead_profile(
+
+    def lead_profile(
     request: Request,
     lead_type: str,
     lead_id: int,
-):
+    ):
 
-@router.post("/dashboard/leads/{lead_type}/{lead_id}/update")
-def update_lead(
+    @router.post("/dashboard/leads/{lead_type}/{lead_id}/update")
+
+    def update_lead(
     request: Request,
     lead_type: str,
     lead_id: int,
     status: str = Form(...),
     coach_notes: str = Form(""),
     follow_up_date: str = Form(""),
-):
+    ):
     if not coach_is_logged_in(request):
         return RedirectResponse(
             "/coach/login",
