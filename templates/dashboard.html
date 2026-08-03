@@ -42,51 +42,65 @@
 
     <section class="summary-grid">
 
-        <article class="summary-card">
-            <span class="summary-label">Total leads</span>
-            <strong class="summary-number">{{ leads|length }}</strong>
-            <span class="summary-note">
-                Assessments and Transformation applications
-            </span>
-        </article>
+    <article class="summary-card">
+        <span class="summary-label">Total leads</span>
 
-        <article class="summary-card">
-            <span class="summary-label">Transformation applicants</span>
-            <strong class="summary-number">{{ applications|length }}</strong>
-            <span class="summary-note">
-                Leads who submitted an application
-            </span>
-        </article>
+        <strong class="summary-number">
+            {{ total_leads }}
+        </strong>
 
-        <article class="summary-card">
-            <span class="summary-label">Needs focused support</span>
+        <span class="summary-note">
+            Assessments and applications
+        </span>
+    </article>
 
-            <strong class="summary-number">
-                {{
-                    assessment_leads
-                    | selectattr("total_score", "lt", 40)
-                    | list
-                    | length
-                }}
-            </strong>
+    <article class="summary-card">
+        <span class="summary-label">Transformation applications</span>
 
-            <span class="summary-note">Assessment scores below 40</span>
-        </article>
+        <strong class="summary-number">
+            {{ total_applications }}
+        </strong>
 
-        <article class="summary-card">
-            <span class="summary-label">Steady foundation</span>
+        <span class="summary-note">
+            Women who completed the application
+        </span>
+    </article>
 
-            <strong class="summary-number">
-                {{
-                    assessment_leads
-                    | selectattr("total_score", "ge", 60)
-                    | list
-                    | length
-                }}
-            </strong>
+    <article class="summary-card">
+        <span class="summary-label">New leads</span>
 
-            <span class="summary-note">Assessment scores of 60 or above</span>
-        </article>
+        <strong class="summary-number">
+            {{ new_leads }}
+        </strong>
+
+        <span class="summary-note">
+            Waiting for first contact
+        </span>
+    </article>
+
+    <article class="summary-card">
+        <span class="summary-label">Clarity calls booked</span>
+
+        <strong class="summary-number">
+            {{ clarity_calls_booked }}
+        </strong>
+
+        <span class="summary-note">
+            Current booked-call status
+        </span>
+    </article>
+
+    <article class="summary-card {% if follow_ups_due > 0 %}attention-card{% endif %}">
+        <span class="summary-label">Follow-ups due</span>
+
+        <strong class="summary-number">
+            {{ follow_ups_due }}
+        </strong>
+
+        <span class="summary-note">
+            Due today or overdue
+        </span>
+    </article>
 
     </section>
 
