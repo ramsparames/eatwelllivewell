@@ -1095,3 +1095,66 @@ a {
         gap: 4px;
     }
 }
+/* Lead profile two-column workspace */
+.lead-workspace-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 28px;
+}
+
+.lead-workspace-grid .dashboard-panel {
+    margin: 0;
+}
+
+.timeline-panel {
+    min-width: 0;
+}
+
+.coach-workspace-panel {
+    position: sticky;
+    top: 24px;
+}
+
+.crm-form-stacked {
+    grid-template-columns: 1fr;
+}
+
+.crm-form-stacked .crm-field,
+.crm-form-stacked .crm-actions {
+    grid-column: auto;
+}
+
+.crm-form-stacked .crm-save-button {
+    width: 100%;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.quick-actions .action-button {
+    padding-left: 12px;
+    padding-right: 12px;
+    text-align: center;
+}
+
+@media (max-width: 920px) {
+    .lead-workspace-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .coach-workspace-panel {
+        position: static;
+    }
+}
+
+@media (max-width: 560px) {
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+}
