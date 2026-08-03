@@ -1002,3 +1002,18 @@ a {
 .attention-card .summary-number {
     color: var(--danger);
 }
+.focus-list{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-top:18px;
+}
+
+.focus-item{
+    background:#f6f2ff;
+    border:1px solid #e3d6ff;
+    color:#5b0e91;
+    padding:14px 18px;
+    border-radius:14px;
+    font-weight:600;
+}
