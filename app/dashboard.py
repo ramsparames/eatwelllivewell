@@ -229,7 +229,7 @@ def dashboard(
         },
     )
     
-@router.get("/dashboard/leads/{lead_type}/{lead_id}", response_class=HTMLResponse)
+    @router.get("/dashboard/leads/{lead_type}/{lead_id}", response_class=HTMLResponse)
 def lead_profile(
     request: Request,
     lead_type: str,
