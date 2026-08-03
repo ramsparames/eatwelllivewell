@@ -39,7 +39,49 @@
         | selectattr("has_application", "equalto", true)
         | list
     %}
+    <section class="dashboard-panel">
 
+    <div class="panel-heading">
+
+        <div>
+
+            <p class="eyebrow">
+                Today's Focus
+            </p>
+
+            <h2>
+                Welcome back, Sushma 👋
+            </h2>
+
+        </div>
+
+    </div>
+
+    {% if today_focus %}
+
+    <div class="focus-list">
+
+        {% for item in today_focus %}
+
+        <div class="focus-item">
+
+            {{ item }}
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <p>
+        🎉 You're all caught up for today.
+    </p>
+
+    {% endif %}
+
+    </section>
     <section class="summary-grid">
 
     <article class="summary-card">
