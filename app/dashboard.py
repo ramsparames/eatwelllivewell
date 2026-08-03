@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from app.auth import coach_is_logged_in
 from app.database import (
     get_all_leads,
@@ -269,7 +269,33 @@ def lead_profile(
         snapshot_id=lead.get("snapshot_id"),
         application_id=lead.get("application_id"),
     )
-
+    now = datetime.now(timezone.utc)
+    today_date = now.date()
+    yesterday_date = today_date - timedelta(days=1)
+    
+    timeline_groups = {
+        "Today": [],
+        "Yesterday": [],
+        "Earlier": [],
+    }
+    
+    for event in events:
+        created_at = event.get("created_at")
+    
+        if not created_at:
+            timeline_groups["Earlier"].append(event)
+            continue
+    
+        event_date = created_at.date()
+    
+        if event_date == today_date:
+            timeline_groups["Today"].append(event)
+    
+        elif event_date == yesterday_date:
+            timeline_groups["Yesterday"].append(event)
+    
+        else:
+            timeline_groups["Earlier"].append(event)
     return templates.TemplateResponse(
         "lead.html",
         {
@@ -279,6 +305,7 @@ def lead_profile(
             "lead_id": lead_id,
             "saved": request.query_params.get("saved") == "1",
             "events": events,
+            "timeline_groups": timeline_groups,
         },
     )
 
