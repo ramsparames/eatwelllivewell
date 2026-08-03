@@ -25,15 +25,10 @@ def get_calendar_events(
     now = datetime.now(timezone.utc)
 
     if start_time is None:
-        start_time = now.replace(
-            hour=0,
-            minute=0,
-            second=0,
-            microsecond=0,
-        )
+        start_time = now - timedelta(days=30)
 
     if end_time is None:
-        end_time = start_time + timedelta(days=1)
+        end_time = now + timedelta(days=30)
 
     headers = {
         "Authorization": f"Bearer {SYNAMATE_API_TOKEN}",
