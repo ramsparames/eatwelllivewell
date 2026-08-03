@@ -179,6 +179,9 @@
                         "email_sent":"📧",
                         "synamate_synced":"🔄",
                         "clarity_call_booked":"🎯",
+                        "joined_foundations":"💜",
+                        "joined_transformation":"⭐",
+                        "lead_closed":"✓",
                         "test_event":"🧪"
                     } %}
 
@@ -186,7 +189,7 @@
 
                     <article class="timeline-item">
 
-                        <div class="timeline-icon">
+                        <div class="timeline-icon timeline-{{ event.event_type }}">
                             {{ icons.get(event.event_type, "•") }}
                         </div>
 
