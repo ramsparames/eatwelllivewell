@@ -211,10 +211,72 @@
             </button>
         </div>
 
-    </form>
+        </form>
 
     </section>
-    
+    <section class="dashboard-panel">
+
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">Lead history</p>
+            <h2>Timeline</h2>
+        </div>
+    </div>
+
+    {% if events %}
+
+    <div class="timeline">
+
+        {% set icons = {
+            "assessment_completed":"📋",
+            "application_submitted":"✨",
+            "coach_note":"📝",
+            "status_changed":"📞",
+            "follow_up":"📅",
+            "email_sent":"📧",
+            "clarity_call_booked":"🎯",
+            "test_event":"🧪"
+        } %}
+
+        {% for event in events %}
+
+        <article class="timeline-item">
+
+            <div class="timeline-icon">
+                {{ icons.get(event.event_type, "•") }}
+            </div>
+
+            <div class="timeline-content">
+
+                <div class="timeline-heading">
+                    <h3>{{ event.title }}</h3>
+
+                    <time>
+                        {{ event.created_at.strftime("%d %b %Y, %I:%M %p") }}
+                    </time>
+                </div>
+
+                {% if event.details %}
+                <p>{{ event.details }}</p>
+                {% endif %}
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state compact">
+        <p>No timeline activity yet.</p>
+    </div>
+
+    {% endif %}
+
+    </section>    
     <section class="detail-grid">
 
         <article class="detail-card highlight-card">
