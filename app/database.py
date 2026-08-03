@@ -567,31 +567,158 @@ def update_lead_crm(
 
     if lead_type == "assessment":
         table_name = "snapshot_submissions"
+        id_column = "snapshot_id"
     elif lead_type == "application":
         table_name = "transformation_applications"
+        id_column = "application_id"
     else:
         raise ValueError("Invalid lead type")
 
+    clean_note = coach_notes.strip() if coach_notes else None
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
+
+            # Read the current values before updating.
+            cursor.execute(
+                f"""
+                SELECT
+                    status,
+                    coach_notes,
+                    follow_up_date
+                FROM {table_name}
+                WHERE id = %s
+                """,
+                (lead_id,),
+            )
+
+            existing = cursor.fetchone()
+
+            if not existing:
+                return False
+
+            old_status = existing["status"]
+            old_follow_up = existing["follow_up_date"]
+
+            # A blank note means "no new note".
+            # It will not erase the previously saved current note.
             cursor.execute(
                 f"""
                 UPDATE {table_name}
                 SET
                     status = %s,
-                    coach_notes = %s,
+                    coach_notes = COALESCE(%s, coach_notes),
                     follow_up_date = %s
                 WHERE id = %s
                 """,
                 (
                     status,
-                    coach_notes or None,
+                    clean_note,
                     follow_up_date or None,
                     lead_id,
                 ),
             )
 
-            return cursor.rowcount > 0
+            event_owner = {
+                "snapshot_id": lead_id
+                if id_column == "snapshot_id"
+                else None,
+
+                "application_id": lead_id
+                if id_column == "application_id"
+                else None,
+            }
+
+            # Record status changes.
+            if status != old_status:
+                cursor.execute(
+                    """
+                    INSERT INTO lead_events (
+                        snapshot_id,
+                        application_id,
+                        event_type,
+                        title,
+                        details
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (
+                        event_owner["snapshot_id"],
+                        event_owner["application_id"],
+                        "status_changed",
+                        "Lead status changed",
+                        (
+                            f"{old_status.replace('_', ' ').title()} "
+                            f"→ {status.replace('_', ' ').title()}"
+                        ),
+                    ),
+                )
+
+            # Every non-empty note becomes permanent timeline history.
+            if clean_note:
+                cursor.execute(
+                    """
+                    INSERT INTO lead_events (
+                        snapshot_id,
+                        application_id,
+                        event_type,
+                        title,
+                        details
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (
+                        event_owner["snapshot_id"],
+                        event_owner["application_id"],
+                        "coach_note",
+                        "Coach note added",
+                        clean_note,
+                    ),
+                )
+
+            old_follow_up_text = (
+                old_follow_up.isoformat()
+                if old_follow_up
+                else None
+            )
+
+            new_follow_up_text = follow_up_date or None
+
+            # Record new or changed follow-up dates.
+            if new_follow_up_text != old_follow_up_text:
+
+                if new_follow_up_text:
+                    event_title = "Follow-up scheduled"
+                    event_details = new_follow_up_text
+                else:
+                    event_title = "Follow-up removed"
+                    event_details = (
+                        old_follow_up_text
+                        if old_follow_up_text
+                        else None
+                    )
+
+                cursor.execute(
+                    """
+                    INSERT INTO lead_events (
+                        snapshot_id,
+                        application_id,
+                        event_type,
+                        title,
+                        details
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (
+                        event_owner["snapshot_id"],
+                        event_owner["application_id"],
+                        "follow_up",
+                        event_title,
+                        event_details,
+                    ),
+                )
+
+            return True
 def add_lead_event(
     *,
     snapshot_id: int | None = None,
