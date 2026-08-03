@@ -7,6 +7,7 @@ from app.database import get_all_leads, get_lead_profile
 from app.database import (
     get_all_leads,
     get_lead_profile,
+    get_lead_events,
     update_lead_crm,
 )
 from fastapi import Form
@@ -206,7 +207,11 @@ def lead_profile(
             status_code=404,
             detail="Lead not found",
         )
-
+    events = get_lead_events(
+        snapshot_id=lead.get("snapshot_id"),
+        application_id=lead.get("application_id"),
+    )
+    
     return templates.TemplateResponse(
         "lead.html",
         {
@@ -215,6 +220,7 @@ def lead_profile(
             "lead_type": lead_type,
             "lead_id": lead_id,
             "saved": request.query_params.get("saved") == "1",
+            "events": events,
         },
     )
 @router.post("/dashboard/leads/{lead_type}/{lead_id}/update")
