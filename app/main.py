@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from app.database import (
+    add_lead_event,
     create_database,
     save_snapshot,
     get_all_leads,
@@ -134,7 +135,12 @@ def receive_snapshot(submission: SnapshotSubmission):
         answers=submission.answers,
         result=result,
     )
-
+    add_lead_event(
+    snapshot_id=submission_id,
+    event_type="assessment_completed",
+    title="Assessment completed",
+    details="Completed the NourisHer assessment.",
+    )
     send_assessment_notification(
         submission_id=submission_id,
         name=submission.name,
