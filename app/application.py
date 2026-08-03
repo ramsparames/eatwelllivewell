@@ -1,7 +1,10 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, EmailStr, Field
-from app.email import send_application_notification
 from app.email import send_assessment_notification
+from app.email import (
+    send_application_confirmation,
+    send_application_notification,
+)
 from app.database import save_application
 from app.synamate import sync_transformation_applicant
 
@@ -62,7 +65,10 @@ def receive_application(
         age_range=submission.age_range,
         why_now=submission.why_now,
     )
-    
+    send_application_confirmation(
+    recipient_email=str(submission.email),
+    name=submission.name,
+    )
     return {
         "status": "saved",
         "application_id": application_id,
