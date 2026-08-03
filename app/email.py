@@ -445,3 +445,61 @@ def send_application_notification(
         html_content=email_html,
         text_content=text_content,
     )
+def send_application_confirmation(
+    *,
+    recipient_email: str,
+    name: str,
+) -> str | None:
+    clean_name = name.strip() or "there"
+
+    booking_url = (
+        "https://share.synamate.com/widget/bookings/"
+        "sushma-s-personal-calendar-4st5xtqy6"
+    )
+
+    body = f"""
+    <div style="
+        padding:22px;
+        border-radius:16px;
+        background:#f7effc;
+    ">
+        <h2 style="margin-top:0;color:#5b0e91;">
+            Thank you, {html.escape(clean_name)}!
+        </h2>
+
+        <p style="line-height:1.7;">
+            Your NourisHer Transformation application has been received.
+            I’ll review your application and assessment before our conversation.
+        </p>
+
+        <p style="line-height:1.7;">
+            Your next step is to book your complimentary Clarity Call.
+        </p>
+    </div>
+    """
+
+    email_html = _email_layout(
+        title="Your NourisHer application is received",
+        intro=(
+            "Thank you for applying to NourisHer Transformation. "
+            "Your next step is to book your Clarity Call."
+        ),
+        body=body,
+        button_text="Book my Clarity Call",
+        button_url=booking_url,
+    )
+
+    try:
+        params: resend.Emails.SendParams = {
+            "from": RESEND_FROM_EMAIL,
+            "to": [recipient_email],
+            "subject": "Your NourisHer Transformation application is received",
+            "html": email_html,
+        }
+
+        response = resend.Emails.send(params)
+        return response.get("id") if response else None
+
+    except Exception:
+        logger.exception("Applicant confirmation email could not be sent")
+        return None
