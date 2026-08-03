@@ -1730,3 +1730,57 @@ a {
     color: #4d3f57;
     font-size: 14px;
 }
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.status-pill::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status-new {
+    background: #f3f3f3;
+    color: #666;
+}
+
+.status-contacted {
+    background: #eaf4ff;
+    color: #1769aa;
+}
+
+.status-clarity_call_booked {
+    background: #e8f7ec;
+    color: #26723b;
+}
+
+.status-joined_foundations {
+    background: #f4eaff;
+    color: #6b159e;
+}
+
+.status-joined_transformation {
+    background: #fff5d8;
+    color: #946500;
+}
+
+.status-follow_up_later {
+    background: #fff2df;
+    color: #a95b00;
+}
+
+.status-closed {
+    background: #eeeeee;
+    color: #666;
+}
