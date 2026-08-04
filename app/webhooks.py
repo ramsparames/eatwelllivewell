@@ -119,13 +119,13 @@ async def receive_synamate_calendar_webhook(
     )
 
     if not calendar_id:
-    raise HTTPException(
+        raise HTTPException(
         status_code=400,
         detail="Calendar ID is missing",
     )
 
     if not start_time:
-    raise HTTPException(
+        raise HTTPException(
         status_code=400,
         detail="Appointment start time is missing",
     )
