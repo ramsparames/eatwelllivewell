@@ -140,7 +140,7 @@ async def receive_synamate_calendar_webhook(
         )
     )
 
-    f not external_appointment_id:
+    if not external_appointment_id:
         raise HTTPException(
         status_code=400,
         detail="Appointment ID is missing",
