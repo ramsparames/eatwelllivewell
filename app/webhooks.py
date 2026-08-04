@@ -49,6 +49,11 @@ async def receive_synamate_calendar_webhook(
         )
 
     payload = await request.json()
+    import json
+
+    print("=" * 80)
+    print(json.dumps(payload, indent=2))
+    print("=" * 80)
     appointment = payload.get("appointment")
 
     if not isinstance(appointment, dict):
@@ -108,12 +113,13 @@ async def receive_synamate_calendar_webhook(
         )
     )
 
-    if not start_time:
-        raise HTTPException(
-        status_code=400,
-        detail="Appointment start time is missing",
-    )
-
+    #if not start_time:
+    #   raise HTTPException(
+    #    status_code=400,
+    #   detail="Appointment start time is missing",
+    #)
+    start_time = start_time or "TEMP"
+    end_time = end_time or "TEMP"
     # Some Synamate workflow payloads do not expose an appointment ID.
     # Create a stable fallback using the calendar, start time and contact.
     if not external_appointment_id:
