@@ -49,50 +49,105 @@ async def receive_synamate_calendar_webhook(
         )
 
     payload = await request.json()
+    appointment = payload.get("appointment")
 
+    if not isinstance(appointment, dict):
+        appointment = {}
+        
     if not isinstance(payload, dict):
         raise HTTPException(
             status_code=400,
             detail="Webhook payload must be a JSON object",
         )
 
-    external_appointment_id = first_value(
+    external_appointment_id = (
+    first_value(
         payload,
         "appointmentId",
         "appointment_id",
         "id",
     )
-
-    calendar_id = first_value(
-        payload,
-        "calendarId",
-        "calendar_id",
-    )
-
-    start_time = first_value(
-        payload,
-        "startTime",
-        "start_time",
-        "appointmentStartTime",
-    )
-
-    if not external_appointment_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Appointment ID is missing",
+    or first_value(
+        appointment,
+        "id",
+        "appointmentId",
+        "appointment_id",
         )
+    )
+    
+    calendar_id = (
+        first_value(
+            payload,
+            "calendarId",
+            "calendar_id",
+        )
+        or first_value(
+            appointment,
+            "calendarId",
+            "calendar_id",
+        )
+    )
+    
+    start_time = (
+        first_value(
+            payload,
+            "startTime",
+            "start_time",
+            "appointmentStartTime",
+        )
+        or first_value(
+            appointment,
+            "startTime",
+            "start_time",
+            "start",
+        )
+    )
+    
+    end_time = (
+        first_value(
+            payload,
+            "endTime",
+            "end_time",
+            "appointmentEndTime",
+        )
+        or first_value(
+            appointment,
+            "endTime",
+            "end_time",
+            "end",
+        )
+    )
 
     if not calendar_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Calendar ID is missing",
-        )
+    raise HTTPException(
+        status_code=400,
+        detail="Calendar ID is missing",
+    )
 
     if not start_time:
-        raise HTTPException(
-            status_code=400,
-            detail="Appointment start time is missing",
+    raise HTTPException(
+        status_code=400,
+        detail="Appointment start time is missing",
+    )
+
+    # Some Synamate workflow payloads do not expose an appointment ID.
+    # Create a stable fallback using the calendar, start time and contact.
+    if not external_appointment_id:
+        fallback_contact = (
+            first_value(payload, "contactId", "contact_id")
+            or first_value(
+                payload.get("contact", {})
+                if isinstance(payload.get("contact"), dict)
+                else {},
+                "id",
+                "contactId",
+            )
+            or "unknown-contact"
         )
+
+    external_appointment_id = (
+        f"{calendar_id}:{start_time}:{fallback_contact}"
+    )
 
     # Ignore events belonging to another calendar.
     clarity_calendar_id = "IBwI80BhwMVqhD9qvMXF"
