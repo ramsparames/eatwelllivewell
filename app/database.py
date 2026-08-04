@@ -835,4 +835,121 @@ def get_lead_events(
             )
 
             return cursor.fetchall()
+def upsert_clarity_call_appointment(
+    *,
+    external_appointment_id: str,
+    calendar_id: str,
+    contact_id: str | None,
+    name: str | None,
+    email: str | None,
+    phone: str | None,
+    appointment_status: str | None,
+    title: str | None,
+    meeting_location: str | None,
+    start_time: str,
+    end_time: str | None,
+    raw_payload: dict[str, Any],
+) -> int:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO clarity_call_appointments (
+                    external_appointment_id,
+                    calendar_id,
+                    contact_id,
+                    name,
+                    email,
+                    phone,
+                    appointment_status,
+                    title,
+                    meeting_location,
+                    start_time,
+                    end_time,
+                    raw_payload
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s
+                )
+                ON CONFLICT (external_appointment_id)
+                DO UPDATE SET
+                    calendar_id = EXCLUDED.calendar_id,
+                    contact_id = EXCLUDED.contact_id,
+                    name = EXCLUDED.name,
+                    email = EXCLUDED.email,
+                    phone = EXCLUDED.phone,
+                    appointment_status = EXCLUDED.appointment_status,
+                    title = EXCLUDED.title,
+                    meeting_location = EXCLUDED.meeting_location,
+                    start_time = EXCLUDED.start_time,
+                    end_time = EXCLUDED.end_time,
+                    raw_payload = EXCLUDED.raw_payload,
+                    updated_at = NOW()
+                RETURNING id
+                """,
+                (
+                    external_appointment_id,
+                    calendar_id,
+                    contact_id,
+                    name,
+                    email,
+                    phone,
+                    appointment_status,
+                    title,
+                    meeting_location,
+                    start_time,
+                    end_time,
+                    json.dumps(raw_payload),
+                ),
+            )
 
+            row = cursor.fetchone()
+
+            if not row:
+                raise RuntimeError(
+                    "Clarity call appointment could not be saved"
+                )
+
+            return int(row["id"])
+
+
+def get_clarity_calls_for_day(
+    *,
+    start_time: str,
+    end_time: str,
+) -> list[dict[str, Any]]:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    external_appointment_id,
+                    calendar_id,
+                    contact_id,
+                    name,
+                    email,
+                    phone,
+                    appointment_status,
+                    title,
+                    meeting_location,
+                    start_time,
+                    end_time
+                FROM clarity_call_appointments
+                WHERE
+                    start_time >= %s
+                    AND start_time < %s
+                    AND COALESCE(appointment_status, '') NOT IN (
+                        'cancelled',
+                        'canceled'
+                    )
+                ORDER BY start_time ASC
+                """,
+                (
+                    start_time,
+                    end_time,
+                ),
+            )
+
+            return cursor.fetchall()
