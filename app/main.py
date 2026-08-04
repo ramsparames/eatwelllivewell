@@ -26,6 +26,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.email import send_assessment_notification
+from app.webhooks import router as webhook_router
 
 app = FastAPI()
 validate_required_settings()
@@ -166,6 +167,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 app.include_router(auth_router)
 app.include_router(dashboard_router)
 app.include_router(application_router)
+app.include_router(webhook_router)
 @app.get("/{page_name}")
 def serve_html_page(page_name: str):
     # Allow both /transformation and /transformation.html
