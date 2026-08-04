@@ -3,7 +3,7 @@ from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException, Request
 
-from app.config import SYNAMATE_WEBHOOK_SECRET
+from app.config import SYNAMATE_SECRET_WEBHOOK
 from app.database import upsert_clarity_call_appointment
 
 
@@ -36,13 +36,13 @@ async def receive_synamate_calendar_webhook(
     request: Request,
     x_webhook_secret: str | None = Header(default=None),
 ):
-    if not SYNAMATE_WEBHOOK_SECRET:
+    if not SYNAMATE_SECRET_WEBHOOK:
         raise HTTPException(
             status_code=500,
             detail="Webhook secret is not configured",
         )
 
-    if x_webhook_secret != SYNAMATE_WEBHOOK_SECRET:
+    if x_webhook_secret != SYNAMATE_SECRET_WEBHOOK:
         raise HTTPException(
             status_code=401,
             detail="Invalid webhook secret",
