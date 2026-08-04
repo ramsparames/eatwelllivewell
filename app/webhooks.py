@@ -75,18 +75,8 @@ async def receive_synamate_calendar_webhook(
         )
     )
     
-    calendar_id = (
-        first_value(
-            payload,
-            "calendarId",
-            "calendar_id",
-        )
-        or first_value(
-            appointment,
-            "calendarId",
-            "calendar_id",
-        )
-    )
+   # This workflow is already filtered to the Clarity Call calendar.
+    calendar_id = "IBwI80BhwMVqhD9qvMXF"
     
     start_time = (
         first_value(
@@ -118,12 +108,6 @@ async def receive_synamate_calendar_webhook(
         )
     )
 
-    if not calendar_id:
-        raise HTTPException(
-        status_code=400,
-        detail="Calendar ID is missing",
-    )
-
     if not start_time:
         raise HTTPException(
         status_code=400,
@@ -151,12 +135,6 @@ async def receive_synamate_calendar_webhook(
 
     # Ignore events belonging to another calendar.
     clarity_calendar_id = "IBwI80BhwMVqhD9qvMXF"
-
-    if calendar_id != clarity_calendar_id:
-        return {
-            "status": "ignored",
-            "reason": "Not the Clarity Call calendar",
-        }
 
     contact = payload.get("contact")
 
