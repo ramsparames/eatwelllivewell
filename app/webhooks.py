@@ -118,7 +118,7 @@ async def receive_synamate_calendar_webhook(
             "appointmentStartTime",
         )
         or first_value(
-            appointment,
+            calendar,
             "startTime",
             "start_time",
             "start",
@@ -133,7 +133,7 @@ async def receive_synamate_calendar_webhook(
             "appointmentEndTime",
         )
         or first_value(
-            appointment,
+            calendar,
             "endTime",
             "end_time",
             "end",
