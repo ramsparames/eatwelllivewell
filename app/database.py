@@ -107,6 +107,33 @@ def create_database() -> None:
             )
             cursor.execute(
                 """
+                CREATE TABLE IF NOT EXISTS clarity_call_appointments (
+                    id BIGSERIAL PRIMARY KEY,
+            
+                    external_appointment_id TEXT NOT NULL UNIQUE,
+                    calendar_id TEXT NOT NULL,
+            
+                    contact_id TEXT,
+                    name TEXT,
+                    email TEXT,
+                    phone TEXT,
+            
+                    appointment_status TEXT,
+                    title TEXT,
+                    meeting_location TEXT,
+            
+                    start_time TIMESTAMPTZ NOT NULL,
+                    end_time TIMESTAMPTZ,
+            
+                    raw_payload JSONB NOT NULL,
+            
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+                """
+            )
+            cursor.execute(
+                """
                 ALTER TABLE snapshot_submissions
                 ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'new'
                 """
