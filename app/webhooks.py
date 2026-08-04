@@ -5,7 +5,8 @@ from fastapi import APIRouter, Header, HTTPException, Request
 
 from app.config import SYNAMATE_SECRET_WEBHOOK
 from app.database import upsert_clarity_call_appointment
-
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 logger = logging.getLogger(__name__)
 
@@ -49,15 +50,11 @@ async def receive_synamate_calendar_webhook(
         )
 
     payload = await request.json()
-    import json
+    
+    calendar = payload.get("calendar")
 
-    print("=" * 80)
-    print(json.dumps(payload, indent=2))
-    print("=" * 80)
-    appointment = payload.get("appointment")
-
-    if not isinstance(appointment, dict):
-        appointment = {}
+    if not isinstance(calendar, dict):
+        calendar = {}
         
     if not isinstance(payload, dict):
         raise HTTPException(
@@ -65,19 +62,49 @@ async def receive_synamate_calendar_webhook(
             detail="Webhook payload must be a JSON object",
         )
 
-    external_appointment_id = (
-    first_value(
-        payload,
-        "appointmentId",
-        "appointment_id",
-        "id",
+    external_appointment_id = first_value(
+    calendar,
+    "appointmentId",
+    "appointment_id",
     )
-    or first_value(
-        appointment,
+    
+    calendar_id = first_value(
+        calendar,
         "id",
-        "appointmentId",
-        "appointment_id",
-        )
+        "calendarId",
+        "calendar_id",
+    ) or "IBwI80BhwMVqhD9qvMXF"
+    
+    start_time = first_value(
+        calendar,
+        "startTime",
+        "start_time",
+    )
+    
+    end_time = first_value(
+        calendar,
+        "endTime",
+        "end_time",
+    )
+    
+    appointment_status = first_value(
+        calendar,
+        "appoinmentStatus",
+        "appointmentStatus",
+        "status",
+    )
+    
+    title = first_value(
+        calendar,
+        "title",
+        "calendarName",
+    ) or "Clarity Call with Sushma"
+    
+    meeting_location = first_value(
+        calendar,
+        "address",
+        "meetingLocation",
+        "location",
     )
     
    # This workflow is already filtered to the Clarity Call calendar.
@@ -113,13 +140,18 @@ async def receive_synamate_calendar_webhook(
         )
     )
 
-    #if not start_time:
-    #   raise HTTPException(
-    #    status_code=400,
-    #   detail="Appointment start time is missing",
-    #)
-    start_time = start_time or "TEMP"
-    end_time = end_time or "TEMP"
+    f not external_appointment_id:
+        raise HTTPException(
+        status_code=400,
+        detail="Appointment ID is missing",
+    )
+    
+    if not start_time:
+       raise HTTPException(
+        status_code=400,
+       detail="Appointment start time is missing",    
+    )
+    
     # Some Synamate workflow payloads do not expose an appointment ID.
     # Create a stable fallback using the calendar, start time and contact.
     if not external_appointment_id:
@@ -147,45 +179,27 @@ async def receive_synamate_calendar_webhook(
     if not isinstance(contact, dict):
         contact = {}
 
+    contact_id = first_value(
+    payload,
+    "contact_id",
+    "contactId",
+    )
+    
     name = first_value(
         payload,
+        "full_name",
         "name",
-        "contactName",
-        "fullName",
-    ) or first_value(
-        contact,
-        "name",
-        "fullName",
     )
-
+    
     email = first_value(
         payload,
         "email",
-        "contactEmail",
-    ) or first_value(
-        contact,
-        "email",
     )
-
+    
     phone = first_value(
         payload,
         "phone",
-        "contactPhone",
-    ) or first_value(
-        contact,
-        "phone",
     )
-
-    contact_id = first_value(
-        payload,
-        "contactId",
-        "contact_id",
-    ) or first_value(
-        contact,
-        "id",
-        "contactId",
-    )
-
     appointment_status = first_value(
         payload,
         "appointmentStatus",
@@ -214,7 +228,22 @@ async def receive_synamate_calendar_webhook(
         "end_time",
         "appointmentEndTime",
     )
+    ist = ZoneInfo("Asia/Kolkata")
 
+    start_dt = datetime.fromisoformat(str(start_time))
+    
+    if start_dt.tzinfo is None:
+        start_dt = start_dt.replace(tzinfo=ist)
+    
+    start_time = start_dt.isoformat()
+    
+    if end_time:
+        end_dt = datetime.fromisoformat(str(end_time))
+    
+    if end_dt.tzinfo is None:
+        end_dt = end_dt.replace(tzinfo=ist)
+    
+    end_time = end_dt.isoformat()
     appointment_id = upsert_clarity_call_appointment(
         external_appointment_id=str(external_appointment_id),
         calendar_id=str(calendar_id),
