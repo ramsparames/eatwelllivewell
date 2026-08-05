@@ -107,6 +107,13 @@ def create_database() -> None:
             )
             cursor.execute(
                 """
+                ALTER TABLE transformation_applications
+                ADD COLUMN IF NOT EXISTS application_data JSONB
+                    NOT NULL DEFAULT '{}'::jsonb
+                """
+            )
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS clarity_call_appointments (
                     id BIGSERIAL PRIMARY KEY,
             
