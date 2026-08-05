@@ -429,6 +429,7 @@ def get_lead_by_id(lead_id: int) -> dict[str, Any] | None:
 
             return cursor.fetchone()
 def save_application(
+    *,
     snapshot_id: int | None,
     name: str,
     email: str,
@@ -439,10 +440,10 @@ def save_application(
     success_goal: str,
     support_needed: str,
     consent: bool,
+    application_data: dict[str, Any] | None = None,
 ) -> int:
     with get_connection() as connection:
         with connection.cursor() as cursor:
-
             linked_snapshot_id = snapshot_id
 
             # First preference:
@@ -491,11 +492,13 @@ def save_application(
                     tried,
                     success_goal,
                     support_needed,
-                    consent
+                    consent,
+                    application_data
                 )
                 VALUES (
                     %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s,
+                    %s
                 )
                 RETURNING id
                 """,
@@ -510,6 +513,7 @@ def save_application(
                     success_goal,
                     support_needed,
                     consent,
+                    json.dumps(application_data or {}),
                 ),
             )
 
