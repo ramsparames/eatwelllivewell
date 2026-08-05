@@ -397,26 +397,342 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
     }
 
     // Transformation application
-    const applicationForm = document.querySelector("[data-application-form]");
+const applicationForm = document.querySelector(
+    "[data-application-form]"
+);
 
-    if (applicationForm) {
-        const savedLead = load(LEAD_KEY);
-        const nameField = document.getElementById("name");
-        const phoneField = document.getElementById("phone");
-        const emailField = document.getElementById("email");
-        const consentField = document.getElementById("consent");
-        let applicationPhoneWidget = null;
+if (applicationForm) {
+    const savedLead = load(LEAD_KEY) || {};
+    const draftKey = "nourisher-application-draft";
 
-        if (savedLead.name && nameField) {
-            nameField.value = savedLead.name;
+    const steps = Array.from(
+        applicationForm.querySelectorAll(
+            "[data-application-step]"
+        )
+    );
+
+    const progressFill = document.querySelector(
+        "[data-application-progress]"
+    );
+
+    const stepLabel = document.querySelector(
+        "[data-application-step-label]"
+    );
+
+    const nameField = document.getElementById("name");
+    const phoneField = document.getElementById("phone");
+    const emailField = document.getElementById("email");
+    const consentField = document.getElementById("consent");
+    const commitmentField = document.getElementById(
+        "commitment"
+    );
+
+    const commitmentValue = document.querySelector(
+        "[data-commitment-value]"
+    );
+
+    let currentStep = 0;
+    let applicationPhoneWidget = null;
+
+    const checkedValues = (name) => (
+        Array.from(
+            applicationForm.querySelectorAll(
+                `input[name="${name}"]:checked`
+            )
+        ).map((input) => input.value)
+    );
+
+    const fieldValue = (id) => (
+        document.getElementById(id)?.value.trim() || ""
+    );
+
+    const showStep = (index) => {
+        currentStep = Math.max(
+            0,
+            Math.min(index, steps.length - 1)
+        );
+
+        steps.forEach((step, stepIndex) => {
+            step.classList.toggle(
+                "active",
+                stepIndex === currentStep
+            );
+        });
+
+        const completedPercentage = (
+            ((currentStep + 1) / steps.length) * 100
+        );
+
+        if (progressFill) {
+            progressFill.style.width =
+                `${completedPercentage}%`;
         }
 
-        if (savedLead.email && emailField) {
-            emailField.value = savedLead.email;
+        if (stepLabel) {
+            stepLabel.textContent =
+                `Step ${currentStep + 1} of ${steps.length}`;
         }
 
-        if (phoneField) {
-            applicationPhoneWidget = intlTelInput(phoneField, {
+        document.querySelector(
+            ".application-progress"
+        )?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+    };
+
+    const findInvalidRequiredField = (step) => {
+        const requiredFields = Array.from(
+            step.querySelectorAll(
+                "input[required], select[required], textarea[required]"
+            )
+        );
+
+        return requiredFields.find(
+            (field) => !field.checkValidity()
+        );
+    };
+
+    const requireChoice = (
+        step,
+        name,
+        message,
+        minimum = 1,
+        maximum = null
+    ) => {
+        const choices = checkedValues(name);
+
+        if (choices.length < minimum) {
+            alert(message);
+
+            step.querySelector(
+                `input[name="${name}"]`
+            )?.focus();
+
+            return false;
+        }
+
+        if (
+            maximum !== null
+            && choices.length > maximum
+        ) {
+            alert(
+                `Please choose no more than ${maximum}.`
+            );
+
+            return false;
+        }
+
+        return true;
+    };
+
+    const validateStep = (stepIndex) => {
+        const step = steps[stepIndex];
+
+        if (!step) {
+            return false;
+        }
+
+        const invalidField =
+            findInvalidRequiredField(step);
+
+        if (invalidField) {
+            invalidField.reportValidity();
+            invalidField.focus();
+
+            return false;
+        }
+
+        const stepNumber = Number(
+            step.dataset.applicationStep
+        );
+
+        if (
+            stepNumber === 2
+            && !requireChoice(
+                step,
+                "symptoms",
+                "Please choose at least one option describing how you feel."
+            )
+        ) {
+            return false;
+        }
+
+        if (
+            stepNumber === 3
+            && !requireChoice(
+                step,
+                "priorities",
+                "Please choose your priorities.",
+                1,
+                3
+            )
+        ) {
+            return false;
+        }
+
+        if (
+            stepNumber === 4
+            && !requireChoice(
+                step,
+                "triedOptions",
+                "Please choose at least one thing you have tried."
+            )
+        ) {
+            return false;
+        }
+
+        if (
+            stepNumber === 4
+            && !requireChoice(
+                step,
+                "fallOffReasons",
+                "Please choose at least one reason you tend to fall off track."
+            )
+        ) {
+            return false;
+        }
+
+        if (
+            stepNumber === 6
+            && !requireChoice(
+                step,
+                "coachNeeds",
+                "Please choose at least one kind of support you are looking for."
+            )
+        ) {
+            return false;
+        }
+
+        return true;
+    };
+
+    const collectDraft = () => {
+        const draft = {};
+
+        applicationForm
+            .querySelectorAll(
+                "input, select, textarea"
+            )
+            .forEach((field) => {
+                if (!field.name) {
+                    return;
+                }
+
+                if (
+                    field.type === "checkbox"
+                    || field.type === "radio"
+                ) {
+                    if (!draft[field.name]) {
+                        draft[field.name] = [];
+                    }
+
+                    if (field.checked) {
+                        draft[field.name].push(
+                            field.value
+                        );
+                    }
+
+                    return;
+                }
+
+                draft[field.name] = field.value;
+            });
+
+        draft.currentStep = currentStep;
+
+        return draft;
+    };
+
+    const saveDraft = () => {
+        try {
+            localStorage.setItem(
+                draftKey,
+                JSON.stringify(collectDraft())
+            );
+        } catch (error) {
+            console.warn(
+                "Application draft could not be saved:",
+                error
+            );
+        }
+    };
+
+    const restoreDraft = () => {
+        let draft = null;
+
+        try {
+            draft = JSON.parse(
+                localStorage.getItem(draftKey)
+            );
+        } catch (error) {
+            console.warn(
+                "Application draft could not be restored:",
+                error
+            );
+        }
+
+        if (!draft) {
+            return;
+        }
+
+        applicationForm
+            .querySelectorAll(
+                "input, select, textarea"
+            )
+            .forEach((field) => {
+                if (!field.name) {
+                    return;
+                }
+
+                const storedValue = draft[field.name];
+
+                if (storedValue === undefined) {
+                    return;
+                }
+
+                if (
+                    field.type === "checkbox"
+                    || field.type === "radio"
+                ) {
+                    field.checked = Array.isArray(
+                        storedValue
+                    )
+                        ? storedValue.includes(
+                            field.value
+                        )
+                        : storedValue === field.value;
+
+                    return;
+                }
+
+                field.value = storedValue;
+            });
+
+        if (
+            Number.isInteger(draft.currentStep)
+            && draft.currentStep >= 0
+            && draft.currentStep < steps.length
+        ) {
+            currentStep = draft.currentStep;
+        }
+    };
+
+    restoreDraft();
+
+    // Assessment visitors get their known details pre-filled.
+    if (savedLead.name && nameField) {
+        nameField.value = savedLead.name;
+    }
+
+    if (savedLead.email && emailField) {
+        emailField.value = savedLead.email;
+    }
+
+    if (phoneField) {
+        applicationPhoneWidget = intlTelInput(
+            phoneField,
+            {
                 initialCountry: "in",
                 separateDialCode: true,
                 nationalMode: true,
@@ -424,76 +740,330 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 loadUtils: () => import(
                     "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/utils.js"
                 ),
-            });
-
-            if (savedLead.phone) {
-                applicationPhoneWidget.setNumber(savedLead.phone);
             }
+        );
 
-            phoneField.addEventListener("input", () => {
-                phoneField.setCustomValidity("");
-            });
+        if (savedLead.phone) {
+            applicationPhoneWidget.setNumber(
+                savedLead.phone
+            );
+        } else if (phoneField.value) {
+            applicationPhoneWidget.setNumber(
+                phoneField.value
+            );
         }
 
-        applicationForm.addEventListener("submit", async (event) => {
-            event.preventDefault();
+        phoneField.addEventListener(
+            "input",
+            () => {
+                phoneField.setCustomValidity("");
+            }
+        );
+    }
 
-            if (!applicationForm.checkValidity()) {
-                applicationForm.reportValidity();
+    if (commitmentField && commitmentValue) {
+        commitmentValue.textContent =
+            commitmentField.value;
+
+        commitmentField.addEventListener(
+            "input",
+            () => {
+                commitmentValue.textContent =
+                    commitmentField.value;
+
+                saveDraft();
+            }
+        );
+    }
+
+    applicationForm.addEventListener(
+        "input",
+        saveDraft
+    );
+
+    applicationForm.addEventListener(
+        "change",
+        saveDraft
+    );
+
+    applicationForm.querySelectorAll(
+        "[data-application-next]"
+    ).forEach((button) => {
+        button.addEventListener("click", () => {
+            if (!validateStep(currentStep)) {
                 return;
             }
 
-            const submitButton = applicationForm.querySelector('button[type="submit"]');
-            let phone = phoneField?.value.trim() || "";
+            saveDraft();
+            showStep(currentStep + 1);
+        });
+    });
 
-            if (applicationPhoneWidget && phoneField) {
+    applicationForm.querySelectorAll(
+        "[data-application-back]"
+    ).forEach((button) => {
+        button.addEventListener("click", () => {
+            saveDraft();
+            showStep(currentStep - 1);
+        });
+    });
+
+    // Prevent applicants selecting more than three priorities.
+    applicationForm.querySelectorAll(
+        'input[name="priorities"]'
+    ).forEach((input) => {
+        input.addEventListener("change", () => {
+            const selected =
+                checkedValues("priorities");
+
+            if (selected.length > 3) {
+                input.checked = false;
+
+                alert(
+                    "Please choose no more than three priorities."
+                );
+            }
+        });
+    });
+
+    showStep(currentStep);
+
+    applicationForm.addEventListener(
+        "submit",
+        async (event) => {
+            event.preventDefault();
+
+            // Recheck every section before sending.
+            for (
+                let index = 0;
+                index < steps.length;
+                index += 1
+            ) {
+                if (!validateStep(index)) {
+                    showStep(index);
+                    return;
+                }
+            }
+
+            const submitButton =
+                applicationForm.querySelector(
+                    'button[type="submit"]'
+                );
+
+            let phone =
+                phoneField?.value.trim() || "";
+
+            if (
+                applicationPhoneWidget
+                && phoneField
+            ) {
                 await applicationPhoneWidget.promise;
 
-                if (!applicationPhoneWidget.isValidNumber()) {
-                    phoneField.setCustomValidity("Please enter a valid mobile number.");
+                if (
+                    !applicationPhoneWidget
+                        .isValidNumber()
+                ) {
+                    showStep(0);
+
+                    phoneField.setCustomValidity(
+                        "Please enter a valid mobile number."
+                    );
+
                     phoneField.reportValidity();
                     return;
                 }
 
                 phoneField.setCustomValidity("");
-                phone = applicationPhoneWidget.getNumber();
+                phone =
+                    applicationPhoneWidget.getNumber();
             }
 
+            const symptoms =
+                checkedValues("symptoms");
+
+            const priorities =
+                checkedValues("priorities");
+
+            const triedOptions =
+                checkedValues("triedOptions");
+
+            const fallOffReasons =
+                checkedValues("fallOffReasons");
+
+            const coachNeeds =
+                checkedValues("coachNeeds");
+
+            // Maintain the original summary fields used by
+            // existing email and dashboard code.
+            const triedSummary =
+                triedOptions.join(", ");
+
+            const supportSummary =
+                coachNeeds.join(", ");
+
+            const hiddenTried =
+                document.getElementById("tried");
+
+            const hiddenSupport =
+                document.getElementById("support");
+
+            if (hiddenTried) {
+                hiddenTried.value = triedSummary;
+            }
+
+            if (hiddenSupport) {
+                hiddenSupport.value =
+                    supportSummary;
+            }
+
+            const applicationData = {
+                city: fieldValue("city"),
+                country: fieldValue("country"),
+                occupation: fieldValue(
+                    "occupation"
+                ),
+                relationship_status: fieldValue(
+                    "relationship-status"
+                ),
+                children: fieldValue("children"),
+                referral_source: fieldValue(
+                    "referral-source"
+                ),
+
+                menopause_stage: fieldValue(
+                    "menopause-stage"
+                ),
+                symptoms,
+                health_summary: fieldValue(
+                    "health-summary"
+                ),
+
+                one_year_vision:
+                    fieldValue("success"),
+                top_priorities: priorities,
+                goals_importance: fieldValue(
+                    "goals-importance"
+                ),
+
+                obstacles: fieldValue(
+                    "obstacles"
+                ),
+                tried_options: triedOptions,
+                fall_off_reasons:
+                    fallOffReasons,
+
+                why_now: fieldValue("why-now"),
+                nothing_changes: fieldValue(
+                    "nothing-changes"
+                ),
+                commitment: Number(
+                    commitmentField?.value || 7
+                ),
+                readiness: fieldValue(
+                    "readiness"
+                ),
+                importance: fieldValue(
+                    "importance"
+                ),
+
+                coach_needs: coachNeeds,
+                coaching_style: fieldValue(
+                    "coaching-style"
+                ),
+                start_timeline: fieldValue(
+                    "start-timeline"
+                ),
+                investment_readiness:
+                    fieldValue(
+                        "investment-readiness"
+                    ),
+                decision_maker: fieldValue(
+                    "decision-maker"
+                ),
+
+                good_fit: fieldValue("good-fit"),
+                additional_notes: fieldValue(
+                    "additional-notes"
+                ),
+            };
+
             const payload = {
-                snapshot_id: savedLead.snapshotId || null,
-                name: nameField?.value.trim() || "",
-                email: emailField?.value.trim() || "",
+                snapshot_id:
+                    savedLead.snapshotId || null,
+
+                name:
+                    nameField?.value.trim() || "",
+
+                email:
+                    emailField?.value.trim() || "",
+
                 phone,
-                age_range: document.getElementById("age")?.value || "",
-                why_now: document.getElementById("why-now")?.value.trim() || "",
-                tried: document.getElementById("tried")?.value.trim() || "",
-                success_goal: document.getElementById("success")?.value.trim() || "",
-                support_needed: document.getElementById("support")?.value || "",
-                consent: Boolean(consentField?.checked),
+
+                age_range:
+                    fieldValue("age"),
+
+                why_now:
+                    fieldValue("why-now"),
+
+                tried:
+                    triedSummary,
+
+                success_goal:
+                    fieldValue("success"),
+
+                support_needed:
+                    supportSummary,
+
+                application_data:
+                    applicationData,
+
+                consent:
+                    Boolean(
+                        consentField?.checked
+                    ),
             };
 
             try {
                 if (submitButton) {
                     submitButton.disabled = true;
-                    submitButton.textContent = "Submitting…";
+                    submitButton.textContent =
+                        "Submitting…";
                 }
 
-                const response = await fetch("/application", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                });
+                const response = await fetch(
+                    "/application",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                        },
+                        body: JSON.stringify(
+                            payload
+                        ),
+                    }
+                );
 
-                const data = await response.json();
+                const data =
+                    await response.json();
 
-                if (!response.ok || data.status !== "saved") {
-                    throw new Error(data.message || data.detail || "The application could not be submitted.");
+                if (
+                    !response.ok
+                    || data.status !== "saved"
+                ) {
+                    throw new Error(
+                        data.message
+                        || data.detail
+                        || "The application could not be submitted."
+                    );
                 }
 
                 save(APPLICATION_KEY, {
                     ...payload,
-                    applicationId: data.application_id,
-                    submittedAt: new Date().toISOString(),
+                    applicationId:
+                        data.application_id,
+                    submittedAt:
+                        new Date().toISOString(),
                 });
 
                 save(LEAD_KEY, {
@@ -501,21 +1071,35 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                     name: payload.name,
                     phone: payload.phone,
                     email: payload.email,
-                    applicationId: data.application_id,
+                    applicationId:
+                        data.application_id,
                 });
 
-                window.location.href = "/thank-you";
+                localStorage.removeItem(draftKey);
+
+                window.location.href =
+                    "/thank-you";
             } catch (error) {
-                console.error("Application submission failed:", error);
-                alert("We could not submit your application. Please try again.");
+                console.error(
+                    "Application submission failed:",
+                    error
+                );
+
+                alert(
+                    "We could not submit your application. Please try again."
+                );
 
                 if (submitButton) {
                     submitButton.disabled = false;
-                    submitButton.textContent = "Submit my application →";
+                    submitButton.textContent =
+                        "Submit my application →";
                 }
             }
-        });
-    }
+        }
+    );
+}
+
+               
 
     // Generic international phone field on other pages, without reinitialising assessment/application forms.
     if (!assessmentForm && !applicationForm) {
@@ -533,4 +1117,65 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
             });
         }
     }
+// Prefill the Synamate Clarity Call booking form
+const clarityBookingLink = document.querySelector(
+    "[data-clarity-booking-link]"
+);
+
+if (clarityBookingLink) {
+    const savedApplication = load(APPLICATION_KEY) || {};
+    const savedLead = load(LEAD_KEY) || {};
+
+    const fullName = (
+        savedApplication.name
+        || savedLead.name
+        || ""
+    ).trim();
+
+    const email = (
+        savedApplication.email
+        || savedLead.email
+        || ""
+    ).trim();
+
+    const phone = (
+        savedApplication.phone
+        || savedLead.phone
+        || ""
+    ).trim();
+
+    const bookingUrl = new URL(
+        clarityBookingLink.href
+    );
+
+    if (fullName) {
+        bookingUrl.searchParams.set(
+            "full_name",
+            fullName
+        );
+
+        // Also include the common name parameter as a fallback.
+        bookingUrl.searchParams.set(
+            "name",
+            fullName
+        );
+    }
+
+    if (email) {
+        bookingUrl.searchParams.set(
+            "email",
+            email
+        );
+    }
+
+    if (phone) {
+        bookingUrl.searchParams.set(
+            "phone",
+            phone
+        );
+    }
+
+    clarityBookingLink.href =
+        bookingUrl.toString();
+	}
 })();

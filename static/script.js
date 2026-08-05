@@ -75,4 +75,79 @@
       history.pushState(null, "", targetId);
     });
   });
+// Prefill the Synamate Clarity Call booking link
+const clarityBookingLink = document.querySelector(
+    "[data-clarity-booking-link]"
+);
+
+if (clarityBookingLink) {
+    let savedApplication = {};
+    let savedLead = {};
+
+    try {
+        savedApplication = JSON.parse(
+            localStorage.getItem("nourisherApplication") || "{}"
+        );
+
+        savedLead = JSON.parse(
+            localStorage.getItem("nourisherLead") || "{}"
+        );
+    } catch (error) {
+        console.warn(
+            "Saved applicant details could not be read:",
+            error
+        );
+    }
+
+    const fullName = (
+        savedApplication.name
+        || savedLead.name
+        || ""
+    ).trim();
+
+    const email = (
+        savedApplication.email
+        || savedLead.email
+        || ""
+    ).trim();
+
+    const phone = (
+        savedApplication.phone
+        || savedLead.phone
+        || ""
+    ).trim();
+
+    const bookingUrl = new URL(
+        clarityBookingLink.href
+    );
+
+    if (fullName) {
+        bookingUrl.searchParams.set(
+            "name",
+            fullName
+        );
+
+        bookingUrl.searchParams.set(
+            "full_name",
+            fullName
+        );
+    }
+
+    if (email) {
+        bookingUrl.searchParams.set(
+            "email",
+            email
+        );
+    }
+
+    if (phone) {
+        bookingUrl.searchParams.set(
+            "phone",
+            phone
+        );
+    }
+
+    clarityBookingLink.href =
+        bookingUrl.toString();
+	}
 })();
