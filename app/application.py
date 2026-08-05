@@ -16,7 +16,7 @@ router = APIRouter()
 
 class TransformationApplicationSubmission(BaseModel):
     snapshot_id: int | None = None
-    
+
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
     phone: str = Field(min_length=7, max_length=30)
@@ -26,6 +26,8 @@ class TransformationApplicationSubmission(BaseModel):
     tried: str = Field(min_length=1, max_length=3000)
     success_goal: str = Field(min_length=3, max_length=3000)
     support_needed: str = Field(min_length=1, max_length=500)
+
+    application_data: dict = Field(default_factory=dict)
 
     consent: bool
 
@@ -51,6 +53,7 @@ def receive_application(
         success_goal=submission.success_goal.strip(),
         support_needed=submission.support_needed.strip(),
         consent=submission.consent,
+        application_data=submission.application_data,
     )
     add_lead_event(
     snapshot_id=submission.snapshot_id,
