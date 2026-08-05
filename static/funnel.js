@@ -411,10 +411,6 @@ const applicationSection = document.querySelector(
 const applicationStart = document.querySelector(
     ".application-start"
 );
-const beginApplicationButton =
-    document.querySelector(
-        "[data-begin-application]"
-    );
 
 if (applicationForm) {
     const savedLead = load(LEAD_KEY) || {};
