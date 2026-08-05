@@ -51,7 +51,21 @@ href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/css/intlTelInput.
 </ul>
 </div>
 </section>
+<div class="application-start">
+    <p>
+        Set aside around 8–10 minutes. Your answers will be
+        personally reviewed by Sushma before your Clarity Call.
+    </p>
 
+    <button
+        type="button"
+        class="btn btn-primary"
+        data-begin-application
+    >
+        Begin Application
+        <span class="btn-arrow">→</span>
+    </button>
+</div>
 <div class="journey-progress application-progress">
     <div class="journey-progress-meta">
         <span data-application-step-label>Step 1 of 7</span>
@@ -67,9 +81,10 @@ href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/css/intlTelInput.
 </div>
 
 <form
+    id="transformation-application"
     class="application-form journey-card"
     data-application-form
-    novalidate
+    hidden
 >
     <!-- STEP 1 -->
     <section
