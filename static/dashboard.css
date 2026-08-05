@@ -1784,3 +1784,19 @@ a {
     background: #eeeeee;
     color: #666;
 }
+/* Prevent the coach workspace from overlapping the sections below */
+.lead-workspace-grid {
+  align-items: start;
+  margin-bottom: 32px;
+}
+
+.coach-workspace-panel {
+  position: static;
+  align-self: start;
+}
+
+.detail-grid {
+  position: relative;
+  z-index: 1;
+  clear: both;
+}
