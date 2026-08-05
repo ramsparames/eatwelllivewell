@@ -1179,6 +1179,7 @@ if (applicationForm) {
             });
         }
     }
+}
 // Prefill the Synamate Clarity Call booking form
 const clarityBookingLink = document.querySelector(
     "[data-clarity-booking-link]"
