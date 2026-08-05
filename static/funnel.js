@@ -446,40 +446,62 @@ if (applicationForm) {
         document.getElementById(id)?.value.trim() || ""
     );
 
-    const showStep = (index) => {
-        currentStep = Math.max(
-            0,
-            Math.min(index, steps.length - 1)
-        );
+    const showStep = (stepIndex) => {
+	    const safeStep = Math.max(
+	        0,
+	        Math.min(stepIndex, steps.length - 1)
+	    );
+	
+	    steps.forEach((step, index) => {
+	        step.classList.toggle(
+	            "active",
+	            index === safeStep
+	        );
+	    });
 
-        steps.forEach((step, stepIndex) => {
-            step.classList.toggle(
-                "active",
-                stepIndex === currentStep
-            );
-        });
-
-        const completedPercentage = (
-            ((currentStep + 1) / steps.length) * 100
-        );
-
-        if (progressFill) {
-            progressFill.style.width =
-                `${completedPercentage}%`;
-        }
-
-        if (stepLabel) {
-            stepLabel.textContent =
-                `Step ${currentStep + 1} of ${steps.length}`;
-        }
-
-        document.querySelector(
-            ".application-progress"
-        )?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
-    };
+	    currentStep = safeStep;
+	
+	    const progressPercent =
+	        ((currentStep + 1) / steps.length) * 100;
+	
+	    if (progressFill) {
+	        progressFill.style.width =
+	            `${progressPercent}%`;
+	    }
+	
+	    if (stepLabel) {
+	        stepLabel.textContent =
+	            `Step ${currentStep + 1} of ${steps.length}`;
+	    }
+	
+	    requestAnimationFrame(() => {
+	        const progress = document.querySelector(
+	            ".application-progress"
+	        );
+	
+	        const header = document.querySelector(
+	            ".journey-header"
+	        );
+	
+	        if (!progress) {
+	            return;
+	        }
+	
+	        const headerHeight =
+	            header?.offsetHeight || 0;
+	
+	        const targetTop =
+	            progress.getBoundingClientRect().top
+	            + window.scrollY
+	            - headerHeight
+	            - 12;
+	
+	        window.scrollTo({
+	            top: Math.max(0, targetTop),
+	            behavior: "smooth",
+	        });
+	    });
+	};
 
     const findInvalidRequiredField = (step) => {
         const requiredFields = Array.from(
