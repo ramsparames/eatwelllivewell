@@ -818,37 +818,38 @@ if (applicationForm) {
         saveDraft
     );
 
-    applicationForm.querySelectorAll(
-        "[data-application-next]"
-    ).forEach((button) => {
-        button.addEventListener("click", () => {
-            if (!validateStep(currentStep)) {
-                return;
-            }
-
-            saveDraft();
-			beginApplicationButton?.addEventListener(
-			    "click",
-			    () => {
-			        if (!applicationSection) {
-			            console.error(
-			                "Application section was not found."
-			            );
-			            return;
-			        }
-			
-			        applicationSection.hidden = false;
-			
-			        if (applicationStart) {
-			            applicationStart.hidden = true;
-			        }
-			
-			        showStep(0);
-			    }
-			);
-            showStep(currentStep + 1);
-        });
-    });
+	applicationForm.querySelectorAll(
+	    "[data-application-next]"
+	).forEach((button) => {
+	    button.addEventListener("click", () => {
+	        if (!validateStep(currentStep)) {
+	            return;
+	        }
+	
+	        saveDraft();
+	        showStep(currentStep + 1);
+	    });
+	});
+	
+	beginApplicationButton?.addEventListener(
+	    "click",
+	    () => {
+	        if (!applicationSection) {
+	            console.error(
+	                "Application section was not found."
+	            );
+	            return;
+	        }
+	
+	        applicationSection.hidden = false;
+	
+	        if (applicationStart) {
+	            applicationStart.hidden = true;
+	        }
+	
+	        showStep(0);
+	    }
+	);
 
     applicationForm.querySelectorAll(
         "[data-application-back]"
