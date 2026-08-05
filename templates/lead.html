@@ -303,23 +303,76 @@
 
                 {% if lead.answers is mapping %}
 
-                <div class="answer-list">
-
-                    {% for question, answer in lead.answers.items() %}
-
-                    <div class="answer-item">
-                        <span>
-                            {{ question|replace("_", " ")|title }}
-                        </span>
-
-                        <strong>
-                            {{ answer|replace("-", " ")|title }}
-                        </strong>
+                    {% set question_labels = {
+                        "body": "Body changes",
+                        "wake": "How she feels on waking",
+                        "sleep": "Sleep quality",
+                        "energy": "Energy through the day",
+                        "stress": "Stress load",
+                        "feeling": "How she feels about herself",
+                        "cravings": "Cravings",
+                        "consistency": "Consistency"
+                    } %}
+                    
+                    {% set scale_labels = {
+                        "1": "Struggling significantly",
+                        "2": "Needs support",
+                        "3": "Mostly manageable",
+                        "4": "Feeling well supported"
+                    } %}
+                    
+                    {% set body_labels = {
+                        "belly": "Mainly around the belly",
+                        "overall": "Overall body or weight changes",
+                        "hips": "Mainly around the hips or thighs",
+                        "off": "Generally feels off or unlike herself"
+                    } %}
+                    
+                    {% set feeling_labels = {
+                        "not-self": "I don't feel like myself",
+                        "out-control": "I feel out of control",
+                        "frustrated": "I feel frustrated",
+                        "stuck": "I feel stuck",
+                        "starting-over": "I keep feeling like I am starting over"
+                    } %}
+                    
+                    <div class="answer-list">
+                        {% for question, answer in lead.answers.items() %}
+                    
+                        {% set answer_string = answer|string %}
+                    
+                        <div class="answer-item">
+                            <span>
+                                {{ question_labels.get(
+                                    question,
+                                    question|replace("_", " ")|title
+                                ) }}
+                            </span>
+                    
+                            <strong>
+                                {% if question == "body" %}
+                                    {{ body_labels.get(
+                                        answer_string,
+                                        answer_string|replace("-", " ")|title
+                                    ) }}
+                    
+                                {% elif question == "feeling" %}
+                                    {{ feeling_labels.get(
+                                        answer_string,
+                                        answer_string|replace("-", " ")|title
+                                    ) }}
+                    
+                                {% else %}
+                                    {{ scale_labels.get(
+                                        answer_string,
+                                        answer_string|replace("-", " ")|title
+                                    ) }}
+                                {% endif %}
+                            </strong>
+                        </div>
+                    
+                        {% endfor %}
                     </div>
-
-                    {% endfor %}
-
-                </div>
 
                 {% else %}
 
