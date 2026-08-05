@@ -2,6 +2,9 @@
 
 <html lang="en">
 <head>
+{% set application_started =
+    request.query_params.get("start") == "1"
+%}
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Apply to Transformation</title>
@@ -51,41 +54,50 @@ href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/css/intlTelInput.
 </ul>
 </div>
 </section>
-<div class="application-start">
-    <p>
-        Set aside around 8–10 minutes. Your answers will be personally
-        reviewed by Sushma before your Clarity Call.
-    </p>
+{% set application_started =
+    request.query_params.get("start") == "1"
+%}
 
-        <button
-        type="button"
-        class="btn btn-primary"
-        onclick="
-            const section = document.getElementById('application-section');
-            const startBox = document.querySelector('.application-start');
+    {% if not application_started %}
     
-            if (section) {
-                section.hidden = false;
-            }
+        <div class="journey-title">
+            <!-- existing title -->
+        </div>
     
-            if (startBox) {
-                startBox.hidden = true;
-            }
+        <section class="application-overview">
+            <!-- Sushma photo and existing content -->
+        </section>
     
-            setTimeout(() => {
-                section?.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }, 50);
-            "
+        <div class="application-start">
+            <p>
+                Set aside around 8–10 minutes. Your answers will be
+                personally reviewed by Sushma before your Clarity Call.
+            </p>
+    
+            <a
+                class="btn btn-primary"
+                href="/join?start=1"
             >
-            Begin Application
-            <span class="btn-arrow">→</span>
-        </button>
-</div>
+                Begin Application
+                <span class="btn-arrow">→</span>
+            </a>
+        </div>
+    
+    {% else %}
+    
+        <!-- existing progress bar -->
+    
+        <form
+            class="application-form journey-card"
+            data-application-form
+        >
+            <!-- all seven existing steps -->
+        </form>
+    
+    {% endif %}
+    
 
-<div data-application-section hidden>
+<div data-application-section>
 
     <div class="application-progress">
         <!-- your existing progress-bar HTML -->
@@ -1034,6 +1046,6 @@ href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/css/intlTelInput.
 </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/intlTelInput.min.js"></script>
-<script type="module" src="/static/funnel.js?v=18"></script>
+<script type="module" src="/static/funnel.js?v=20"></script>
 </body>
 </html>
