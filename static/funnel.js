@@ -485,13 +485,21 @@ if (applicationForm) {
 		        ".journey-header"
 		    );
 		
+		    const progress = document.querySelector(
+		        ".application-progress"
+		    );
+		
 		    const headerHeight =
 		        header?.offsetHeight || 0;
+		
+		    const progressHeight =
+		        progress?.offsetHeight || 0;
 		
 		    const targetTop =
 		        activeStep.getBoundingClientRect().top
 		        + window.scrollY
 		        - headerHeight
+		        - progressHeight
 		        - 20;
 		
 		    window.scrollTo({
