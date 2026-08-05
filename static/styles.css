@@ -3936,3 +3936,29 @@ button {
     top: 92px;
   }
 }
+.application-start {
+  max-width: 720px;
+  margin: 32px auto 0;
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+  text-align: center;
+  box-shadow: var(--shadow-2);
+}
+
+.application-start p {
+  max-width: 56ch;
+  margin: 0 auto 20px;
+  color: var(--body);
+  line-height: 1.7;
+}
+
+.application-start .btn {
+  display: inline-flex;
+}
+
+.application-form[hidden],
+.application-start[hidden] {
+  display: none !important;
+}
