@@ -489,18 +489,15 @@ if (applicationForm) {
 		        ".application-progress"
 		    );
 		
-		    const headerHeight =
-		        header?.offsetHeight || 0;
-		
-		    const progressHeight =
-		        progress?.offsetHeight || 0;
+		    const offset =
+		        (header?.offsetHeight || 0)
+		        + (progress?.offsetHeight || 0)
+		        + 24;
 		
 		    const targetTop =
 		        activeStep.getBoundingClientRect().top
 		        + window.scrollY
-		        - headerHeight
-		        - progressHeight
-		        - 20;
+		        - offset;
 		
 		    window.scrollTo({
 		        top: Math.max(0, targetTop),
