@@ -1229,5 +1229,4 @@ if (clarityBookingLink) {
 
     clarityBookingLink.href =
         bookingUrl.toString();
-	}
 })();
