@@ -819,15 +819,24 @@ if (applicationForm) {
     );
 
 	applicationForm.querySelectorAll(
-	    "[data-application-next]"
+    "[data-application-next]"
+).forEach((button) => {
+    button.addEventListener("click", () => {
+        if (!validateStep(currentStep)) {
+            return;
+        }
+
+        saveDraft();
+        showStep(currentStep + 1);
+    });
+});
+
+	applicationForm.querySelectorAll(
+	    "[data-application-back]"
 	).forEach((button) => {
 	    button.addEventListener("click", () => {
-	        if (!validateStep(currentStep)) {
-	            return;
-	        }
-	
 	        saveDraft();
-	        showStep(currentStep + 1);
+	        showStep(currentStep - 1);
 	    });
 	});
 	
