@@ -475,32 +475,30 @@ if (applicationForm) {
 	    }
 	
 	    requestAnimationFrame(() => {
-	        const progress = document.querySelector(
-	            ".application-progress"
-	        );
-	
-	        const header = document.querySelector(
-	            ".journey-header"
-	        );
-	
-	        if (!progress) {
-	            return;
-	        }
-	
-	        const headerHeight =
-	            header?.offsetHeight || 0;
-	
-	        const targetTop =
-	            progress.getBoundingClientRect().top
-	            + window.scrollY
-	            - headerHeight
-	            - 12;
-	
-	        window.scrollTo({
-	            top: Math.max(0, targetTop),
-	            behavior: "smooth",
-	        });
-	    });
+		    const activeStep = steps[currentStep];
+		
+		    if (!activeStep) {
+		        return;
+		    }
+		
+		    const header = document.querySelector(
+		        ".journey-header"
+		    );
+		
+		    const headerHeight =
+		        header?.offsetHeight || 0;
+		
+		    const targetTop =
+		        activeStep.getBoundingClientRect().top
+		        + window.scrollY
+		        - headerHeight
+		        - 20;
+		
+		    window.scrollTo({
+		        top: Math.max(0, targetTop),
+		        behavior: "smooth",
+		    });
+		});
 	};
 
     const findInvalidRequiredField = (step) => {
