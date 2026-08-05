@@ -1,1051 +1,612 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-{% set application_started =
-    request.query_params.get("start") == "1"
-%}
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Apply to Transformation</title>
-<meta content="Apply for personalised NourisHer wellness coaching with Sushma." name="description"/>
-<link href="/static/styles.css" rel="stylesheet"/>
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/css/intlTelInput.css">
-</head>
-<body class="journey-page">
-<header class="journey-header">
-<div class="journey-header-inner">
-<a aria-label="Eat Well Live Well home" class="wordmark" href="/index">
-<span>Eat</span><span class="script">well</span><span>Live</span><span class="script">well</span>
-</a>
-<nav aria-label="Journey navigation" class="journey-nav">
-<a href="/index#how">How it works</a>
-<a href="/index#pillars">Pillars</a><a href="/foundations">Foundations</a>
-<a href="/index#stories">Stories</a>
-<a href="/index#bio">About Sushma</a>
-</nav>
-<a class="btn btn-primary" href="/join">Apply to Transformation <span class="btn-arrow">→</span></a>
-</div>
-</header>
-<main class="journey-shell">
-<div class="journey-wrap">
-<div class="journey-title">
-<p class="eyebrow">The NourisHer Transformation™ application</p>
-<h1>Let’s see if we’re <em>a good fit.</em></h1>
-<p>This is not a test. Your answers help Sushma understand what you need, what you have already tried and whether Transformation is the right level of support.</p>
-</div>
-<section class="application-overview">
-<div class="application-photo">
-<img alt="Sushma, founder of NourisHer" src="/static/sush-founder.jpeg"/>
-<div class="application-badge">
-<strong>Personally reviewed</strong>
-<span>by Sushma</span>
-</div>
-</div>
-<div>
-<p class="eyebrow">What happens next?</p>
-<h2>A thoughtful conversation—not a sales pitch.</h2>
-<p>Sushma will review your application and contact you to arrange a free introductory conversation if the programme appears suitable.</p>
-<ul>
-<li>No hard sell</li>
-<li>No obligation to enrol</li>
-<li>A real discussion about your goals and next best step</li>
-</ul>
-</div>
-</section>
-{% set application_started =
-    request.query_params.get("start") == "1"
-%}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {% if not application_started %}
-    
-        <div class="journey-title">
-            <!-- existing title -->
-        </div>
-    
-        <section class="application-overview">
-            <!-- Sushma photo and existing content -->
-        </section>
-    
-        <div class="application-start">
-            <p>
-                Set aside around 8–10 minutes. Your answers will be
-                personally reviewed by Sushma before your Clarity Call.
-            </p>
-    
+    <title>Apply to NourisHer Transformation</title>
+    <meta
+        name="description"
+        content="Apply for personalised NourisHer wellness coaching with Sushma."
+    >
+
+    <link rel="stylesheet" href="/static/styles.css">
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/css/intlTelInput.css"
+    >
+</head>
+
+<body class="journey-page">
+
+    <header class="journey-header">
+        <div class="journey-header-inner">
             <a
-                class="btn btn-primary"
-                href="/join?start=1"
+                class="wordmark"
+                href="/index"
+                aria-label="Eat Well Live Well home"
             >
-                Begin Application
+                <span>Eat</span>
+                <span class="script">well</span>
+                <span>Live</span>
+                <span class="script">well</span>
+            </a>
+
+            <nav class="journey-nav" aria-label="Journey navigation">
+                <a href="/index#how">How it works</a>
+                <a href="/index#pillars">Pillars</a>
+                <a href="/foundations">Foundations</a>
+                <a href="/index#stories">Stories</a>
+                <a href="/index#bio">About Sushma</a>
+            </nav>
+
+            <a class="btn btn-primary" href="/join">
+                Apply to Transformation
                 <span class="btn-arrow">→</span>
             </a>
         </div>
-    
-    {% else %}
-    
-        <!-- existing progress bar -->
-    
-        <form
-            class="application-form journey-card"
-            data-application-form
-        >
-            <!-- all seven existing steps -->
-        </form>
-    
-    {% endif %}
-    
+    </header>
 
-<div data-application-section>
+    <main class="journey-shell">
+        <div class="journey-wrap">
 
-    <div class="application-progress">
-        <!-- your existing progress-bar HTML -->
-    </div>
+            <div id="application-intro">
 
-    <form
-        id="transformation-application"
-        class="application-form journey-card"
-        data-application-form
-    >
-        <!-- all existing application steps -->
-    </form>
-
-</div>
-
-<form
-    id="transformation-application"
-    class="application-form journey-card"
-    data-application-form
->
-    <!-- STEP 1 -->
-    <section
-        class="application-step active"
-        data-application-step="1"
-    >
-        <div class="application-step-heading">
-            <p class="eyebrow">Step 1 · About you</p>
-            <h2>Tell us a little about yourself.</h2>
-            <p>
-                These details may already be filled in if you completed
-                the NourisHer assessment.
-            </p>
-        </div>
-
-        <div class="field-grid">
-            <div class="form-field">
-                <label for="name">Your name</label>
-                <input
-                    autocomplete="name"
-                    id="name"
-                    name="name"
-                    required
-                />
-            </div>
-
-            <div class="form-field">
-                <label for="email">Email address</label>
-                <input
-                    autocomplete="email"
-                    id="email"
-                    name="email"
-                    required
-                    type="email"
-                />
-            </div>
-
-            <div class="form-field">
-                <label for="phone">Phone / WhatsApp number</label>
-                <input
-                    autocomplete="tel"
-                    id="phone"
-                    name="phone"
-                    required
-                />
-            </div>
-
-            <div class="form-field">
-                <label for="age">Age range</label>
-                <select id="age" name="age" required>
-                    <option value="">Choose one</option>
-                    <option>35–39</option>
-                    <option>40–44</option>
-                    <option>45–49</option>
-                    <option>50–54</option>
-                    <option>55–59</option>
-                    <option>60+</option>
-                </select>
-            </div>
-
-            <div class="form-field">
-                <label for="city">City</label>
-                <input id="city" name="city" required />
-            </div>
-
-            <div class="form-field">
-                <label for="country">Country</label>
-                <input
-                    id="country"
-                    name="country"
-                    value="India"
-                    required
-                />
-            </div>
-
-            <div class="form-field">
-                <label for="occupation">Occupation</label>
-                <input
-                    id="occupation"
-                    name="occupation"
-                    required
-                />
-            </div>
-
-            <div class="form-field">
-                <label for="relationship-status">
-                    Relationship status
-                </label>
-                <select
-                    id="relationship-status"
-                    name="relationshipStatus"
-                    required
-                >
-                    <option value="">Choose one</option>
-                    <option>Single</option>
-                    <option>Married / Partnered</option>
-                    <option>Separated / Divorced</option>
-                    <option>Widowed</option>
-                    <option>Prefer not to say</option>
-                </select>
-            </div>
-
-            <div class="form-field">
-                <label for="children">Children</label>
-                <select
-                    id="children"
-                    name="children"
-                    required
-                >
-                    <option value="">Choose one</option>
-                    <option>No children</option>
-                    <option>Young children</option>
-                    <option>Teenage children</option>
-                    <option>Adult children</option>
-                </select>
-            </div>
-
-            <div class="form-field">
-                <label for="referral-source">
-                    How did you hear about NourisHer?
-                </label>
-                <select
-                    id="referral-source"
-                    name="referralSource"
-                    required
-                >
-                    <option value="">Choose one</option>
-                    <option>Instagram</option>
-                    <option>Facebook</option>
-                    <option>WhatsApp</option>
-                    <option>Friend or family</option>
-                    <option>Existing client</option>
-                    <option>Workshop or event</option>
-                    <option>Google</option>
-                    <option>Other</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="application-actions">
-            <span></span>
-            <button
-                class="btn btn-primary"
-                type="button"
-                data-application-next
-            >
-                Continue <span class="btn-arrow">→</span>
-            </button>
-        </div>
-    </section>
-
-    <!-- STEP 2 -->
-    <section
-        class="application-step"
-        data-application-step="2"
-    >
-        <div class="application-step-heading">
-            <p class="eyebrow">Step 2 · Your health today</p>
-            <h2>Where are you right now?</h2>
-            <p>
-                Choose everything that feels relevant. There are no
-                right or wrong answers.
-            </p>
-        </div>
-
-        <div class="field-grid">
-            <div class="form-field full">
-                <label for="menopause-stage">
-                    Which phase best describes you?
-                </label>
-                <select
-                    id="menopause-stage"
-                    name="menopauseStage"
-                    required
-                >
-                    <option value="">Choose one</option>
-                    <option>Perimenopause</option>
-                    <option>Menopause</option>
-                    <option>Postmenopause</option>
-                    <option>Surgical menopause</option>
-                    <option>Not sure</option>
-                    <option>None of these</option>
-                </select>
-            </div>
-
-            <fieldset class="choice-field full">
-                <legend>
-                    Which best describes how you are feeling?
-                </legend>
-                <p class="field-helper">Select all that apply.</p>
-
-                <div class="choice-grid">
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Weight gain"
-                        />
-                        <span>Weight gain</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Belly fat"
-                        />
-                        <span>Belly fat</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Low energy"
-                        />
-                        <span>Low energy</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Poor sleep"
-                        />
-                        <span>Poor sleep</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Cravings"
-                        />
-                        <span>Cravings</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Emotional eating"
-                        />
-                        <span>Emotional eating</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Hormonal symptoms"
-                        />
-                        <span>Hormonal symptoms</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Loss of strength"
-                        />
-                        <span>Loss of strength</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Low confidence"
-                        />
-                        <span>Low confidence</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input
-                            type="checkbox"
-                            name="symptoms"
-                            value="Health markers"
-                        />
-                        <span>Concerned about health markers</span>
-                    </label>
-                </div>
-            </fieldset>
-
-            <div class="form-field full">
-                <label for="health-summary">
-                    Describe your health in one sentence.
-                </label>
-                <textarea
-                    id="health-summary"
-                    name="healthSummary"
-                    required
-                    placeholder="For example: I know what I should do, but I struggle to stay consistent."
-                ></textarea>
-            </div>
-        </div>
-
-        <div class="application-actions">
-            <button
-                class="btn btn-ghost"
-                type="button"
-                data-application-back
-            >
-                ← Back
-            </button>
-
-            <button
-                class="btn btn-primary"
-                type="button"
-                data-application-next
-            >
-                Continue <span class="btn-arrow">→</span>
-            </button>
-        </div>
-    </section>
-
-    <!-- STEP 3 -->
-    <section
-        class="application-step"
-        data-application-step="3"
-    >
-        <div class="application-step-heading">
-            <p class="eyebrow">Step 3 · Your vision</p>
-            <h2>What would meaningful change look like?</h2>
-            <p>
-                Imagine it is one year from today and you are genuinely
-                glad you took this step.
-            </p>
-        </div>
-
-        <div class="field-grid">
-            <div class="form-field full">
-                <label for="success">
-                    What would have changed for you?
-                </label>
-                <textarea
-                    id="success"
-                    name="success"
-                    required
-                    placeholder="Tell Sushma what you would be feeling, doing or experiencing differently."
-                ></textarea>
-            </div>
-
-            <fieldset class="choice-field full">
-                <legend>What are your top three priorities?</legend>
-                <p class="field-helper">
-                    Select no more than three.
+            <div class="journey-title">
+                <p class="eyebrow">
+                    The NourisHer Transformation™ application
                 </p>
 
-                <div class="choice-grid">
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Lose weight" />
-                        <span>Lose weight</span>
-                    </label>
+                <h1>
+                    Let’s see if we’re
+                    <em>a good fit.</em>
+                </h1>
 
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Lose belly fat" />
-                        <span>Lose belly fat</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Improve energy" />
-                        <span>Improve energy</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Improve sleep" />
-                        <span>Improve sleep</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Reduce cravings" />
-                        <span>Reduce cravings</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Feel stronger" />
-                        <span>Feel stronger</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Improve hormonal symptoms" />
-                        <span>Improve hormonal symptoms</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Build healthy habits" />
-                        <span>Build healthy habits</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Improve confidence" />
-                        <span>Improve confidence</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="priorities" value="Improve health reports" />
-                        <span>Improve health reports</span>
-                    </label>
-                </div>
-            </fieldset>
-
-            <div class="form-field full">
-                <label for="goals-importance">
-                    Why are these goals important to you?
-                </label>
-                <textarea
-                    id="goals-importance"
-                    name="goalsImportance"
-                    required
-                ></textarea>
-            </div>
-        </div>
-
-        <div class="application-actions">
-            <button
-                class="btn btn-ghost"
-                type="button"
-                data-application-back
-            >
-                ← Back
-            </button>
-
-            <button
-                class="btn btn-primary"
-                type="button"
-                data-application-next
-            >
-                Continue <span class="btn-arrow">→</span>
-            </button>
-        </div>
-    </section>
-
-    <!-- STEP 4 -->
-    <section
-        class="application-step"
-        data-application-step="4"
-    >
-        <div class="application-step-heading">
-            <p class="eyebrow">Step 4 · What has been difficult</p>
-            <h2>What has been keeping you stuck?</h2>
-            <p>
-                Understanding the pattern helps Sushma prepare the right
-                questions for your Clarity Call.
-            </p>
-        </div>
-
-        <div class="field-grid">
-            <div class="form-field full">
-                <label for="obstacles">
-                    What do you believe has stopped you from reaching
-                    your goals until now?
-                </label>
-                <textarea
-                    id="obstacles"
-                    name="obstacles"
-                    required
-                ></textarea>
+                <p>
+                    This is not a test. Your answers help Sushma
+                    understand what you need, what you have already
+                    tried and whether Transformation is the right
+                    level of support for you.
+                </p>
             </div>
 
-            <fieldset class="choice-field full">
-                <legend>What have you already tried?</legend>
-                <p class="field-helper">Select all that apply.</p>
-
-                <div class="choice-grid">
-                    <label class="choice-card">
-                        <input type="checkbox" name="triedOptions" value="Diets" />
-                        <span>Diets</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="triedOptions" value="Calorie counting" />
-                        <span>Calorie counting</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="triedOptions" value="Gym or classes" />
-                        <span>Gym or classes</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="triedOptions" value="Walking" />
-                        <span>Walking</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="triedOptions" value="Intermittent fasting" />
-                        <span>Intermittent fasting</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="triedOptions" value="Nutritionist" />
-                        <span>Nutritionist</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="triedOptions" value="Personal trainer" />
-                        <span>Personal trainer</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="triedOptions" value="Medication" />
-                        <span>Medication</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="triedOptions" value="Nothing consistently" />
-                        <span>Nothing consistently</span>
-                    </label>
-                </div>
-            </fieldset>
-
-            <fieldset class="choice-field full">
-                <legend>What usually causes you to fall off track?</legend>
-                <p class="field-helper">Select all that apply.</p>
-
-                <div class="choice-grid">
-                    <label class="choice-card">
-                        <input type="checkbox" name="fallOffReasons" value="Busy schedule" />
-                        <span>Busy schedule</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="fallOffReasons" value="Family responsibilities" />
-                        <span>Family responsibilities</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="fallOffReasons" value="Stress" />
-                        <span>Stress</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="fallOffReasons" value="Emotional eating" />
-                        <span>Emotional eating</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="fallOffReasons" value="Lack of motivation" />
-                        <span>Lack of motivation</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="fallOffReasons" value="No accountability" />
-                        <span>No accountability</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="fallOffReasons" value="All-or-nothing thinking" />
-                        <span>All-or-nothing thinking</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="fallOffReasons" value="Travel or social occasions" />
-                        <span>Travel or social occasions</span>
-                    </label>
-                </div>
-            </fieldset>
-        </div>
-
-        <div class="application-actions">
-            <button
-                class="btn btn-ghost"
-                type="button"
-                data-application-back
+            <section
+                class="application-overview"
+                id="application-introduction"
             >
-                ← Back
-            </button>
+                <div class="application-photo">
+                    <img
+                        src="/static/sush-founder.jpeg"
+                        alt="Sushma, founder of NourisHer"
+                    >
 
-            <button
-                class="btn btn-primary"
-                type="button"
-                data-application-next
-            >
-                Continue <span class="btn-arrow">→</span>
-            </button>
-        </div>
-    </section>
-
-    <!-- STEP 5 -->
-    <section
-        class="application-step"
-        data-application-step="5"
-    >
-        <div class="application-step-heading">
-            <p class="eyebrow">Step 5 · Why now?</p>
-            <h2>Why does this matter today?</h2>
-        </div>
-
-        <div class="field-grid">
-            <div class="form-field full">
-                <label for="why-now">
-                    Why are you looking for support now?
-                </label>
-                <textarea
-                    id="why-now"
-                    name="whyNow"
-                    required
-                    placeholder="What has changed or made this feel important now?"
-                ></textarea>
-            </div>
-
-            <div class="form-field full">
-                <label for="nothing-changes">
-                    If nothing changes over the next 12 months, how
-                    would that affect your life?
-                </label>
-                <textarea
-                    id="nothing-changes"
-                    name="nothingChanges"
-                    required
-                ></textarea>
-            </div>
-
-            <fieldset class="choice-field full">
-                <legend>
-                    On a scale of 1–10, how committed are you to making
-                    yourself a priority?
-                </legend>
-
-                <div class="commitment-scale">
-                    <input
-                        id="commitment"
-                        name="commitment"
-                        type="range"
-                        min="1"
-                        max="10"
-                        value="7"
-                    />
-
-                    <div class="commitment-value">
-                        <strong data-commitment-value>7</strong>
-                        <span>/ 10</span>
+                    <div class="application-badge">
+                        <strong>Personally reviewed</strong>
+                        <span>by Sushma</span>
                     </div>
                 </div>
-            </fieldset>
 
-            <div class="form-field">
-                <label for="readiness">
-                    Which best describes you?
-                </label>
-                <select
-                    id="readiness"
-                    name="readiness"
-                    required
-                >
-                    <option value="">Choose one</option>
-                    <option>I am ready to make a change now</option>
-                    <option>I want to begin soon</option>
-                    <option>I am still exploring</option>
-                </select>
-            </div>
+                <div>
+                    <p class="eyebrow">What happens next?</p>
 
-            <div class="form-field">
-                <label for="importance">
-                    How important is solving this challenge?
-                </label>
-                <select
-                    id="importance"
-                    name="importance"
-                    required
-                >
-                    <option value="">Choose one</option>
-                    <option>Nice to have</option>
-                    <option>Important</option>
-                    <option>It is affecting my daily life</option>
-                    <option>It is one of my top priorities</option>
-                </select>
-            </div>
-        </div>
+                    <h2>
+                        A thoughtful conversation—not a sales pitch.
+                    </h2>
 
-        <div class="application-actions">
-            <button
-                class="btn btn-ghost"
-                type="button"
-                data-application-back
-            >
-                ← Back
-            </button>
+                    <p>
+                        Sushma will personally review your assessment
+                        and application before your complimentary
+                        Clarity Call.
+                    </p>
 
-            <button
-                class="btn btn-primary"
-                type="button"
-                data-application-next
-            >
-                Continue <span class="btn-arrow">→</span>
-            </button>
-        </div>
-    </section>
-
-    <!-- STEP 6 -->
-    <section
-        class="application-step"
-        data-application-step="6"
-    >
-        <div class="application-step-heading">
-            <p class="eyebrow">Step 6 · Working together</p>
-            <h2>What kind of coaching would support you?</h2>
-        </div>
-
-        <div class="field-grid">
-            <fieldset class="choice-field full">
-                <legend>What are you looking for in a coach?</legend>
-                <p class="field-helper">Select all that apply.</p>
-
-                <div class="choice-grid">
-                    <label class="choice-card">
-                        <input type="checkbox" name="coachNeeds" value="Accountability" />
-                        <span>Accountability</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="coachNeeds" value="Education" />
-                        <span>Education</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="coachNeeds" value="Meal guidance" />
-                        <span>Meal guidance</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="coachNeeds" value="Habit coaching" />
-                        <span>Habit coaching</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="coachNeeds" value="Mindset support" />
-                        <span>Mindset support</span>
-                    </label>
-
-                    <label class="choice-card">
-                        <input type="checkbox" name="coachNeeds" value="Menopause expertise" />
-                        <span>Menopause expertise</span>
-                    </label>
+                    <ul>
+                        <li>No hard sell</li>
+                        <li>No obligation to enrol</li>
+                        <li>
+                            A real discussion about your goals,
+                            challenges and next best step
+                        </li>
+                    </ul>
                 </div>
-            </fieldset>
+            </section>
 
-            <div class="form-field">
-                <label for="coaching-style">
-                    Which coaching style motivates you?
-                </label>
-                <select
-                    id="coaching-style"
-                    name="coachingStyle"
-                    required
+            <div class="application-start">
+                <p>
+                    Set aside around 8–10 minutes. Your answers will
+                    help Sushma understand your health journey before
+                    your Clarity Call.
+                </p>
+
+                <a
+                    class="btn btn-primary"
+                    href="/join?start=1"
                 >
-                    <option value="">Choose one</option>
-                    <option>Gentle and encouraging</option>
-                    <option>Direct and action-focused</option>
-                    <option>Highly accountable</option>
-                    <option>A balanced combination</option>
-                </select>
+                    Begin Application
+                    <span class="btn-arrow">→</span>
+                </a>
             </div>
 
-            <div class="form-field">
-                <label for="start-timeline">
-                    If accepted, when would you like to begin?
-                </label>
-                <select
-                    id="start-timeline"
-                    name="startTimeline"
-                    required
+            </div>
+
+            <div id="application-form-section" hidden>
+
+            <div class="journey-title">
+                <p class="eyebrow">
+                    The NourisHer Transformation™ application
+                </p>
+
+                <h1>
+                    Tell us what support
+                    <em>would help you most.</em>
+                </h1>
+
+                <p>
+                    Take your time and answer honestly. Your progress
+                    is saved in this browser as you move through the
+                    application.
+                </p>
+            </div>
+
+            <div class="application-progress" aria-live="polite">
+                <div class="journey-progress-meta">
+                    <span data-application-step-label>
+                        Step 1 of 7
+                    </span>
+                    <span>Transformation application</span>
+                </div>
+
+                <div
+                    class="journey-progress-track"
+                    aria-hidden="true"
                 >
-                    <option value="">Choose one</option>
-                    <option>Immediately</option>
-                    <option>Within 2 weeks</option>
-                    <option>Within a month</option>
-                    <option>Not sure yet</option>
-                </select>
+                    <div
+                        class="journey-progress-fill"
+                        data-application-progress
+                        style="width: 14.3%;"
+                    ></div>
+                </div>
             </div>
 
-            <div class="form-field">
-                <label for="investment-readiness">
-                    If we both feel it is a good fit, which best
-                    describes you?
-                </label>
-                <select
-                    id="investment-readiness"
-                    name="investmentReadiness"
-                    required
-                >
-                    <option value="">Choose one</option>
-                    <option>I am ready to invest</option>
-                    <option>I need to discuss it with my spouse or family</option>
-                    <option>I want to understand the programme first</option>
-                    <option>I am currently gathering information</option>
-                </select>
-            </div>
-
-            <div class="form-field">
-                <label for="decision-maker">
-                    Who will be involved in making the decision?
-                </label>
-                <select
-                    id="decision-maker"
-                    name="decisionMaker"
-                    required
-                >
-                    <option value="">Choose one</option>
-                    <option>Me</option>
-                    <option>Me and my spouse</option>
-                    <option>Me and my family</option>
-                    <option>Someone else</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="application-actions">
-            <button
-                class="btn btn-ghost"
-                type="button"
-                data-application-back
+            <form
+                id="transformation-application"
+                class="application-form journey-card"
+                data-application-form
+                novalidate
             >
-                ← Back
-            </button>
+                <section class="application-step active" data-application-step="1">
+                    <div class="application-step-heading">
+                        <p class="eyebrow">Step 1</p>
+                        <h2>Tell us a little about yourself</h2>
+                        <p>
+                            These details help Sushma understand your
+                            current life stage and contact you about
+                            your application.
+                        </p>
+                    </div>
 
-            <button
-                class="btn btn-primary"
-                type="button"
-                data-application-next
-            >
-                Continue <span class="btn-arrow">→</span>
-            </button>
-        </div>
-    </section>
+                    <div class="field-grid">
+                        <div class="form-field">
+                            <label for="name">Your name</label>
+                            <input id="name" name="name" autocomplete="name" required>
+                        </div>
 
-    <!-- STEP 7 -->
-    <section
-        class="application-step"
-        data-application-step="7"
-    >
-        <div class="application-step-heading">
-            <p class="eyebrow">Step 7 · Before we speak</p>
-            <h2>One last thing.</h2>
-            <p>
-                These final answers help Sushma arrive at your Clarity
-                Call already understanding what matters to you.
-            </p>
-        </div>
+                        <div class="form-field">
+                            <label for="email">Email address</label>
+                            <input id="email" name="email" type="email" autocomplete="email" required>
+                        </div>
 
-        <div class="field-grid">
-            <div class="form-field full">
-                <label for="good-fit">
-                    Why do you believe you may be a good fit for
-                    NourisHer?
-                </label>
-                <textarea
-                    id="good-fit"
-                    name="goodFit"
-                    required
-                ></textarea>
+                        <div class="form-field">
+                            <label for="phone">Phone / WhatsApp number</label>
+                            <input id="phone" name="phone" autocomplete="tel" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="age">Age range</label>
+                            <select id="age" name="age" required>
+                                <option value="">Choose one</option>
+                                <option>35–39</option>
+                                <option>40–44</option>
+                                <option>45–49</option>
+                                <option>50–54</option>
+                                <option>55–59</option>
+                                <option>60+</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="city">City</label>
+                            <input id="city" name="city" autocomplete="address-level2" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="country">Country</label>
+                            <input id="country" name="country" autocomplete="country-name" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="occupation">Occupation</label>
+                            <input id="occupation" name="occupation" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="relationship-status">Relationship status</label>
+                            <select id="relationship-status" name="relationshipStatus" required>
+                                <option value="">Choose one</option>
+                                <option>Single</option>
+                                <option>Married / Partnered</option>
+                                <option>Separated / Divorced</option>
+                                <option>Widowed</option>
+                                <option>Prefer not to say</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="children">Children</label>
+                            <select id="children" name="children" required>
+                                <option value="">Choose one</option>
+                                <option>No children</option>
+                                <option>Young children</option>
+                                <option>Teenage children</option>
+                                <option>Adult children</option>
+                                <option>Prefer not to say</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="referral-source">How did you hear about NourisHer?</label>
+                            <select id="referral-source" name="referralSource" required>
+                                <option value="">Choose one</option>
+                                <option>Instagram</option>
+                                <option>WhatsApp</option>
+                                <option>Friend or family</option>
+                                <option>Workshop / Webinar</option>
+                                <option>Existing client</option>
+                                <option>Google</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="application-actions">
+                        <span></span>
+                        <button class="btn btn-primary" type="button" data-application-next>
+                            Continue <span class="btn-arrow">→</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="application-step" data-application-step="2">
+                    <div class="application-step-heading">
+                        <p class="eyebrow">Step 2</p>
+                        <h2>How are you feeling right now?</h2>
+                        <p>Choose the options that best describe your current experience.</p>
+                    </div>
+
+                    <div class="field-grid">
+                        <div class="form-field">
+                            <label for="menopause-stage">Which phase best describes you today?</label>
+                            <select id="menopause-stage" name="menopauseStage" required>
+                                <option value="">Choose one</option>
+                                <option>Regular cycles</option>
+                                <option>Perimenopause / changing cycles</option>
+                                <option>Menopause</option>
+                                <option>Post-menopause</option>
+                                <option>Not sure</option>
+                                <option>Prefer not to say</option>
+                            </select>
+                        </div>
+
+                        <fieldset class="choice-field form-field full">
+                            <legend>Which best describes how you are feeling right now?</legend>
+                            <p class="field-helper">Choose all that apply.</p>
+
+                            <div class="choice-grid">
+                                <label class="choice-card"><input type="checkbox" name="symptoms" value="Low energy"><span>Low energy</span></label>
+                                <label class="choice-card"><input type="checkbox" name="symptoms" value="Weight gain"><span>Weight gain</span></label>
+                                <label class="choice-card"><input type="checkbox" name="symptoms" value="Poor sleep"><span>Poor sleep</span></label>
+                                <label class="choice-card"><input type="checkbox" name="symptoms" value="Mood changes"><span>Mood changes</span></label>
+                                <label class="choice-card"><input type="checkbox" name="symptoms" value="Cravings"><span>Cravings</span></label>
+                                <label class="choice-card"><input type="checkbox" name="symptoms" value="Feeling stuck"><span>Feeling stuck</span></label>
+                                <label class="choice-card"><input type="checkbox" name="symptoms" value="Inconsistent habits"><span>Inconsistent habits</span></label>
+                                <label class="choice-card"><input type="checkbox" name="symptoms" value="I do not feel like myself"><span>I do not feel like myself</span></label>
+                            </div>
+                        </fieldset>
+
+                        <div class="form-field full">
+                            <label for="health-summary">Describe your health in one sentence</label>
+                            <textarea id="health-summary" name="healthSummary" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="application-actions">
+                        <button class="btn btn-secondary" type="button" data-application-back>← Back</button>
+                        <button class="btn btn-primary" type="button" data-application-next>Continue <span class="btn-arrow">→</span></button>
+                    </div>
+                </section>
+
+                <section class="application-step" data-application-step="3">
+                    <div class="application-step-heading">
+                        <p class="eyebrow">Step 3</p>
+                        <h2>What would you love to change?</h2>
+                    </div>
+
+                    <div class="field-grid">
+                        <div class="form-field full">
+                            <label for="success">
+                                Imagine it is one year from today. What would need to change for you to say,
+                                “I’m so glad I took this step”?
+                            </label>
+                            <textarea id="success" name="success" required></textarea>
+                        </div>
+
+                        <fieldset class="choice-field form-field full">
+                            <legend>What are your top priorities right now?</legend>
+                            <p class="field-helper">Choose up to three.</p>
+                            <div class="choice-grid">
+                                <label class="choice-card"><input type="checkbox" name="priorities" value="Sustainable fat loss"><span>Sustainable fat loss</span></label>
+                                <label class="choice-card"><input type="checkbox" name="priorities" value="Better energy"><span>Better energy</span></label>
+                                <label class="choice-card"><input type="checkbox" name="priorities" value="Strength and fitness"><span>Strength and fitness</span></label>
+                                <label class="choice-card"><input type="checkbox" name="priorities" value="Better sleep"><span>Better sleep</span></label>
+                                <label class="choice-card"><input type="checkbox" name="priorities" value="Hormonal wellbeing"><span>Hormonal wellbeing</span></label>
+                                <label class="choice-card"><input type="checkbox" name="priorities" value="Confidence and consistency"><span>Confidence and consistency</span></label>
+                            </div>
+                        </fieldset>
+
+                        <div class="form-field full">
+                            <label for="goals-importance">Why are these goals important to you?</label>
+                            <textarea id="goals-importance" name="goalsImportance" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="application-actions">
+                        <button class="btn btn-secondary" type="button" data-application-back>← Back</button>
+                        <button class="btn btn-primary" type="button" data-application-next>Continue <span class="btn-arrow">→</span></button>
+                    </div>
+                </section>
+
+                <section class="application-step" data-application-step="4">
+                    <div class="application-step-heading">
+                        <p class="eyebrow">Step 4</p>
+                        <h2>What has made progress difficult?</h2>
+                    </div>
+
+                    <div class="field-grid">
+                        <div class="form-field full">
+                            <label for="obstacles">What do you believe has stopped you from reaching your goals until now?</label>
+                            <textarea id="obstacles" name="obstacles" required></textarea>
+                        </div>
+
+                        <fieldset class="choice-field form-field full">
+                            <legend>What have you already tried?</legend>
+                            <p class="field-helper">Choose all that apply.</p>
+                            <div class="choice-grid">
+                                <label class="choice-card"><input type="checkbox" name="triedOptions" value="Diets"><span>Diets</span></label>
+                                <label class="choice-card"><input type="checkbox" name="triedOptions" value="Calorie counting"><span>Calorie counting</span></label>
+                                <label class="choice-card"><input type="checkbox" name="triedOptions" value="Exercise programmes"><span>Exercise programmes</span></label>
+                                <label class="choice-card"><input type="checkbox" name="triedOptions" value="Apps or online plans"><span>Apps or online plans</span></label>
+                                <label class="choice-card"><input type="checkbox" name="triedOptions" value="Coaching"><span>Coaching</span></label>
+                                <label class="choice-card"><input type="checkbox" name="triedOptions" value="Nothing consistently"><span>Nothing consistently</span></label>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="choice-field form-field full">
+                            <legend>What usually causes you to fall off track?</legend>
+                            <div class="choice-grid">
+                                <label class="choice-card"><input type="checkbox" name="fallOffReasons" value="Busy schedule"><span>Busy schedule</span></label>
+                                <label class="choice-card"><input type="checkbox" name="fallOffReasons" value="Stress or emotional eating"><span>Stress or emotional eating</span></label>
+                                <label class="choice-card"><input type="checkbox" name="fallOffReasons" value="Lack of accountability"><span>Lack of accountability</span></label>
+                                <label class="choice-card"><input type="checkbox" name="fallOffReasons" value="All-or-nothing thinking"><span>All-or-nothing thinking</span></label>
+                                <label class="choice-card"><input type="checkbox" name="fallOffReasons" value="Low energy or poor sleep"><span>Low energy or poor sleep</span></label>
+                                <label class="choice-card"><input type="checkbox" name="fallOffReasons" value="Not knowing what to do"><span>Not knowing what to do</span></label>
+                            </div>
+                        </fieldset>
+
+                        <input id="tried" name="tried" type="hidden">
+                    </div>
+
+                    <div class="application-actions">
+                        <button class="btn btn-secondary" type="button" data-application-back>← Back</button>
+                        <button class="btn btn-primary" type="button" data-application-next>Continue <span class="btn-arrow">→</span></button>
+                    </div>
+                </section>
+
+                <section class="application-step" data-application-step="5">
+                    <div class="application-step-heading">
+                        <p class="eyebrow">Step 5</p>
+                        <h2>Why does support matter now?</h2>
+                    </div>
+
+                    <div class="field-grid">
+                        <div class="form-field full">
+                            <label for="why-now">Why are you looking for support now?</label>
+                            <textarea id="why-now" name="whyNow" required></textarea>
+                        </div>
+
+                        <div class="form-field full">
+                            <label for="nothing-changes">If nothing changes over the next 12 months, how would that affect your life?</label>
+                            <textarea id="nothing-changes" name="nothingChanges" required></textarea>
+                        </div>
+
+                        <div class="form-field full">
+                            <label for="commitment">On a scale of 1–10, how committed are you to making yourself a priority?</label>
+                            <div class="commitment-scale">
+                                <input id="commitment" name="commitment" type="range" min="1" max="10" value="7">
+                                <div class="commitment-value">
+                                    <strong data-commitment-value>7</strong><span>/10</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="readiness">Which statement describes you best?</label>
+                            <select id="readiness" name="readiness" required>
+                                <option value="">Choose one</option>
+                                <option>I am ready to take action now</option>
+                                <option>I am interested but need clarity</option>
+                                <option>I am exploring my options</option>
+                                <option>I am not ready yet</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="importance">How important is it for you to solve this challenge?</label>
+                            <select id="importance" name="importance" required>
+                                <option value="">Choose one</option>
+                                <option>Extremely important</option>
+                                <option>Very important</option>
+                                <option>Important</option>
+                                <option>Somewhat important</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="application-actions">
+                        <button class="btn btn-secondary" type="button" data-application-back>← Back</button>
+                        <button class="btn btn-primary" type="button" data-application-next>Continue <span class="btn-arrow">→</span></button>
+                    </div>
+                </section>
+
+                <section class="application-step" data-application-step="6">
+                    <div class="application-step-heading">
+                        <p class="eyebrow">Step 6</p>
+                        <h2>What kind of coaching would support you?</h2>
+                    </div>
+
+                    <div class="field-grid">
+                        <fieldset class="choice-field form-field full">
+                            <legend>What are you looking for in a coach?</legend>
+                            <p class="field-helper">Choose all that apply.</p>
+                            <div class="choice-grid">
+                                <label class="choice-card"><input type="checkbox" name="coachNeeds" value="Accountability"><span>Accountability</span></label>
+                                <label class="choice-card"><input type="checkbox" name="coachNeeds" value="Nutrition guidance"><span>Nutrition guidance</span></label>
+                                <label class="choice-card"><input type="checkbox" name="coachNeeds" value="Habit coaching"><span>Habit coaching</span></label>
+                                <label class="choice-card"><input type="checkbox" name="coachNeeds" value="Menopause support"><span>Menopause support</span></label>
+                                <label class="choice-card"><input type="checkbox" name="coachNeeds" value="Strength and movement guidance"><span>Strength and movement guidance</span></label>
+                                <label class="choice-card"><input type="checkbox" name="coachNeeds" value="Mindset and confidence support"><span>Mindset and confidence support</span></label>
+                            </div>
+                        </fieldset>
+
+                        <div class="form-field">
+                            <label for="coaching-style">Which coaching style motivates you most?</label>
+                            <select id="coaching-style" name="coachingStyle" required>
+                                <option value="">Choose one</option>
+                                <option>Warm, supportive and encouraging</option>
+                                <option>Direct and action-oriented</option>
+                                <option>A balanced combination</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="start-timeline">When would you ideally like to start?</label>
+                            <select id="start-timeline" name="startTimeline" required>
+                                <option value="">Choose one</option>
+                                <option>As soon as possible</option>
+                                <option>Within the next month</option>
+                                <option>Within 2–3 months</option>
+                                <option>I am not sure yet</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="investment-readiness">Are you open to investing in long-term, sustainable coaching if it feels aligned?</label>
+                            <select id="investment-readiness" name="investmentReadiness" required>
+                                <option value="">Choose one</option>
+                                <option>Yes</option>
+                                <option>Maybe, I need more clarity</option>
+                                <option>No</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="decision-maker">Are you the decision-maker for this investment?</label>
+                            <select id="decision-maker" name="decisionMaker" required>
+                                <option value="">Choose one</option>
+                                <option>Yes</option>
+                                <option>I will discuss it with my partner or family</option>
+                                <option>Not sure</option>
+                            </select>
+                        </div>
+
+                        <input id="support" name="support" type="hidden">
+                    </div>
+
+                    <div class="application-actions">
+                        <button class="btn btn-secondary" type="button" data-application-back>← Back</button>
+                        <button class="btn btn-primary" type="button" data-application-next>Continue <span class="btn-arrow">→</span></button>
+                    </div>
+                </section>
+
+                <section class="application-step" data-application-step="7">
+                    <div class="application-step-heading">
+                        <p class="eyebrow">Step 7</p>
+                        <h2>One final check before you submit</h2>
+                    </div>
+
+                    <div class="field-grid">
+                        <div class="form-field full">
+                            <label for="good-fit">Why do you feel NourisHer might be a good fit for you?</label>
+                            <textarea id="good-fit" name="goodFit" required></textarea>
+                        </div>
+
+                        <div class="form-field full">
+                            <label for="additional-notes">Is there anything else you would like Sushma to know?</label>
+                            <textarea id="additional-notes" name="additionalNotes"></textarea>
+                        </div>
+                    </div>
+
+                    <label class="consent-row">
+                        <input id="consent" name="consent" type="checkbox" required>
+                        <span>
+                            I understand this is a coaching application and not medical care.
+                            I consent to being contacted about my application.
+                        </span>
+                    </label>
+
+                    <div class="application-actions">
+                        <button class="btn btn-secondary" type="button" data-application-back>← Back</button>
+                        <button class="btn btn-primary" type="submit">
+                            Submit my application <span class="btn-arrow">→</span>
+                        </button>
+                    </div>
+                </section>
+            </form>
+
             </div>
-
-            <div class="form-field full">
-                <label for="additional-notes">
-                    Is there anything else you would like Sushma to know
-                    before you speak?
-                </label>
-                <textarea
-                    id="additional-notes"
-                    name="additionalNotes"
-                ></textarea>
-            </div>
-
-            <!-- Maintains compatibility with the existing backend -->
-            <input
-                id="tried"
-                name="tried"
-                type="hidden"
-            />
-
-            <input
-                id="support"
-                name="support"
-                type="hidden"
-            />
         </div>
+    </main>
 
-        <label class="consent-row">
-            <input
-                id="consent"
-                name="consent"
-                required
-                type="checkbox"
-            />
-
-            <span>
-                I understand that NourisHer is a coaching programme,
-                not medical diagnosis or treatment. I understand that
-                completing this application does not guarantee
-                acceptance, and I consent to being contacted about my
-                application.
-            </span>
-        </label>
-
-        <div class="application-actions">
-            <button
-                class="btn btn-ghost"
-                type="button"
-                data-application-back
-            >
-                ← Back
-            </button>
-
-            <button
-                class="btn btn-primary"
-                type="submit"
-            >
-                Submit my application
-                <span class="btn-arrow">→</span>
-            </button>
+    <footer class="journey-footer">
+        <div class="journey-footer-inner">
+            <span>© 2026 Eat Well Live Well · Coaching by Sushma</span>
+            <span>Educational wellness guidance—not medical diagnosis or treatment.</span>
         </div>
+    </footer>
 
-        <p class="form-note">
-            Your responses are confidential and are personally reviewed
-            by Sushma before your Clarity Call.
-        </p>
-    </section>
-</form>
-</div>
-</main>
-<footer class="journey-footer">
-<div class="journey-footer-inner">
-<span>© 2026 Eat Well Live Well · Coaching by Sushma</span>
-<span>Educational wellness guidance—not medical diagnosis or treatment.</span>
-</div>
-</footer>
-<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/intlTelInput.min.js"></script>
-<script type="module" src="/static/funnel.js?v=20"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/build/js/intlTelInput.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const params = new URLSearchParams(window.location.search);
+            const started = params.get("start") === "1";
+
+            const intro = document.getElementById("application-intro");
+            const formSection = document.getElementById(
+                "application-form-section"
+            );
+
+            if (!intro || !formSection) {
+                return;
+            }
+
+            intro.hidden = started;
+            formSection.hidden = !started;
+
+            if (started) {
+                window.scrollTo({ top: 0, behavior: "auto" });
+            }
+        });
+    </script>
+
+    <script type="module" src="/static/funnel.js?v=21"></script>
 </body>
 </html>
