@@ -3962,3 +3962,15 @@ button {
 .application-start[hidden] {
   display: none !important;
 }
+.application-progress {
+  position: sticky;
+  top: 78px;
+  z-index: 20;
+  margin-bottom: 28px;
+  background: #fff;
+}
+@media (max-width: 650px) {
+  .application-progress {
+    top: 68px;
+  }
+}
