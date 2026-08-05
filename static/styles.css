@@ -3919,23 +3919,8 @@ button {
     width: 100%;
   }
 }
-.application-progress {
-  position: static;
-  top: 12px;
-  z-index: 20;
-  padding: 12px 16px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 8px 24px rgba(27, 37, 52, 0.08);
-  backdrop-filter: blur(10px);
-}
 
-@media (min-width: 761px) {
-  .application-progress {
-    top: 92px;
-  }
-}
+
 .application-start {
   max-width: 720px;
   margin: 32px auto 0;
@@ -3962,28 +3947,29 @@ button {
 .application-start[hidden] {
   display: none !important;
 }
+
 .application-progress {
-  position: fixed;
-  top: 78px;
-  left: 50%;
+  position: sticky;
+  top: 64px;
   z-index: 30;
 
-  width: min(1120px, calc(100% - 64px));
-  transform: translateX(-50%);
+  width: 100%;
+  margin: 0 0 28px;
 
-  margin: 0;
   background: #fff;
 }
-#transformation-application {
-  padding-top: 125px;
+
+/* Leave enough room when JavaScript scrolls to a step */
+.application-step {
+  scroll-margin-top: 180px;
 }
+
 @media (max-width: 650px) {
   .application-progress {
-    top: 68px;
-    width: calc(100% - 34px);
+    top: 58px;
   }
 
-  #transformation-application {
-    padding-top: 115px;
+  .application-step {
+    scroll-margin-top: 165px;
   }
 }
