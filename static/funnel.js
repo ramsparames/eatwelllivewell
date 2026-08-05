@@ -796,6 +796,12 @@ if (applicationForm) {
 
             saveDraft();
             showStep(currentStep + 1);
+			document
+    			.querySelector(".application-progress")
+		    ?.scrollIntoView({
+		        behavior: "smooth",
+		        block: "start"
+		    });
         });
     });
 
@@ -805,6 +811,12 @@ if (applicationForm) {
         button.addEventListener("click", () => {
             saveDraft();
             showStep(currentStep - 1);
+			document
+		    .querySelector(".application-progress")
+		    ?.scrollIntoView({
+		        behavior: "smooth",
+		        block: "start"
+		    });
         });
     });
 
