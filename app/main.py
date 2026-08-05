@@ -78,7 +78,10 @@ def assessment():
 def results():
     return FileResponse(BASE_DIR / "results.html")
 
-
+@app.get("/join-form")
+def join_form():
+    return FileResponse(BASE_DIR / "join-form.html")
+    
 @app.get("/join")
 def join():
     return FileResponse(BASE_DIR / "join.html")
