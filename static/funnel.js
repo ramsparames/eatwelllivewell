@@ -400,6 +400,17 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
 const applicationForm = document.querySelector(
     "[data-application-form]"
 );
+const beginApplicationButton = document.querySelector(
+    "[data-begin-application]"
+);
+
+const applicationSection = document.querySelector(
+    "[data-application-section]"
+);
+
+const applicationStart = document.querySelector(
+    ".application-start"
+);
 const beginApplicationButton =
     document.querySelector(
         "[data-begin-application]"
@@ -823,14 +834,21 @@ if (applicationForm) {
 			beginApplicationButton?.addEventListener(
 			    "click",
 			    () => {
-			        applicationForm.hidden = false;
-	
-		        document
-		            .querySelector(".application-start")
-		            ?.setAttribute("hidden", "");
-	
-	        	showStep(0);
-	    		}
+			        if (!applicationSection) {
+			            console.error(
+			                "Application section was not found."
+			            );
+			            return;
+			        }
+			
+			        applicationSection.hidden = false;
+			
+			        if (applicationStart) {
+			            applicationStart.hidden = true;
+			        }
+			
+			        showStep(0);
+			    }
 			);
             showStep(currentStep + 1);
         });
@@ -862,8 +880,9 @@ if (applicationForm) {
             }
         });
     });
-
+	if (!applicationSection?.hidden) {
     showStep(currentStep);
+	}
 
     applicationForm.addEventListener(
         "submit",
