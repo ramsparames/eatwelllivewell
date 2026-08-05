@@ -3963,14 +3963,27 @@ button {
   display: none !important;
 }
 .application-progress {
-  position: sticky;
+  position: fixed;
   top: 78px;
-  z-index: 20;
-  margin-bottom: 28px;
+  left: 50%;
+  z-index: 30;
+
+  width: min(1120px, calc(100% - 64px));
+  transform: translateX(-50%);
+
+  margin: 0;
   background: #fff;
+}
+#transformation-application {
+  padding-top: 125px;
 }
 @media (max-width: 650px) {
   .application-progress {
     top: 68px;
+    width: calc(100% - 34px);
+  }
+
+  #transformation-application {
+    padding-top: 115px;
   }
 }
