@@ -177,7 +177,7 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
             phoneInput.setCustomValidity("");
             intro.hidden = true;
             assessment.hidden = false;
-
+			
             requestAnimationFrame(() => {
                 assessment.classList.add("active");
                 const header = document.querySelector(".site-header");
@@ -400,6 +400,10 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
 const applicationForm = document.querySelector(
     "[data-application-form]"
 );
+const beginApplicationButton =
+    document.querySelector(
+        "[data-begin-application]"
+    );
 
 if (applicationForm) {
     const savedLead = load(LEAD_KEY) || {};
@@ -472,35 +476,35 @@ if (applicationForm) {
             stepLabel.textContent =
                 `Step ${currentStep + 1} of ${steps.length}`;
         }
-
-        requestAnimationFrame(() => {
-		    const progress = document.querySelector(
-		        ".application-progress"
-		    );
-		
-		    const header = document.querySelector(
-		        ".journey-header"
-		    );
-		
-		    if (!progress) {
-		        return;
-		    }
-		
-		    const headerHeight =
-		        header?.offsetHeight || 0;
-		
-		    const top =
-		        progress.getBoundingClientRect().top
-		        + window.scrollY
-		        - headerHeight
-		        - 16;
-		
-		    window.scrollTo({
-		        top: Math.max(0, top),
-		        behavior: "smooth",
-		    });
-		});
-    };
+		if (!applicationForm.hidden) {
+	        requestAnimationFrame(() => {
+			    const progress = document.querySelector(
+			        ".application-progress"
+			    );
+			
+			    const header = document.querySelector(
+			        ".journey-header"
+			    );
+			
+			    if (!progress) {
+			        return;
+			    }
+			
+			    const headerHeight =
+			        header?.offsetHeight || 0;
+			
+			    const top =
+			        progress.getBoundingClientRect().top
+			        + window.scrollY
+			        - headerHeight
+			        - 16;
+			
+			    window.scrollTo({
+			        top: Math.max(0, top),
+			        behavior: "smooth",
+			    });
+			});
+		}
 
     const findInvalidRequiredField = (step) => {
         const requiredFields = Array.from(
@@ -816,6 +820,18 @@ if (applicationForm) {
             }
 
             saveDraft();
+			beginApplicationButton?.addEventListener(
+			    "click",
+			    () => {
+			        applicationForm.hidden = false;
+	
+		        document
+		            .querySelector(".application-start")
+		            ?.setAttribute("hidden", "");
+	
+	        	showStep(0);
+	    		}
+			);
             showStep(currentStep + 1);
         });
     });
