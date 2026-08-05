@@ -481,27 +481,9 @@ if (applicationForm) {
 		        return;
 		    }
 		
-		    const header = document.querySelector(
-		        ".journey-header"
-		    );
-		
-		    const progress = document.querySelector(
-		        ".application-progress"
-		    );
-		
-		    const offset =
-		        (header?.offsetHeight || 0)
-		        + (progress?.offsetHeight || 0)
-		        + 24;
-		
-		    const targetTop =
-		        activeStep.getBoundingClientRect().top
-		        + window.scrollY
-		        - offset;
-		
-		    window.scrollTo({
-		        top: Math.max(0, targetTop),
+		    activeStep.scrollIntoView({
 		        behavior: "smooth",
+		        block: "start",
 		    });
 		});
 	};
