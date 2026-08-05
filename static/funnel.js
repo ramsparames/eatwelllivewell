@@ -177,7 +177,7 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
             phoneInput.setCustomValidity("");
             intro.hidden = true;
             assessment.hidden = false;
-			
+
             requestAnimationFrame(() => {
                 assessment.classList.add("active");
                 const header = document.querySelector(".site-header");
@@ -400,17 +400,6 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
 const applicationForm = document.querySelector(
     "[data-application-form]"
 );
-const beginApplicationButton = document.querySelector(
-    "[data-begin-application]"
-);
-
-const applicationSection = document.querySelector(
-    "[data-application-section]"
-);
-
-const applicationStart = document.querySelector(
-    ".application-start"
-);
 
 if (applicationForm) {
     const savedLead = load(LEAD_KEY) || {};
@@ -483,35 +472,14 @@ if (applicationForm) {
             stepLabel.textContent =
                 `Step ${currentStep + 1} of ${steps.length}`;
         }
-		if (!applicationForm.hidden) {
-	        requestAnimationFrame(() => {
-			    const progress = document.querySelector(
-			        ".application-progress"
-			    );
-			
-			    const header = document.querySelector(
-			        ".journey-header"
-			    );
-			
-			    if (!progress) {
-			        return;
-			    }
-			
-			    const headerHeight =
-			        header?.offsetHeight || 0;
-			
-			    const top =
-			        progress.getBoundingClientRect().top
-			        + window.scrollY
-			        - headerHeight
-			        - 16;
-			
-			    window.scrollTo({
-			        top: Math.max(0, top),
-			        behavior: "smooth",
-			    });
-			});
-		}
+
+        document.querySelector(
+            ".application-progress"
+        )?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+    };
 
     const findInvalidRequiredField = (step) => {
         const requiredFields = Array.from(
@@ -818,47 +786,18 @@ if (applicationForm) {
         saveDraft
     );
 
-	applicationForm.querySelectorAll(
-    "[data-application-next]"
-).forEach((button) => {
-    button.addEventListener("click", () => {
-        if (!validateStep(currentStep)) {
-            return;
-        }
+    applicationForm.querySelectorAll(
+        "[data-application-next]"
+    ).forEach((button) => {
+        button.addEventListener("click", () => {
+            if (!validateStep(currentStep)) {
+                return;
+            }
 
-        saveDraft();
-        showStep(currentStep + 1);
+            saveDraft();
+            showStep(currentStep + 1);
+        });
     });
-});
-
-	applicationForm.querySelectorAll(
-	    "[data-application-back]"
-	).forEach((button) => {
-	    button.addEventListener("click", () => {
-	        saveDraft();
-	        showStep(currentStep - 1);
-	    });
-	});
-	
-	beginApplicationButton?.addEventListener(
-	    "click",
-	    () => {
-	        if (!applicationSection) {
-	            console.error(
-	                "Application section was not found."
-	            );
-	            return;
-	        }
-	
-	        applicationSection.hidden = false;
-	
-	        if (applicationStart) {
-	            applicationStart.hidden = true;
-	        }
-	
-	        showStep(0);
-	    }
-	);
 
     applicationForm.querySelectorAll(
         "[data-application-back]"
@@ -886,9 +825,8 @@ if (applicationForm) {
             }
         });
     });
-	if (!applicationSection?.hidden) {
+
     showStep(currentStep);
-	}
 
     applicationForm.addEventListener(
         "submit",
@@ -1179,7 +1117,6 @@ if (applicationForm) {
             });
         }
     }
-}
 // Prefill the Synamate Clarity Call booking form
 const clarityBookingLink = document.querySelector(
     "[data-clarity-booking-link]"
@@ -1240,5 +1177,5 @@ if (clarityBookingLink) {
 
     clarityBookingLink.href =
         bookingUrl.toString();
-}
+	}
 })();
