@@ -3966,3 +3966,7 @@ button {
 .application-start[hidden] {
   display: none !important;
 }
+#application-section[hidden],
+.application-start[hidden] {
+  display: none !important;
+}
