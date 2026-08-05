@@ -1150,6 +1150,7 @@ a {
 
     .coach-workspace-panel {
         position: static;
+        top: auto;
     }
 }
 
@@ -1799,4 +1800,36 @@ a {
   position: relative;
   z-index: 1;
   clear: both;
+}
+/* Coach panel must remain inside its own grid row */
+.lead-workspace-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1.45fr)
+        minmax(320px, 0.85fr);
+    align-items: start;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.lead-workspace-grid > * {
+    min-width: 0;
+}
+
+.coach-workspace-panel {
+    position: static !important;
+    top: auto !important;
+    height: auto;
+    max-height: none;
+}
+
+.detail-grid {
+    clear: both;
+    width: 100%;
+}
+
+@media (max-width: 920px) {
+    .lead-workspace-grid {
+        grid-template-columns: 1fr;
+    }
 }
