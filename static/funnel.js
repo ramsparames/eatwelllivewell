@@ -474,18 +474,12 @@ if (applicationForm) {
 	            `Step ${currentStep + 1} of ${steps.length}`;
 	    }
 	
-	    requestAnimationFrame(() => {
-		    const activeStep = steps[currentStep];
-		
-		    if (!activeStep) {
-		        return;
-		    }
-		
-		    activeStep.scrollIntoView({
+	    rsetTimeout(() => {
+		    window.scrollTo({
+		        top: 0,
 		        behavior: "smooth",
-		        block: "start",
 		    });
-		});
+		}, 50);
 	};
 
     const findInvalidRequiredField = (step) => {
