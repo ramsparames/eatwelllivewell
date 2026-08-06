@@ -446,7 +446,7 @@ if (applicationForm) {
         document.getElementById(id)?.value.trim() || ""
     );
 
-    const showStep = (stepIndex) => {
+    const showStep = (stepIndex, shouldScroll = true) => {
 	    const safeStep = Math.max(
 	        0,
 	        Math.min(stepIndex, steps.length - 1)
@@ -458,7 +458,7 @@ if (applicationForm) {
 	            index === safeStep
 	        );
 	    });
-
+	
 	    currentStep = safeStep;
 	
 	    const progressPercent =
@@ -474,12 +474,14 @@ if (applicationForm) {
 	            `Step ${currentStep + 1} of ${steps.length}`;
 	    }
 	
-	    rsetTimeout(() => {
-		    window.scrollTo({
-		        top: 0,
-		        behavior: "smooth",
-		    });
-		}, 50);
+	    if (shouldScroll) {
+	        requestAnimationFrame(() => {
+	            window.scrollTo({
+	                top: 0,
+	                behavior: "smooth",
+	            });
+	        });
+	    }
 	};
 
     const findInvalidRequiredField = (step) => {
@@ -827,7 +829,7 @@ if (applicationForm) {
         });
     });
 
-    showStep(currentStep);
+    showStep(currentStep, false);
 
     applicationForm.addEventListener(
         "submit",
