@@ -476,11 +476,29 @@ if (applicationForm) {
 	
 	    if (shouldScroll) {
 	        requestAnimationFrame(() => {
-	            window.scrollTo({
-	                top: 0,
-	                behavior: "smooth",
-	            });
-	        });
+			    const heading = steps[currentStep].querySelector(
+			        ".application-step-heading"
+			    );
+			
+			    if (!heading) {
+			        return;
+			    }
+			
+			    const headerHeight =
+			        document.querySelector(".journey-header")
+			            ?.offsetHeight || 0;
+			
+			    const y =
+			        heading.getBoundingClientRect().top
+			        + window.scrollY
+			        - headerHeight
+			        - 16;
+			
+			    window.scrollTo({
+			        top: y,
+			        behavior: "smooth",
+			    });
+			});
 	    }
 	};
 
