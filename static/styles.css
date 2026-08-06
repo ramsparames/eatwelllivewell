@@ -3660,11 +3660,6 @@ button {
    MULTI-STEP TRANSFORMATION APPLICATION
    ========================================================= */
 
-.application-progress {
-  max-width: 940px;
-  margin: 36px auto 22px;
-}
-
 .application-step {
   display: none;
 }
@@ -3949,14 +3944,9 @@ button {
 }
 
 .application-progress {
-  position: sticky;
-  top: 64px;
-  z-index: 30;
-
+  position: static;
   width: 100%;
   margin: 0 0 28px;
-
-  background: #fff;
 }
 
 /* Leave enough room when JavaScript scrolls to a step */
