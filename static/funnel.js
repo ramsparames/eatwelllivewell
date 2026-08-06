@@ -858,7 +858,17 @@ if (applicationForm) {
         "submit",
         async (event) => {
             event.preventDefault();
-
+			const submitButton = applicationForm.querySelector(
+		    "[data-application-submit]"
+			);
+			
+			const submitLabel = applicationForm.querySelector(
+			    "[data-submit-label]"
+			);
+			
+			const submitArrow = applicationForm.querySelector(
+			    "[data-submit-arrow]"
+			);
             // Recheck every section before sending.
             for (
                 let index = 0;
@@ -870,7 +880,7 @@ if (applicationForm) {
                     return;
                 }
             }
-
+			
             const submitButton =
                 applicationForm.querySelector(
                     'button[type="submit"]'
