@@ -474,32 +474,37 @@ if (applicationForm) {
 	            `Step ${currentStep + 1} of ${steps.length}`;
 	    }
 	
-	    if (shouldScroll) {
-	        requestAnimationFrame(() => {
-			    const heading = steps[currentStep].querySelector(
-			        ".application-step-heading"
-			    );
-			
-			    if (!heading) {
-			        return;
-			    }
-			
-			    const headerHeight =
-			        document.querySelector(".journey-header")
-			            ?.offsetHeight || 0;
-			
-			    const y =
-			        heading.getBoundingClientRect().top
-			        + window.scrollY
-			        - headerHeight
-			        - 16;
-			
-			    window.scrollTo({
-			        top: y,
-			        behavior: "smooth",
-			    });
-			});
+	    if (!shouldScroll) {
+	        return;
 	    }
+	
+	    requestAnimationFrame(() => {
+	        const progress = document.querySelector(
+	            ".application-progress"
+	        );
+	
+	        const header = document.querySelector(
+	            ".journey-header"
+	        );
+	
+	        if (!progress) {
+	            return;
+	        }
+	
+	        const headerHeight =
+	            header?.offsetHeight || 0;
+	
+	        const targetTop =
+	            progress.getBoundingClientRect().top
+	            + window.scrollY
+	            - headerHeight
+	            - 12;
+	
+	        window.scrollTo({
+	            top: Math.max(0, targetTop),
+	            behavior: "smooth",
+	        });
+	    });
 	};
 
     const findInvalidRequiredField = (step) => {
