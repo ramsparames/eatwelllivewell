@@ -1785,11 +1785,6 @@ a {
     background: #eeeeee;
     color: #666;
 }
-/* Prevent the coach workspace from overlapping the sections below */
-.lead-workspace-grid {
-  align-items: start;
-  margin-bottom: 32px;
-}
 
 .coach-workspace-panel {
   position: static;
@@ -1832,4 +1827,16 @@ a {
     .lead-workspace-grid {
         grid-template-columns: 1fr;
     }
+}
+/* Keep the coach workspace inside the normal page flow */
+.crm-main-grid {
+    align-items: start;
+}
+
+.crm-side-column,
+.coach-workspace-panel {
+    position: static !important;
+    top: auto !important;
+    height: auto;
+    max-height: none;
 }
