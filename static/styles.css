@@ -3948,18 +3948,3 @@ button {
   width: 100%;
   margin: 0 0 28px;
 }
-
-/* Leave enough room when JavaScript scrolls to a step */
-.application-step {
-  scroll-margin-top: 180px;
-}
-
-@media (max-width: 650px) {
-  .application-progress {
-    top: 58px;
-  }
-
-  .application-step {
-    scroll-margin-top: 165px;
-  }
-}
