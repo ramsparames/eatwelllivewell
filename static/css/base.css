@@ -1,1 +1,35 @@
+:root{
 
+--font-display:46px;
+--font-h1:36px;
+--font-h2:28px;
+--font-h3:22px;
+
+--text: #232323;
+--muted:#6c7280;
+
+--purple:#5B0E91;
+--purple-light:#F7F0FD;
+
+--green:#2D7A4D;
+--green-light:#EEF8F1;
+
+--orange:#D97706;
+--orange-light:#FFF5E6;
+
+--red:#D64545;
+
+--radius-lg:22px;
+--radius-md:16px;
+--radius-sm:12px;
+
+--shadow:
+0 8px 24px rgba(0,0,0,.06);
+
+--space-1:8px;
+--space-2:16px;
+--space-3:24px;
+--space-4:32px;
+--space-5:48px;
+
+}
