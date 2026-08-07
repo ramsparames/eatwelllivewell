@@ -22,7 +22,7 @@ def set_templates(template_engine: Jinja2Templates) -> None:
     templates = template_engine
 
 
-@router.get("/dashboard", response_class=HTMLResponse)
+@router.get("/dashboard/leads", response_class=HTMLResponse)
 def dashboard(
     request: Request,
     q: str = "",
@@ -351,6 +351,60 @@ def update_lead(
         url=f"/dashboard/leads/{lead_type}/{lead_id}?saved=1",
         status_code=303,
     )
+@router.get(
+    "/dashboard",
+    response_class=HTMLResponse,
+)
+def dashboard_home(request: Request):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    clients = ClientService.dashboard_clients()
+
+    calls_today = ClientService.calls_today()
+
+    calls_this_week = (
+        ClientService.calls_this_week()
+    )
+
+    active_clients = [
+        client
+        for client in clients
+        if client.get("status") == "active"
+    ]
+
+    all_leads = get_all_leads()
+
+    new_leads = 0
+
+    for lead in all_leads:
+        status = (
+            lead.get("application_status")
+            or lead.get("status")
+            or "new"
+        )
+
+        if status == "new":
+            new_leads += 1
+
+    return templates.TemplateResponse(
+        "dashboard_home.html",
+        {
+            "request": request,
+            "active_clients":
+                active_clients,
+            "calls_today":
+                calls_today,
+            "calls_this_week":
+                calls_this_week,
+            "new_leads":
+                new_leads,
+        },
+    )
+    
 @router.get(
     "/dashboard/clients",
     response_class=HTMLResponse,
