@@ -2116,3 +2116,296 @@ a {
         padding: 20px;
     }
 }
+/* =========================================
+   NOURISHER COACHING DASHBOARD
+   ========================================= */
+
+.coaching-dashboard {
+    display: grid;
+    gap: 24px;
+}
+
+.coaching-dashboard-header h1 {
+    margin: 5px 0 6px;
+    font-size: 42px;
+}
+
+.coaching-dashboard-header > div > p:last-child {
+    margin: 0;
+    color: var(--muted);
+}
+
+.coaching-summary-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.coaching-summary-card {
+    padding: 22px 24px;
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    background: #fff;
+    box-shadow: var(--shadow);
+}
+
+.coaching-summary-card span {
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.coaching-summary-card strong {
+    display: block;
+
+    margin-top: 8px;
+
+    color: var(--text);
+
+    font-size: 34px;
+    line-height: 1;
+}
+
+.coaching-agenda {
+    display: grid;
+    gap: 10px;
+}
+
+.coaching-agenda-item {
+    display: grid;
+
+    grid-template-columns:
+        110px
+        minmax(0, 1fr)
+        auto;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 17px 18px;
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    color: inherit;
+    text-decoration: none;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.coaching-agenda-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.coaching-agenda-time {
+    color: var(--green-700);
+    font-weight: 800;
+}
+
+.coaching-agenda-item div:nth-child(2) {
+    display: grid;
+    gap: 3px;
+}
+
+.coaching-agenda-item div:nth-child(2) span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.coaching-open-link {
+    color: var(--purple);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.coaching-empty-agenda {
+    display: grid;
+    gap: 5px;
+
+    padding: 24px;
+
+    border-radius: 16px;
+
+    background: var(--sage-tint);
+}
+
+.coaching-empty-agenda span {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.coaching-client-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+}
+
+.coaching-client-card {
+    display: grid;
+    gap: 18px;
+
+    padding: 22px;
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    color: inherit;
+    background: #fff;
+
+    text-decoration: none;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.coaching-client-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.coaching-client-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.coaching-client-avatar {
+    width: 46px;
+    height: 46px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 14px;
+
+    color: #fff;
+    background: var(--green-700);
+
+    font-weight: 800;
+}
+
+.coaching-client-status {
+    padding: 6px 10px;
+
+    border-radius: 999px;
+
+    color: var(--muted);
+    background: var(--sage-tint);
+
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.coaching-client-status.is-active {
+    color: var(--green-700);
+    background: var(--green-50);
+}
+
+.coaching-client-name h3 {
+    margin: 0;
+    font-size: 21px;
+}
+
+.coaching-client-name p {
+    margin: 5px 0 0;
+
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.coaching-client-metrics {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.coaching-client-metrics > div {
+    display: grid;
+    gap: 4px;
+
+    padding: 13px;
+
+    border-radius: 14px;
+
+    background: var(--sage-tint);
+}
+
+.coaching-client-metrics span,
+.coaching-client-next span {
+    color: var(--muted);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.coaching-client-metrics strong {
+    font-size: 15px;
+}
+
+.coaching-client-progress {
+    color: var(--green-700);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.coaching-client-next {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    gap: 15px;
+
+    padding-top: 16px;
+
+    border-top: 1px solid var(--border);
+}
+
+.coaching-client-next > div {
+    display: grid;
+    gap: 5px;
+}
+
+.coaching-client-next > strong {
+    color: var(--purple);
+    font-size: 12px;
+}
+
+@media (max-width: 800px) {
+
+    .coaching-summary-grid,
+    .coaching-client-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .coaching-agenda-item {
+        grid-template-columns:
+            90px
+            minmax(0, 1fr);
+    }
+
+    .coaching-open-link {
+        display: none;
+    }
+}
