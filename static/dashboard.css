@@ -3249,3 +3249,92 @@ a.coach-home-stat:hover {
         grid-template-columns: 1fr;
     }
 }
+.daily-tracking-form {
+    display: grid;
+    gap: 20px;
+}
+
+.daily-tracking-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.tracking-check-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    min-height: 46px;
+    padding: 0 14px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: #fff;
+}
+
+.tracking-check-field input {
+    width: 18px;
+    height: 18px;
+}
+
+.tracking-check-field label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.tracking-history {
+    display: grid;
+    gap: 10px;
+
+    margin-top: 28px;
+    padding-top: 22px;
+
+    border-top: 1px solid var(--border);
+}
+
+.tracking-history h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+}
+
+.tracking-history-row {
+    display: grid;
+    grid-template-columns:
+        120px
+        repeat(6, minmax(80px, 1fr));
+
+    gap: 10px;
+    align-items: center;
+
+    padding: 12px 14px;
+
+    border-radius: 12px;
+    background: var(--bg);
+}
+
+.tracking-history-row span {
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+@media (max-width: 950px) {
+    .daily-tracking-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .tracking-history-row {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .daily-tracking-grid {
+        grid-template-columns: 1fr;
+    }
+}
