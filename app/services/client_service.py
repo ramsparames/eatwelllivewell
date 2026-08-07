@@ -131,7 +131,10 @@ class ClientService:
                 float(current_weight)
                 - float(initial_weight)
             )
-
+        active_actions = get_client_actions(
+            client_id,
+            status="active",
+        )
         return {
             "client": client,
             "checkins": checkins,
@@ -140,6 +143,7 @@ class ClientService:
             "weight_change": weight_change,
             "next_call_date": next_call_date,
             "next_call_time": next_call_time,
+            "active_actions": active_actions,
         }
     @staticmethod
     def dashboard_clients():
