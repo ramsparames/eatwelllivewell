@@ -1,3 +1,104 @@
+
+/* ==========================================================
+   NOURISHER COACH OS DESIGN SYSTEM
+   ========================================================== */
+
+:root {
+
+    /* Brand */
+
+    --purple: #5B0E91;
+    --purple-50: #F6F0FB;
+
+    --green: #3B7D4F;
+    --green-50: #EDF7EF;
+
+    --orange: #E6941F;
+    --orange-50: #FFF5E7;
+
+    --red: #D64545;
+
+    /* Text */
+
+    --text: #22252A;
+    --text-light: #6C7280;
+
+    /* Surface */
+
+    --bg: #F8F8F6;
+    --surface: #FFFFFF;
+    --border: #E8E7E4;
+
+    /* Radius */
+
+    --radius-xl:24px;
+    --radius-lg:20px;
+    --radius-md:16px;
+    --radius-sm:12px;
+
+    /* Shadow */
+
+    --shadow:
+        0 8px 30px rgba(0,0,0,.05);
+
+    /* Typography */
+
+    --font-display:44px;
+    --font-h1:34px;
+    --font-h2:28px;
+    --font-h3:22px;
+
+    --font-body:16px;
+    --font-small:14px;
+    --font-caption:12px;
+
+    /* Spacing */
+
+    --space-1:8px;
+    --space-2:16px;
+    --space-3:24px;
+    --space-4:32px;
+    --space-5:48px;
+}
+
+.page-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-end;
+
+    gap:32px;
+
+    margin-bottom:40px;
+
+}
+
+.page-title{
+
+    margin:0;
+
+    font-size:var(--font-display);
+
+    font-weight:700;
+
+    color:var(--text);
+
+}
+
+.page-description{
+
+    margin-top:10px;
+
+    max-width:650px;
+
+    color:var(--text-light);
+
+    line-height:1.7;
+
+}
+
 :root {
     --primary: #5b0e91;
     --primary-dark: #3f0866;
@@ -2422,7 +2523,7 @@ a {
     min-height: 100vh;
 
     display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-columns:190px 1fr;
 }
 
 .coach-sidebar {
@@ -2434,7 +2535,7 @@ a {
     display: flex;
     flex-direction: column;
 
-    padding: 26px 18px;
+    padding:20px 14px;
 
     border-right: 1px solid var(--border);
 
