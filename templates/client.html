@@ -69,6 +69,81 @@
 
         </div>
 
+        <section class="dashboard-panel">
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">Weekly coaching</p>
+            <h2>Add check-in</h2>
+        </div>
+    </div>
+
+    <form
+        method="post"
+        action="/dashboard/clients/{{ client.id }}/checkin"
+        class="crm-form"
+    >
+        <div class="crm-field">
+            <label>Call date</label>
+            <input
+                type="date"
+                name="call_date"
+                required
+            >
+        </div>
+
+        <div class="crm-field">
+            <label>Current weight (kg)</label>
+            <input
+                type="number"
+                step="0.1"
+                name="weight_kg"
+            >
+        </div>
+
+        <div class="crm-field">
+            <label>Stress (1–5)</label>
+            <input
+                type="number"
+                min="1"
+                max="5"
+                name="stress_score"
+            >
+        </div>
+
+        <div class="crm-field">
+            <label>Mood (1–5)</label>
+            <input
+                type="number"
+                min="1"
+                max="5"
+                name="mood_score"
+            >
+        </div>
+
+        <div class="crm-field">
+            <label>Next call date</label>
+            <input
+                type="date"
+                name="next_call_date"
+            >
+        </div>
+
+        <div class="crm-field">
+            <label>Next call time</label>
+            <input
+                type="time"
+                name="next_call_time"
+            >
+        </div>
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            Save Weekly Check-in
+        </button>
+    </form>
+</section>
     </section>
 
 </main>
