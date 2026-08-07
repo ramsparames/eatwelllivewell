@@ -1069,6 +1069,13 @@ if (applicationForm) {
 			if (submitArrow) {
 			    submitArrow.textContent = "⏳";
 			}
+
+			// Give the browser a chance to paint the loading state
+			await new Promise((resolve) => {
+			    requestAnimationFrame(() => {
+			        requestAnimationFrame(resolve);
+			    });
+			});
             try {
                 const response = await fetch(
                     "/application",
