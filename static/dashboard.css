@@ -2920,3 +2920,58 @@ a.coach-home-stat:hover {
         display: none;
     }
 }
+/* =====================================================
+   SHARED COACH OS PAGE STYLING
+   ===================================================== */
+
+.leads-workspace,
+.coaching-dashboard,
+.client-workspace,
+.coach-home {
+    display: grid;
+    gap: 24px;
+}
+
+.workspace-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+}
+
+.workspace-page-header h1 {
+    margin: 5px 0 7px;
+    color: var(--text);
+    font-size: 38px;
+    line-height: 1.1;
+}
+
+.workspace-page-header > div > p:last-child {
+    max-width: 680px;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.dashboard-panel {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: var(--shadow);
+}
+
+.panel-heading h2 {
+    margin: 4px 0 0;
+    color: var(--text);
+}
+
+@media (max-width: 650px) {
+    .workspace-page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .workspace-page-header h1 {
+        font-size: 30px;
+    }
+}
