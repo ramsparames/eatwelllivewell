@@ -3338,3 +3338,116 @@ a.coach-home-stat:hover {
         grid-template-columns: 1fr;
     }
 }
+/* =====================================================
+   CLIENT JOURNEY ACCORDIONS
+   ===================================================== */
+
+.coaching-accordion {
+    display: grid;
+    gap: 14px;
+}
+
+.coaching-accordion-item {
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+
+    background: #fff;
+}
+
+.coaching-accordion-item[open] {
+    box-shadow: var(--shadow);
+}
+
+.coaching-accordion-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 20px 22px;
+
+    cursor: pointer;
+    list-style: none;
+}
+
+.coaching-accordion-summary::-webkit-details-marker {
+    display: none;
+}
+
+.coaching-accordion-heading {
+    display: grid;
+    gap: 4px;
+}
+
+.coaching-accordion-heading span {
+    color: var(--purple);
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.coaching-accordion-heading strong {
+    color: var(--text);
+    font-size: 18px;
+}
+
+.coaching-accordion-summary::after {
+    content: "+";
+
+    width: 30px;
+    height: 30px;
+
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 30px;
+
+    border-radius: 50%;
+
+    color: var(--purple);
+    background: var(--purple-50);
+
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.coaching-accordion-item[open]
+.coaching-accordion-summary::after {
+    content: "−";
+}
+
+.coaching-accordion-content {
+    padding: 0 22px 24px;
+
+    border-top: 1px solid var(--border);
+}
+
+.coaching-subsection {
+    padding-top: 22px;
+}
+
+.coaching-subsection + .coaching-subsection {
+    margin-top: 22px;
+    border-top: 1px solid var(--border);
+}
+
+.coaching-subsection-header {
+    margin-bottom: 16px;
+}
+
+.coaching-subsection-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.coaching-subsection-header p {
+    margin: 5px 0 0;
+
+    color: var(--text-light);
+    font-size: 12px;
+}
