@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}
+Home | NourisHer Coach
+{% endblock %}
+
+{% block content %}
+
+<div class="coach-home">
+
+    <header class="coach-home-hero">
+
+        <div>
+            <p class="eyebrow">
+                Coach command centre
+            </p>
+
+            <h1>
+                Good morning, Sushma 👋
+            </h1>
+
+            <p>
+                Here’s what needs your attention
+                across coaching and leads.
+            </p>
+        </div>
+
+    </header>
+
+
+    <!-- SUMMARY -->
+
+    <section class="coach-home-stats">
+
+        <a
+            href="/dashboard/clients"
+            class="coach-home-stat"
+        >
+            <span>
+                Active clients
+            </span>
+
+            <strong>
+                {{ active_clients|length }}
+            </strong>
+
+            <small>
+                View coaching →
+            </small>
+        </a>
+
+
+        <article class="coach-home-stat">
+
+            <span>
+                Calls today
+            </span>
+
+            <strong>
+                {{ calls_today|length }}
+            </strong>
+
+            <small>
+                Coaching agenda
+            </small>
+
+        </article>
+
+
+        <article class="coach-home-stat">
+
+            <span>
+                Calls this week
+            </span>
+
+            <strong>
+                {{ calls_this_week|length }}
+            </strong>
+
+            <small>
+                Including today
+            </small>
+
+        </article>
+
+
+        <a
+            href="/dashboard/leads"
+            class="coach-home-stat"
+        >
+            <span>
+                New leads
+            </span>
+
+            <strong>
+                {{ new_leads }}
+            </strong>
+
+            <small>
+                Review leads →
+            </small>
+        </a>
+
+    </section>
+
+
+    <!-- TODAY -->
+
+    <section class="dashboard-panel">
+
+        <div class="panel-heading">
+
+            <div>
+                <p class="eyebrow">
+                    Today
+                </p>
+
+                <h2>
+                    Coaching agenda
+                </h2>
+            </div>
+
+        </div>
+
+
+        {% if calls_today %}
+
+        <div class="home-agenda-list">
+
+            {% for call in calls_today %}
+
+            <a
+                href="/dashboard/clients/{{ call.client_id }}"
+                class="home-agenda-row"
+            >
+
+                <div class="home-agenda-time">
+
+                    {% if call.next_call_time %}
+                        {{ call.next_call_time }}
+                    {% else %}
+                        Time TBD
+                    {% endif %}
+
+                </div>
+
+
+                <div class="home-agenda-person">
+
+                    <strong>
+                        {{ call.name }}
+                    </strong>
+
+                    <span>
+                        {{ call.program }}
+                    </span>
+
+                </div>
+
+
+                <span class="home-agenda-open">
+                    Open →
+                </span>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="coach-home-empty">
+
+            <strong>
+                No coaching calls today.
+            </strong>
+
+            <span>
+                Your coaching calendar is clear.
+            </span>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- THIS WEEK -->
+
+    <section class="dashboard-panel">
+
+        <div class="panel-heading">
+
+            <div>
+                <p class="eyebrow">
+                    Coming up
+                </p>
+
+                <h2>
+                    This week
+                </h2>
+            </div>
+
+        </div>
+
+
+        {% if calls_this_week %}
+
+        <div class="home-week-list">
+
+            {% for call in calls_this_week %}
+
+            <a
+                href="/dashboard/clients/{{ call.client_id }}"
+                class="home-week-row"
+            >
+
+                <div>
+                    <span>
+                        {{ call.next_call_date }}
+                    </span>
+
+                    <strong>
+                        {{ call.name }}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>
+                        {{ call.program }}
+                    </span>
+
+                    {% if call.next_call_time %}
+                    <strong>
+                        {{ call.next_call_time }}
+                    </strong>
+                    {% endif %}
+                </div>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="coach-home-empty">
+
+            <strong>
+                No upcoming calls this week.
+            </strong>
+
+            <span>
+                Schedule the next call from a
+                client’s coaching journey.
+            </span>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- QUICK ACCESS -->
+
+    <section class="coach-home-quick-grid">
+
+        <a
+            href="/dashboard/clients"
+            class="coach-home-quick-card"
+        >
+            <span class="coach-home-quick-icon">
+                ♡
+            </span>
+
+            <div>
+                <strong>
+                    Coaching
+                </strong>
+
+                <span>
+                    Clients, calls and weekly
+                    check-ins
+                </span>
+            </div>
+
+            <b>→</b>
+        </a>
+
+
+        <a
+            href="/dashboard/leads"
+            class="coach-home-quick-card"
+        >
+            <span class="coach-home-quick-icon">
+                ◎
+            </span>
+
+            <div>
+                <strong>
+                    Leads
+                </strong>
+
+                <span>
+                    Assessments, applications
+                    and follow-ups
+                </span>
+            </div>
+
+            <b>→</b>
+        </a>
+
+    </section>
+
+</div>
+
+{% endblock %}
