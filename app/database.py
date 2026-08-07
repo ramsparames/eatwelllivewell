@@ -203,6 +203,140 @@ def create_database() -> None:
                 )
                 """
             )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS client_weekly_checkins (
+                    id SERIAL PRIMARY KEY,
+            
+                    client_id INTEGER NOT NULL
+                        REFERENCES clients(id)
+                        ON DELETE CASCADE,
+            
+                    week_number INTEGER,
+            
+                    call_date DATE NOT NULL,
+            
+                    weight_kg NUMERIC(6,2),
+            
+                    stress_score INTEGER,
+                    mood_score INTEGER,
+            
+                    next_call_date DATE,
+                    next_call_time TIME,
+            
+                    created_at TIMESTAMPTZ
+                        NOT NULL DEFAULT NOW(),
+            
+                    updated_at TIMESTAMPTZ
+                        NOT NULL DEFAULT NOW()
+                )
+                """
+            )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS client_action_plans (
+                    id SERIAL PRIMARY KEY,
+            
+                    client_id INTEGER NOT NULL
+                        REFERENCES clients(id)
+                        ON DELETE CASCADE,
+            
+                    checkin_id INTEGER
+                        REFERENCES client_weekly_checkins(id)
+                        ON DELETE SET NULL,
+            
+                    action_name TEXT NOT NULL,
+            
+                    target_count INTEGER,
+            
+                    target_unit TEXT,
+            
+                    start_date DATE NOT NULL,
+            
+                    end_date DATE,
+            
+                    status TEXT
+                        NOT NULL DEFAULT 'active',
+            
+                    created_at TIMESTAMPTZ
+                        NOT NULL DEFAULT NOW()
+                )
+                """
+            )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS client_daily_tracking (
+                    id SERIAL PRIMARY KEY,
+            
+                    client_id INTEGER NOT NULL
+                        REFERENCES clients(id)
+                        ON DELETE CASCADE,
+            
+                    tracked_on DATE NOT NULL,
+            
+                    protein BOOLEAN,
+                    water BOOLEAN,
+            
+                    steps INTEGER,
+            
+                    strength_training BOOLEAN,
+            
+                    stress_score INTEGER,
+                    mood_score INTEGER,
+            
+                    weight_kg NUMERIC(6,2),
+            
+                    note TEXT,
+            
+                    created_at TIMESTAMPTZ
+                        NOT NULL DEFAULT NOW(),
+            
+                    updated_at TIMESTAMPTZ
+                        NOT NULL DEFAULT NOW(),
+            
+                    UNIQUE(client_id, tracked_on)
+                )
+                """
+            )
+            cursor.execute(
+                """
+                CREATE INDEX IF NOT EXISTS
+                idx_weekly_checkins_client_date
+                ON client_weekly_checkins(
+                    client_id,
+                    call_date DESC
+                )
+                """
+            )
+            
+            cursor.execute(
+                """
+                CREATE INDEX IF NOT EXISTS
+                idx_action_plans_client
+                ON client_action_plans(client_id)
+                """
+            )
+            
+            cursor.execute(
+                """
+                CREATE INDEX IF NOT EXISTS
+                idx_daily_tracking_client_date
+                ON client_daily_tracking(
+                    client_id,
+                    tracked_on DESC
+                )
+                """
+            )
+            
+            cursor.execute(
+                """
+                CREATE INDEX IF NOT EXISTS
+                idx_weekly_checkins_next_call
+                ON client_weekly_checkins(
+                    next_call_date
+                )
+                """
+            )
 
 def save_snapshot(
     name: str,
