@@ -362,17 +362,26 @@ def clients_page(request: Request):
             status_code=303,
         )
 
-    clients = ClientService.list_clients()
+    clients = ClientService.dashboard_clients()
 
     calls_today = ClientService.calls_today()
-
-    calls_this_week = ClientService.calls_this_week()
+    
+    calls_this_week = (
+        ClientService.calls_this_week()
+    )
+    
+    active_clients = [
+        client
+        for client in clients
+        if client["status"] == "active"
+    ]
 
     return templates.TemplateResponse(
         "clients.html",
         {
             "request": request,
             "clients": clients,
+            "active_clients": active_clients,
             "calls_today": calls_today,
             "calls_this_week": calls_this_week,
         },
