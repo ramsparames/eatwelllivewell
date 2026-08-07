@@ -175,15 +175,25 @@ def create_database() -> None:
                     email TEXT,
                     phone TEXT,
             
-                    program TEXT,
-                    status TEXT NOT NULL DEFAULT 'active',
+                    program TEXT
+                        NOT NULL DEFAULT 'Transformation',
+            
+                    status TEXT
+                        NOT NULL DEFAULT 'active',
             
                     start_date DATE,
                     end_date DATE,
             
-                    timezone TEXT DEFAULT 'Asia/Kolkata',
+                    primary_goal TEXT,
+                    goal_weight_kg NUMERIC(6,2),
             
-                    coach_notes TEXT,
+                    initial_weight_kg NUMERIC(6,2),
+            
+                    weekly_call_day INTEGER,
+                    weekly_call_time TIME,
+            
+                    timezone TEXT
+                        NOT NULL DEFAULT 'Asia/Kolkata',
             
                     created_at TIMESTAMPTZ
                         NOT NULL DEFAULT NOW(),
@@ -191,178 +201,6 @@ def create_database() -> None:
                     updated_at TIMESTAMPTZ
                         NOT NULL DEFAULT NOW()
                 )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS client_calls (
-                    id SERIAL PRIMARY KEY,
-            
-                    client_id INTEGER NOT NULL
-                        REFERENCES clients(id)
-                        ON DELETE CASCADE,
-            
-                    scheduled_at TIMESTAMPTZ NOT NULL,
-            
-                    completed_at TIMESTAMPTZ,
-            
-                    call_type TEXT
-                        NOT NULL DEFAULT 'coaching',
-            
-                    status TEXT
-                        NOT NULL DEFAULT 'scheduled',
-            
-                    wins TEXT,
-                    challenges TEXT,
-                    coach_notes TEXT,
-                    next_focus TEXT,
-            
-                    created_at TIMESTAMPTZ
-                        NOT NULL DEFAULT NOW()
-                )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS client_measurements (
-                    id SERIAL PRIMARY KEY,
-            
-                    client_id INTEGER NOT NULL
-                        REFERENCES clients(id)
-                        ON DELETE CASCADE,
-            
-                    measured_on DATE NOT NULL,
-            
-                    weight_kg NUMERIC(6,2),
-            
-                    upper_arm_cm NUMERIC(6,2),
-                    chest_cm NUMERIC(6,2),
-                    waist_cm NUMERIC(6,2),
-                    lower_abdomen_cm NUMERIC(6,2),
-                    hip_cm NUMERIC(6,2),
-                    thigh_cm NUMERIC(6,2),
-            
-                    notes TEXT,
-            
-                    created_at TIMESTAMPTZ
-                        NOT NULL DEFAULT NOW(),
-            
-                    UNIQUE(client_id, measured_on)
-                )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS action_library (
-                    id SERIAL PRIMARY KEY,
-            
-                    title TEXT NOT NULL,
-                    category TEXT,
-            
-                    description TEXT,
-            
-                    default_target INTEGER,
-                    default_frequency TEXT,
-            
-                    is_active BOOLEAN
-                        NOT NULL DEFAULT TRUE,
-            
-                    created_at TIMESTAMPTZ
-                        NOT NULL DEFAULT NOW()
-                )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS client_actions (
-                    id SERIAL PRIMARY KEY,
-            
-                    client_id INTEGER NOT NULL
-                        REFERENCES clients(id)
-                        ON DELETE CASCADE,
-            
-                    action_id INTEGER
-                        REFERENCES action_library(id),
-            
-                    custom_title TEXT,
-            
-                    target_count INTEGER,
-                    frequency TEXT,
-            
-                    start_date DATE,
-                    end_date DATE,
-            
-                    status TEXT
-                        NOT NULL DEFAULT 'active',
-            
-                    coach_note TEXT,
-            
-                    created_at TIMESTAMPTZ
-                        NOT NULL DEFAULT NOW()
-                )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS client_action_logs (
-                    id SERIAL PRIMARY KEY,
-            
-                    client_action_id INTEGER NOT NULL
-                        REFERENCES client_actions(id)
-                        ON DELETE CASCADE,
-            
-                    logged_on DATE NOT NULL,
-            
-                    completed BOOLEAN
-                        NOT NULL DEFAULT FALSE,
-            
-                    value NUMERIC(8,2),
-            
-                    note TEXT,
-            
-                    created_at TIMESTAMPTZ
-                        NOT NULL DEFAULT NOW(),
-            
-                    UNIQUE(
-                        client_action_id,
-                        logged_on
-                    )
-                )
-                """
-            )
-
-            cursor.execute(
-                """
-                CREATE INDEX IF NOT EXISTS
-                idx_client_calls_client
-                ON client_calls(client_id)
-                """
-            )
-            
-            cursor.execute(
-                """
-                CREATE INDEX IF NOT EXISTS
-                idx_client_calls_scheduled
-                ON client_calls(scheduled_at)
-                """
-            )
-            
-            cursor.execute(
-                """
-                CREATE INDEX IF NOT EXISTS
-                idx_client_measurements_client_date
-                ON client_measurements(
-                    client_id,
-                    measured_on DESC
-                )
-                """
-            )
-            
-            cursor.execute(
-                """
-                CREATE INDEX IF NOT EXISTS
-                idx_client_actions_client
-                ON client_actions(client_id)
                 """
             )
 
