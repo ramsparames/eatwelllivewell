@@ -27,6 +27,9 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.email import send_assessment_notification
 from app.webhooks import router as webhook_router
+from app.database import create_database
+
+create_database()
 
 app = FastAPI()
 validate_required_settings()
