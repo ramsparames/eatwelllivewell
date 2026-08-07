@@ -185,112 +185,110 @@ Coaching | NourisHer
 
                 <div class="coaching-client-top">
 
-                    <div class="coaching-client-avatar">
-                        {{ client.name[0]|upper }}
-                    </div>
-
-                    <span
-                        class="coaching-client-status
-                        {% if client.status == 'active' %}
-                            is-active
-                        {% endif %}"
-                    >
-                        {{ client.status|title }}
-                    </span>
-
-                </div>
-
-
-                <div class="coaching-client-name">
-
-                    <h3>
-                        {{ client.name }}
-                    </h3>
-
-                    <p>
-                        {{ client.program }}
-
-                        {% if client.current_week %}
-                            · Week
-                            {{ client.current_week }}
-                        {% endif %}
-                    </p>
-
-                </div>
-
-
-                <div class="coaching-client-metrics">
-
-                    <div>
-                        <span>
-                            Current weight
-                        </span>
-
-                        <strong>
-                            {% if client.current_weight_kg %}
-                                {{ client.current_weight_kg }}
-                                kg
-                            {% else %}
-                                —
-                            {% endif %}
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>
-                            Goal
-                        </span>
-
-                        <strong>
-                            {% if client.goal_weight_kg %}
-                                {{ client.goal_weight_kg }}
-                                kg
-                            {% else %}
-                                —
-                            {% endif %}
-                        </strong>
-                    </div>
-
-                </div>
-
-
-                {% if client.weight_change is not none %}
-
-                <div class="coaching-client-progress">
-                    {% if client.weight_change > 0 %}
-                        +
-                    {% endif %}
-
-                    {{ "%.1f"|format(
-                        client.weight_change
-                    ) }}
-                    kg since start
-                </div>
-
-                {% endif %}
-
-
-                <div class="coaching-client-next">
-
-                    <div>
-                        <span>
-                            Next call
-                        </span>
-
-                        <strong>
-                            {{
-                                client.next_call_date
-                                or "Not scheduled"
-                            }}
-                        </strong>
-                    </div>
-
-                    <strong>
-                        Open →
-                    </strong>
-
-                </div>
-
+                  <div class="coaching-client-avatar">
+                      {{ client.name[0]|upper }}
+                  </div>
+              
+                  <span
+                      class="coaching-client-status
+                      {% if client.status == 'active' %}
+                          is-active
+                      {% endif %}"
+                  >
+                      {{ client.status|title }}
+                  </span>
+              
+              </div>
+              
+              <div class="coaching-client-name">
+              
+                  <h3>{{ client.name }}</h3>
+              
+                  <p>
+                      {{ client.program }}
+              
+                      {% if client.current_week %}
+                          • Week {{ client.current_week }}
+                      {% endif %}
+                  </p>
+              
+              </div>
+              
+              <div class="coaching-client-next">
+              
+                  <div>
+              
+                      <span>Next Call</span>
+              
+                      <strong>
+                          {{ client.next_call_date or "Not scheduled" }}
+                      </strong>
+              
+                  </div>
+              
+              </div>
+              
+              <div class="coaching-client-metrics">
+              
+                  <div>
+              
+                      <span>Current</span>
+              
+                      <strong>
+                          {% if client.current_weight_kg %}
+                              {{ client.current_weight_kg }} kg
+                          {% else %}
+                              —
+                          {% endif %}
+                      </strong>
+              
+                  </div>
+              
+                  <div>
+              
+                      <span>Goal</span>
+              
+                      <strong>
+                          {% if client.goal_weight_kg %}
+                              {{ client.goal_weight_kg }} kg
+                          {% else %}
+                              —
+                          {% endif %}
+                      </strong>
+              
+                  </div>
+              
+              </div>
+              
+              {% if client.weight_change is not none %}
+              
+              <div class="coaching-client-progress
+                  {% if client.weight_change < 0 %}
+                      is-good
+                  {% elif client.weight_change > 0 %}
+                      is-warning
+                  {% endif %}
+              ">
+              
+                  {% if client.weight_change < 0 %}
+                      ⬇
+                  {% elif client.weight_change > 0 %}
+                      ⬆
+                  {% endif %}
+              
+                  {{ "%.1f"|format(client.weight_change|abs) }} kg
+              
+              </div>
+              
+              {% endif %}
+              
+              <div class="coaching-client-footer">
+              
+                  <span>
+                      View Journey →
+                  </span>
+              
+              </div>
             </a>
 
             {% endfor %}
