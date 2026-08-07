@@ -371,6 +371,16 @@ def clients_page(request: Request):
             "clients": clients,
         },
     )
+    checkins = ClientService.checkins(client_id)
+
+    return templates.TemplateResponse(
+        "client.html",
+        {
+        "request": request,
+        "client": client,
+        "checkins": checkins,
+        },
+    )
 
 
 @router.post("/dashboard/clients")
@@ -399,6 +409,37 @@ def add_client(
         status_code=303,
     )
 
+@router.post("/dashboard/clients/{client_id}/checkin")
+def add_client_checkin(
+    request: Request,
+    client_id: int,
+    call_date: str = Form(...),
+    weight_kg: float | None = Form(None),
+    stress_score: int | None = Form(None),
+    mood_score: int | None = Form(None),
+    next_call_date: str | None = Form(None),
+    next_call_time: str | None = Form(None),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    ClientService.add_checkin(
+        client_id=client_id,
+        call_date=call_date,
+        weight_kg=weight_kg,
+        stress_score=stress_score,
+        mood_score=mood_score,
+        next_call_date=next_call_date or None,
+        next_call_time=next_call_time or None,
+    )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}",
+        status_code=303,
+    )
 
 @router.get(
     "/dashboard/clients/{client_id}",
