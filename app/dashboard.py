@@ -9,11 +9,7 @@ from app.database import (
     get_lead_events,
     update_lead_crm,
 )
-from app.database import (
-    get_clients,
-    get_client,
-    create_client,
-)
+from app.services.client_service import ClientService
 from fastapi import Form
 
 router = APIRouter()
@@ -366,7 +362,7 @@ def clients_page(request: Request):
             status_code=303,
         )
 
-    clients = get_clients()
+    clients = ClientService.list_clients()
 
     return templates.TemplateResponse(
         "clients.html",
@@ -391,7 +387,7 @@ def add_client(
             status_code=303,
         )
 
-    client_id = create_client(
+    client_id = ClientService.create(
         name=name.strip(),
         email=email.strip() or None,
         phone=phone.strip() or None,
@@ -418,7 +414,7 @@ def client_profile(
             status_code=303,
         )
 
-    client = get_client(client_id)
+    client = ClientService.get(client_id)
 
     if client is None:
         raise HTTPException(
