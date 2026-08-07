@@ -1,56 +1,379 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Clients | NourisHer Coach</title>
-    <link rel="stylesheet" href="/static/dashboard.css">
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        Coaching | NourisHer
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/dashboard.css"
+    >
 </head>
 
 <body class="dashboard-page">
 
-<main class="dashboard-shell">
+<main class="dashboard-shell coaching-dashboard">
 
-    <div class="panel-heading">
+    <header class="coaching-dashboard-header">
+
         <div>
-            <p class="eyebrow">Coach workspace</p>
-            <h1>Clients</h1>
+            <p class="eyebrow">
+                Coach workspace
+            </p>
+
+            <h1>Coaching</h1>
+
+            <p>
+                Your clients, calls and weekly
+                coaching—all in one place.
+            </p>
         </div>
-    </div>
+
+    </header>
+
+
+    <!-- SUMMARY -->
+
+    <section class="coaching-summary-grid">
+
+        <article class="coaching-summary-card">
+            <span>Active clients</span>
+
+            <strong>
+                {{ active_clients|length }}
+            </strong>
+        </article>
+
+        <article class="coaching-summary-card">
+            <span>Calls today</span>
+
+            <strong>
+                {{ calls_today|length }}
+            </strong>
+        </article>
+
+        <article class="coaching-summary-card">
+            <span>This week</span>
+
+            <strong>
+                {{ calls_this_week|length }}
+            </strong>
+        </article>
+
+    </section>
+
+
+    <!-- TODAY -->
 
     <section class="dashboard-panel">
-        <h2>Add client</h2>
+
+        <div class="panel-heading">
+
+            <div>
+                <p class="eyebrow">
+                    Today's agenda
+                </p>
+
+                <h2>Coaching calls</h2>
+            </div>
+
+        </div>
+
+
+        {% if calls_today %}
+
+        <div class="coaching-agenda">
+
+            {% for call in calls_today %}
+
+            <a
+                href="/dashboard/clients/{{ call.client_id }}"
+                class="coaching-agenda-item"
+            >
+
+                <div class="coaching-agenda-time">
+
+                    {% if call.next_call_time %}
+                        {{ call.next_call_time }}
+                    {% else %}
+                        Time TBD
+                    {% endif %}
+
+                </div>
+
+                <div>
+                    <strong>
+                        {{ call.name }}
+                    </strong>
+
+                    <span>
+                        {{ call.program }}
+                    </span>
+                </div>
+
+                <span class="coaching-open-link">
+                    Open →
+                </span>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="coaching-empty-agenda">
+            <strong>No coaching calls today.</strong>
+
+            <span>
+                Your schedule is clear.
+            </span>
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- CLIENTS -->
+
+    <section class="dashboard-panel">
+
+        <div class="panel-heading">
+
+            <div>
+                <p class="eyebrow">
+                    Client roster
+                </p>
+
+                <h2>All clients</h2>
+            </div>
+
+        </div>
+
+
+        {% if clients %}
+
+        <div class="coaching-client-grid">
+
+            {% for client in clients %}
+
+            <a
+                href="/dashboard/clients/{{ client.id }}"
+                class="coaching-client-card"
+            >
+
+                <div class="coaching-client-top">
+
+                    <div class="coaching-client-avatar">
+                        {{ client.name[0]|upper }}
+                    </div>
+
+                    <span
+                        class="coaching-client-status
+                        {% if client.status == 'active' %}
+                            is-active
+                        {% endif %}"
+                    >
+                        {{ client.status|title }}
+                    </span>
+
+                </div>
+
+
+                <div class="coaching-client-name">
+
+                    <h3>
+                        {{ client.name }}
+                    </h3>
+
+                    <p>
+                        {{ client.program }}
+
+                        {% if client.current_week %}
+                            · Week
+                            {{ client.current_week }}
+                        {% endif %}
+                    </p>
+
+                </div>
+
+
+                <div class="coaching-client-metrics">
+
+                    <div>
+                        <span>
+                            Current weight
+                        </span>
+
+                        <strong>
+                            {% if client.current_weight_kg %}
+                                {{ client.current_weight_kg }}
+                                kg
+                            {% else %}
+                                —
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>
+                            Goal
+                        </span>
+
+                        <strong>
+                            {% if client.goal_weight_kg %}
+                                {{ client.goal_weight_kg }}
+                                kg
+                            {% else %}
+                                —
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                {% if client.weight_change is not none %}
+
+                <div class="coaching-client-progress">
+                    {% if client.weight_change > 0 %}
+                        +
+                    {% endif %}
+
+                    {{ "%.1f"|format(
+                        client.weight_change
+                    ) }}
+                    kg since start
+                </div>
+
+                {% endif %}
+
+
+                <div class="coaching-client-next">
+
+                    <div>
+                        <span>
+                            Next call
+                        </span>
+
+                        <strong>
+                            {{
+                                client.next_call_date
+                                or "Not scheduled"
+                            }}
+                        </strong>
+                    </div>
+
+                    <strong>
+                        Open →
+                    </strong>
+
+                </div>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="coaching-empty-agenda">
+            <strong>
+                No clients yet.
+            </strong>
+
+            <span>
+                Add your first coaching client
+                to get started.
+            </span>
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ADD CLIENT -->
+
+    <section class="dashboard-panel">
+
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">
+                    New enrolment
+                </p>
+
+                <h2>Add client</h2>
+            </div>
+        </div>
+
 
         <form
             method="post"
             action="/dashboard/clients"
             class="crm-form"
         >
+
             <div class="crm-field">
-                <label>Name</label>
+                <label for="client_name">
+                    Name
+                </label>
+
                 <input
+                    id="client_name"
                     name="name"
                     required
                 >
             </div>
 
             <div class="crm-field">
-                <label>Email</label>
+                <label for="client_email">
+                    Email
+                </label>
+
                 <input
+                    id="client_email"
                     name="email"
                     type="email"
                 >
             </div>
 
             <div class="crm-field">
-                <label>Phone</label>
-                <input name="phone">
+                <label for="client_phone">
+                    Phone
+                </label>
+
+                <input
+                    id="client_phone"
+                    name="phone"
+                >
             </div>
 
             <div class="crm-field">
-                <label>Program</label>
-                <select name="program">
+                <label for="client_program">
+                    Program
+                </label>
+
+                <select
+                    id="client_program"
+                    name="program"
+                >
                     <option>
                         Transformation
                     </option>
+
                     <option>
                         Foundations
                     </option>
@@ -58,58 +381,14 @@
             </div>
 
             <button
-                class="btn btn-primary"
                 type="submit"
+                class="btn btn-primary"
             >
                 Add Client
             </button>
+
         </form>
-    </section>
 
-    <section class="dashboard-panel">
-        <div class="panel-heading">
-            <div>
-                <p class="eyebrow">
-                    Active coaching
-                </p>
-                <h2>All Clients</h2>
-            </div>
-        </div>
-
-        {% if clients %}
-
-        <div class="client-list">
-
-            {% for client in clients %}
-            <a
-                href="/dashboard/clients/{{ client.id }}"
-                class="client-row"
-            >
-                <div>
-                    <strong>
-                        {{ client.name }}
-                    </strong>
-
-                    <span>
-                        {{ client.program }}
-                    </span>
-                </div>
-
-                <span>
-                    {{ client.status|title }}
-                </span>
-            </a>
-            {% endfor %}
-
-        </div>
-
-        {% else %}
-
-        <p>
-            No clients have been added yet.
-        </p>
-
-        {% endif %}
     </section>
 
 </main>
