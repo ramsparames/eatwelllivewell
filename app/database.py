@@ -1322,6 +1322,56 @@ def get_calls_this_week():
 
             return cursor.fetchall()
             
+def get_client_summaries():
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    c.id,
+                    c.name,
+                    c.email,
+                    c.phone,
+                    c.program,
+                    c.status,
+                    c.start_date,
+                    c.primary_goal,
+                    c.initial_weight_kg,
+                    c.goal_weight_kg,
+
+                    latest.weight_kg
+                        AS current_weight_kg,
+
+                    latest.next_call_date,
+                    latest.next_call_time
+
+                FROM clients c
+
+                LEFT JOIN LATERAL (
+                    SELECT
+                        w.weight_kg,
+                        w.next_call_date,
+                        w.next_call_time
+                    FROM client_weekly_checkins w
+                    WHERE w.client_id = c.id
+                    ORDER BY
+                        w.call_date DESC,
+                        w.id DESC
+                    LIMIT 1
+                ) latest ON TRUE
+
+                ORDER BY
+                    CASE
+                        WHEN c.status = 'active'
+                        THEN 0
+                        ELSE 1
+                    END,
+                    c.name
+                """
+            )
+
+            return cursor.fetchall()
+            
 if __name__ == "__main__":
     create_database()
     print("Database updated successfully.")
