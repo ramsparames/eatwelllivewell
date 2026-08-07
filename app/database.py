@@ -1062,3 +1062,6 @@ def get_client(client_id):
 
         return cursor.fetchone()
 
+if __name__ == "__main__":
+    create_database()
+    print("Database updated successfully.")
