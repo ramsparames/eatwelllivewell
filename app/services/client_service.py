@@ -137,16 +137,21 @@ class ClientService:
             client_id,
             status="active",
         )
+        tracking = get_client_tracking(
+            client_id
+        )
         return {
             "client": client,
             "checkins": checkins,
+            "active_actions": active_actions,
+            "tracking": tracking,
             "current_week": current_week,
             "current_weight": current_weight,
             "weight_change": weight_change,
             "next_call_date": next_call_date,
             "next_call_time": next_call_time,
-            "active_actions": active_actions,
         }
+        
     @staticmethod
     def dashboard_clients():
         clients = get_client_summaries()
