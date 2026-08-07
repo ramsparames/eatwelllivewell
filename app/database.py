@@ -5,7 +5,7 @@ from typing import Any
 import psycopg
 from psycopg.rows import dict_row
 from datetime import date
-
+from datetime import date, timedelta
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
@@ -1195,7 +1195,127 @@ def get_client(client_id):
         )
 
         return cursor.fetchone()
+        
+def create_weekly_checkin(
+    client_id: int,
+    call_date,
+    weight_kg=None,
+    stress_score=None,
+    mood_score=None,
+    next_call_date=None,
+    next_call_time=None,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO client_weekly_checkins (
+                    client_id,
+                    call_date,
+                    weight_kg,
+                    stress_score,
+                    mood_score,
+                    next_call_date,
+                    next_call_time
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (
+                    client_id,
+                    call_date,
+                    weight_kg,
+                    stress_score,
+                    mood_score,
+                    next_call_date,
+                    next_call_time,
+                ),
+            )
 
+            row = cursor.fetchone()
+            return int(row["id"])
+
+
+def get_client_checkins(client_id: int):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM client_weekly_checkins
+                WHERE client_id = %s
+                ORDER BY call_date DESC, id DESC
+                """,
+                (client_id,),
+            )
+
+            return cursor.fetchall()
+
+
+def get_calls_today():
+    today = date.today()
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    c.id AS client_id,
+                    c.name,
+                    c.program,
+                    w.next_call_date,
+                    w.next_call_time
+                FROM client_weekly_checkins w
+                JOIN clients c
+                    ON c.id = w.client_id
+                WHERE
+                    w.next_call_date = %s
+                    AND c.status = 'active'
+                ORDER BY
+                    w.next_call_time NULLS LAST,
+                    c.name
+                """,
+                (today,),
+            )
+
+            return cursor.fetchall()
+
+
+def get_calls_this_week():
+    today = date.today()
+    end_of_week = today + timedelta(
+        days=6 - today.weekday()
+    )
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    c.id AS client_id,
+                    c.name,
+                    c.program,
+                    w.next_call_date,
+                    w.next_call_time
+                FROM client_weekly_checkins w
+                JOIN clients c
+                    ON c.id = w.client_id
+                WHERE
+                    w.next_call_date BETWEEN %s AND %s
+                    AND c.status = 'active'
+                ORDER BY
+                    w.next_call_date,
+                    w.next_call_time NULLS LAST,
+                    c.name
+                """,
+                (
+                    today,
+                    end_of_week,
+                ),
+            )
+
+            return cursor.fetchall()
+            
 if __name__ == "__main__":
     create_database()
     print("Database updated successfully.")
