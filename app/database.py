@@ -1465,7 +1465,121 @@ def complete_client_action(
                 """,
                 (action_id,),
             )
+
+def save_daily_tracking(
+    client_id: int,
+    tracked_on,
+    protein: bool | None = None,
+    water: bool | None = None,
+    steps: int | None = None,
+    strength_training: bool | None = None,
+    stress_score: int | None = None,
+    mood_score: int | None = None,
+    weight_kg: float | None = None,
+    note: str | None = None,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO client_daily_tracking (
+                    client_id,
+                    tracked_on,
+                    protein,
+                    water,
+                    steps,
+                    strength_training,
+                    stress_score,
+                    mood_score,
+                    weight_kg,
+                    note
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s
+                )
+                ON CONFLICT (
+                    client_id,
+                    tracked_on
+                )
+                DO UPDATE SET
+                    protein = EXCLUDED.protein,
+                    water = EXCLUDED.water,
+                    steps = EXCLUDED.steps,
+                    strength_training =
+                        EXCLUDED.strength_training,
+                    stress_score =
+                        EXCLUDED.stress_score,
+                    mood_score =
+                        EXCLUDED.mood_score,
+                    weight_kg =
+                        EXCLUDED.weight_kg,
+                    note =
+                        EXCLUDED.note,
+                    updated_at = NOW()
+                RETURNING id
+                """,
+                (
+                    client_id,
+                    tracked_on,
+                    protein,
+                    water,
+                    steps,
+                    strength_training,
+                    stress_score,
+                    mood_score,
+                    weight_kg,
+                    note,
+                ),
+            )
+
+            row = cursor.fetchone()
+
+            if not row:
+                raise RuntimeError(
+                    "Daily tracking could not be saved"
+                )
+
+            return int(row["id"])
+
+def get_client_tracking(
+    client_id: int,
+    start_date=None,
+    end_date=None,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+
+            if start_date and end_date:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM client_daily_tracking
+                    WHERE client_id = %s
+                      AND tracked_on
+                          BETWEEN %s AND %s
+                    ORDER BY tracked_on
+                    """,
+                    (
+                        client_id,
+                        start_date,
+                        end_date,
+                    ),
+                )
+            else:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM client_daily_tracking
+                    WHERE client_id = %s
+                    ORDER BY tracked_on DESC
+                    """,
+                    (client_id,),
+                )
+
+            return cursor.fetchall()
             
+
 if __name__ == "__main__":
     create_database()
     print("Database updated successfully.")
