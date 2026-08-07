@@ -1,23 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
+{% block title %}
+{{ client.name }}
+{% endblock %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
-
-    <title>
-        {{ client.name }} | NourisHer Coaching
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="/static/dashboard.css"
-    >
-</head>
+{% block content %}
 
 <body class="dashboard-page">
 
@@ -451,5 +438,4 @@
 
 </main>
 
-</body>
-</html>
+{% endblock %}
