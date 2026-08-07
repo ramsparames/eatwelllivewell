@@ -1070,62 +1070,72 @@ if (applicationForm) {
 			    submitArrow.textContent = "⏳";
 			}
 
-			// Give the browser a chance to paint the loading state
-			await new Promise((resolve) => {
-			    requestAnimationFrame(() => {
-			        requestAnimationFrame(resolve);
+			const submitStartedAt = Date.now();
+
+			try {
+			    const response = await fetch(
+			        "/application",
+			        {
+			            method: "POST",
+			            headers: {
+			                "Content-Type":
+			                    "application/json",
+			            },
+			            body: JSON.stringify(payload),
+			        }
+			    );
+			
+			    const data = await response.json();
+			
+			    if (
+			        !response.ok
+			        || data.status !== "saved"
+			    ) {
+			        throw new Error(
+			            data.message
+			            || (
+			                data.detail
+			                    ? JSON.stringify(data.detail)
+			                    : "The application could not be submitted."
+			            )
+			        );
+			    }
+			
+			    save(APPLICATION_KEY, {
+			        ...payload,
+			        applicationId:
+			            data.application_id,
+			        submittedAt:
+			            new Date().toISOString(),
 			    });
-			});
-            try {
-                const response = await fetch(
-                    "/application",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-                        },
-                        body: JSON.stringify(
-                            payload
-                        ),
-                    }
-                );
-
-                const data =
-                    await response.json();
-
-                if (
-                    !response.ok
-                    || data.status !== "saved"
-                ) {
-                    throw new Error(
-                        data.message
-                        || data.detail
-                        || "The application could not be submitted."
-                    );
-                }
-
-                save(APPLICATION_KEY, {
-                    ...payload,
-                    applicationId:
-                        data.application_id,
-                    submittedAt:
-                        new Date().toISOString(),
-                });
-
-                save(LEAD_KEY, {
-                    ...savedLead,
-                    name: payload.name,
-                    phone: payload.phone,
-                    email: payload.email,
-                    applicationId:
-                        data.application_id,
-                });
-
-                localStorage.removeItem(draftKey);
-
-                window.location.href =
-                    "/thank-you";
+			
+			    save(LEAD_KEY, {
+			        ...savedLead,
+			        name: payload.name,
+			        phone: payload.phone,
+			        email: payload.email,
+			        applicationId:
+			            data.application_id,
+			    });
+			
+			    localStorage.removeItem(draftKey);
+			
+			    const elapsed =
+			        Date.now() - submitStartedAt;
+			
+			    const minimumDelay = 350;
+			
+			    if (elapsed < minimumDelay) {
+			        await new Promise((resolve) => {
+			            setTimeout(
+			                resolve,
+			                minimumDelay - elapsed
+			            );
+			        });
+			    }
+			
+			    window.location.href =
+			        "/thank-you";
 			} catch (error) {
 			    console.error(
 			        "Application submission failed:",
