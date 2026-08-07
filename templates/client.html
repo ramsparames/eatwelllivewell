@@ -432,6 +432,164 @@
 
             </section>
 
+            <section class="dashboard-panel">
+
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">
+                            This week
+                        </p>
+            
+                        <h2>
+                            Action Plan
+                        </h2>
+                    </div>
+                </div>
+            
+                {% if active_actions %}
+            
+                <div class="client-action-list">
+            
+                    {% for action in active_actions %}
+            
+                    <article class="client-action-row">
+            
+                        <div>
+                            <strong>
+                                {{ action.action_name }}
+                            </strong>
+            
+                            <span>
+                                {% if action.target_count %}
+                                    Target:
+                                    {{ action.target_count }}
+            
+                                    {% if action.target_unit %}
+                                        {{ action.target_unit }}
+                                    {% endif %}
+                                {% endif %}
+                            </span>
+                        </div>
+            
+                        <span class="client-action-status">
+                            Active
+                        </span>
+            
+                    </article>
+            
+                    {% endfor %}
+            
+                </div>
+            
+                {% else %}
+            
+                <p class="empty-text">
+                    No active actions yet.
+                </p>
+            
+                {% endif %}
+            
+            
+                <form
+                    method="post"
+                    action="/dashboard/clients/{{ client.id }}/actions"
+                    class="client-action-form"
+                >
+            
+                    <div class="client-action-form-grid">
+            
+                        <div class="crm-field">
+                            <label for="action_name">
+                                Action
+                            </label>
+            
+                            <input
+                                id="action_name"
+                                name="action_name"
+                                placeholder="Protein in first meal"
+                                required
+                            >
+                        </div>
+            
+                        <div class="crm-field">
+                            <label for="target_count">
+                                Target
+                            </label>
+            
+                            <input
+                                id="target_count"
+                                type="number"
+                                min="1"
+                                name="target_count"
+                                placeholder="5"
+                            >
+                        </div>
+            
+                        <div class="crm-field">
+                            <label for="target_unit">
+                                Unit
+                            </label>
+            
+                            <select
+                                id="target_unit"
+                                name="target_unit"
+                            >
+                                <option value="">
+                                    Choose
+                                </option>
+            
+                                <option value="days">
+                                    days
+                                </option>
+            
+                                <option value="sessions">
+                                    sessions
+                                </option>
+            
+                                <option value="times">
+                                    times
+                                </option>
+                            </select>
+                        </div>
+            
+                        <div class="crm-field">
+                            <label for="action_start_date">
+                                Start date
+                            </label>
+            
+                            <input
+                                id="action_start_date"
+                                type="date"
+                                name="start_date"
+                                required
+                            >
+                        </div>
+            
+                        <div class="crm-field">
+                            <label for="action_end_date">
+                                End date
+                            </label>
+            
+                            <input
+                                id="action_end_date"
+                                type="date"
+                                name="end_date"
+                            >
+                        </div>
+            
+                    </div>
+            
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        + Add Action
+                    </button>
+            
+                </form>
+            
+            </section>
+
         </div>
 
     </section>
