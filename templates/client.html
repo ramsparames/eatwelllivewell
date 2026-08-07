@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block title %}
-{{ client.name }}
+{{ client.name }} | NourisHer Coach
 {% endblock %}
 
 {% block content %}
 
-<body class="dashboard-page">
+<div class="client-workspace">
 
-<main class="dashboard-shell client-workspace">
+    <!-- Back -->
 
     <a
         href="/dashboard/clients"
@@ -17,9 +17,13 @@
         ← Back to Clients
     </a>
 
+
     <section class="client-profile-grid">
 
-        <!-- LEFT: CLIENT CONTEXT -->
+
+        <!-- ==================================================
+             LEFT: CLIENT SNAPSHOT
+             ================================================== -->
 
         <aside class="client-context-card">
 
@@ -31,10 +35,13 @@
                 Client
             </p>
 
-            <h1>{{ client.name }}</h1>
+            <h1>
+                {{ client.name }}
+            </h1>
 
             <p class="client-program">
                 {{ client.program }}
+
                 {% if current_week %}
                     · Week {{ current_week }}
                 {% endif %}
@@ -44,33 +51,51 @@
                 ● {{ client.status|title }}
             </span>
 
+
             <div class="client-context-divider"></div>
 
+
             <div class="client-context-item">
-                <span>Primary goal</span>
+
+                <span>
+                    Primary goal
+                </span>
 
                 <strong>
                     {{
                         client.primary_goal
-                        or "Not added yet"
+                        if client.primary_goal is defined
+                        and client.primary_goal
+                        else "Not added yet"
                     }}
                 </strong>
+
             </div>
 
+
             <div class="client-context-item">
-                <span>Starting weight</span>
+
+                <span>
+                    Starting weight
+                </span>
 
                 <strong>
-                    {% if client.initial_weight_kg %}
+                    {% if client.initial_weight_kg is defined
+                          and client.initial_weight_kg %}
                         {{ client.initial_weight_kg }} kg
                     {% else %}
                         —
                     {% endif %}
                 </strong>
+
             </div>
 
+
             <div class="client-context-item">
-                <span>Current weight</span>
+
+                <span>
+                    Current weight
+                </span>
 
                 <strong>
                     {% if current_weight %}
@@ -79,24 +104,35 @@
                         —
                     {% endif %}
                 </strong>
+
             </div>
 
+
             <div class="client-context-item">
-                <span>Goal weight</span>
+
+                <span>
+                    Goal weight
+                </span>
 
                 <strong>
-                    {% if client.goal_weight_kg %}
+                    {% if client.goal_weight_kg is defined
+                          and client.goal_weight_kg %}
                         {{ client.goal_weight_kg }} kg
                     {% else %}
                         —
                     {% endif %}
                 </strong>
+
             </div>
+
 
             {% if weight_change is not none %}
 
             <div class="client-progress-highlight">
-                <span>Weight change</span>
+
+                <span>
+                    Weight change
+                </span>
 
                 <strong>
                     {% if weight_change > 0 %}
@@ -106,789 +142,1057 @@
                     {{ "%.1f"|format(weight_change) }}
                     kg
                 </strong>
+
             </div>
 
             {% endif %}
 
+
             <div class="client-context-divider"></div>
 
+
             <div class="client-context-item">
-                <span>Next coaching call</span>
+
+                <span>
+                    Next coaching call
+                </span>
 
                 <strong>
+
                     {% if next_call_date %}
+
                         {{ next_call_date }}
 
                         {% if next_call_time %}
                             <br>
                             {{ next_call_time }}
                         {% endif %}
+
                     {% else %}
+
                         Not scheduled
+
                     {% endif %}
+
                 </strong>
+
             </div>
 
+
             <div class="client-context-item">
-                <span>Email</span>
+
+                <span>
+                    Email
+                </span>
 
                 <strong>
                     {{ client.email or "—" }}
                 </strong>
+
             </div>
 
+
             <div class="client-context-item">
-                <span>Phone</span>
+
+                <span>
+                    Phone
+                </span>
 
                 <strong>
                     {{ client.phone or "—" }}
                 </strong>
+
             </div>
 
         </aside>
 
 
-        <!-- RIGHT: COACHING JOURNEY -->
+
+        <!-- ==================================================
+             RIGHT: COACHING WORKFLOW
+             ================================================== -->
 
         <div class="client-coaching-column">
 
-            <section class="dashboard-panel">
-
-                <div class="panel-heading">
-
-                    <div>
-                        <p class="eyebrow">
-                            Current coaching cycle
-                        </p>
-
-                        <h2>
-                            {% if current_week %}
-                                Week {{ current_week }}
-                            {% else %}
-                                Weekly coaching
-                            {% endif %}
-                        </h2>
-                    </div>
-
-                </div>
+            <div class="coaching-accordion">
 
 
-                <form
-                    method="post"
-                    action="/dashboard/clients/{{ client.id }}/checkin"
-                    class="client-checkin-form"
+                <!-- ==========================================
+                     1. THIS WEEK
+                     ========================================== -->
+
+                <details
+                    class="coaching-accordion-item"
+                    open
                 >
 
-                    <div class="client-checkin-grid">
-
-                        <div class="crm-field">
-                            <label for="call_date">
-                                Call date
-                            </label>
-
-                            <input
-                                id="call_date"
-                                type="date"
-                                name="call_date"
-                                required
-                            >
-                        </div>
-
-                        <div class="crm-field">
-                            <label for="weight_kg">
-                                Weight (kg)
-                            </label>
-
-                            <input
-                                id="weight_kg"
-                                type="number"
-                                step="0.1"
-                                name="weight_kg"
-                            >
-                        </div>
-
-                        <div class="crm-field">
-                            <label for="stress_score">
-                                Stress
-                            </label>
-
-                            <select
-                                id="stress_score"
-                                name="stress_score"
-                            >
-                                <option value="">
-                                    Choose
-                                </option>
-                                <option value="1">
-                                    1 · Very low
-                                </option>
-                                <option value="2">
-                                    2 · Low
-                                </option>
-                                <option value="3">
-                                    3 · Moderate
-                                </option>
-                                <option value="4">
-                                    4 · High
-                                </option>
-                                <option value="5">
-                                    5 · Very high
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="crm-field">
-                            <label for="mood_score">
-                                Mood
-                            </label>
-
-                            <select
-                                id="mood_score"
-                                name="mood_score"
-                            >
-                                <option value="">
-                                    Choose
-                                </option>
-                                <option value="1">
-                                    1 · Very low
-                                </option>
-                                <option value="2">
-                                    2 · Low
-                                </option>
-                                <option value="3">
-                                    3 · Okay
-                                </option>
-                                <option value="4">
-                                    4 · Good
-                                </option>
-                                <option value="5">
-                                    5 · Great
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="crm-field">
-                            <label for="next_call_date">
-                                Next call
-                            </label>
-
-                            <input
-                                id="next_call_date"
-                                type="date"
-                                name="next_call_date"
-                            >
-                        </div>
-
-                        <div class="crm-field">
-                            <label for="next_call_time">
-                                Call time
-                            </label>
-
-                            <input
-                                id="next_call_time"
-                                type="time"
-                                name="next_call_time"
-                            >
-                        </div>
-
-                    </div>
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
+                    <summary
+                        class="coaching-accordion-summary"
                     >
-                        Save Weekly Check-in
-                    </button>
 
-                </form>
+                        <div
+                            class="coaching-accordion-heading"
+                        >
+                            <span>
+                                Current focus
+                            </span>
 
-            </section>
+                            <strong>
+                                This Week
+                            </strong>
+                        </div>
 
-
-            <section class="dashboard-panel">
-
-                <div class="panel-heading">
-
-                    <div>
-                        <p class="eyebrow">
-                            Coaching journey
-                        </p>
-
-                        <h2>
-                            Weekly history
-                        </h2>
-                    </div>
-
-                </div>
+                    </summary>
 
 
-                {% if checkins %}
+                    <div
+                        class="coaching-accordion-content"
+                    >
 
-                <div class="coaching-timeline">
 
-                    {% for checkin in checkins %}
+                        <!-- ACTION PLAN -->
 
-                    <article class="coaching-week-card">
+                        <div class="coaching-subsection">
 
-                        <div class="coaching-week-header">
+                            <div
+                                class="coaching-subsection-header"
+                            >
+                                <h3>
+                                    Action Plan
+                                </h3>
 
-                            <div>
-                                <span>
-                                    Weekly check-in
-                                </span>
+                                <p>
+                                    What the client agreed
+                                    to focus on before the
+                                    next coaching call.
+                                </p>
+                            </div>
+
+
+                            {% if active_actions %}
+
+                            <div class="client-action-list">
+
+                                {% for action in active_actions %}
+
+                                <article
+                                    class="client-action-row"
+                                >
+
+                                    <div>
+
+                                        <strong>
+                                            {{ action.action_name }}
+                                        </strong>
+
+                                        <span>
+
+                                            {% if action.target_count %}
+
+                                                Target:
+                                                {{ action.target_count }}
+
+                                                {% if action.target_unit %}
+                                                    {{ action.target_unit }}
+                                                {% endif %}
+
+                                            {% endif %}
+
+                                        </span>
+
+                                    </div>
+
+                                    <span
+                                        class="client-action-status"
+                                    >
+                                        Active
+                                    </span>
+
+                                </article>
+
+                                {% endfor %}
+
+                            </div>
+
+                            {% else %}
+
+                            <p class="empty-text">
+                                No active actions yet.
+                            </p>
+
+                            {% endif %}
+
+
+                            <!-- ADD ACTION -->
+
+                            <form
+                                method="post"
+                                action="/dashboard/clients/{{ client.id }}/actions"
+                                class="client-action-form"
+                            >
+
+                                <div
+                                    class="client-action-form-grid"
+                                >
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="action_name"
+                                        >
+                                            Action
+                                        </label>
+
+                                        <input
+                                            id="action_name"
+                                            name="action_name"
+                                            placeholder="Protein in first meal"
+                                            required
+                                        >
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="target_count"
+                                        >
+                                            Target
+                                        </label>
+
+                                        <input
+                                            id="target_count"
+                                            name="target_count"
+                                            type="number"
+                                            min="1"
+                                            placeholder="5"
+                                        >
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="target_unit"
+                                        >
+                                            Unit
+                                        </label>
+
+                                        <select
+                                            id="target_unit"
+                                            name="target_unit"
+                                        >
+                                            <option value="">
+                                                Choose
+                                            </option>
+
+                                            <option value="days">
+                                                days
+                                            </option>
+
+                                            <option value="sessions">
+                                                sessions
+                                            </option>
+
+                                            <option value="times">
+                                                times
+                                            </option>
+                                        </select>
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="action_start_date"
+                                        >
+                                            Start date
+                                        </label>
+
+                                        <input
+                                            id="action_start_date"
+                                            name="start_date"
+                                            type="date"
+                                            required
+                                        >
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="action_end_date"
+                                        >
+                                            End date
+                                        </label>
+
+                                        <input
+                                            id="action_end_date"
+                                            name="end_date"
+                                            type="date"
+                                        >
+
+                                    </div>
+
+                                </div>
+
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary"
+                                >
+                                    + Add Action
+                                </button>
+
+                            </form>
+
+                        </div>
+
+
+
+                        <!-- DAILY TRACKING -->
+
+                        <div class="coaching-subsection">
+
+                            <div
+                                class="coaching-subsection-header"
+                            >
+                                <h3>
+                                    Daily Tracking
+                                </h3>
+
+                                <p>
+                                    What actually happened
+                                    during the week.
+                                </p>
+                            </div>
+
+
+                            <!-- RECENT TRACKING FIRST -->
+
+                            {% if tracking %}
+
+                            <div class="tracking-history">
 
                                 <h3>
-                                    {{ checkin.call_date }}
+                                    Recent tracking
                                 </h3>
+
+
+                                {% for entry in tracking[:7] %}
+
+                                <div
+                                    class="tracking-history-row"
+                                >
+
+                                    <strong>
+                                        {{ entry.tracked_on }}
+                                    </strong>
+
+                                    <span>
+                                        Protein:
+                                        {% if entry.protein %}
+                                            ✓
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </span>
+
+                                    <span>
+                                        Water:
+                                        {% if entry.water %}
+                                            ✓
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </span>
+
+                                    <span>
+                                        Steps:
+                                        {{ entry.steps or "—" }}
+                                    </span>
+
+                                    <span>
+                                        Strength:
+                                        {% if entry.strength_training %}
+                                            ✓
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </span>
+
+                                    <span>
+                                        Stress:
+                                        {{ entry.stress_score or "—" }}/5
+                                    </span>
+
+                                    <span>
+                                        Mood:
+                                        {{ entry.mood_score or "—" }}/5
+                                    </span>
+
+                                </div>
+
+                                {% endfor %}
+
                             </div>
 
-                            {% if checkin.weight_kg %}
+                            {% else %}
 
-                            <strong>
-                                {{ checkin.weight_kg }}
-                                kg
-                            </strong>
+                            <p class="empty-text">
+                                No daily tracking recorded yet.
+                            </p>
 
                             {% endif %}
 
+
+                            <!-- MANUAL TRACKING ENTRY -->
+
+                            <details
+                                class="daily-entry-details"
+                            >
+
+                                <summary>
+                                    + Add / update daily tracking
+                                </summary>
+
+
+                                <form
+                                    method="post"
+                                    action="/dashboard/clients/{{ client.id }}/tracking"
+                                    class="daily-tracking-form"
+                                >
+
+                                    <div
+                                        class="daily-tracking-grid"
+                                    >
+
+                                        <div class="crm-field">
+
+                                            <label
+                                                for="tracked_on"
+                                            >
+                                                Date
+                                            </label>
+
+                                            <input
+                                                id="tracked_on"
+                                                name="tracked_on"
+                                                type="date"
+                                                required
+                                            >
+
+                                        </div>
+
+
+                                        <div
+                                            class="tracking-check-field"
+                                        >
+
+                                            <input
+                                                id="protein"
+                                                name="protein"
+                                                type="checkbox"
+                                                value="true"
+                                            >
+
+                                            <label
+                                                for="protein"
+                                            >
+                                                Protein goal met
+                                            </label>
+
+                                        </div>
+
+
+                                        <div
+                                            class="tracking-check-field"
+                                        >
+
+                                            <input
+                                                id="water"
+                                                name="water"
+                                                type="checkbox"
+                                                value="true"
+                                            >
+
+                                            <label
+                                                for="water"
+                                            >
+                                                Water goal met
+                                            </label>
+
+                                        </div>
+
+
+                                        <div class="crm-field">
+
+                                            <label
+                                                for="steps"
+                                            >
+                                                Steps
+                                            </label>
+
+                                            <input
+                                                id="steps"
+                                                name="steps"
+                                                type="number"
+                                                min="0"
+                                                placeholder="7000"
+                                            >
+
+                                        </div>
+
+
+                                        <div
+                                            class="tracking-check-field"
+                                        >
+
+                                            <input
+                                                id="strength_training"
+                                                name="strength_training"
+                                                type="checkbox"
+                                                value="true"
+                                            >
+
+                                            <label
+                                                for="strength_training"
+                                            >
+                                                Strength training
+                                            </label>
+
+                                        </div>
+
+
+                                        <div class="crm-field">
+
+                                            <label
+                                                for="daily_stress"
+                                            >
+                                                Stress
+                                            </label>
+
+                                            <select
+                                                id="daily_stress"
+                                                name="stress_score"
+                                            >
+                                                <option value="">
+                                                    Choose
+                                                </option>
+
+                                                <option value="1">
+                                                    1 · Very low
+                                                </option>
+
+                                                <option value="2">
+                                                    2 · Low
+                                                </option>
+
+                                                <option value="3">
+                                                    3 · Moderate
+                                                </option>
+
+                                                <option value="4">
+                                                    4 · High
+                                                </option>
+
+                                                <option value="5">
+                                                    5 · Very high
+                                                </option>
+                                            </select>
+
+                                        </div>
+
+
+                                        <div class="crm-field">
+
+                                            <label
+                                                for="daily_mood"
+                                            >
+                                                Mood
+                                            </label>
+
+                                            <select
+                                                id="daily_mood"
+                                                name="mood_score"
+                                            >
+                                                <option value="">
+                                                    Choose
+                                                </option>
+
+                                                <option value="1">
+                                                    1 · Very low
+                                                </option>
+
+                                                <option value="2">
+                                                    2 · Low
+                                                </option>
+
+                                                <option value="3">
+                                                    3 · Okay
+                                                </option>
+
+                                                <option value="4">
+                                                    4 · Good
+                                                </option>
+
+                                                <option value="5">
+                                                    5 · Great
+                                                </option>
+                                            </select>
+
+                                        </div>
+
+
+                                        <div class="crm-field">
+
+                                            <label
+                                                for="daily_weight"
+                                            >
+                                                Weight (kg)
+                                            </label>
+
+                                            <input
+                                                id="daily_weight"
+                                                name="weight_kg"
+                                                type="number"
+                                                step="0.1"
+                                                min="0"
+                                            >
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="tracking_note"
+                                        >
+                                            Note
+                                        </label>
+
+                                        <textarea
+                                            id="tracking_note"
+                                            name="note"
+                                            rows="2"
+                                            placeholder="Anything worth remembering about today..."
+                                        ></textarea>
+
+                                    </div>
+
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary"
+                                    >
+                                        Save Daily Tracking
+                                    </button>
+
+                                </form>
+
+                            </details>
+
                         </div>
 
-
-                        <div class="coaching-week-metrics">
-
-                            <div>
-                                <span>Stress</span>
-                                <strong>
-                                    {{
-                                        checkin.stress_score
-                                        or "—"
-                                    }}
-                                    /5
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>Mood</span>
-                                <strong>
-                                    {{
-                                        checkin.mood_score
-                                        or "—"
-                                    }}
-                                    /5
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>Next call</span>
-                                <strong>
-                                    {{
-                                        checkin.next_call_date
-                                        or "Not scheduled"
-                                    }}
-                                </strong>
-                            </div>
-
-                        </div>
-
-                        <div class="coaching-action-placeholder">
-
-                            <span>
-                                Action plan
-                            </span>
-
-                            <p>
-                                Weekly actions will appear
-                                here once we connect the
-                                Action Plan module.
-                            </p>
-
-                        </div>
-
-                    </article>
-
-                    {% endfor %}
-
-                </div>
-
-                <section class="dashboard-panel">
-
-                    <div class="panel-heading">
-                        <div>
-                            <p class="eyebrow">
-                                Daily habits
-                            </p>
-                
-                            <h2>
-                                Daily Tracking
-                            </h2>
-                        </div>
                     </div>
-                
-                
-                    <form
-                        method="post"
-                        action="/dashboard/clients/{{ client.id }}/tracking"
-                        class="daily-tracking-form"
-                    >
-                
-                        <div class="daily-tracking-grid">
-                
-                            <div class="crm-field">
-                                <label for="tracked_on">
-                                    Date
-                                </label>
-                
-                                <input
-                                    id="tracked_on"
-                                    name="tracked_on"
-                                    type="date"
-                                    required
-                                >
-                            </div>
-                
-                
-                            <div class="tracking-check-field">
-                
-                                <input
-                                    id="protein"
-                                    name="protein"
-                                    type="checkbox"
-                                    value="true"
-                                >
-                
-                                <label for="protein">
-                                    Protein goal met
-                                </label>
-                
-                            </div>
-                
-                
-                            <div class="tracking-check-field">
-                
-                                <input
-                                    id="water"
-                                    name="water"
-                                    type="checkbox"
-                                    value="true"
-                                >
-                
-                                <label for="water">
-                                    Water goal met
-                                </label>
-                
-                            </div>
-                
-                
-                            <div class="crm-field">
-                
-                                <label for="steps">
-                                    Steps
-                                </label>
-                
-                                <input
-                                    id="steps"
-                                    name="steps"
-                                    type="number"
-                                    min="0"
-                                    placeholder="7000"
-                                >
-                
-                            </div>
-                
-                
-                            <div class="tracking-check-field">
-                
-                                <input
-                                    id="strength_training"
-                                    name="strength_training"
-                                    type="checkbox"
-                                    value="true"
-                                >
-                
-                                <label for="strength_training">
-                                    Strength training
-                                </label>
-                
-                            </div>
-                
-                
-                            <div class="crm-field">
-                
-                                <label for="daily_stress">
-                                    Stress
-                                </label>
-                
-                                <select
-                                    id="daily_stress"
-                                    name="stress_score"
-                                >
-                                    <option value="">
-                                        Choose
-                                    </option>
-                
-                                    <option value="1">
-                                        1 · Very low
-                                    </option>
-                
-                                    <option value="2">
-                                        2 · Low
-                                    </option>
-                
-                                    <option value="3">
-                                        3 · Moderate
-                                    </option>
-                
-                                    <option value="4">
-                                        4 · High
-                                    </option>
-                
-                                    <option value="5">
-                                        5 · Very high
-                                    </option>
-                                </select>
-                
-                            </div>
-                
-                
-                            <div class="crm-field">
-                
-                                <label for="daily_mood">
-                                    Mood
-                                </label>
-                
-                                <select
-                                    id="daily_mood"
-                                    name="mood_score"
-                                >
-                                    <option value="">
-                                        Choose
-                                    </option>
-                
-                                    <option value="1">
-                                        1 · Very low
-                                    </option>
-                
-                                    <option value="2">
-                                        2 · Low
-                                    </option>
-                
-                                    <option value="3">
-                                        3 · Okay
-                                    </option>
-                
-                                    <option value="4">
-                                        4 · Good
-                                    </option>
-                
-                                    <option value="5">
-                                        5 · Great
-                                    </option>
-                                </select>
-                
-                            </div>
-                
-                
-                            <div class="crm-field">
-                
-                                <label for="daily_weight">
-                                    Weight (kg)
-                                </label>
-                
-                                <input
-                                    id="daily_weight"
-                                    name="weight_kg"
-                                    type="number"
-                                    step="0.1"
-                                    min="0"
-                                >
-                
-                            </div>
-                
-                        </div>
-                
-                
-                        <div class="crm-field">
-                
-                            <label for="tracking_note">
-                                Note
-                                <span class="optional-label">
-                                    Optional
-                                </span>
-                            </label>
-                
-                            <textarea
-                                id="tracking_note"
-                                name="note"
-                                rows="2"
-                                placeholder="Anything worth remembering about today..."
-                            ></textarea>
-                
-                        </div>
-                
-                
-                        <button
-                            type="submit"
-                            class="btn btn-primary"
-                        >
-                            Save Daily Tracking
-                        </button>
-                
-                    </form>
-                
-                
-                    {% if tracking %}
-                
-                    <div class="tracking-history">
-                
-                        <h3>
-                            Recent tracking
-                        </h3>
-                
-                        {% for entry in tracking[:7] %}
-                
-                        <div class="tracking-history-row">
-                
-                            <strong>
-                                {{ entry.tracked_on }}
-                            </strong>
-                
-                            <span>
-                                Protein:
-                                {% if entry.protein %}
-                                    ✓
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </span>
-                
-                            <span>
-                                Water:
-                                {% if entry.water %}
-                                    ✓
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </span>
-                
-                            <span>
-                                Steps:
-                                {{ entry.steps or "—" }}
-                            </span>
-                
-                            <span>
-                                Strength:
-                                {% if entry.strength_training %}
-                                    ✓
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </span>
-                
-                            <span>
-                                Stress:
-                                {{ entry.stress_score or "—" }}/5
-                            </span>
-                
-                            <span>
-                                Mood:
-                                {{ entry.mood_score or "—" }}/5
-                            </span>
-                
-                        </div>
-                
-                        {% endfor %}
-                
-                    </div>
-                
-                    {% endif %}
-                
-                </section>
 
-                {% else %}
+                </details>
 
-                <div class="empty-coaching-state">
 
-                    <h3>
-                        Start the coaching journey
-                    </h3>
 
-                    <p>
-                        Save the first weekly check-in
-                        above. Weight, mood, stress and
-                        future action plans will build a
-                        chronological coaching history
-                        here.
-                    </p>
+                <!-- ==========================================
+                     2. WEEKLY CHECK-IN
+                     ========================================== -->
 
-                </div>
-
-                {% endif %}
-
-            </section>
-
-            <section class="dashboard-panel">
-
-                <div class="panel-heading">
-                    <div>
-                        <p class="eyebrow">
-                            This week
-                        </p>
-            
-                        <h2>
-                            Action Plan
-                        </h2>
-                    </div>
-                </div>
-            
-                {% if active_actions %}
-            
-                <div class="client-action-list">
-            
-                    {% for action in active_actions %}
-            
-                    <article class="client-action-row">
-            
-                        <div>
-                            <strong>
-                                {{ action.action_name }}
-                            </strong>
-            
-                            <span>
-                                {% if action.target_count %}
-                                    Target:
-                                    {{ action.target_count }}
-            
-                                    {% if action.target_unit %}
-                                        {{ action.target_unit }}
-                                    {% endif %}
-                                {% endif %}
-                            </span>
-                        </div>
-            
-                        <span class="client-action-status">
-                            Active
-                        </span>
-            
-                    </article>
-            
-                    {% endfor %}
-            
-                </div>
-
-                
-                {% else %}
-            
-                <p class="empty-text">
-                    No active actions yet.
-                </p>
-            
-                {% endif %}
-            
-            
-                <form
-                    method="post"
-                    action="/dashboard/clients/{{ client.id }}/actions"
-                    class="client-action-form"
+                <details
+                    class="coaching-accordion-item"
                 >
-            
-                    <div class="client-action-form-grid">
-            
-                        <div class="crm-field">
-                            <label for="action_name">
-                                Action
-                            </label>
-            
-                            <input
-                                id="action_name"
-                                name="action_name"
-                                placeholder="Protein in first meal"
-                                required
-                            >
-                        </div>
-            
-                        <div class="crm-field">
-                            <label for="target_count">
-                                Target
-                            </label>
-            
-                            <input
-                                id="target_count"
-                                type="number"
-                                min="1"
-                                name="target_count"
-                                placeholder="5"
-                            >
-                        </div>
-            
-                        <div class="crm-field">
-                            <label for="target_unit">
-                                Unit
-                            </label>
-            
-                            <select
-                                id="target_unit"
-                                name="target_unit"
-                            >
-                                <option value="">
-                                    Choose
-                                </option>
-            
-                                <option value="days">
-                                    days
-                                </option>
-            
-                                <option value="sessions">
-                                    sessions
-                                </option>
-            
-                                <option value="times">
-                                    times
-                                </option>
-                            </select>
-                        </div>
-            
-                        <div class="crm-field">
-                            <label for="action_start_date">
-                                Start date
-                            </label>
-            
-                            <input
-                                id="action_start_date"
-                                type="date"
-                                name="start_date"
-                                required
-                            >
-                        </div>
-            
-                        <div class="crm-field">
-                            <label for="action_end_date">
-                                End date
-                            </label>
-            
-                            <input
-                                id="action_end_date"
-                                type="date"
-                                name="end_date"
-                            >
-                        </div>
-            
-                    </div>
-            
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
+
+                    <summary
+                        class="coaching-accordion-summary"
                     >
-                        + Add Action
-                    </button>
-            
-                </form>
-            
-            </section>
+
+                        <div
+                            class="coaching-accordion-heading"
+                        >
+                            <span>
+                                Coaching call
+                            </span>
+
+                            <strong>
+                                Weekly Check-in
+                            </strong>
+                        </div>
+
+                    </summary>
+
+
+                    <div
+                        class="coaching-accordion-content"
+                    >
+
+                        <div class="coaching-subsection">
+
+                            <div
+                                class="coaching-subsection-header"
+                            >
+                                <h3>
+                                    Complete Weekly Check-in
+                                </h3>
+
+                                <p>
+                                    Review the week, record
+                                    progress and schedule
+                                    the next coaching call.
+                                </p>
+                            </div>
+
+
+                            <form
+                                method="post"
+                                action="/dashboard/clients/{{ client.id }}/checkin"
+                                class="client-checkin-form"
+                            >
+
+                                <div
+                                    class="client-checkin-grid"
+                                >
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="call_date"
+                                        >
+                                            Call date
+                                        </label>
+
+                                        <input
+                                            id="call_date"
+                                            name="call_date"
+                                            type="date"
+                                            required
+                                        >
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="weight_kg"
+                                        >
+                                            Weight (kg)
+                                        </label>
+
+                                        <input
+                                            id="weight_kg"
+                                            name="weight_kg"
+                                            type="number"
+                                            step="0.1"
+                                        >
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="stress_score"
+                                        >
+                                            Stress
+                                        </label>
+
+                                        <select
+                                            id="stress_score"
+                                            name="stress_score"
+                                        >
+                                            <option value="">
+                                                Choose
+                                            </option>
+
+                                            <option value="1">
+                                                1 · Very low
+                                            </option>
+
+                                            <option value="2">
+                                                2 · Low
+                                            </option>
+
+                                            <option value="3">
+                                                3 · Moderate
+                                            </option>
+
+                                            <option value="4">
+                                                4 · High
+                                            </option>
+
+                                            <option value="5">
+                                                5 · Very high
+                                            </option>
+                                        </select>
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="mood_score"
+                                        >
+                                            Mood
+                                        </label>
+
+                                        <select
+                                            id="mood_score"
+                                            name="mood_score"
+                                        >
+                                            <option value="">
+                                                Choose
+                                            </option>
+
+                                            <option value="1">
+                                                1 · Very low
+                                            </option>
+
+                                            <option value="2">
+                                                2 · Low
+                                            </option>
+
+                                            <option value="3">
+                                                3 · Okay
+                                            </option>
+
+                                            <option value="4">
+                                                4 · Good
+                                            </option>
+
+                                            <option value="5">
+                                                5 · Great
+                                            </option>
+                                        </select>
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="next_call_date"
+                                        >
+                                            Next call
+                                        </label>
+
+                                        <input
+                                            id="next_call_date"
+                                            name="next_call_date"
+                                            type="date"
+                                        >
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label
+                                            for="next_call_time"
+                                        >
+                                            Call time
+                                        </label>
+
+                                        <input
+                                            id="next_call_time"
+                                            name="next_call_time"
+                                            type="time"
+                                        >
+
+                                    </div>
+
+                                </div>
+
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary"
+                                >
+                                    Save Weekly Check-in
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+
+                <!-- ==========================================
+                     3. COACHING JOURNEY
+                     ========================================== -->
+
+                <details
+                    class="coaching-accordion-item"
+                >
+
+                    <summary
+                        class="coaching-accordion-summary"
+                    >
+
+                        <div
+                            class="coaching-accordion-heading"
+                        >
+                            <span>
+                                History
+                            </span>
+
+                            <strong>
+                                Coaching Journey
+                            </strong>
+                        </div>
+
+                    </summary>
+
+
+                    <div
+                        class="coaching-accordion-content"
+                    >
+
+                        <div class="coaching-subsection">
+
+
+                            {% if checkins %}
+
+                            <div class="coaching-timeline">
+
+                                {% for checkin in checkins %}
+
+                                <article
+                                    class="coaching-week-card"
+                                >
+
+                                    <div
+                                        class="coaching-week-header"
+                                    >
+
+                                        <div>
+
+                                            <span>
+                                                Weekly check-in
+                                            </span>
+
+                                            <h3>
+                                                {{ checkin.call_date }}
+                                            </h3>
+
+                                        </div>
+
+
+                                        {% if checkin.weight_kg %}
+
+                                        <strong>
+                                            {{ checkin.weight_kg }}
+                                            kg
+                                        </strong>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <div
+                                        class="coaching-week-metrics"
+                                    >
+
+                                        <div>
+                                            <span>
+                                                Stress
+                                            </span>
+
+                                            <strong>
+                                                {{
+                                                    checkin.stress_score
+                                                    or "—"
+                                                }}/5
+                                            </strong>
+                                        </div>
+
+
+                                        <div>
+                                            <span>
+                                                Mood
+                                            </span>
+
+                                            <strong>
+                                                {{
+                                                    checkin.mood_score
+                                                    or "—"
+                                                }}/5
+                                            </strong>
+                                        </div>
+
+
+                                        <div>
+                                            <span>
+                                                Next call
+                                            </span>
+
+                                            <strong>
+                                                {{
+                                                    checkin.next_call_date
+                                                    or "Not scheduled"
+                                                }}
+                                            </strong>
+                                        </div>
+
+                                    </div>
+
+                                </article>
+
+                                {% endfor %}
+
+                            </div>
+
+                            {% else %}
+
+                            <div
+                                class="empty-coaching-state"
+                            >
+
+                                <h3>
+                                    No coaching history yet
+                                </h3>
+
+                                <p>
+                                    Weekly check-ins will
+                                    build the client's
+                                    coaching journey here.
+                                </p>
+
+                            </div>
+
+                            {% endif %}
+
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+            </div>
 
         </div>
 
     </section>
 
-</main>
+</div>
 
 {% endblock %}
