@@ -2333,14 +2333,8 @@ a {
 }
 
 .coaching-empty-agenda {
-    display: grid;
-    gap: 5px;
-
-    padding: 24px;
-
-    border-radius: 16px;
-
-    background: var(--sage-tint);
+    padding: 16px 18px;
+    min-height: 0;
 }
 
 .coaching-empty-agenda span {
