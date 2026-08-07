@@ -3451,3 +3451,27 @@ a.coach-home-stat:hover {
     color: var(--text-light);
     font-size: 12px;
 }
+.daily-entry-details {
+    margin-top: 20px;
+}
+
+.daily-entry-details > summary {
+    width: fit-content;
+
+    cursor: pointer;
+
+    color: var(--purple);
+
+    font-size: 13px;
+    font-weight: 800;
+
+    list-style: none;
+}
+
+.daily-entry-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.daily-entry-details[open] > summary {
+    margin-bottom: 18px;
+}
