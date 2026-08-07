@@ -158,23 +158,7 @@ class ClientService:
             else:
                 client["current_week"] = None
     
-            initial_weight = client.get(
-                "initial_weight_kg"
-            )
-    
-            current_weight = client.get(
-                "current_weight_kg"
-            )
-    
-            if (
-                initial_weight is not None
-                and current_weight is not None
-            ):
-                client["weight_change"] = (
-                    float(current_weight)
-                    - float(initial_weight)
-                )
-            else:
-                client["weight_change"] = None
+        
+            client["weight_change"] = None
     
         return clients
