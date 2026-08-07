@@ -31,6 +31,6 @@ class ClientService:
             phone=phone,
             program=program,
         )
-        @staticmethod
+    @staticmethod
     def add_checkin(
         client_id,
