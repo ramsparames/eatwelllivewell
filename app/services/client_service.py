@@ -12,6 +12,8 @@ from app.database import (
     create_client_action,
     get_client_actions,
     complete_client_action,
+    save_daily_tracking,
+    get_client_tracking,
 )
 
 
@@ -206,4 +208,43 @@ class ClientService:
     ):
         complete_client_action(
             action_id
+        )
+
+    @staticmethod
+    def save_tracking(
+        client_id,
+        tracked_on,
+        protein=None,
+        water=None,
+        steps=None,
+        strength_training=None,
+        stress_score=None,
+        mood_score=None,
+        weight_kg=None,
+        note=None,
+    ):
+        return save_daily_tracking(
+            client_id=client_id,
+            tracked_on=tracked_on,
+            protein=protein,
+            water=water,
+            steps=steps,
+            strength_training=strength_training,
+            stress_score=stress_score,
+            mood_score=mood_score,
+            weight_kg=weight_kg,
+            note=note,
+        )
+    
+    
+    @staticmethod
+    def tracking(
+        client_id,
+        start_date=None,
+        end_date=None,
+    ):
+        return get_client_tracking(
+            client_id,
+            start_date=start_date,
+            end_date=end_date,
         )
