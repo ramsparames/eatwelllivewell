@@ -880,11 +880,6 @@ if (applicationForm) {
                     return;
                 }
             }
-			
-            const submitButton =
-                applicationForm.querySelector(
-                    'button[type="submit"]'
-                );
 
             let phone =
                 phoneField?.value.trim() || "";
@@ -1058,14 +1053,23 @@ if (applicationForm) {
                         consentField?.checked
                     ),
             };
-
+			if (submitButton) {
+			    submitButton.disabled = true;
+			    submitButton.setAttribute(
+			        "aria-busy",
+			        "true"
+			    );
+			}
+			
+			if (submitLabel) {
+			    submitLabel.textContent =
+			        "Submitting...";
+			}
+			
+			if (submitArrow) {
+			    submitArrow.textContent = "⏳";
+			}
             try {
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    submitButton.textContent =
-                        "Submitting…";
-                }
-
                 const response = await fetch(
                     "/application",
                     {
@@ -1115,22 +1119,30 @@ if (applicationForm) {
 
                 window.location.href =
                     "/thank-you";
-            } catch (error) {
-                console.error(
-                    "Application submission failed:",
-                    error
-                );
-
-                alert(
-                    "We could not submit your application. Please try again."
-                );
-
-                if (submitButton) {
-                    submitButton.disabled = false;
-                    submitButton.textContent =
-                        "Submit my application →";
-                }
-            }
+			} catch (error) {
+			    console.error(
+			        "Application submission failed:",
+			        error
+			    );
+			
+			    alert(
+			        "We could not submit your application. Please try again."
+			    );
+			
+			    if (submitButton) {
+			        submitButton.disabled = false;
+			        submitButton.removeAttribute("aria-busy");
+			    }
+			
+			    if (submitLabel) {
+			        submitLabel.textContent =
+			            "Submit my application";
+			    }
+			
+			    if (submitArrow) {
+			        submitArrow.textContent = "→";
+			    }
+			}
         }
     );
 }
