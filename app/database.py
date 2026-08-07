@@ -1335,9 +1335,6 @@ def get_client_summaries():
                     c.program,
                     c.status,
                     c.start_date,
-                    c.primary_goal,
-                    c.initial_weight_kg,
-                    c.goal_weight_kg,
 
                     latest.weight_kg
                         AS current_weight_kg,
