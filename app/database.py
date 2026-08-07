@@ -1154,7 +1154,7 @@ def create_client(
                     program
                 )
                 VALUES
-                (%s,%s,%s,%s)
+                (%s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
@@ -1164,9 +1164,15 @@ def create_client(
                     program,
                 ),
             )
-
-            return cursor.fetchone()[0]
-
+            
+            row = cursor.fetchone()
+            
+            if not row:
+                raise RuntimeError(
+                    "Client could not be created"
+                )
+            
+            return int(row["id"])
 def get_clients():
     conn = get_connection()
 
