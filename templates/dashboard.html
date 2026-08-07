@@ -1,27 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <title>Coach Dashboard | NourisHer</title>
+{% block title %}
+Leads | NourisHer Coach
+{% endblock %}
 
-    <link rel="stylesheet" href="/static/dashboard.css">
-</head>
+{% block content %}
 
-<body>
+<header class="workspace-page-header">
+    <div>
+        <p class="eyebrow">
+            Lead workspace
+        </p>
 
-<header class="dashboard-header">
-    <div class="dashboard-header-inner">
-        <div>
-            <p class="brand-kicker">Eat Well Live Well</p>
-            <h1>NourisHer Coach Dashboard</h1>
-        </div>
+        <h1>
+            Leads
+        </h1>
 
-        <div class="header-actions">
-            <a class="site-link" href="/">View website →</a>
-            <a class="site-link logout-link" href="/coach/logout">Log out</a>
-        </div>
+        <p>
+            Review assessments, Transformation applications
+            and follow-ups in one place.
+        </p>
     </div>
 </header>
 
@@ -500,5 +498,4 @@
 
 </main>
 
-</body>
-</html>
+{% endblock %}
