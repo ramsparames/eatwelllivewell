@@ -450,34 +450,20 @@ def client_profile(
             status_code=303,
         )
 
-   profile = ClientService.profile(
+    profile = ClientService.profile(
         client_id
     )
-    
+
     if profile is None:
         raise HTTPException(
             status_code=404,
             detail="Client not found",
         )
-    
+
     return templates.TemplateResponse(
         "client.html",
         {
             "request": request,
             **profile,
-        },
-    )
-
-    if client is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Client not found",
-        )
-
-    return templates.TemplateResponse(
-        "client.html",
-        {
-            "request": request,
-            "client": client,
         },
     )
