@@ -410,6 +410,300 @@
 
                 </div>
 
+                <section class="dashboard-panel">
+
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">
+                                Daily habits
+                            </p>
+                
+                            <h2>
+                                Daily Tracking
+                            </h2>
+                        </div>
+                    </div>
+                
+                
+                    <form
+                        method="post"
+                        action="/dashboard/clients/{{ client.id }}/tracking"
+                        class="daily-tracking-form"
+                    >
+                
+                        <div class="daily-tracking-grid">
+                
+                            <div class="crm-field">
+                                <label for="tracked_on">
+                                    Date
+                                </label>
+                
+                                <input
+                                    id="tracked_on"
+                                    name="tracked_on"
+                                    type="date"
+                                    required
+                                >
+                            </div>
+                
+                
+                            <div class="tracking-check-field">
+                
+                                <input
+                                    id="protein"
+                                    name="protein"
+                                    type="checkbox"
+                                    value="true"
+                                >
+                
+                                <label for="protein">
+                                    Protein goal met
+                                </label>
+                
+                            </div>
+                
+                
+                            <div class="tracking-check-field">
+                
+                                <input
+                                    id="water"
+                                    name="water"
+                                    type="checkbox"
+                                    value="true"
+                                >
+                
+                                <label for="water">
+                                    Water goal met
+                                </label>
+                
+                            </div>
+                
+                
+                            <div class="crm-field">
+                
+                                <label for="steps">
+                                    Steps
+                                </label>
+                
+                                <input
+                                    id="steps"
+                                    name="steps"
+                                    type="number"
+                                    min="0"
+                                    placeholder="7000"
+                                >
+                
+                            </div>
+                
+                
+                            <div class="tracking-check-field">
+                
+                                <input
+                                    id="strength_training"
+                                    name="strength_training"
+                                    type="checkbox"
+                                    value="true"
+                                >
+                
+                                <label for="strength_training">
+                                    Strength training
+                                </label>
+                
+                            </div>
+                
+                
+                            <div class="crm-field">
+                
+                                <label for="daily_stress">
+                                    Stress
+                                </label>
+                
+                                <select
+                                    id="daily_stress"
+                                    name="stress_score"
+                                >
+                                    <option value="">
+                                        Choose
+                                    </option>
+                
+                                    <option value="1">
+                                        1 · Very low
+                                    </option>
+                
+                                    <option value="2">
+                                        2 · Low
+                                    </option>
+                
+                                    <option value="3">
+                                        3 · Moderate
+                                    </option>
+                
+                                    <option value="4">
+                                        4 · High
+                                    </option>
+                
+                                    <option value="5">
+                                        5 · Very high
+                                    </option>
+                                </select>
+                
+                            </div>
+                
+                
+                            <div class="crm-field">
+                
+                                <label for="daily_mood">
+                                    Mood
+                                </label>
+                
+                                <select
+                                    id="daily_mood"
+                                    name="mood_score"
+                                >
+                                    <option value="">
+                                        Choose
+                                    </option>
+                
+                                    <option value="1">
+                                        1 · Very low
+                                    </option>
+                
+                                    <option value="2">
+                                        2 · Low
+                                    </option>
+                
+                                    <option value="3">
+                                        3 · Okay
+                                    </option>
+                
+                                    <option value="4">
+                                        4 · Good
+                                    </option>
+                
+                                    <option value="5">
+                                        5 · Great
+                                    </option>
+                                </select>
+                
+                            </div>
+                
+                
+                            <div class="crm-field">
+                
+                                <label for="daily_weight">
+                                    Weight (kg)
+                                </label>
+                
+                                <input
+                                    id="daily_weight"
+                                    name="weight_kg"
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                >
+                
+                            </div>
+                
+                        </div>
+                
+                
+                        <div class="crm-field">
+                
+                            <label for="tracking_note">
+                                Note
+                                <span class="optional-label">
+                                    Optional
+                                </span>
+                            </label>
+                
+                            <textarea
+                                id="tracking_note"
+                                name="note"
+                                rows="2"
+                                placeholder="Anything worth remembering about today..."
+                            ></textarea>
+                
+                        </div>
+                
+                
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Save Daily Tracking
+                        </button>
+                
+                    </form>
+                
+                
+                    {% if tracking %}
+                
+                    <div class="tracking-history">
+                
+                        <h3>
+                            Recent tracking
+                        </h3>
+                
+                        {% for entry in tracking[:7] %}
+                
+                        <div class="tracking-history-row">
+                
+                            <strong>
+                                {{ entry.tracked_on }}
+                            </strong>
+                
+                            <span>
+                                Protein:
+                                {% if entry.protein %}
+                                    ✓
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </span>
+                
+                            <span>
+                                Water:
+                                {% if entry.water %}
+                                    ✓
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </span>
+                
+                            <span>
+                                Steps:
+                                {{ entry.steps or "—" }}
+                            </span>
+                
+                            <span>
+                                Strength:
+                                {% if entry.strength_training %}
+                                    ✓
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </span>
+                
+                            <span>
+                                Stress:
+                                {{ entry.stress_score or "—" }}/5
+                            </span>
+                
+                            <span>
+                                Mood:
+                                {{ entry.mood_score or "—" }}/5
+                            </span>
+                
+                        </div>
+                
+                        {% endfor %}
+                
+                    </div>
+                
+                    {% endif %}
+                
+                </section>
+
                 {% else %}
 
                 <div class="empty-coaching-state">
@@ -480,7 +774,8 @@
                     {% endfor %}
             
                 </div>
-            
+
+                
                 {% else %}
             
                 <p class="empty-text">
