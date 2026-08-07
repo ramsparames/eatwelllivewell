@@ -9,6 +9,11 @@ from app.database import (
     get_lead_events,
     update_lead_crm,
 )
+from app.database import (
+    get_clients,
+    get_client,
+    create_client,
+)
 from fastapi import Form
 
 router = APIRouter()
@@ -349,4 +354,82 @@ def update_lead(
     return RedirectResponse(
         url=f"/dashboard/leads/{lead_type}/{lead_id}?saved=1",
         status_code=303,
+    )
+@router.get(
+    "/dashboard/clients",
+    response_class=HTMLResponse,
+)
+def clients_page(request: Request):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    clients = get_clients()
+
+    return templates.TemplateResponse(
+        "clients.html",
+        {
+            "request": request,
+            "clients": clients,
+        },
+    )
+
+
+@router.post("/dashboard/clients")
+def add_client(
+    request: Request,
+    name: str = Form(...),
+    email: str = Form(""),
+    phone: str = Form(""),
+    program: str = Form("Transformation"),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    client_id = create_client(
+        name=name.strip(),
+        email=email.strip() or None,
+        phone=phone.strip() or None,
+        program=program,
+    )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}",
+        status_code=303,
+    )
+
+
+@router.get(
+    "/dashboard/clients/{client_id}",
+    response_class=HTMLResponse,
+)
+def client_profile(
+    request: Request,
+    client_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    client = get_client(client_id)
+
+    if client is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Client not found",
+        )
+
+    return templates.TemplateResponse(
+        "client.html",
+        {
+            "request": request,
+            "client": client,
+        },
     )
