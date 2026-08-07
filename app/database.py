@@ -1000,3 +1000,65 @@ def get_clarity_calls_for_day(
             )
 
             return cursor.fetchall()
+def create_client(
+    name,
+    email=None,
+    phone=None,
+    program="Transformation",
+):
+    conn = get_connection()
+
+    with conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO clients
+                (
+                    name,
+                    email,
+                    phone,
+                    program
+                )
+                VALUES
+                (%s,%s,%s,%s)
+                RETURNING id
+                """,
+                (
+                    name,
+                    email,
+                    phone,
+                    program,
+                ),
+            )
+
+            return cursor.fetchone()[0]
+
+def get_clients():
+    conn = get_connection()
+
+    with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT *
+            FROM clients
+            ORDER BY name
+            """
+        )
+
+        return cursor.fetchall()
+
+def get_client(client_id):
+    conn = get_connection()
+
+    with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT *
+            FROM clients
+            WHERE id=%s
+            """,
+            (client_id,),
+        )
+
+        return cursor.fetchone()
+
