@@ -1369,6 +1369,103 @@ def get_client_summaries():
 
             return cursor.fetchall()
             
+def create_client_action(
+    client_id: int,
+    action_name: str,
+    target_count: int | None,
+    target_unit: str | None,
+    start_date,
+    end_date=None,
+    checkin_id=None,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO client_action_plans (
+                    client_id,
+                    checkin_id,
+                    action_name,
+                    target_count,
+                    target_unit,
+                    start_date,
+                    end_date
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s, %s, %s
+                )
+                RETURNING id
+                """,
+                (
+                    client_id,
+                    checkin_id,
+                    action_name,
+                    target_count,
+                    target_unit,
+                    start_date,
+                    end_date,
+                ),
+            )
+
+            row = cursor.fetchone()
+
+            if not row:
+                raise RuntimeError(
+                    "Client action could not be created"
+                )
+
+            return int(row["id"])
+
+
+def get_client_actions(
+    client_id: int,
+    status: str | None = None,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+
+            if status:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM client_action_plans
+                    WHERE client_id = %s
+                      AND status = %s
+                    ORDER BY start_date DESC, id DESC
+                    """,
+                    (
+                        client_id,
+                        status,
+                    ),
+                )
+            else:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM client_action_plans
+                    WHERE client_id = %s
+                    ORDER BY start_date DESC, id DESC
+                    """,
+                    (client_id,),
+                )
+
+            return cursor.fetchall()
+
+
+def complete_client_action(
+    action_id: int,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE client_action_plans
+                SET status = 'completed'
+                WHERE id = %s
+                """,
+                (action_id,),
+            )
+            
 if __name__ == "__main__":
     create_database()
     print("Database updated successfully.")
