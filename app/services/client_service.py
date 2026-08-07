@@ -8,6 +8,7 @@ from app.database import (
     get_client_checkins,
     get_calls_today,
     get_calls_this_week,
+    get_client_summaries,
 )
 
 
@@ -137,3 +138,43 @@ class ClientService:
             "next_call_date": next_call_date,
             "next_call_time": next_call_time,
         }
+    @staticmethod
+    def dashboard_clients():
+        clients = get_client_summaries()
+    
+        today = date.today()
+    
+        for client in clients:
+            start_date = client.get("start_date")
+    
+            if start_date:
+                days = (today - start_date).days
+    
+                client["current_week"] = (
+                    (days // 7) + 1
+                    if days >= 0
+                    else None
+                )
+            else:
+                client["current_week"] = None
+    
+            initial_weight = client.get(
+                "initial_weight_kg"
+            )
+    
+            current_weight = client.get(
+                "current_weight_kg"
+            )
+    
+            if (
+                initial_weight is not None
+                and current_weight is not None
+            ):
+                client["weight_change"] = (
+                    float(current_weight)
+                    - float(initial_weight)
+                )
+            else:
+                client["weight_change"] = None
+    
+        return clients
