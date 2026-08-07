@@ -364,24 +364,19 @@ def clients_page(request: Request):
 
     clients = ClientService.list_clients()
 
+    calls_today = ClientService.calls_today()
+
+    calls_this_week = ClientService.calls_this_week()
+
     return templates.TemplateResponse(
         "clients.html",
         {
             "request": request,
             "clients": clients,
+            "calls_today": calls_today,
+            "calls_this_week": calls_this_week,
         },
     )
-    checkins = ClientService.checkins(client_id)
-
-    return templates.TemplateResponse(
-        "client.html",
-        {
-        "request": request,
-        "client": client,
-        "checkins": checkins,
-        },
-    )
-
 
 @router.post("/dashboard/clients")
 def add_client(
