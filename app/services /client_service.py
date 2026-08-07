@@ -4,21 +4,27 @@ from app.database import (
     get_clients,
 )
 
-def list_clients():
-    return get_clients()
 
-def get_client_profile(client_id):
-    return get_client(client_id)
+class ClientService:
 
-def add_client(
-    name,
-    email,
-    phone,
-    program,
-):
-    return create_client(
-        name=name,
-        email=email,
-        phone=phone,
-        program=program,
-    )
+    @staticmethod
+    def list_clients():
+        return get_clients()
+
+    @staticmethod
+    def get(client_id):
+        return get_client(client_id)
+
+    @staticmethod
+    def create(
+        name,
+        email=None,
+        phone=None,
+        program="Transformation",
+    ):
+        return create_client(
+            name=name,
+            email=email,
+            phone=phone,
+            program=program,
+        )
