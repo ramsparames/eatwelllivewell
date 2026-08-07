@@ -1505,32 +1505,37 @@ def save_daily_tracking(
                 DO UPDATE SET
                     protein = EXCLUDED.protein,
                     water = EXCLUDED.water,
-                    steps = EXCLUDED.steps,
+                
+                    steps = COALESCE(
+                        EXCLUDED.steps,
+                        client_daily_tracking.steps
+                    ),
+                
                     strength_training =
                         EXCLUDED.strength_training,
-                    stress_score =
+                
+                    stress_score = COALESCE(
                         EXCLUDED.stress_score,
-                    mood_score =
+                        client_daily_tracking.stress_score
+                    ),
+                
+                    mood_score = COALESCE(
                         EXCLUDED.mood_score,
-                    weight_kg =
+                        client_daily_tracking.mood_score
+                    ),
+                
+                    weight_kg = COALESCE(
                         EXCLUDED.weight_kg,
-                    note =
+                        client_daily_tracking.weight_kg
+                    ),
+                
+                    note = COALESCE(
                         EXCLUDED.note,
+                        client_daily_tracking.note
+                    ),
+                
                     updated_at = NOW()
-                RETURNING id
-                """,
-                (
-                    client_id,
-                    tracked_on,
-                    protein,
-                    water,
-                    steps,
-                    strength_training,
-                    stress_score,
-                    mood_score,
-                    weight_kg,
-                    note,
-                ),
+                }
             )
 
             row = cursor.fetchone()
