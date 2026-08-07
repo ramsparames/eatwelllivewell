@@ -574,13 +574,60 @@ def save_client_tracking(
     tracked_on: str = Form(...),
     protein: bool = Form(False),
     water: bool = Form(False),
-    steps: int | None = Form(None),
+    steps: str = Form(""),
     strength_training: bool = Form(False),
-    stress_score: int | None = Form(None),
-    mood_score: int | None = Form(None),
-    weight_kg: float | None = Form(None),
-    note: str | None = Form(None),
+    stress_score: str = Form(""),
+    mood_score: str = Form(""),
+    weight_kg: str = Form(""),
+    note: str = Form(""),
 ):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    parsed_steps = (
+        int(steps)
+        if steps.strip()
+        else None
+    )
+
+    parsed_stress = (
+        int(stress_score)
+        if stress_score.strip()
+        else None
+    )
+
+    parsed_mood = (
+        int(mood_score)
+        if mood_score.strip()
+        else None
+    )
+
+    parsed_weight = (
+        float(weight_kg)
+        if weight_kg.strip()
+        else None
+    )
+
+    ClientService.save_tracking(
+        client_id=client_id,
+        tracked_on=tracked_on,
+        protein=protein,
+        water=water,
+        steps=parsed_steps,
+        strength_training=strength_training,
+        stress_score=parsed_stress,
+        mood_score=parsed_mood,
+        weight_kg=parsed_weight,
+        note=note.strip() or None,
+    )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}",
+        status_code=303,
+    )
     if not coach_is_logged_in(request):
         return RedirectResponse(
             "/coach/login",
