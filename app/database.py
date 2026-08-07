@@ -1578,7 +1578,50 @@ def get_client_tracking(
                 )
 
             return cursor.fetchall()
-            
+
+@router.post(
+    "/dashboard/clients/{client_id}/tracking"
+)
+def save_client_tracking(
+    request: Request,
+    client_id: int,
+    tracked_on: str = Form(...),
+    protein: bool = Form(False),
+    water: bool = Form(False),
+    steps: int | None = Form(None),
+    strength_training: bool = Form(False),
+    stress_score: int | None = Form(None),
+    mood_score: int | None = Form(None),
+    weight_kg: float | None = Form(None),
+    note: str | None = Form(None),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    ClientService.save_tracking(
+        client_id=client_id,
+        tracked_on=tracked_on,
+        protein=protein,
+        water=water,
+        steps=steps,
+        strength_training=strength_training,
+        stress_score=stress_score,
+        mood_score=mood_score,
+        weight_kg=weight_kg,
+        note=(
+            note.strip()
+            if note
+            else None
+        ),
+    )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}",
+        status_code=303,
+    )
 
 if __name__ == "__main__":
     create_database()
