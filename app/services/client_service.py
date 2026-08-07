@@ -9,6 +9,9 @@ from app.database import (
     get_calls_today,
     get_calls_this_week,
     get_client_summaries,
+    create_client_action,
+    get_client_actions,
+    complete_client_action,
 )
 
 
@@ -162,3 +165,41 @@ class ClientService:
             client["weight_change"] = None
     
         return clients
+    @staticmethod
+    def add_action(
+            client_id,
+            action_name,
+            target_count,
+            target_unit,
+            start_date,
+            end_date=None,
+            checkin_id=None,
+    ):
+        return create_client_action(
+                client_id=client_id,
+                action_name=action_name,
+                target_count=target_count,
+                target_unit=target_unit,
+                start_date=start_date,
+                end_date=end_date,
+                checkin_id=checkin_id,
+        )
+        
+    @staticmethod
+    def actions(
+        client_id,
+        status=None,
+    ):
+        return get_client_actions(
+            client_id,
+            status=status,
+        )
+    
+    
+    @staticmethod
+    def complete_action(
+        action_id,
+    ):
+        complete_client_action(
+            action_id
+        )
