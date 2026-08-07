@@ -498,7 +498,42 @@ def add_client_checkin(
         f"/dashboard/clients/{client_id}",
         status_code=303,
     )
+@router.post(
+    "/dashboard/clients/{client_id}/actions"
+)
+def add_client_action(
+        request: Request,
+        client_id: int,
+        action_name: str = Form(...),
+        target_count: int | None = Form(None),
+        target_unit: str | None = Form(None),
+        start_date: str = Form(...),
+        end_date: str | None = Form(None),
+    ):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
 
+    ClientService.add_action(
+        client_id=client_id,
+        action_name=action_name.strip(),
+        target_count=target_count,
+        target_unit=(
+            target_unit.strip()
+            if target_unit
+            else None
+        ),
+        start_date=start_date,
+        end_date=end_date or None,
+    )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}",
+        status_code=303,
+    )
+    
 @router.get(
     "/dashboard/clients/{client_id}",
     response_class=HTMLResponse,
