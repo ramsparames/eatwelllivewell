@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clients | NourisHer Coach</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+
+<body class="dashboard-page">
+
+<main class="dashboard-shell">
+
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">Coach workspace</p>
+            <h1>Clients</h1>
+        </div>
+    </div>
+
+    <section class="dashboard-panel">
+        <h2>Add client</h2>
+
+        <form
+            method="post"
+            action="/dashboard/clients"
+            class="crm-form"
+        >
+            <div class="crm-field">
+                <label>Name</label>
+                <input
+                    name="name"
+                    required
+                >
+            </div>
+
+            <div class="crm-field">
+                <label>Email</label>
+                <input
+                    name="email"
+                    type="email"
+                >
+            </div>
+
+            <div class="crm-field">
+                <label>Phone</label>
+                <input name="phone">
+            </div>
+
+            <div class="crm-field">
+                <label>Program</label>
+                <select name="program">
+                    <option>
+                        Transformation
+                    </option>
+                    <option>
+                        Foundations
+                    </option>
+                </select>
+            </div>
+
+            <button
+                class="btn btn-primary"
+                type="submit"
+            >
+                Add Client
+            </button>
+        </form>
+    </section>
+
+    <section class="dashboard-panel">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">
+                    Active coaching
+                </p>
+                <h2>All Clients</h2>
+            </div>
+        </div>
+
+        {% if clients %}
+
+        <div class="client-list">
+
+            {% for client in clients %}
+            <a
+                href="/dashboard/clients/{{ client.id }}"
+                class="client-row"
+            >
+                <div>
+                    <strong>
+                        {{ client.name }}
+                    </strong>
+
+                    <span>
+                        {{ client.program }}
+                    </span>
+                </div>
+
+                <span>
+                    {{ client.status|title }}
+                </span>
+            </a>
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <p>
+            No clients have been added yet.
+        </p>
+
+        {% endif %}
+    </section>
+
+</main>
+
+</body>
+</html>
