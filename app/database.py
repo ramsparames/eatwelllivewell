@@ -1316,10 +1316,12 @@ def create_weekly_checkin(
     client_id: int,
     call_date,
     weight_kg=None,
-    stress_score=None,
-    mood_score=None,
     next_call_date=None,
     next_call_time=None,
+    wins=None,
+    struggles=None,
+    improvements_needed=None,
+    coach_support=None,
 ):
     with get_connection() as connection:
         with connection.cursor() as cursor:
@@ -1329,28 +1331,40 @@ def create_weekly_checkin(
                     client_id,
                     call_date,
                     weight_kg,
-                    stress_score,
-                    mood_score,
                     next_call_date,
-                    next_call_time
+                    next_call_time,
+                    wins,
+                    struggles,
+                    improvements_needed,
+                    coach_support
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (
+                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s
+                )
                 RETURNING id
                 """,
                 (
                     client_id,
                     call_date,
                     weight_kg,
-                    stress_score,
-                    mood_score,
                     next_call_date,
                     next_call_time,
+                    wins,
+                    struggles,
+                    improvements_needed,
+                    coach_support,
                 ),
             )
 
             row = cursor.fetchone()
-            return int(row["id"])
 
+            if not row:
+                raise RuntimeError(
+                    "Weekly check-in could not be created"
+                )
+
+            return int(row["id"])
 
 def get_client_checkins(client_id: int):
     with get_connection() as connection:
@@ -1708,6 +1722,162 @@ def get_client_tracking(
                 )
 
             return cursor.fetchall()          
+
+def save_client_intake(
+    client_id: int,
+    intake_date,
+    current_situation=None,
+    primary_goal=None,
+    secondary_goals=None,
+    goal_weight_kg=None,
+    coach_focus=None,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO client_intakes (
+                    client_id,
+                    intake_date,
+                    current_situation,
+                    primary_goal,
+                    secondary_goals,
+                    goal_weight_kg,
+                    coach_focus
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s, %s, %s
+                )
+                ON CONFLICT (client_id)
+                DO UPDATE SET
+                    intake_date = EXCLUDED.intake_date,
+                    current_situation =
+                        EXCLUDED.current_situation,
+                    primary_goal =
+                        EXCLUDED.primary_goal,
+                    secondary_goals =
+                        EXCLUDED.secondary_goals,
+                    goal_weight_kg =
+                        EXCLUDED.goal_weight_kg,
+                    coach_focus =
+                        EXCLUDED.coach_focus,
+                    updated_at = NOW()
+                RETURNING id
+                """,
+                (
+                    client_id,
+                    intake_date,
+                    current_situation,
+                    primary_goal,
+                    secondary_goals,
+                    goal_weight_kg,
+                    coach_focus,
+                ),
+            )
+
+            row = cursor.fetchone()
+
+            if not row:
+                raise RuntimeError(
+                    "Client intake could not be saved"
+                )
+
+            return int(row["id"])
+
+
+def get_client_intake(
+    client_id: int,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM client_intakes
+                WHERE client_id = %s
+                """,
+                (client_id,),
+            )
+
+            return cursor.fetchone()
+
+def save_client_measurement(
+    client_id: int,
+    measured_on,
+    weight_kg=None,
+    upper_arm=None,
+    chest=None,
+    waist=None,
+    lower_abdomen=None,
+    hip=None,
+    thigh=None,
+    measurement_unit="inches",
+    checkin_id=None,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO client_measurements (
+                    client_id,
+                    checkin_id,
+                    measured_on,
+                    weight_kg,
+                    upper_arm,
+                    chest,
+                    waist,
+                    lower_abdomen,
+                    hip,
+                    thigh,
+                    measurement_unit
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s
+                )
+                RETURNING id
+                """,
+                (
+                    client_id,
+                    checkin_id,
+                    measured_on,
+                    weight_kg,
+                    upper_arm,
+                    chest,
+                    waist,
+                    lower_abdomen,
+                    hip,
+                    thigh,
+                    measurement_unit,
+                ),
+            )
+
+            row = cursor.fetchone()
+
+            if not row:
+                raise RuntimeError(
+                    "Client measurement could not be saved"
+                )
+
+            return int(row["id"])
+
+
+def get_client_measurements(
+    client_id: int,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM client_measurements
+                WHERE client_id = %s
+                ORDER BY measured_on DESC, id DESC
+                """,
+                (client_id,),
+            )
+
+            return cursor.fetchall()
             
 if __name__ == "__main__":
     create_database()
