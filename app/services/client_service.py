@@ -171,7 +171,7 @@ def add_checkin(
         }
         
     @staticmethod
-def dashboard_clients():
+    def dashboard_clients():
     clients = get_client_summaries()
 
     today = date.today()
