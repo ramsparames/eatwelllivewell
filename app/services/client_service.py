@@ -45,29 +45,29 @@ class ClientService:
             program=program,
         )
 
-@staticmethod
-def add_checkin(
-    client_id,
-    call_date,
-    weight_kg=None,
-    next_call_date=None,
-    next_call_time=None,
-    wins=None,
-    struggles=None,
-    improvements_needed=None,
-    coach_support=None,
-):
-    return create_weekly_checkin(
-        client_id=client_id,
-        call_date=call_date,
-        weight_kg=weight_kg,
-        next_call_date=next_call_date,
-        next_call_time=next_call_time,
-        wins=wins,
-        struggles=struggles,
-        improvements_needed=improvements_needed,
-        coach_support=coach_support,
-    )
+    @staticmethod
+    def add_checkin(
+        client_id,
+        call_date,
+        weight_kg=None,
+        next_call_date=None,
+        next_call_time=None,
+        wins=None,
+        struggles=None,
+        improvements_needed=None,
+        coach_support=None,
+    ):
+        return create_weekly_checkin(
+            client_id=client_id,
+            call_date=call_date,
+            weight_kg=weight_kg,
+            next_call_date=next_call_date,
+            next_call_time=next_call_time,
+            wins=wins,
+            struggles=struggles,
+            improvements_needed=improvements_needed,
+            coach_support=coach_support,
+        )
 
     @staticmethod
     def checkins(client_id):
@@ -273,65 +273,64 @@ def add_checkin(
         )
 
 
-@staticmethod
-def save_intake(
-    client_id,
-    intake_date,
-    current_situation=None,
-    primary_goal=None,
-    secondary_goals=None,
-    goal_weight_kg=None,
-    coach_focus=None,
-):
-    return save_client_intake(
-        client_id=client_id,
-        intake_date=intake_date,
-        current_situation=current_situation,
-        primary_goal=primary_goal,
-        secondary_goals=secondary_goals,
-        goal_weight_kg=goal_weight_kg,
-        coach_focus=coach_focus,
-    )
+    @staticmethod
+    def save_intake(
+        client_id,
+        intake_date,
+        current_situation=None,
+        primary_goal=None,
+        secondary_goals=None,
+        goal_weight_kg=None,
+        coach_focus=None,
+    ):
+        return save_client_intake(
+            client_id=client_id,
+            intake_date=intake_date,
+            current_situation=current_situation,
+            primary_goal=primary_goal,
+            secondary_goals=secondary_goals,
+            goal_weight_kg=goal_weight_kg,
+            coach_focus=coach_focus,
+        )
 
 
-@staticmethod
-def intake(client_id):
-    return get_client_intake(
-        client_id
-    )
+    @staticmethod
+    def intake(client_id):
+        return get_client_intake(
+            client_id
+        )
 
 
-@staticmethod
-def add_measurement(
-    client_id,
-    measured_on,
-    weight_kg=None,
-    upper_arm=None,
-    chest=None,
-    waist=None,
-    lower_abdomen=None,
-    hip=None,
-    thigh=None,
-    measurement_unit="inches",
-    checkin_id=None,
-):
-    return save_client_measurement(
-        client_id=client_id,
-        measured_on=measured_on,
-        weight_kg=weight_kg,
-        upper_arm=upper_arm,
-        chest=chest,
-        waist=waist,
-        lower_abdomen=lower_abdomen,
-        hip=hip,
-        thigh=thigh,
-        measurement_unit=measurement_unit,
-        checkin_id=checkin_id,
-    )
+    @staticmethod
+    def add_measurement(
+        client_id,
+        measured_on,
+        weight_kg=None,
+        upper_arm=None,
+        chest=None,
+        waist=None,
+        lower_abdomen=None,
+        hip=None,
+        thigh=None,
+        measurement_unit="inches",
+        checkin_id=None,
+    ):
+        return save_client_measurement(
+            client_id=client_id,
+            measured_on=measured_on,
+            weight_kg=weight_kg,
+            upper_arm=upper_arm,
+            chest=chest,
+            waist=waist,
+            lower_abdomen=lower_abdomen,
+            hip=hip,
+            thigh=thigh,
+            measurement_unit=measurement_unit,
+            checkin_id=checkin_id,
+        )
 
-
-@staticmethod
-def measurements(client_id):
-    return get_client_measurements(
-        client_id
-    )
+    @staticmethod
+    def measurements(client_id):
+        return get_client_measurements(
+            client_id
+        )
