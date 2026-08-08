@@ -29,6 +29,94 @@ CLOSED_STATUSES = {
 }
 
 
+
+ASSESSMENT_LABELS = {
+    "wake": {
+        "1": "Still tired, even after sleep",
+        "2": "Okay, but not fully refreshed",
+        "3": "Mostly fresh",
+        "4": "Energetic and ready",
+    },
+    "body": {
+        "belly": "Belly area",
+        "overall": "Overall weight gain",
+        "hips": "Hips / thighs",
+        "off": "I just feel off overall",
+    },
+    "energy": {
+        "1": "Low most of the time",
+        "2": "Up and down",
+        "3": "Manageable",
+        "4": "Good and steady",
+    },
+    "cravings": {
+        "1": "Strong and frequent",
+        "2": "Sometimes hard to control",
+        "3": "Occasional",
+        "4": "Rare",
+    },
+    "sleep": {
+        "1": "Disturbed / waking up often",
+        "2": "Light sleep",
+        "3": "Okay",
+        "4": "Deep and restful",
+    },
+    "stress": {
+        "1": "Very high",
+        "2": "Moderate",
+        "3": "Low",
+        "4": "Very low",
+    },
+    "consistency": {
+        "1": "I'm trying, but nothing is working",
+        "2": "I start and stop often",
+        "3": "I'm somewhat consistent",
+        "4": "I'm consistent but results are slow",
+    },
+}
+
+QUESTION_LABELS = {
+    "wake": "How do you usually feel when you wake up?",
+    "body": "Where do you notice changes in your body the most?",
+    "energy": "How are your energy levels during the day?",
+    "cravings": "How would you describe your cravings?",
+    "sleep": "How is your sleep lately?",
+    "stress": "How stressed do you feel on most days?",
+    "consistency": "Which statement feels most like you right now?",
+}
+
+
+def _format_assessment_answers(answers):
+    if not answers:
+        return []
+
+    formatted = []
+
+    for key, value in answers.items():
+        answer_map = ASSESSMENT_LABELS.get(
+            key,
+            {},
+        )
+
+        readable_value = answer_map.get(
+            str(value),
+            str(value).replace("-", " ").title(),
+        )
+
+        formatted.append(
+            {
+                "question": QUESTION_LABELS.get(
+                    key,
+                    key.replace("_", " ").title(),
+                ),
+                "answer": readable_value,
+            }
+        )
+
+    return formatted
+
+
+
 def _lead_stage_label(status: str) -> str:
     labels = {
         "new": "New",
@@ -310,6 +398,18 @@ def lead_workspace(
                 event
             )
 
+    raw_answers = (
+        lead.get("assessment_answers")
+        or lead.get("answers")
+        or {}
+    )
+
+    assessment_answers = (
+        _format_assessment_answers(
+            raw_answers
+        )
+    )
+
     return templates.TemplateResponse(
         "coach/lead_workspace.html",
         {
@@ -329,6 +429,7 @@ def lead_workspace(
                 == "1",
             "events": events,
             "timeline_groups": timeline_groups,
+            "assessment_answers": assessment_answers,
         },
     )
 

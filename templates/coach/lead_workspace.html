@@ -428,13 +428,7 @@
             </section>
 
 
-            {% set answers =
-                lead.assessment_answers
-                if lead.assessment_answers is defined
-                else lead.answers
-            %}
-
-            {% if answers %}
+            {% if assessment_answers %}
 
             <section class="workspace-panel assessment-answers-panel">
                 {{ ui.panel_header(
@@ -444,11 +438,16 @@
 
                 <div class="assessment-answer-list">
 
-                    {% for question, answer in answers.items() %}
+                    {% for item in assessment_answers %}
 
                     <div>
-                        <span>{{ question }}</span>
-                        <strong>{{ answer }}</strong>
+                        <span>
+                            {{ item.question }}
+                        </span>
+
+                        <strong>
+                            {{ item.answer }}
+                        </strong>
                     </div>
 
                     {% endfor %}
