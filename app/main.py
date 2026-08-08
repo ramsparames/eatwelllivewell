@@ -19,7 +19,6 @@ from app.database import (
 )
 from app.coach.clients import (
     router as clients_router,
-    set_templates as set_client_templates,
 )
 from app.auth import router as auth_router
 from app.auth import set_templates as set_auth_templates
