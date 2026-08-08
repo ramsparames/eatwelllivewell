@@ -17,6 +17,12 @@ from app.database import (
     get_all_leads,
     get_lead_by_id,
 )
+from app.coach.clients import (
+    router as clients_router,
+    set_templates as set_client_templates,
+)
+from app.auth import router as auth_router
+from app.auth import set_templates as set_auth_templates
 
 from app.scoring import calculate_score
 from fastapi import Request
@@ -49,6 +55,7 @@ templates = Jinja2Templates(
 )
 set_templates(templates)
 set_auth_templates(templates)
+set_client_templates(templates)
 app.mount(
     "/static",
     StaticFiles(directory=str(BASE_DIR / "static")),
