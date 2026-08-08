@@ -54,7 +54,6 @@ templates = Jinja2Templates(
 )
 set_templates(templates)
 set_auth_templates(templates)
-set_client_templates(templates)
 app.mount(
     "/static",
     StaticFiles(directory=str(BASE_DIR / "static")),
