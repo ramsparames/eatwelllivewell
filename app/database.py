@@ -301,6 +301,67 @@ def create_database() -> None:
 
             cursor.execute(
                 """
+                CREATE TABLE IF NOT EXISTS client_intakes (
+                    id SERIAL PRIMARY KEY,
+            
+                    client_id INTEGER NOT NULL UNIQUE
+                        REFERENCES clients(id)
+                        ON DELETE CASCADE,
+            
+                    intake_date DATE NOT NULL,
+            
+                    current_situation TEXT,
+                    primary_goal TEXT,
+                    secondary_goals TEXT,
+            
+                    goal_weight_kg NUMERIC(6,2),
+            
+                    coach_focus TEXT,
+            
+                    created_at TIMESTAMPTZ
+                        NOT NULL DEFAULT NOW(),
+            
+                    updated_at TIMESTAMPTZ
+                        NOT NULL DEFAULT NOW()
+                )
+                """
+            )
+            
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS client_measurements (
+                    id SERIAL PRIMARY KEY,
+            
+                    client_id INTEGER NOT NULL
+                        REFERENCES clients(id)
+                        ON DELETE CASCADE,
+            
+                    checkin_id INTEGER
+                        REFERENCES client_weekly_checkins(id)
+                        ON DELETE SET NULL,
+            
+                    measured_on DATE NOT NULL,
+            
+                    weight_kg NUMERIC(6,2),
+            
+                    upper_arm NUMERIC(7,2),
+                    chest NUMERIC(7,2),
+                    waist NUMERIC(7,2),
+                    lower_abdomen NUMERIC(7,2),
+                    hip NUMERIC(7,2),
+                    thigh NUMERIC(7,2),
+            
+                    measurement_unit TEXT
+                        NOT NULL DEFAULT 'inches',
+            
+                    created_at TIMESTAMPTZ
+                        NOT NULL DEFAULT NOW()
+                )
+                """
+            }
+                
+            cursor.execute(
+                """
                 ALTER TABLE client_weekly_checkins
                 ADD COLUMN IF NOT EXISTS wins TEXT
                 """
@@ -1646,68 +1707,8 @@ def get_client_tracking(
                     (client_id,),
                 )
 
-            return cursor.fetchall()
+            return cursor.fetchall()          
             
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS client_intakes (
-        id SERIAL PRIMARY KEY,
-
-        client_id INTEGER NOT NULL UNIQUE
-            REFERENCES clients(id)
-            ON DELETE CASCADE,
-
-        intake_date DATE NOT NULL,
-
-        current_situation TEXT,
-        primary_goal TEXT,
-        secondary_goals TEXT,
-
-        goal_weight_kg NUMERIC(6,2),
-
-        coach_focus TEXT,
-
-        created_at TIMESTAMPTZ
-            NOT NULL DEFAULT NOW(),
-
-        updated_at TIMESTAMPTZ
-            NOT NULL DEFAULT NOW()
-    )
-    """
-)
-
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS client_measurements (
-        id SERIAL PRIMARY KEY,
-
-        client_id INTEGER NOT NULL
-            REFERENCES clients(id)
-            ON DELETE CASCADE,
-
-        checkin_id INTEGER
-            REFERENCES client_weekly_checkins(id)
-            ON DELETE SET NULL,
-
-        measured_on DATE NOT NULL,
-
-        weight_kg NUMERIC(6,2),
-
-        upper_arm NUMERIC(7,2),
-        chest NUMERIC(7,2),
-        waist NUMERIC(7,2),
-        lower_abdomen NUMERIC(7,2),
-        hip NUMERIC(7,2),
-        thigh NUMERIC(7,2),
-
-        measurement_unit TEXT
-            NOT NULL DEFAULT 'inches',
-
-        created_at TIMESTAMPTZ
-            NOT NULL DEFAULT NOW()
-    )
-    """
-)
 if __name__ == "__main__":
     create_database()
     print("Database updated successfully.")
