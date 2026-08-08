@@ -387,6 +387,15 @@ def create_database() -> None:
                 ADD COLUMN IF NOT EXISTS coach_support TEXT
                 """
             )
+
+            cursor.execute(
+                """
+                ALTER TABLE client_measurements
+                ADD COLUMN IF NOT EXISTS checkin_id INTEGER
+                REFERENCES client_weekly_checkins(id)
+                ON DELETE SET NULL
+                """
+            )
             
             cursor.execute(
                 """
@@ -1811,9 +1820,21 @@ def save_client_measurement(
     lower_abdomen=None,
     hip=None,
     thigh=None,
-    measurement_unit="inches",
+    measurement_unit="cm",
     checkin_id=None,
 ):
+    # Store all body measurements in centimetres.
+    def to_cm(value):
+        if value is None:
+            return None
+
+        value = float(value)
+
+        if measurement_unit == "inches":
+            return round(value * 2.54, 2)
+
+        return value
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -1823,17 +1844,16 @@ def save_client_measurement(
                     checkin_id,
                     measured_on,
                     weight_kg,
-                    upper_arm,
-                    chest,
-                    waist,
-                    lower_abdomen,
-                    hip,
-                    thigh,
-                    measurement_unit
+                    upper_arm_cm,
+                    chest_cm,
+                    waist_cm,
+                    lower_abdomen_cm,
+                    hip_cm,
+                    thigh_cm
                 )
                 VALUES (
                     %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s
                 )
                 RETURNING id
                 """,
@@ -1842,13 +1862,12 @@ def save_client_measurement(
                     checkin_id,
                     measured_on,
                     weight_kg,
-                    upper_arm,
-                    chest,
-                    waist,
-                    lower_abdomen,
-                    hip,
-                    thigh,
-                    measurement_unit,
+                    to_cm(upper_arm),
+                    to_cm(chest),
+                    to_cm(waist),
+                    to_cm(lower_abdomen),
+                    to_cm(hip),
+                    to_cm(thigh),
                 ),
             )
 
@@ -1860,7 +1879,6 @@ def save_client_measurement(
                 )
 
             return int(row["id"])
-
 
 def get_client_measurements(
     client_id: int,
