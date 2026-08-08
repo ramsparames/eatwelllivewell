@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import (
     APIRouter,
     Form,
@@ -14,6 +16,12 @@ from fastapi.templating import Jinja2Templates
 
 from app.auth import coach_is_logged_in
 from app.services.client_service import ClientService
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+templates = Jinja2Templates(
+    directory=str(BASE_DIR / "templates")
+)
 
 router = APIRouter()
 
