@@ -148,6 +148,14 @@ def add_checkin(
         tracking = get_client_tracking(
             client_id
         )
+
+        intake = get_client_intake(
+            client_id
+        )
+        
+        measurements = get_client_measurements(
+            client_id
+        )
         return {
             "client": client,
             "checkins": checkins,
@@ -158,6 +166,8 @@ def add_checkin(
             "weight_change": weight_change,
             "next_call_date": next_call_date,
             "next_call_time": next_call_time,
+            "intake": intake,
+            "measurements": measurements,
         }
         
     @staticmethod
