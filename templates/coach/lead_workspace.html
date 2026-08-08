@@ -1,0 +1,675 @@
+{% extends "coach/base.html" %}
+{% import "coach/components/ui.html" as ui %}
+
+{% block title %}
+{{ lead.name or "Lead" }} | NourisHer Coach
+{% endblock %}
+
+{% block content %}
+
+<div class="lead-workspace">
+
+    <div class="lead-workspace-header">
+
+        <div class="lead-title-block">
+
+            <a
+                href="/dashboard/leads"
+                class="back-link"
+            >
+                ← Leads
+            </a>
+
+
+            <div class="lead-title-row">
+
+                <span class="client-heading-avatar">
+                    {{ (lead.name or "L")[0]|upper }}
+                </span>
+
+                <div>
+                    <h1>
+                        {{ lead.name or "Lead" }}
+                    </h1>
+
+                    <p>
+                        {{ lead.email or lead.phone or "No contact details" }}
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="lead-header-meta">
+
+            <div>
+                <span>Stage</span>
+                <strong>{{ stage_label }}</strong>
+            </div>
+
+            <div>
+                <span>Assessment score</span>
+                <strong>
+                    {% if lead.total_score is not none %}
+                        {{ lead.total_score }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div>
+                <span>Follow-up</span>
+                <strong>
+                    {{ effective_follow_up or "Not scheduled" }}
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% if saved %}
+    <div class="save-banner">
+        ✓ Lead details updated.
+    </div>
+    {% endif %}
+
+
+    <nav
+        class="client-tabs"
+        aria-label="Lead workspace"
+    >
+
+        {{ ui.tab_button(
+            "overview",
+            "Overview",
+            true
+        ) }}
+
+        {{ ui.tab_button(
+            "assessment",
+            "Assessment"
+        ) }}
+
+        {{ ui.tab_button(
+            "notes",
+            "Notes & Timeline"
+        ) }}
+
+        {{ ui.tab_button(
+            "communication",
+            "Communication"
+        ) }}
+
+    </nav>
+
+
+    <!-- ==================================================
+         OVERVIEW
+         ================================================== -->
+
+    <section
+        class="client-tab-panel is-active"
+        data-client-panel="overview"
+    >
+
+        <div class="lead-overview-grid">
+
+            <section class="workspace-panel">
+
+                {{ ui.panel_header(
+                    "Snapshot",
+                    "Lead overview"
+                ) }}
+
+
+                <div class="lead-snapshot-grid">
+
+                    <div class="snapshot-item">
+                        <span>Phone</span>
+                        <strong>
+                            {{ lead.phone or "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="snapshot-item">
+                        <span>Email</span>
+                        <strong>
+                            {{ lead.email or "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="snapshot-item">
+                        <span>Age range</span>
+                        <strong>
+                            {{ lead.age_range or "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="snapshot-item">
+                        <span>Strength</span>
+                        <strong>
+                            {{ lead.strength or "—" }}
+                        </strong>
+                    </div>
+
+                    <div class="snapshot-item snapshot-wide">
+                        <span>Opportunity</span>
+                        <strong>
+                            {{ lead.opportunity or "—" }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                {% if lead.why_now
+                    or lead.tried
+                    or lead.success_goal
+                    or lead.support_needed %}
+
+                <div class="lead-application-summary">
+
+                    <div>
+                        <span>Why now</span>
+                        <p>
+                            {{ lead.why_now or "—" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>What she has tried</span>
+                        <p>
+                            {{ lead.tried or "—" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>Success looks like</span>
+                        <p>
+                            {{ lead.success_goal or "—" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>Support needed</span>
+                        <p>
+                            {{ lead.support_needed or "—" }}
+                        </p>
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+            </section>
+
+
+            <section class="workspace-panel lead-manage-panel">
+
+                {{ ui.panel_header(
+                    "Coach",
+                    "Next step"
+                ) }}
+
+
+                <form
+                    method="post"
+                    action="/dashboard/leads/{{ lead_type }}/{{ lead_id }}/update"
+                    class="coach-form"
+                >
+
+                    <div class="field">
+                        <label for="lead_status">
+                            Stage
+                        </label>
+
+                        <select
+                            id="lead_status"
+                            name="status"
+                            required
+                        >
+                            <option
+                                value="new"
+                                {% if effective_status == "new" %}selected{% endif %}
+                            >
+                                New
+                            </option>
+
+                            <option
+                                value="contacted"
+                                {% if effective_status == "contacted" %}selected{% endif %}
+                            >
+                                Contacted
+                            </option>
+
+                            <option
+                                value="clarity_call_booked"
+                                {% if effective_status == "clarity_call_booked" %}selected{% endif %}
+                            >
+                                Clarity Call Booked
+                            </option>
+
+                            <option
+                                value="follow_up_later"
+                                {% if effective_status == "follow_up_later" %}selected{% endif %}
+                            >
+                                Follow Up Later
+                            </option>
+
+                            <option
+                                value="joined_foundations"
+                                {% if effective_status == "joined_foundations" %}selected{% endif %}
+                            >
+                                Joined Foundations
+                            </option>
+
+                            <option
+                                value="joined_transformation"
+                                {% if effective_status == "joined_transformation" %}selected{% endif %}
+                            >
+                                Joined Transformation
+                            </option>
+
+                            <option
+                                value="closed"
+                                {% if effective_status == "closed" %}selected{% endif %}
+                            >
+                                Closed
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="field">
+                        <label for="lead_follow_up">
+                            Next follow-up
+                        </label>
+
+                        <input
+                            id="lead_follow_up"
+                            name="follow_up_date"
+                            type="date"
+                            value="{{ effective_follow_up or '' }}"
+                        >
+                    </div>
+
+
+                    <div class="field">
+                        <label for="lead_notes">
+                            Coach notes
+                        </label>
+
+                        <textarea
+                            id="lead_notes"
+                            name="coach_notes"
+                            rows="7"
+                            placeholder="Call notes, objections, what matters, what to follow up on..."
+                        >{{ effective_notes or "" }}</textarea>
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Save lead
+                    </button>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         ASSESSMENT
+         ================================================== -->
+
+    <section
+        class="client-tab-panel"
+        data-client-panel="assessment"
+    >
+
+        <div class="section-intro">
+            <p class="page-kicker">
+                Assessment
+            </p>
+
+            <h2>
+                Health & readiness snapshot
+            </h2>
+
+            <p>
+                The assessment data that helps frame the first conversation.
+            </p>
+        </div>
+
+
+        {% if lead.total_score is not none %}
+
+        <div class="assessment-score-grid">
+
+            <div class="assessment-score-main">
+                <span>Total score</span>
+                <strong>{{ lead.total_score }}</strong>
+            </div>
+
+            <div>
+                <span>Recovery</span>
+                <strong>{{ lead.recovery or "—" }}</strong>
+            </div>
+
+            <div>
+                <span>Metabolic</span>
+                <strong>{{ lead.metabolic or "—" }}</strong>
+            </div>
+
+            <div>
+                <span>Nutrition</span>
+                <strong>{{ lead.nutrition or "—" }}</strong>
+            </div>
+
+            <div>
+                <span>Behaviour</span>
+                <strong>{{ lead.behaviour or "—" }}</strong>
+            </div>
+
+            <div>
+                <span>Confidence</span>
+                <strong>{{ lead.confidence or "—" }}</strong>
+            </div>
+
+        </div>
+
+
+        <div class="assessment-context-grid">
+
+            <section class="workspace-panel">
+                {{ ui.panel_header(
+                    "Profile",
+                    "Body & feeling"
+                ) }}
+
+                <div class="key-value-row">
+                    <span>Body profile</span>
+                    <strong>
+                        {{ lead.body_profile or "—" }}
+                    </strong>
+                </div>
+
+                <div class="key-value-row">
+                    <span>Feeling</span>
+                    <strong>
+                        {{ lead.feeling or "—" }}
+                    </strong>
+                </div>
+
+                <div class="key-value-row">
+                    <span>Strength</span>
+                    <strong>
+                        {{ lead.strength or "—" }}
+                    </strong>
+                </div>
+
+                <div class="key-value-row">
+                    <span>Opportunity</span>
+                    <strong>
+                        {{ lead.opportunity or "—" }}
+                    </strong>
+                </div>
+            </section>
+
+
+            {% set answers =
+                lead.assessment_answers
+                if lead.assessment_answers is defined
+                else lead.answers
+            %}
+
+            {% if answers %}
+
+            <section class="workspace-panel assessment-answers-panel">
+                {{ ui.panel_header(
+                    "Responses",
+                    "Assessment answers"
+                ) }}
+
+                <div class="assessment-answer-list">
+
+                    {% for question, answer in answers.items() %}
+
+                    <div>
+                        <span>{{ question }}</span>
+                        <strong>{{ answer }}</strong>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+            </section>
+
+            {% endif %}
+
+        </div>
+
+        {% else %}
+
+        {{ ui.empty_state(
+            "No assessment linked",
+            "This lead came directly through the Transformation application."
+        ) }}
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ==================================================
+         NOTES + TIMELINE
+         ================================================== -->
+
+    <section
+        class="client-tab-panel"
+        data-client-panel="notes"
+    >
+
+        <div class="section-intro">
+            <p class="page-kicker">
+                Relationship history
+            </p>
+
+            <h2>
+                Notes & timeline
+            </h2>
+
+            <p>
+                A chronological view of what has happened with this lead.
+            </p>
+        </div>
+
+
+        {% if events %}
+
+        <div class="lead-timeline">
+
+            {% for group_name, group_events
+                in timeline_groups.items() %}
+
+                {% if group_events %}
+
+                <div class="timeline-group">
+
+                    <h3>{{ group_name }}</h3>
+
+                    {% for event in group_events %}
+
+                    <article class="lead-timeline-row">
+
+                        <span class="timeline-dot"></span>
+
+                        <div>
+
+                            <div class="timeline-row-heading">
+                                <strong>
+                                    {{ event.title }}
+                                </strong>
+
+                                {% if event.created_at %}
+                                <time>
+                                    {{ event.created_at.strftime(
+                                        "%d %b %Y, %I:%M %p"
+                                    ) }}
+                                </time>
+                                {% endif %}
+                            </div>
+
+                            {% if event.details %}
+                            <p>{{ event.details }}</p>
+                            {% endif %}
+
+                        </div>
+
+                    </article>
+
+                    {% endfor %}
+
+                </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        {{ ui.empty_state(
+            "No activity yet",
+            "Assessment, application and CRM events will appear here."
+        ) }}
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ==================================================
+         COMMUNICATION
+         ================================================== -->
+
+    <section
+        class="client-tab-panel"
+        data-client-panel="communication"
+    >
+
+        <div class="section-intro">
+            <p class="page-kicker">
+                Coming next
+            </p>
+
+            <h2>
+                Communication
+            </h2>
+
+            <p>
+                Email and WhatsApp conversations will eventually live here.
+            </p>
+        </div>
+
+
+        <div class="communication-placeholder">
+
+            <div>
+                <strong>
+                    One conversation history
+                </strong>
+
+                <p>
+                    This tab is reserved for future email and WhatsApp integration.
+                    No extra data entry is required today.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+(() => {
+    const storageKey =
+        "nh-lead-tab-{{ lead_type }}-{{ lead_id }}";
+
+    const tabs = Array.from(
+        document.querySelectorAll(
+            "[data-client-tab]"
+        )
+    );
+
+    const panels = Array.from(
+        document.querySelectorAll(
+            "[data-client-panel]"
+        )
+    );
+
+    const activate = (name) => {
+        tabs.forEach((tab) => {
+            tab.classList.toggle(
+                "is-active",
+                tab.dataset.clientTab === name
+            );
+        });
+
+        panels.forEach((panel) => {
+            panel.classList.toggle(
+                "is-active",
+                panel.dataset.clientPanel === name
+            );
+        });
+
+        localStorage.setItem(
+            storageKey,
+            name
+        );
+    };
+
+    tabs.forEach((tab) => {
+        tab.addEventListener(
+            "click",
+            () => activate(
+                tab.dataset.clientTab
+            )
+        );
+    });
+
+    const saved =
+        localStorage.getItem(storageKey);
+
+    if (
+        saved
+        && panels.some(
+            (panel) =>
+                panel.dataset.clientPanel
+                === saved
+        )
+    ) {
+        activate(saved);
+    }
+})();
+</script>
+
+{% endblock %}

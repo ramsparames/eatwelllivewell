@@ -1,0 +1,181 @@
+{% macro page_header(kicker, title, subtitle="", action_label="", action_attr="") %}
+<section class="page-heading page-heading-row">
+    <div>
+        {% if kicker %}
+        <p class="page-kicker">{{ kicker }}</p>
+        {% endif %}
+
+        <h1>{{ title }}</h1>
+
+        {% if subtitle %}
+        <p class="page-subtitle">{{ subtitle }}</p>
+        {% endif %}
+    </div>
+
+    {% if action_label %}
+    <button
+        type="button"
+        class="button button-primary"
+        {% if action_attr %}{{ action_attr|safe }}{% endif %}
+    >
+        {{ action_label }}
+    </button>
+    {% endif %}
+</section>
+{% endmacro %}
+
+
+{% macro stat_item(label, value) %}
+<div>
+    <span>{{ label }}</span>
+    <strong>{{ value }}</strong>
+</div>
+{% endmacro %}
+
+
+{% macro status_pill(label, tone="neutral") %}
+<span class="status-pill status-{{ tone }}">
+    {{ label }}
+</span>
+{% endmacro %}
+
+
+{% macro person_cell(name, subtitle="", href="") %}
+{% if href %}
+<a href="{{ href }}" class="client-name-cell">
+{% else %}
+<div class="client-name-cell">
+{% endif %}
+
+    <span class="table-avatar">
+        {{ name[0]|upper }}
+    </span>
+
+    <span>
+        <strong>{{ name }}</strong>
+
+        {% if subtitle %}
+        <small>{{ subtitle }}</small>
+        {% endif %}
+    </span>
+
+{% if href %}
+</a>
+{% else %}
+</div>
+{% endif %}
+{% endmacro %}
+
+
+{% macro empty_state(title, message, compact=false) %}
+{% if compact %}
+<div class="inline-empty">
+    <p>{{ message }}</p>
+</div>
+{% else %}
+<div class="empty-state">
+    <h2>{{ title }}</h2>
+    <p>{{ message }}</p>
+</div>
+{% endif %}
+{% endmacro %}
+
+
+{% macro panel_header(kicker="", title="", action_label="", action_href="") %}
+<div class="panel-heading">
+    <div>
+        {% if kicker %}
+        <p class="page-kicker">{{ kicker }}</p>
+        {% endif %}
+
+        {% if title %}
+        <h2>{{ title }}</h2>
+        {% endif %}
+    </div>
+
+    {% if action_label and action_href %}
+    <a href="{{ action_href }}" class="text-button">
+        {{ action_label }}
+    </a>
+    {% endif %}
+</div>
+{% endmacro %}
+
+
+{% macro tab_button(name, label, active=false) %}
+<button
+    type="button"
+    class="client-tab {% if active %}is-active{% endif %}"
+    data-client-tab="{{ name }}"
+>
+    {{ label }}
+</button>
+{% endmacro %}
+
+
+{% macro form_section(number, title, description="", collapsible=false, open=false) %}
+{% if collapsible %}
+<details
+    class="form-section form-disclosure"
+    {% if open %}open{% endif %}
+>
+    <summary>
+        <div class="form-section-heading">
+            <span>{{ number }}</span>
+
+            <div>
+                <h3>{{ title }}</h3>
+
+                {% if description %}
+                <p>{{ description }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <span class="disclosure-icon">+</span>
+    </summary>
+
+    <div class="disclosure-content">
+        {{ caller() }}
+    </div>
+</details>
+{% else %}
+<section class="form-section">
+    <div class="form-section-heading">
+        <span>{{ number }}</span>
+
+        <div>
+            <h3>{{ title }}</h3>
+
+            {% if description %}
+            <p>{{ description }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {{ caller() }}
+</section>
+{% endif %}
+{% endmacro %}
+
+
+{% macro dialog_header(kicker, title, close_attr) %}
+<div class="dialog-heading">
+    <div>
+        {% if kicker %}
+        <p class="page-kicker">{{ kicker }}</p>
+        {% endif %}
+
+        <h2>{{ title }}</h2>
+    </div>
+
+    <button
+        type="button"
+        class="dialog-close"
+        {{ close_attr|safe }}
+        aria-label="Close"
+    >
+        ×
+    </button>
+</div>
+{% endmacro %}

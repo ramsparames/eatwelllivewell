@@ -1,0 +1,495 @@
+{% extends "coach/base.html" %}
+{% import "coach/components/ui.html" as ui %}
+
+{% block title %}
+Today | NourisHer Coach
+{% endblock %}
+
+{% block content %}
+
+{{ ui.page_header(
+    "Coach workspace",
+    "Today",
+    "Calls, follow-ups and clients who need your attention."
+) }}
+
+<div class="today-date">
+    {{ today.strftime("%A, %d %B") }}
+</div>
+
+
+<section class="summary-strip today-summary-strip">
+    {{ ui.stat_item("Calls today", calls_today|length) }}
+    {{ ui.stat_item("Active clients", active_clients|length) }}
+    {{ ui.stat_item("New leads", new_leads) }}
+    {{ ui.stat_item("Lead follow-ups", lead_followups_due) }}
+</section>
+
+
+<div class="today-workspace-grid">
+
+    <section class="workspace-panel today-primary-panel">
+
+        {{ ui.panel_header(
+            "Schedule",
+            "Calls today",
+            "View clients →",
+            "/dashboard/clients"
+        ) }}
+
+
+        {% if calls_today %}
+
+        <div class="today-call-list">
+
+            {% for call in calls_today %}
+
+            <a
+                href="/dashboard/clients/{{ call.client_id }}"
+                class="today-call-row"
+            >
+
+                <div class="today-call-time">
+                    {{ call.next_call_time or "Time TBD" }}
+                </div>
+
+                {{ ui.person_cell(
+                    call.name,
+                    call.program or "Coaching"
+                ) }}
+
+                <span class="today-open-arrow">→</span>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="today-clear-state">
+
+            <div class="today-clear-icon">✓</div>
+
+            <div>
+                <strong>No coaching calls today</strong>
+                <p>Your schedule is clear.</p>
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <section class="workspace-panel">
+
+        {{ ui.panel_header(
+            "Action",
+            "Needs attention"
+        ) }}
+
+
+        <div class="attention-list">
+
+            {% if clients_without_next_call %}
+
+            <a
+                href="/dashboard/clients"
+                class="attention-row"
+            >
+                <span class="attention-indicator attention-amber"></span>
+
+                <div>
+                    <strong>
+                        {{ clients_without_next_call|length }}
+                        client{% if clients_without_next_call|length != 1 %}s{% endif %}
+                        without a next call
+                    </strong>
+
+                    <small>
+                        Schedule the next coaching conversation.
+                    </small>
+                </div>
+
+                <span>→</span>
+            </a>
+
+            {% endif %}
+
+
+            {% if lead_followups_due %}
+
+            <a
+                href="/dashboard/leads"
+                class="attention-row"
+            >
+                <span class="attention-indicator attention-red"></span>
+
+                <div>
+                    <strong>
+                        {{ lead_followups_due }}
+                        lead follow-up{% if lead_followups_due != 1 %}s{% endif %}
+                        due
+                    </strong>
+
+                    <small>
+                        Includes overdue and today’s follow-ups.
+                    </small>
+                </div>
+
+                <span>→</span>
+            </a>
+
+            {% endif %}
+
+
+            {% if new_leads %}
+
+            <a
+                href="/dashboard/leads"
+                class="attention-row"
+            >
+                <span class="attention-indicator attention-purple"></span>
+
+                <div>
+                    <strong>
+                        {{ new_leads }}
+                        new lead{% if new_leads != 1 %}s{% endif %}
+                    </strong>
+
+                    <small>
+                        Review new assessments and applications.
+                    </small>
+                </div>
+
+                <span>→</span>
+            </a>
+
+            {% endif %}
+
+
+            {% if (
+                not clients_without_next_call
+                and not lead_followups_due
+                and not new_leads
+            ) %}
+
+            <div class="today-clear-state compact">
+                <div class="today-clear-icon">✓</div>
+
+                <div>
+                    <strong>Nothing urgent right now</strong>
+                    <p>You’re caught up.</p>
+                </div>
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<section class="workspace-panel today-week-panel">
+
+    {{ ui.panel_header(
+        "Upcoming",
+        "This week"
+    ) }}
+
+
+    {% if calls_this_week %}
+
+    <div class="data-table-wrap">
+
+        <table class="data-table today-week-table">
+
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Program</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for call in calls_this_week %}
+
+                <tr>
+
+                    <td>
+                        {{ ui.person_cell(
+                            call.name,
+                            "",
+                            "/dashboard/clients/" ~ call.client_id
+                        ) }}
+                    </td>
+
+                    <td>
+                        {{ call.program or "Coaching" }}
+                    </td>
+
+                    <td>
+                        {{ call.next_call_date or "—" }}
+                    </td>
+
+                    <td>
+                        {{ call.next_call_time or "TBD" }}
+                    </td>
+
+                    <td class="table-open">
+                        <a
+                            href="/dashboard/clients/{{ call.client_id }}"
+                            aria-label="Open {{ call.name }}"
+                        >
+                            →
+                        </a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div class="today-clear-state compact">
+        <div class="today-clear-icon">✓</div>
+
+        <div>
+            <strong>No more coaching calls scheduled this week</strong>
+
+            <p>
+                Add the next call from a client’s Weekly Coaching tab.
+            </p>
+        </div>
+    </div>
+
+    {% endif %}
+
+</section>
+
+
+<style>
+.today-date {
+    margin: -20px 0 20px;
+
+    color: var(--coach-muted);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.today-summary-strip {
+    grid-template-columns:
+        repeat(4, minmax(0, 170px));
+}
+
+.today-workspace-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1.35fr)
+        minmax(330px, 0.75fr);
+
+    gap: 16px;
+    align-items: start;
+
+    margin-bottom: 16px;
+}
+
+.today-primary-panel {
+    min-height: 310px;
+}
+
+.today-call-list,
+.attention-list {
+    display: grid;
+}
+
+.today-call-row {
+    display: grid;
+    grid-template-columns:
+        100px
+        minmax(0, 1fr)
+        26px;
+
+    gap: 16px;
+    align-items: center;
+
+    min-height: 66px;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid var(--coach-border);
+
+    color: inherit;
+    text-decoration: none;
+}
+
+.today-call-row:first-child {
+    padding-top: 0;
+}
+
+.today-call-row:last-child {
+    border-bottom: 0;
+}
+
+.today-call-row:hover strong,
+.today-call-row:hover .today-open-arrow {
+    color: var(--coach-purple);
+}
+
+.today-call-time {
+    color: var(--coach-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.today-open-arrow {
+    justify-self: end;
+
+    color: var(--coach-purple);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.today-clear-state {
+    min-height: 210px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    padding: 24px;
+
+    color: var(--coach-muted);
+}
+
+.today-clear-state.compact {
+    min-height: 0;
+
+    justify-content: flex-start;
+
+    padding: 18px 0;
+}
+
+.today-clear-icon {
+    width: 34px;
+    height: 34px;
+
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 34px;
+
+    border-radius: 50%;
+
+    color: var(--coach-green);
+    background: var(--coach-green-50);
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.today-clear-state strong {
+    color: var(--coach-text);
+    font-size: 12px;
+}
+
+.today-clear-state p {
+    margin: 2px 0 0;
+    font-size: 11px;
+}
+
+.attention-row {
+    display: grid;
+    grid-template-columns:
+        9px
+        minmax(0, 1fr)
+        20px;
+
+    gap: 12px;
+    align-items: center;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid var(--coach-border);
+
+    color: inherit;
+    text-decoration: none;
+}
+
+.attention-row:first-child {
+    padding-top: 0;
+}
+
+.attention-row:last-child {
+    border-bottom: 0;
+}
+
+.attention-row > div {
+    display: grid;
+    gap: 3px;
+}
+
+.attention-row strong {
+    font-size: 12px;
+}
+
+.attention-row small {
+    color: var(--coach-muted);
+    font-size: 10px;
+}
+
+.attention-row > span:last-child {
+    color: var(--coach-purple);
+}
+
+.attention-indicator {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.attention-red {
+    background: #c84b4b;
+}
+
+.attention-amber {
+    background: #c1842a;
+}
+
+.attention-purple {
+    background: var(--coach-purple);
+}
+
+.today-week-table {
+    min-width: 760px;
+}
+
+@media (max-width: 900px) {
+    .today-workspace-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .today-summary-strip {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+</style>
+
+{% endblock %}

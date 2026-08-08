@@ -1,0 +1,436 @@
+{% extends "coach/base.html" %}
+{% import "coach/components/ui.html" as ui %}
+
+{% block title %}
+Clients | NourisHer Coach
+{% endblock %}
+
+{% block content %}
+
+{{ ui.page_header(
+    "Coaching",
+    "Clients",
+    "See every active coaching relationship in one place.",
+    "+ Add client",
+    "data-open-add-client"
+) }}
+
+
+<section class="summary-strip">
+    {{ ui.stat_item("Active clients", active_clients|length) }}
+    {{ ui.stat_item("Calls today", calls_today|length) }}
+    {{ ui.stat_item("Calls this week", calls_this_week|length) }}
+</section>
+
+
+<section class="workspace-section">
+
+    <div class="table-toolbar">
+
+        <label class="table-search">
+            <span>Search</span>
+
+            <input
+                type="search"
+                placeholder="Name, email, phone or program"
+                data-client-search
+            >
+        </label>
+
+        <div class="table-filter-group">
+            <button
+                type="button"
+                class="filter-chip is-active"
+                data-client-filter="all"
+            >
+                All
+            </button>
+
+            <button
+                type="button"
+                class="filter-chip"
+                data-client-filter="active"
+            >
+                Active
+            </button>
+        </div>
+
+    </div>
+
+
+    {% if clients %}
+
+    <div class="data-table-wrap">
+
+        <table class="data-table client-list-table">
+
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Program</th>
+                    <th>Week</th>
+                    <th>Current weight</th>
+                    <th>Next call</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th aria-label="Open"></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for client in clients %}
+
+                <tr
+                    class="client-row"
+                    data-client-row
+                    data-client-status="{{ client.status or '' }}"
+                    data-client-search-text="{{ (
+                        (client.name or '') ~ ' ' ~
+                        (client.email or '') ~ ' ' ~
+                        (client.phone or '') ~ ' ' ~
+                        (client.program or '')
+                    )|lower }}"
+                >
+
+                    <td>
+                        {{ ui.person_cell(
+                            client.name,
+                            client.email or "No email",
+                            "/dashboard/clients/" ~ client.id
+                        ) }}
+                    </td>
+
+                    <td>
+                        {{ client.program or "—" }}
+                    </td>
+
+                    <td>
+                        {% if client.current_week %}
+                            Week {{ client.current_week }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if client.current_weight_kg %}
+                            <strong>
+                                {{ client.current_weight_kg }} kg
+                            </strong>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if client.next_call_date %}
+
+                            <strong>
+                                {{ client.next_call_date }}
+                            </strong>
+
+                            {% if client.next_call_time %}
+                                <small class="table-secondary">
+                                    {{ client.next_call_time }}
+                                </small>
+                            {% endif %}
+
+                        {% else %}
+                            <span class="table-muted">
+                                Not scheduled
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <span class="table-contact">
+                            {{ client.phone or "—" }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {% if client.status == "active" %}
+                            {{ ui.status_pill("Active", "active") }}
+                        {% else %}
+                            {{ ui.status_pill(
+                                (client.status or "active")|title,
+                                "neutral"
+                            ) }}
+                        {% endif %}
+                    </td>
+
+                    <td class="table-open">
+                        <a
+                            href="/dashboard/clients/{{ client.id }}"
+                            aria-label="Open {{ client.name }}"
+                        >
+                            →
+                        </a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div
+        class="table-empty"
+        data-client-empty
+        hidden
+    >
+        No clients match your search.
+    </div>
+
+    {% else %}
+
+    {{ ui.empty_state(
+        "No clients yet",
+        "Add the first active coaching client to start building her coaching journey."
+    ) }}
+
+    <div class="empty-state-action">
+        <button
+            type="button"
+            class="button button-primary"
+            data-open-add-client
+        >
+            + Add client
+        </button>
+    </div>
+
+    {% endif %}
+
+</section>
+
+
+<dialog
+    class="coach-dialog"
+    data-add-client-dialog
+>
+
+    <form
+        method="post"
+        action="/dashboard/clients"
+        class="coach-form"
+    >
+
+        {{ ui.dialog_header(
+            "New client",
+            "Add coaching client",
+            "data-close-add-client"
+        ) }}
+
+
+        <div class="form-grid form-grid-two">
+
+            <div class="field field-span-two">
+                <label for="client_name">
+                    Name
+                </label>
+
+                <input
+                    id="client_name"
+                    name="name"
+                    required
+                >
+            </div>
+
+
+            <div class="field">
+                <label for="client_email">
+                    Email
+                </label>
+
+                <input
+                    id="client_email"
+                    name="email"
+                    type="email"
+                >
+            </div>
+
+
+            <div class="field">
+                <label for="client_phone">
+                    Phone
+                </label>
+
+                <input
+                    id="client_phone"
+                    name="phone"
+                >
+            </div>
+
+
+            <div class="field field-span-two">
+                <label for="client_program">
+                    Program
+                </label>
+
+                <select
+                    id="client_program"
+                    name="program"
+                >
+                    <option value="Transformation">
+                        Transformation
+                    </option>
+
+                    <option value="Foundations">
+                        Foundations
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+            <button
+                type="button"
+                class="button button-secondary"
+                data-close-add-client
+            >
+                Cancel
+            </button>
+
+            <button
+                type="submit"
+                class="button button-primary"
+            >
+                Add client
+            </button>
+        </div>
+
+    </form>
+
+</dialog>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+(() => {
+    const search = document.querySelector(
+        "[data-client-search]"
+    );
+
+    const rows = Array.from(
+        document.querySelectorAll(
+            "[data-client-row]"
+        )
+    );
+
+    const empty = document.querySelector(
+        "[data-client-empty]"
+    );
+
+    const filters = Array.from(
+        document.querySelectorAll(
+            "[data-client-filter]"
+        )
+    );
+
+    let currentFilter = "all";
+
+    const updateRows = () => {
+        const query = (
+            search?.value || ""
+        ).trim().toLowerCase();
+
+        let visibleCount = 0;
+
+        rows.forEach((row) => {
+            const matchesSearch =
+                !query
+                || row.dataset.clientSearchText
+                    .includes(query);
+
+            const matchesFilter =
+                currentFilter === "all"
+                || row.dataset.clientStatus
+                    === currentFilter;
+
+            const show =
+                matchesSearch
+                && matchesFilter;
+
+            row.hidden = !show;
+
+            if (show) {
+                visibleCount += 1;
+            }
+        });
+
+        if (empty) {
+            empty.hidden =
+                visibleCount !== 0;
+        }
+    };
+
+    search?.addEventListener(
+        "input",
+        updateRows
+    );
+
+    filters.forEach((button) => {
+        button.addEventListener(
+            "click",
+            () => {
+                currentFilter =
+                    button.dataset.clientFilter;
+
+                filters.forEach(
+                    (item) => {
+                        item.classList.toggle(
+                            "is-active",
+                            item === button
+                        );
+                    }
+                );
+
+                updateRows();
+            }
+        );
+    });
+
+
+    const dialog = document.querySelector(
+        "[data-add-client-dialog]"
+    );
+
+    document
+        .querySelectorAll(
+            "[data-open-add-client]"
+        )
+        .forEach((button) => {
+            button.addEventListener(
+                "click",
+                () => {
+                    dialog?.showModal();
+                }
+            );
+        });
+
+    document
+        .querySelectorAll(
+            "[data-close-add-client]"
+        )
+        .forEach((button) => {
+            button.addEventListener(
+                "click",
+                () => {
+                    dialog?.close();
+                }
+            );
+        });
+})();
+</script>
+
+{% endblock %}

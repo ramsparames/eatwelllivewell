@@ -1,0 +1,361 @@
+{% extends "coach/base.html" %}
+{% import "coach/components/ui.html" as ui %}
+
+{% block title %}
+Leads | NourisHer Coach
+{% endblock %}
+
+{% block content %}
+
+{{ ui.page_header(
+    "Pipeline",
+    "Leads",
+    "See who needs a conversation, follow-up or next step."
+) }}
+
+
+<section class="summary-strip leads-summary-strip">
+    {{ ui.stat_item("All leads", total_leads) }}
+    {{ ui.stat_item("New", new_leads) }}
+    {{ ui.stat_item("Clarity calls", clarity_calls) }}
+    {{ ui.stat_item("Follow-ups due", follow_ups_due) }}
+    {{ ui.stat_item("Joined", joined) }}
+</section>
+
+
+<section class="workspace-section">
+
+    <div class="table-toolbar leads-toolbar">
+
+        <label class="table-search">
+            <span>Search</span>
+
+            <input
+                type="search"
+                placeholder="Name, phone, email, score or stage"
+                data-lead-search
+            >
+        </label>
+
+
+        <div class="table-filter-group leads-filter-group">
+
+            <button
+                type="button"
+                class="filter-chip is-active"
+                data-lead-filter="all"
+            >
+                All
+            </button>
+
+            <button
+                type="button"
+                class="filter-chip"
+                data-lead-filter="new"
+            >
+                New
+            </button>
+
+            <button
+                type="button"
+                class="filter-chip"
+                data-lead-filter="contacted"
+            >
+                Contacted
+            </button>
+
+            <button
+                type="button"
+                class="filter-chip"
+                data-lead-filter="clarity"
+            >
+                Clarity Call
+            </button>
+
+            <button
+                type="button"
+                class="filter-chip"
+                data-lead-filter="followup"
+            >
+                Follow Up
+            </button>
+
+            <button
+                type="button"
+                class="filter-chip"
+                data-lead-filter="joined"
+            >
+                Joined
+            </button>
+
+            <button
+                type="button"
+                class="filter-chip"
+                data-lead-filter="closed"
+            >
+                Closed
+            </button>
+
+        </div>
+
+    </div>
+
+
+    {% if leads %}
+
+    <div class="data-table-wrap">
+
+        <table class="data-table leads-table">
+
+            <thead>
+                <tr>
+                    <th>Lead</th>
+                    <th>Stage</th>
+                    <th>Score</th>
+                    <th>Opportunity</th>
+                    <th>Source</th>
+                    <th>Next follow-up</th>
+                    <th>Submitted</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for lead in leads %}
+
+                <tr
+                    data-lead-row
+                    data-lead-stage="{{ lead.stage_group }}"
+                    data-lead-search-text="{{ lead.search_text }}"
+                >
+
+                    <td>
+                        {{ ui.person_cell(
+                            lead.name or "Lead",
+                            lead.email or lead.phone or "",
+                            "/dashboard/leads/"
+                            ~ lead.lead_type
+                            ~ "/"
+                            ~ lead.lead_id
+                        ) }}
+                    </td>
+
+
+                    <td>
+                        {% if lead.effective_status in [
+                            "joined_foundations",
+                            "joined_transformation"
+                        ] %}
+                            {{ ui.status_pill(
+                                lead.stage_label,
+                                "active"
+                            ) }}
+                        {% elif lead.follow_up_overdue %}
+                            {{ ui.status_pill(
+                                "Overdue",
+                                "danger"
+                            ) }}
+                        {% elif lead.effective_status
+                            == "clarity_call_booked" %}
+                            {{ ui.status_pill(
+                                lead.stage_label,
+                                "purple"
+                            ) }}
+                        {% elif lead.effective_status
+                            == "follow_up_later" %}
+                            {{ ui.status_pill(
+                                lead.stage_label,
+                                "warning"
+                            ) }}
+                        {% else %}
+                            {{ ui.status_pill(
+                                lead.stage_label,
+                                "neutral"
+                            ) }}
+                        {% endif %}
+                    </td>
+
+
+                    <td>
+                        {% if lead.total_score is not none %}
+                            <strong>
+                                {{ lead.total_score }}
+                            </strong>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+
+                    <td class="lead-opportunity">
+                        {{ lead.opportunity or "—" }}
+                    </td>
+
+
+                    <td>
+                        <span class="source-label">
+                            {{ lead.source_label }}
+                        </span>
+                    </td>
+
+
+                    <td>
+                        {% if lead.effective_follow_up_date %}
+
+                            <strong
+                                {% if lead.follow_up_overdue %}
+                                class="text-danger"
+                                {% endif %}
+                            >
+                                {{ lead.effective_follow_up_date }}
+                            </strong>
+
+                        {% else %}
+
+                            <span class="table-muted">
+                                Not scheduled
+                            </span>
+
+                        {% endif %}
+                    </td>
+
+
+                    <td>
+                        {% if lead.submitted_at %}
+                            {{ lead.submitted_at.strftime("%d %b %Y") }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+
+                    <td class="table-open">
+                        <a
+                            href="/dashboard/leads/{{ lead.lead_type }}/{{ lead.lead_id }}"
+                            aria-label="Open {{ lead.name or 'lead' }}"
+                        >
+                            →
+                        </a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <div
+        class="table-empty"
+        data-lead-empty
+        hidden
+    >
+        No leads match this view.
+    </div>
+
+    {% else %}
+
+    {{ ui.empty_state(
+        "No leads yet",
+        "Assessments and Transformation applications will appear here."
+    ) }}
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+(() => {
+    const search = document.querySelector(
+        "[data-lead-search]"
+    );
+
+    const rows = Array.from(
+        document.querySelectorAll(
+            "[data-lead-row]"
+        )
+    );
+
+    const filters = Array.from(
+        document.querySelectorAll(
+            "[data-lead-filter]"
+        )
+    );
+
+    const empty = document.querySelector(
+        "[data-lead-empty]"
+    );
+
+    let currentFilter = "all";
+
+    const updateRows = () => {
+        const query = (
+            search?.value || ""
+        ).trim().toLowerCase();
+
+        let visible = 0;
+
+        rows.forEach((row) => {
+            const matchesSearch =
+                !query
+                || row.dataset.leadSearchText
+                    .includes(query);
+
+            const matchesFilter =
+                currentFilter === "all"
+                || row.dataset.leadStage
+                    === currentFilter;
+
+            const show =
+                matchesSearch
+                && matchesFilter;
+
+            row.hidden = !show;
+
+            if (show) {
+                visible += 1;
+            }
+        });
+
+        if (empty) {
+            empty.hidden = visible !== 0;
+        }
+    };
+
+    search?.addEventListener(
+        "input",
+        updateRows
+    );
+
+    filters.forEach((button) => {
+        button.addEventListener(
+            "click",
+            () => {
+                currentFilter =
+                    button.dataset.leadFilter;
+
+                filters.forEach((item) => {
+                    item.classList.toggle(
+                        "is-active",
+                        item === button
+                    );
+                });
+
+                updateRows();
+            }
+        );
+    });
+})();
+</script>
+
+{% endblock %}

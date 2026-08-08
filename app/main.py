@@ -1,5 +1,6 @@
 from app.dashboard import router as dashboard_router
 from app.coach.clients import router as clients_router
+from app.coach.leads import router as leads_router
 from app.dashboard import set_templates
 from starlette.middleware.sessions import SessionMiddleware
 from app.application import router as application_router
@@ -17,11 +18,6 @@ from app.database import (
     get_all_leads,
     get_lead_by_id,
 )
-from app.coach.clients import (
-    router as clients_router,
-)
-from app.auth import router as auth_router
-from app.auth import set_templates as set_auth_templates
 
 from app.scoring import calculate_score
 from fastapi import Request
@@ -179,6 +175,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 app.include_router(auth_router)
 app.include_router(dashboard_router)
 app.include_router(clients_router)
+app.include_router(leads_router)
 app.include_router(application_router)
 app.include_router(webhook_router)
 @app.get("/{page_name}")

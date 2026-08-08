@@ -1,0 +1,116 @@
+/* ======================================================
+   REUSABLE COACH COMPONENTS
+   ====================================================== */
+
+/* Shared status tones */
+.status-warning {
+    color: var(--coach-amber);
+    background: var(--coach-amber-50);
+}
+
+.status-danger {
+    color: #a94747;
+    background: #fbeeee;
+}
+
+.status-purple {
+    color: var(--coach-purple);
+    background: var(--coach-purple-50);
+}
+
+/* Shared panel variants */
+.workspace-panel.is-flat {
+    box-shadow: none;
+}
+
+.workspace-panel.is-compact {
+    padding: 18px;
+}
+
+/* Shared inline key/value row */
+.key-value-row {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: 16px;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid var(--coach-border);
+}
+
+.key-value-row:last-child {
+    border-bottom: 0;
+}
+
+.key-value-row > span {
+    color: var(--coach-muted);
+    font-size: 11px;
+}
+
+.key-value-row > strong,
+.key-value-row > div {
+    min-width: 0;
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+/* Shared compact alert */
+.coach-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    padding: 12px 14px;
+
+    border: 1px solid var(--coach-border);
+    border-radius: 10px;
+
+    background: #fff;
+}
+
+.coach-alert-dot {
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    margin-top: 6px;
+
+    border-radius: 50%;
+    background: var(--coach-purple);
+}
+
+.coach-alert strong {
+    display: block;
+    font-size: 12px;
+}
+
+.coach-alert p {
+    margin: 2px 0 0;
+
+    color: var(--coach-muted);
+    font-size: 10px;
+}
+
+/* Shared workspace toolbar */
+.workspace-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    margin-bottom: 16px;
+}
+
+@media (max-width: 760px) {
+    .workspace-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .key-value-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+}

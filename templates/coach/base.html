@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        {% block title %}NourisHer Coach{% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/static/coach.css?v=1"
+    >
+    <link
+        rel="stylesheet"
+        href="/static/components.css?v=1"
+    >
+    <link
+        rel="stylesheet"
+        href="/static/tables.css?v=1"
+    >
+    <link
+        rel="stylesheet"
+        href="/static/forms.css?v=1"
+    >
+    <link
+        rel="stylesheet"
+        href="/static/leads.css?v=1"
+    >
+</head>
+
+<body class="coach-body">
+
+<header class="coach-topnav">
+
+    <div class="coach-topnav-inner">
+
+        <a
+            href="/dashboard"
+            class="coach-brand"
+        >
+            <span class="coach-brand-mark">N</span>
+
+            <span>
+                <strong>NourisHer</strong>
+                <small>Coach</small>
+            </span>
+        </a>
+
+
+        <nav class="coach-nav" aria-label="Coach navigation">
+
+            <a
+                href="/dashboard"
+                class="{% if active_nav == 'today' %}is-active{% endif %}"
+            >
+                Today
+            </a>
+
+            <a
+                href="/dashboard/clients"
+                class="{% if active_nav == 'clients' %}is-active{% endif %}"
+            >
+                Clients
+            </a>
+
+            <a
+                href="/dashboard/leads"
+                class="{% if active_nav == 'leads' %}is-active{% endif %}"
+            >
+                Leads
+            </a>
+
+        </nav>
+
+
+        <div class="coach-nav-actions">
+            <a href="/coach/logout">
+                Sign out
+            </a>
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="coach-shell">
+
+    {% block content %}
+    {% endblock %}
+
+</main>
+
+
+{% block scripts %}
+{% endblock %}
+
+</body>
+</html>

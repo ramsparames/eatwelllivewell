@@ -1,0 +1,1574 @@
+{% extends "coach/base.html" %}
+
+{% block title %}
+{{ client.name }} | NourisHer Coach
+{% endblock %}
+
+{% block content %}
+
+<div class="client-workspace">
+
+    <div class="client-workspace-header">
+
+        <div class="client-title-row">
+
+            <a
+                href="/dashboard/clients"
+                class="back-link"
+            >
+                ← Clients
+            </a>
+
+
+            <div class="client-heading">
+
+                <span class="client-heading-avatar">
+                    {{ client.name[0]|upper }}
+                </span>
+
+                <div>
+                    <h1>{{ client.name }}</h1>
+
+                    <p>
+                        {{ client.program or "Coaching" }}
+
+                        {% if current_week %}
+                            · Week {{ current_week }}
+                        {% endif %}
+
+                        ·
+                        <span class="inline-status">
+                            {{ (client.status or "active")|title }}
+                        </span>
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="client-header-meta">
+
+            <div>
+                <span>Current weight</span>
+
+                <strong>
+                    {% if current_weight %}
+                        {{ current_weight }} kg
+                    {% else %}
+                        —
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div>
+                <span>Goal</span>
+
+                <strong>
+                    {% if intake and intake.goal_weight_kg %}
+                        {{ intake.goal_weight_kg }} kg
+                    {% else %}
+                        —
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div>
+                <span>Next call</span>
+
+                <strong>
+                    {% if next_call_date %}
+                        {{ next_call_date }}
+                    {% else %}
+                        Not scheduled
+                    {% endif %}
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <nav class="client-tabs" aria-label="Client workspace">
+
+        <button
+            type="button"
+            class="client-tab is-active"
+            data-client-tab="overview"
+        >
+            Overview
+        </button>
+
+        <button
+            type="button"
+            class="client-tab"
+            data-client-tab="weekly"
+        >
+            Weekly Coaching
+        </button>
+
+        <button
+            type="button"
+            class="client-tab"
+            data-client-tab="tracking"
+        >
+            Tracking
+        </button>
+
+        <button
+            type="button"
+            class="client-tab"
+            data-client-tab="journey"
+        >
+            Journey
+        </button>
+
+    </nav>
+
+
+    <!-- ==================================================
+         OVERVIEW
+         ================================================== -->
+
+    <section
+        class="client-tab-panel is-active"
+        data-client-panel="overview"
+    >
+
+        <div class="overview-grid">
+
+            <section class="workspace-panel overview-primary">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <p class="page-kicker">
+                            Coach snapshot
+                        </p>
+
+                        <h2>
+                            At a glance
+                        </h2>
+                    </div>
+
+                </div>
+
+
+                <div class="snapshot-grid">
+
+                    <div class="snapshot-item snapshot-wide">
+
+                        <span>Primary goal</span>
+
+                        <strong>
+                            {% if intake and intake.primary_goal %}
+                                {{ intake.primary_goal }}
+                            {% else %}
+                                Not added yet
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="snapshot-item">
+
+                        <span>Current weight</span>
+
+                        <strong>
+                            {% if current_weight %}
+                                {{ current_weight }} kg
+                            {% else %}
+                                —
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="snapshot-item">
+
+                        <span>Goal weight</span>
+
+                        <strong>
+                            {% if intake and intake.goal_weight_kg %}
+                                {{ intake.goal_weight_kg }} kg
+                            {% else %}
+                                —
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="snapshot-item">
+
+                        <span>Program</span>
+
+                        <strong>
+                            {{ client.program or "—" }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="snapshot-item">
+
+                        <span>Current week</span>
+
+                        <strong>
+                            {% if current_week %}
+                                Week {{ current_week }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                {% if intake %}
+
+                <div class="overview-notes">
+
+                    <div>
+                        <span>Current situation</span>
+                        <p>
+                            {{ intake.current_situation or "—" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>Secondary goals</span>
+                        <p>
+                            {{ intake.secondary_goals or "—" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <span>Coach focus</span>
+                        <p>
+                            {{ intake.coach_focus or "—" }}
+                        </p>
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+            </section>
+
+
+            <section class="workspace-panel">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <p class="page-kicker">
+                            This week
+                        </p>
+
+                        <h2>
+                            Action plan
+                        </h2>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="text-button"
+                        data-open-action-form
+                    >
+                        + Add action
+                    </button>
+
+                </div>
+
+
+                {% if active_actions %}
+
+                <div class="action-list">
+
+                    {% for action in active_actions %}
+
+                    <div class="action-list-row">
+
+                        <div>
+                            <strong>
+                                {{ action.action_name }}
+                            </strong>
+
+                            <span>
+                                {% if action.target_count %}
+                                    {{ action.target_count }}
+                                    {{ action.target_unit or "" }}
+                                {% else %}
+                                    Weekly focus
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <span class="status-pill status-active">
+                            Active
+                        </span>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% else %}
+
+                <div class="inline-empty">
+                    No active actions assigned for this week.
+                </div>
+
+                {% endif %}
+
+
+                <form
+                    method="post"
+                    action="/dashboard/clients/{{ client.id }}/actions"
+                    class="inline-action-form"
+                    data-action-form
+                    hidden
+                >
+
+                    <div class="form-grid form-grid-action">
+
+                        <div class="field">
+                            <label>Action</label>
+
+                            <input
+                                name="action_name"
+                                placeholder="Protein in first meal"
+                                required
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Target</label>
+
+                            <input
+                                name="target_count"
+                                type="number"
+                                min="1"
+                                placeholder="5"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Unit</label>
+
+                            <select name="target_unit">
+                                <option value="">
+                                    —
+                                </option>
+                                <option value="days">
+                                    days
+                                </option>
+                                <option value="sessions">
+                                    sessions
+                                </option>
+                                <option value="times">
+                                    times
+                                </option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions form-actions-left">
+
+                        <button
+                            type="submit"
+                            class="button button-primary"
+                        >
+                            Add action
+                        </button>
+
+                        <button
+                            type="button"
+                            class="button button-secondary"
+                            data-close-action-form
+                        >
+                            Cancel
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+            <section class="workspace-panel">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <p class="page-kicker">
+                            Latest coaching review
+                        </p>
+
+                        <h2>
+                            What matters right now
+                        </h2>
+                    </div>
+
+                    {% if checkins %}
+                    <span class="table-secondary">
+                        {{ checkins[0].call_date }}
+                    </span>
+                    {% endif %}
+
+                </div>
+
+
+                {% if checkins %}
+
+                    {% set latest_checkin = checkins[0] %}
+
+                    <div class="overview-notes">
+
+                        <div>
+                            <span>Wins</span>
+                            <p>
+                                {{ latest_checkin.wins or "—" }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <span>Struggles</span>
+                            <p>
+                                {{ latest_checkin.struggles or "—" }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <span>Improve next</span>
+                            <p>
+                                {{ latest_checkin.improvements_needed or "—" }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <span>Coach support</span>
+                            <p>
+                                {{ latest_checkin.coach_support or "—" }}
+                            </p>
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                <div class="inline-empty">
+                    The latest coaching review will appear after the first weekly check-in.
+                </div>
+
+                {% endif %}
+
+            </section>
+
+
+            <section class="workspace-panel">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <p class="page-kicker">
+                            Latest
+                        </p>
+
+                        <h2>
+                            Measurements
+                        </h2>
+                    </div>
+
+                </div>
+
+
+                {% if measurements %}
+
+                    {% set latest_measurement = measurements[0] %}
+
+                    <div class="measurement-summary">
+
+                        <div>
+                            <span>Date</span>
+                            <strong>
+                                {{ latest_measurement.measured_on }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Weight</span>
+                            <strong>
+                                {{ latest_measurement.weight_kg or "—" }}
+                                {% if latest_measurement.weight_kg %}kg{% endif %}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Waist</span>
+                            <strong>
+                                {{ latest_measurement.waist_cm or "—" }}
+                                {% if latest_measurement.waist_cm %}cm{% endif %}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Hip</span>
+                            <strong>
+                                {{ latest_measurement.hip_cm or "—" }}
+                                {% if latest_measurement.hip_cm %}cm{% endif %}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                <div class="inline-empty">
+                    Measurements will appear after the first coaching check-in.
+                </div>
+
+                {% endif %}
+
+            </section>
+
+
+            <section class="workspace-panel">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <p class="page-kicker">
+                            Client details
+                        </p>
+
+                        <h2>
+                            Contact & setup
+                        </h2>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="text-button"
+                        data-toggle-intake
+                    >
+                        {% if intake %}
+                            Edit setup
+                        {% else %}
+                            Complete setup
+                        {% endif %}
+                    </button>
+
+                </div>
+
+
+                <dl class="detail-list">
+
+                    <div>
+                        <dt>Email</dt>
+                        <dd>{{ client.email or "—" }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Phone</dt>
+                        <dd>{{ client.phone or "—" }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Next call</dt>
+                        <dd>
+                            {% if next_call_date %}
+                                {{ next_call_date }}
+                                {% if next_call_time %}
+                                    · {{ next_call_time }}
+                                {% endif %}
+                            {% else %}
+                                Not scheduled
+                            {% endif %}
+                        </dd>
+                    </div>
+
+                </dl>
+
+
+                <form
+                    method="post"
+                    action="/dashboard/clients/{{ client.id }}/intake"
+                    class="coach-form intake-edit-form"
+                    data-intake-form
+                    {% if intake %}hidden{% endif %}
+                >
+
+                    <div class="form-grid form-grid-two">
+
+                        <div class="field">
+                            <label>Intake date</label>
+
+                            <input
+                                type="date"
+                                name="intake_date"
+                                value="{% if intake %}{{ intake.intake_date }}{% endif %}"
+                                required
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Goal weight (kg)</label>
+
+                            <input
+                                type="number"
+                                step="0.1"
+                                name="goal_weight_kg"
+                                value="{% if intake and intake.goal_weight_kg %}{{ intake.goal_weight_kg }}{% endif %}"
+                            >
+                        </div>
+
+                        <div class="field field-span-two">
+                            <label>Current situation</label>
+
+                            <textarea
+                                name="current_situation"
+                                rows="3"
+                            >{% if intake %}{{ intake.current_situation or "" }}{% endif %}</textarea>
+                        </div>
+
+                        <div class="field field-span-two">
+                            <label>Primary goal</label>
+
+                            <textarea
+                                name="primary_goal"
+                                rows="2"
+                            >{% if intake %}{{ intake.primary_goal or "" }}{% endif %}</textarea>
+                        </div>
+
+                        <div class="field field-span-two">
+                            <label>Secondary goals</label>
+
+                            <textarea
+                                name="secondary_goals"
+                                rows="2"
+                            >{% if intake %}{{ intake.secondary_goals or "" }}{% endif %}</textarea>
+                        </div>
+
+                        <div class="field field-span-two">
+                            <label>Coach focus</label>
+
+                            <textarea
+                                name="coach_focus"
+                                rows="2"
+                            >{% if intake %}{{ intake.coach_focus or "" }}{% endif %}</textarea>
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-actions form-actions-left">
+
+                        <button
+                            type="submit"
+                            class="button button-primary"
+                        >
+                            Save client setup
+                        </button>
+
+                        {% if intake %}
+
+                        <button
+                            type="button"
+                            class="button button-secondary"
+                            data-toggle-intake
+                        >
+                            Cancel
+                        </button>
+
+                        {% endif %}
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         WEEKLY COACHING
+         ================================================== -->
+
+    <section
+        class="client-tab-panel"
+        data-client-panel="weekly"
+    >
+
+        <div class="single-column-workspace">
+
+            <div class="section-intro">
+
+                <div>
+                    <p class="page-kicker">
+                        Coaching call
+                    </p>
+
+                    <h2>
+                        Weekly coaching
+                    </h2>
+
+                    <p>
+                        Review the week, capture measurements and
+                        reflections, then schedule the next call.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <form
+                method="post"
+                action="/dashboard/clients/{{ client.id }}/checkin"
+                class="coach-form weekly-coaching-form"
+                data-preserve-tab="weekly"
+            >
+
+                <section class="form-section">
+
+                    <div class="form-section-heading">
+                        <span>01</span>
+
+                        <div>
+                            <h3>Session</h3>
+                            <p>Record the basics for this coaching call.</p>
+                        </div>
+                    </div>
+
+
+                    <div class="form-grid form-grid-three">
+
+                        <div class="field">
+                            <label>Call date</label>
+
+                            <input
+                                name="call_date"
+                                type="date"
+                                required
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Weight (kg)</label>
+
+                            <input
+                                name="weight_kg"
+                                type="number"
+                                step="0.1"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Measurement unit</label>
+
+                            <select name="measurement_unit">
+                                <option value="inches">
+                                    Inches
+                                </option>
+
+                                <option value="cm">
+                                    Centimetres
+                                </option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <details class="form-section form-disclosure" open>
+
+                    <summary>
+                        <div class="form-section-heading">
+                            <span>02</span>
+
+                            <div>
+                                <h3>Measurements</h3>
+
+                                <p>
+                                    Add body measurements when they are taken.
+                                </p>
+                            </div>
+                        </div>
+
+                        <span class="disclosure-icon">+</span>
+                    </summary>
+
+
+                    <div class="form-grid form-grid-three disclosure-content">
+
+                        <div class="field">
+                            <label>Upper arm</label>
+                            <input
+                                name="upper_arm"
+                                type="number"
+                                step="0.1"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Chest</label>
+                            <input
+                                name="chest"
+                                type="number"
+                                step="0.1"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Waist</label>
+                            <input
+                                name="waist"
+                                type="number"
+                                step="0.1"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Lower abdomen</label>
+                            <input
+                                name="lower_abdomen"
+                                type="number"
+                                step="0.1"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Hip</label>
+                            <input
+                                name="hip"
+                                type="number"
+                                step="0.1"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Thigh</label>
+                            <input
+                                name="thigh"
+                                type="number"
+                                step="0.1"
+                            >
+                        </div>
+
+                    </div>
+
+                </details>
+
+
+                <section class="form-section">
+
+                    <div class="form-section-heading">
+                        <span>03</span>
+
+                        <div>
+                            <h3>Weekly review</h3>
+
+                            <p>
+                                Capture what matters from the conversation.
+                            </p>
+                        </div>
+                    </div>
+
+
+                    <div class="form-grid form-grid-two">
+
+                        <div class="field">
+                            <label>Wins</label>
+
+                            <textarea
+                                name="wins"
+                                rows="4"
+                                placeholder="What went well this week?"
+                            ></textarea>
+                        </div>
+
+
+                        <div class="field">
+                            <label>Struggles</label>
+
+                            <textarea
+                                name="struggles"
+                                rows="4"
+                                placeholder="What felt difficult?"
+                            ></textarea>
+                        </div>
+
+
+                        <div class="field">
+                            <label>Improvements needed</label>
+
+                            <textarea
+                                name="improvements_needed"
+                                rows="4"
+                                placeholder="What should she work on next?"
+                            ></textarea>
+                        </div>
+
+
+                        <div class="field">
+                            <label>Help / support from coach</label>
+
+                            <textarea
+                                name="coach_support"
+                                rows="4"
+                                placeholder="What support does she need from Sushma?"
+                            ></textarea>
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="form-section">
+
+                    <div class="form-section-heading">
+                        <span>04</span>
+
+                        <div>
+                            <h3>Next call</h3>
+                            <p>Close the loop before ending the session.</p>
+                        </div>
+                    </div>
+
+
+                    <div class="form-grid form-grid-two">
+
+                        <div class="field">
+                            <label>Next call date</label>
+
+                            <input
+                                name="next_call_date"
+                                type="date"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label>Call time</label>
+
+                            <input
+                                name="next_call_time"
+                                type="time"
+                            >
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <div class="sticky-form-footer">
+
+                    <div>
+                        <strong>Ready to save this week's coaching call?</strong>
+
+                        <span>
+                            The reflection and measurements will appear in Journey.
+                        </span>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Save weekly check-in
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         TRACKING
+         ================================================== -->
+
+    <section
+        class="client-tab-panel"
+        data-client-panel="tracking"
+    >
+
+        <div class="section-intro section-intro-row">
+
+            <div>
+                <p class="page-kicker">
+                    Daily habits
+                </p>
+
+                <h2>Tracking</h2>
+
+                <p>
+                    A spreadsheet-style view of the client's daily habits.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="button button-primary"
+                data-open-tracking-form
+            >
+                + Add daily entry
+            </button>
+
+        </div>
+
+
+        {% if tracking %}
+
+        <div class="data-table-wrap">
+
+            <table class="data-table tracking-table">
+
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Protein</th>
+                        <th>Water</th>
+                        <th>Steps</th>
+                        <th>Strength</th>
+                        <th>Stress</th>
+                        <th>Mood</th>
+                        <th>Weight</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for entry in tracking %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ entry.tracked_on }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {% if entry.protein %}
+                                <span class="table-check">✓</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if entry.water %}
+                                <span class="table-check">✓</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>{{ entry.steps or "—" }}</td>
+
+                        <td>
+                            {% if entry.strength_training %}
+                                <span class="table-check">✓</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>{{ entry.stress_score or "—" }}</td>
+                        <td>{{ entry.mood_score or "—" }}</td>
+
+                        <td>
+                            {% if entry.weight_kg %}
+                                {{ entry.weight_kg }} kg
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td class="tracking-note">
+                            {{ entry.note or "—" }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+            <h2>No tracking yet</h2>
+            <p>Daily entries will appear here as rows.</p>
+        </div>
+
+        {% endif %}
+
+
+        <dialog
+            class="coach-dialog"
+            data-tracking-dialog
+        >
+
+            <form
+                method="post"
+                action="/dashboard/clients/{{ client.id }}/tracking"
+                class="coach-form"
+                data-preserve-tab="tracking"
+            >
+
+                <div class="dialog-heading">
+
+                    <div>
+                        <p class="page-kicker">
+                            Daily tracking
+                        </p>
+
+                        <h2>
+                            Add / update entry
+                        </h2>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="dialog-close"
+                        data-close-tracking-form
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div class="form-grid form-grid-three">
+
+                    <div class="field">
+                        <label>Date</label>
+
+                        <input
+                            name="tracked_on"
+                            type="date"
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Steps</label>
+
+                        <input
+                            name="steps"
+                            type="number"
+                            min="0"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Weight (kg)</label>
+
+                        <input
+                            name="weight_kg"
+                            type="number"
+                            step="0.1"
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="check-row">
+
+                    <label>
+                        <input
+                            name="protein"
+                            type="checkbox"
+                            value="true"
+                        >
+                        Protein goal met
+                    </label>
+
+                    <label>
+                        <input
+                            name="water"
+                            type="checkbox"
+                            value="true"
+                        >
+                        Water goal met
+                    </label>
+
+                    <label>
+                        <input
+                            name="strength_training"
+                            type="checkbox"
+                            value="true"
+                        >
+                        Strength training
+                    </label>
+
+                </div>
+
+
+                <div class="form-grid form-grid-two">
+
+                    <div class="field">
+                        <label>Stress</label>
+
+                        <select name="stress_score">
+                            <option value="">—</option>
+                            <option value="1">1 · Very low</option>
+                            <option value="2">2 · Low</option>
+                            <option value="3">3 · Moderate</option>
+                            <option value="4">4 · High</option>
+                            <option value="5">5 · Very high</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Mood</label>
+
+                        <select name="mood_score">
+                            <option value="">—</option>
+                            <option value="1">1 · Very low</option>
+                            <option value="2">2 · Low</option>
+                            <option value="3">3 · Okay</option>
+                            <option value="4">4 · Good</option>
+                            <option value="5">5 · Great</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+                    <label>Note</label>
+
+                    <textarea
+                        name="note"
+                        rows="3"
+                    ></textarea>
+                </div>
+
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        class="button button-secondary"
+                        data-close-tracking-form
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Save entry
+                    </button>
+
+                </div>
+
+            </form>
+
+        </dialog>
+
+    </section>
+
+
+    <!-- ==================================================
+         JOURNEY
+         ================================================== -->
+
+    <section
+        class="client-tab-panel"
+        data-client-panel="journey"
+    >
+
+        <div class="section-intro">
+
+            <div>
+                <p class="page-kicker">
+                    History
+                </p>
+
+                <h2>Coaching journey</h2>
+
+                <p>
+                    A week-by-week record of progress and coaching conversations.
+                </p>
+            </div>
+
+        </div>
+
+
+        {% if checkins %}
+
+        <div class="journey-table">
+
+            <div class="journey-table-head">
+                <span>Date</span>
+                <span>Weight</span>
+                <span>Wins</span>
+                <span>Struggles</span>
+                <span>Improvements</span>
+                <span>Coach support</span>
+                <span>Next call</span>
+            </div>
+
+
+            {% for checkin in checkins %}
+
+            <div class="journey-table-row">
+
+                <div>
+                    <strong>
+                        {{ checkin.call_date }}
+                    </strong>
+                </div>
+
+                <div>
+                    {% if checkin.weight_kg %}
+                        {{ checkin.weight_kg }} kg
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+
+                <div>
+                    {{ checkin.wins or "—" }}
+                </div>
+
+                <div>
+                    {{ checkin.struggles or "—" }}
+                </div>
+
+                <div>
+                    {{ checkin.improvements_needed or "—" }}
+                </div>
+
+                <div>
+                    {{ checkin.coach_support or "—" }}
+                </div>
+
+                <div>
+                    {{ checkin.next_call_date or "—" }}
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <h2>No weekly coaching history yet</h2>
+
+            <p>
+                Each saved weekly coaching session will add a row here.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+(() => {
+    const storageKey =
+        "nh-client-tab-{{ client.id }}";
+
+    const tabs = Array.from(
+        document.querySelectorAll(
+            "[data-client-tab]"
+        )
+    );
+
+    const panels = Array.from(
+        document.querySelectorAll(
+            "[data-client-panel]"
+        )
+    );
+
+    const activateTab = (name) => {
+        tabs.forEach((tab) => {
+            tab.classList.toggle(
+                "is-active",
+                tab.dataset.clientTab === name
+            );
+        });
+
+        panels.forEach((panel) => {
+            panel.classList.toggle(
+                "is-active",
+                panel.dataset.clientPanel === name
+            );
+        });
+
+        localStorage.setItem(
+            storageKey,
+            name
+        );
+    };
+
+    tabs.forEach((tab) => {
+        tab.addEventListener(
+            "click",
+            () => {
+                activateTab(
+                    tab.dataset.clientTab
+                );
+            }
+        );
+    });
+
+    const savedTab =
+        localStorage.getItem(storageKey);
+
+    if (
+        savedTab
+        && panels.some(
+            (panel) =>
+                panel.dataset.clientPanel
+                === savedTab
+        )
+    ) {
+        activateTab(savedTab);
+    }
+
+
+    document
+        .querySelectorAll(
+            "[data-preserve-tab]"
+        )
+        .forEach((form) => {
+            form.addEventListener(
+                "submit",
+                () => {
+                    localStorage.setItem(
+                        storageKey,
+                        form.dataset.preserveTab
+                    );
+                }
+            );
+        });
+
+
+    const intakeForm = document.querySelector(
+        "[data-intake-form]"
+    );
+
+    document
+        .querySelectorAll(
+            "[data-toggle-intake]"
+        )
+        .forEach((button) => {
+            button.addEventListener(
+                "click",
+                () => {
+                    if (!intakeForm) return;
+
+                    intakeForm.hidden =
+                        !intakeForm.hidden;
+                }
+            );
+        });
+
+
+    const actionForm = document.querySelector(
+        "[data-action-form]"
+    );
+
+    document
+        .querySelector(
+            "[data-open-action-form]"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+                if (actionForm) {
+                    actionForm.hidden = false;
+                }
+            }
+        );
+
+    document
+        .querySelector(
+            "[data-close-action-form]"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+                if (actionForm) {
+                    actionForm.hidden = true;
+                }
+            }
+        );
+
+
+    const trackingDialog =
+        document.querySelector(
+            "[data-tracking-dialog]"
+        );
+
+    document
+        .querySelector(
+            "[data-open-tracking-form]"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+                trackingDialog?.showModal();
+            }
+        );
+
+    document
+        .querySelectorAll(
+            "[data-close-tracking-form]"
+        )
+        .forEach((button) => {
+            button.addEventListener(
+                "click",
+                () => {
+                    trackingDialog?.close();
+                }
+            );
+        });
+})();
+</script>
+
+{% endblock %}
