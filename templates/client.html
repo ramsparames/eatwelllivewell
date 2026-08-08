@@ -6,9 +6,7 @@
 
 {% block content %}
 
-<div class="client-workspace">
-
-    <!-- Back -->
+<div class="client-workspace-v2">
 
     <a
         href="/dashboard/clients"
@@ -18,28 +16,24 @@
     </a>
 
 
-    <section class="client-profile-grid">
+    <div class="client-v2-layout">
 
 
         <!-- ==================================================
-             LEFT: CLIENT SNAPSHOT
+             LEFT — CLIENT SNAPSHOT
              ================================================== -->
 
-        <aside class="client-context-card">
+        <aside class="client-v2-sidebar">
 
-            <div class="client-avatar">
+            <div class="client-v2-avatar">
                 {{ client.name[0]|upper }}
             </div>
-
-            <p class="eyebrow">
-                Client
-            </p>
 
             <h1>
                 {{ client.name }}
             </h1>
 
-            <p class="client-program">
+            <p class="client-v2-program">
                 {{ client.program }}
 
                 {% if current_week %}
@@ -47,88 +41,68 @@
                 {% endif %}
             </p>
 
-            <span class="client-status">
+            <span class="client-v2-status">
                 ● {{ client.status|title }}
             </span>
 
 
-            <div class="client-context-divider"></div>
+            <div class="client-v2-divider"></div>
 
 
-            <div class="client-context-item">
+            <div class="client-v2-stat">
 
                 <span>
                     Primary goal
                 </span>
 
                 <strong>
-                    {{
-                        client.primary_goal
-                        if client.primary_goal is defined
-                        and client.primary_goal
-                        else "Not added yet"
-                    }}
-                </strong>
-
-            </div>
-
-
-            <div class="client-context-item">
-
-                <span>
-                    Starting weight
-                </span>
-
-                <strong>
-                    {% if client.initial_weight_kg is defined
-                          and client.initial_weight_kg %}
-                        {{ client.initial_weight_kg }} kg
+                    {% if intake and intake.primary_goal %}
+                        {{ intake.primary_goal }}
                     {% else %}
-                        —
+                        Not added yet
                     {% endif %}
                 </strong>
 
             </div>
 
 
-            <div class="client-context-item">
+            <div class="client-v2-weight-grid">
 
-                <span>
-                    Current weight
-                </span>
+                <div>
+                    <span>
+                        Current
+                    </span>
 
-                <strong>
-                    {% if current_weight %}
-                        {{ current_weight }} kg
-                    {% else %}
-                        —
-                    {% endif %}
-                </strong>
+                    <strong>
+                        {% if current_weight %}
+                            {{ current_weight }} kg
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+                </div>
 
-            </div>
 
+                <div>
+                    <span>
+                        Goal
+                    </span>
 
-            <div class="client-context-item">
-
-                <span>
-                    Goal weight
-                </span>
-
-                <strong>
-                    {% if client.goal_weight_kg is defined
-                          and client.goal_weight_kg %}
-                        {{ client.goal_weight_kg }} kg
-                    {% else %}
-                        —
-                    {% endif %}
-                </strong>
+                    <strong>
+                        {% if intake and intake.goal_weight_kg %}
+                            {{ intake.goal_weight_kg }} kg
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+                </div>
 
             </div>
 
 
             {% if weight_change is not none %}
 
-            <div class="client-progress-highlight">
+            <div class="client-v2-progress">
 
                 <span>
                     Weight change
@@ -139,8 +113,7 @@
                         +
                     {% endif %}
 
-                    {{ "%.1f"|format(weight_change) }}
-                    kg
+                    {{ "%.1f"|format(weight_change) }} kg
                 </strong>
 
             </div>
@@ -148,10 +121,10 @@
             {% endif %}
 
 
-            <div class="client-context-divider"></div>
+            <div class="client-v2-divider"></div>
 
 
-            <div class="client-context-item">
+            <div class="client-v2-stat">
 
                 <span>
                     Next coaching call
@@ -179,7 +152,7 @@
             </div>
 
 
-            <div class="client-context-item">
+            <div class="client-v2-stat">
 
                 <span>
                     Email
@@ -192,7 +165,7 @@
             </div>
 
 
-            <div class="client-context-item">
+            <div class="client-v2-stat">
 
                 <span>
                     Phone
@@ -209,63 +182,296 @@
 
 
         <!-- ==================================================
-             RIGHT: COACHING WORKFLOW
+             RIGHT — COACHING WORKFLOW
              ================================================== -->
 
-        <div class="client-coaching-column">
+        <main class="client-v2-main">
 
-            <div class="coaching-accordion">
+            <div class="client-v2-heading">
+
+                <div>
+                    <p class="eyebrow">
+                        Coaching journey
+                    </p>
+
+                    <h2>
+                        {{ client.name }}
+                    </h2>
+                </div>
+
+                {% if intake %}
+
+                <span class="client-v2-complete-badge">
+                    ✓ Setup complete
+                </span>
+
+                {% endif %}
+
+            </div>
 
 
-                <!-- ==========================================
-                     1. THIS WEEK
-                     ========================================== -->
+
+            <div class="client-v2-accordions">
+
+
+                <!-- ==================================================
+                     1 — CLIENT SETUP
+                     ================================================== -->
 
                 <details
-                    class="coaching-accordion-item"
-                    open
+                    class="client-v2-accordion"
+                    {% if not intake %}open{% endif %}
                 >
 
-                    <summary
-                        class="coaching-accordion-summary"
-                    >
+                    <summary class="client-v2-summary">
 
-                        <div
-                            class="coaching-accordion-heading"
-                        >
+                        <div>
+
                             <span>
-                                Current focus
+                                01
                             </span>
 
-                            <strong>
-                                This Week
-                            </strong>
+                            <div>
+                                <strong>
+                                    Client Setup
+                                </strong>
+
+                                <small>
+                                    Intake, baseline and goals
+                                </small>
+                            </div>
+
                         </div>
 
                     </summary>
 
 
-                    <div
-                        class="coaching-accordion-content"
-                    >
+                    <div class="client-v2-accordion-body">
 
+                        {% if intake %}
 
-                        <!-- ACTION PLAN -->
+                        <div class="client-v2-intake-summary">
 
-                        <div class="coaching-subsection">
-
-                            <div
-                                class="coaching-subsection-header"
-                            >
-                                <h3>
-                                    Action Plan
-                                </h3>
+                            <div>
+                                <span>
+                                    Current situation
+                                </span>
 
                                 <p>
-                                    What the client agreed
-                                    to focus on before the
-                                    next coaching call.
+                                    {{ intake.current_situation or "—" }}
                                 </p>
+                            </div>
+
+
+                            <div>
+                                <span>
+                                    Primary goal
+                                </span>
+
+                                <p>
+                                    {{ intake.primary_goal or "—" }}
+                                </p>
+                            </div>
+
+
+                            <div>
+                                <span>
+                                    Secondary goals
+                                </span>
+
+                                <p>
+                                    {{ intake.secondary_goals or "—" }}
+                                </p>
+                            </div>
+
+
+                            <div>
+                                <span>
+                                    Coach focus
+                                </span>
+
+                                <p>
+                                    {{ intake.coach_focus or "—" }}
+                                </p>
+                            </div>
+
+                        </div>
+
+                        {% endif %}
+
+
+                        <form
+                            method="post"
+                            action="/dashboard/clients/{{ client.id }}/intake"
+                            class="client-v2-form"
+                        >
+
+                            <div class="client-v2-form-grid">
+
+                                <div class="crm-field">
+
+                                    <label>
+                                        Intake date
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        name="intake_date"
+                                        value="{% if intake %}{{ intake.intake_date }}{% endif %}"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <div class="crm-field">
+
+                                    <label>
+                                        Goal weight (kg)
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        name="goal_weight_kg"
+                                        value="{% if intake and intake.goal_weight_kg %}{{ intake.goal_weight_kg }}{% endif %}"
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="crm-field">
+
+                                <label>
+                                    Where is she currently?
+                                </label>
+
+                                <textarea
+                                    name="current_situation"
+                                    rows="3"
+                                    placeholder="Current health, lifestyle, challenges and context..."
+                                >{% if intake %}{{ intake.current_situation or "" }}{% endif %}</textarea>
+
+                            </div>
+
+
+                            <div class="crm-field">
+
+                                <label>
+                                    Primary goal
+                                </label>
+
+                                <textarea
+                                    name="primary_goal"
+                                    rows="2"
+                                    placeholder="The most important outcome she wants..."
+                                >{% if intake %}{{ intake.primary_goal or "" }}{% endif %}</textarea>
+
+                            </div>
+
+
+                            <div class="crm-field">
+
+                                <label>
+                                    Secondary goals
+                                </label>
+
+                                <textarea
+                                    name="secondary_goals"
+                                    rows="2"
+                                    placeholder="Energy, strength, sleep, confidence..."
+                                >{% if intake %}{{ intake.secondary_goals or "" }}{% endif %}</textarea>
+
+                            </div>
+
+
+                            <div class="crm-field">
+
+                                <label>
+                                    Coach focus
+                                </label>
+
+                                <textarea
+                                    name="coach_focus"
+                                    rows="2"
+                                    placeholder="What should coaching initially focus on?"
+                                >{% if intake %}{{ intake.coach_focus or "" }}{% endif %}</textarea>
+
+                            </div>
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                {% if intake %}
+                                    Update Client Setup
+                                {% else %}
+                                    Save Client Setup
+                                {% endif %}
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </details>
+
+
+
+                <!-- ==================================================
+                     2 — THIS WEEK
+                     ================================================== -->
+
+                <details
+                    class="client-v2-accordion"
+                    open
+                >
+
+                    <summary class="client-v2-summary">
+
+                        <div>
+
+                            <span>
+                                02
+                            </span>
+
+                            <div>
+                                <strong>
+                                    This Week
+                                </strong>
+
+                                <small>
+                                    Action plan and daily tracking
+                                </small>
+                            </div>
+
+                        </div>
+
+                    </summary>
+
+
+                    <div class="client-v2-accordion-body">
+
+
+                        <!-- CURRENT ACTION PLAN -->
+
+                        <section class="client-v2-section">
+
+                            <div class="client-v2-section-heading">
+
+                                <div>
+                                    <h3>
+                                        Current Action Plan
+                                    </h3>
+
+                                    <p>
+                                        What the client agreed to focus on this week.
+                                    </p>
+                                </div>
+
                             </div>
 
 
@@ -275,9 +481,7 @@
 
                                 {% for action in active_actions %}
 
-                                <article
-                                    class="client-action-row"
-                                >
+                                <article class="client-action-row">
 
                                     <div>
 
@@ -286,25 +490,18 @@
                                         </strong>
 
                                         <span>
-
                                             {% if action.target_count %}
-
-                                                Target:
                                                 {{ action.target_count }}
 
                                                 {% if action.target_unit %}
                                                     {{ action.target_unit }}
                                                 {% endif %}
-
                                             {% endif %}
-
                                         </span>
 
                                     </div>
 
-                                    <span
-                                        class="client-action-status"
-                                    >
+                                    <span class="client-action-status">
                                         Active
                                     </span>
 
@@ -316,185 +513,150 @@
 
                             {% else %}
 
-                            <p class="empty-text">
-                                No active actions yet.
-                            </p>
+                            <div class="client-v2-empty">
+                                No weekly actions assigned yet.
+                            </div>
 
                             {% endif %}
 
 
-                            <!-- ADD ACTION -->
+                            <details class="client-v2-inline-details">
 
-                            <form
-                                method="post"
-                                action="/dashboard/clients/{{ client.id }}/actions"
-                                class="client-action-form"
-                            >
+                                <summary>
+                                    + Add weekly action
+                                </summary>
 
-                                <div
-                                    class="client-action-form-grid"
+
+                                <form
+                                    method="post"
+                                    action="/dashboard/clients/{{ client.id }}/actions"
+                                    class="client-v2-inline-form"
                                 >
 
-                                    <div class="crm-field">
+                                    <div class="client-v2-action-grid">
 
-                                        <label
-                                            for="action_name"
-                                        >
-                                            Action
-                                        </label>
+                                        <div class="crm-field">
 
-                                        <input
-                                            id="action_name"
-                                            name="action_name"
-                                            placeholder="Protein in first meal"
-                                            required
-                                        >
+                                            <label>
+                                                Action
+                                            </label>
 
-                                    </div>
+                                            <input
+                                                name="action_name"
+                                                placeholder="Protein in first meal"
+                                                required
+                                            >
 
-
-                                    <div class="crm-field">
-
-                                        <label
-                                            for="target_count"
-                                        >
-                                            Target
-                                        </label>
-
-                                        <input
-                                            id="target_count"
-                                            name="target_count"
-                                            type="number"
-                                            min="1"
-                                            placeholder="5"
-                                        >
-
-                                    </div>
+                                        </div>
 
 
-                                    <div class="crm-field">
+                                        <div class="crm-field">
 
-                                        <label
-                                            for="target_unit"
-                                        >
-                                            Unit
-                                        </label>
+                                            <label>
+                                                Target
+                                            </label>
 
-                                        <select
-                                            id="target_unit"
-                                            name="target_unit"
-                                        >
-                                            <option value="">
-                                                Choose
-                                            </option>
+                                            <input
+                                                name="target_count"
+                                                type="number"
+                                                min="1"
+                                                placeholder="5"
+                                            >
 
-                                            <option value="days">
-                                                days
-                                            </option>
+                                        </div>
 
-                                            <option value="sessions">
-                                                sessions
-                                            </option>
 
-                                            <option value="times">
-                                                times
-                                            </option>
-                                        </select>
+                                        <div class="crm-field">
+
+                                            <label>
+                                                Unit
+                                            </label>
+
+                                            <select name="target_unit">
+
+                                                <option value="">
+                                                    Choose
+                                                </option>
+
+                                                <option value="days">
+                                                    days
+                                                </option>
+
+                                                <option value="sessions">
+                                                    sessions
+                                                </option>
+
+                                                <option value="times">
+                                                    times
+                                                </option>
+
+                                            </select>
+
+                                        </div>
 
                                     </div>
 
 
-                                    <div class="crm-field">
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary"
+                                    >
+                                        Add Action
+                                    </button>
 
-                                        <label
-                                            for="action_start_date"
-                                        >
-                                            Start date
-                                        </label>
+                                </form>
 
-                                        <input
-                                            id="action_start_date"
-                                            name="start_date"
-                                            type="date"
-                                            required
-                                        >
+                            </details>
 
-                                    </div>
-
-
-                                    <div class="crm-field">
-
-                                        <label
-                                            for="action_end_date"
-                                        >
-                                            End date
-                                        </label>
-
-                                        <input
-                                            id="action_end_date"
-                                            name="end_date"
-                                            type="date"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
-                                <button
-                                    type="submit"
-                                    class="btn btn-primary"
-                                >
-                                    + Add Action
-                                </button>
-
-                            </form>
-
-                        </div>
+                        </section>
 
 
 
                         <!-- DAILY TRACKING -->
 
-                        <div class="coaching-subsection">
+                        <section class="client-v2-section">
 
-                            <div
-                                class="coaching-subsection-header"
-                            >
-                                <h3>
-                                    Daily Tracking
-                                </h3>
+                            <div class="client-v2-section-heading">
 
-                                <p>
-                                    What actually happened
-                                    during the week.
-                                </p>
+                                <div>
+                                    <h3>
+                                        Daily Tracking
+                                    </h3>
+
+                                    <p>
+                                        What actually happened during the week.
+                                    </p>
+                                </div>
+
                             </div>
 
 
-                            <!-- RECENT TRACKING FIRST -->
-
                             {% if tracking %}
 
-                            <div class="tracking-history">
+                            <div class="client-v2-tracking-table">
 
-                                <h3>
-                                    Recent tracking
-                                </h3>
+                                <div class="client-v2-tracking-head">
+
+                                    <span>Date</span>
+                                    <span>Protein</span>
+                                    <span>Water</span>
+                                    <span>Steps</span>
+                                    <span>Strength</span>
+                                    <span>Stress</span>
+                                    <span>Mood</span>
+
+                                </div>
 
 
                                 {% for entry in tracking[:7] %}
 
-                                <div
-                                    class="tracking-history-row"
-                                >
+                                <div class="client-v2-tracking-row">
 
                                     <strong>
                                         {{ entry.tracked_on }}
                                     </strong>
 
                                     <span>
-                                        Protein:
                                         {% if entry.protein %}
                                             ✓
                                         {% else %}
@@ -503,7 +665,6 @@
                                     </span>
 
                                     <span>
-                                        Water:
                                         {% if entry.water %}
                                             ✓
                                         {% else %}
@@ -512,12 +673,10 @@
                                     </span>
 
                                     <span>
-                                        Steps:
                                         {{ entry.steps or "—" }}
                                     </span>
 
                                     <span>
-                                        Strength:
                                         {% if entry.strength_training %}
                                             ✓
                                         {% else %}
@@ -526,13 +685,11 @@
                                     </span>
 
                                     <span>
-                                        Stress:
-                                        {{ entry.stress_score or "—" }}/5
+                                        {{ entry.stress_score or "—" }}
                                     </span>
 
                                     <span>
-                                        Mood:
-                                        {{ entry.mood_score or "—" }}/5
+                                        {{ entry.mood_score or "—" }}
                                     </span>
 
                                 </div>
@@ -543,18 +700,14 @@
 
                             {% else %}
 
-                            <p class="empty-text">
+                            <div class="client-v2-empty">
                                 No daily tracking recorded yet.
-                            </p>
+                            </div>
 
                             {% endif %}
 
 
-                            <!-- MANUAL TRACKING ENTRY -->
-
-                            <details
-                                class="daily-entry-details"
-                            >
+                            <details class="client-v2-inline-details">
 
                                 <summary>
                                     + Add / update daily tracking
@@ -564,23 +717,18 @@
                                 <form
                                     method="post"
                                     action="/dashboard/clients/{{ client.id }}/tracking"
-                                    class="daily-tracking-form"
+                                    class="client-v2-form"
                                 >
 
-                                    <div
-                                        class="daily-tracking-grid"
-                                    >
+                                    <div class="client-v2-form-grid-three">
 
                                         <div class="crm-field">
 
-                                            <label
-                                                for="tracked_on"
-                                            >
+                                            <label>
                                                 Date
                                             </label>
 
                                             <input
-                                                id="tracked_on"
                                                 name="tracked_on"
                                                 type="date"
                                                 required
@@ -589,97 +737,80 @@
                                         </div>
 
 
-                                        <div
-                                            class="tracking-check-field"
-                                        >
-
-                                            <input
-                                                id="protein"
-                                                name="protein"
-                                                type="checkbox"
-                                                value="true"
-                                            >
-
-                                            <label
-                                                for="protein"
-                                            >
-                                                Protein goal met
-                                            </label>
-
-                                        </div>
-
-
-                                        <div
-                                            class="tracking-check-field"
-                                        >
-
-                                            <input
-                                                id="water"
-                                                name="water"
-                                                type="checkbox"
-                                                value="true"
-                                            >
-
-                                            <label
-                                                for="water"
-                                            >
-                                                Water goal met
-                                            </label>
-
-                                        </div>
-
-
                                         <div class="crm-field">
 
-                                            <label
-                                                for="steps"
-                                            >
+                                            <label>
                                                 Steps
                                             </label>
 
                                             <input
-                                                id="steps"
                                                 name="steps"
                                                 type="number"
                                                 min="0"
-                                                placeholder="7000"
                                             >
-
-                                        </div>
-
-
-                                        <div
-                                            class="tracking-check-field"
-                                        >
-
-                                            <input
-                                                id="strength_training"
-                                                name="strength_training"
-                                                type="checkbox"
-                                                value="true"
-                                            >
-
-                                            <label
-                                                for="strength_training"
-                                            >
-                                                Strength training
-                                            </label>
 
                                         </div>
 
 
                                         <div class="crm-field">
 
-                                            <label
-                                                for="daily_stress"
+                                            <label>
+                                                Weight
+                                            </label>
+
+                                            <input
+                                                name="weight_kg"
+                                                type="number"
+                                                step="0.1"
                                             >
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="client-v2-check-grid">
+
+                                        <label>
+                                            <input
+                                                name="protein"
+                                                type="checkbox"
+                                                value="true"
+                                            >
+                                            Protein goal met
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                name="water"
+                                                type="checkbox"
+                                                value="true"
+                                            >
+                                            Water goal met
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                name="strength_training"
+                                                type="checkbox"
+                                                value="true"
+                                            >
+                                            Strength training
+                                        </label>
+
+                                    </div>
+
+
+                                    <div class="client-v2-form-grid">
+
+                                        <div class="crm-field">
+
+                                            <label>
                                                 Stress
                                             </label>
 
-                                            <select
-                                                id="daily_stress"
-                                                name="stress_score"
-                                            >
+                                            <select name="stress_score">
+
                                                 <option value="">
                                                     Choose
                                                 </option>
@@ -703,6 +834,7 @@
                                                 <option value="5">
                                                     5 · Very high
                                                 </option>
+
                                             </select>
 
                                         </div>
@@ -710,16 +842,12 @@
 
                                         <div class="crm-field">
 
-                                            <label
-                                                for="daily_mood"
-                                            >
+                                            <label>
                                                 Mood
                                             </label>
 
-                                            <select
-                                                id="daily_mood"
-                                                name="mood_score"
-                                            >
+                                            <select name="mood_score">
+
                                                 <option value="">
                                                     Choose
                                                 </option>
@@ -743,26 +871,8 @@
                                                 <option value="5">
                                                     5 · Great
                                                 </option>
+
                                             </select>
-
-                                        </div>
-
-
-                                        <div class="crm-field">
-
-                                            <label
-                                                for="daily_weight"
-                                            >
-                                                Weight (kg)
-                                            </label>
-
-                                            <input
-                                                id="daily_weight"
-                                                name="weight_kg"
-                                                type="number"
-                                                step="0.1"
-                                                min="0"
-                                            >
 
                                         </div>
 
@@ -771,17 +881,13 @@
 
                                     <div class="crm-field">
 
-                                        <label
-                                            for="tracking_note"
-                                        >
+                                        <label>
                                             Note
                                         </label>
 
                                         <textarea
-                                            id="tracking_note"
                                             name="note"
                                             rows="2"
-                                            placeholder="Anything worth remembering about today..."
                                         ></textarea>
 
                                     </div>
@@ -798,7 +904,7 @@
 
                             </details>
 
-                        </div>
+                        </section>
 
                     </div>
 
@@ -806,74 +912,72 @@
 
 
 
-                <!-- ==========================================
-                     2. WEEKLY CHECK-IN
-                     ========================================== -->
+                <!-- ==================================================
+                     3 — WEEKLY COACHING CALL
+                     ================================================== -->
 
-                <details
-                    class="coaching-accordion-item"
-                >
+                <details class="client-v2-accordion">
 
-                    <summary
-                        class="coaching-accordion-summary"
-                    >
+                    <summary class="client-v2-summary">
 
-                        <div
-                            class="coaching-accordion-heading"
-                        >
+                        <div>
+
                             <span>
-                                Coaching call
+                                03
                             </span>
 
-                            <strong>
-                                Weekly Check-in
-                            </strong>
+                            <div>
+                                <strong>
+                                    Weekly Coaching Call
+                                </strong>
+
+                                <small>
+                                    Review progress and decide what comes next
+                                </small>
+                            </div>
+
                         </div>
 
                     </summary>
 
 
-                    <div
-                        class="coaching-accordion-content"
-                    >
+                    <div class="client-v2-accordion-body">
 
-                        <div class="coaching-subsection">
-
-                            <div
-                                class="coaching-subsection-header"
-                            >
-                                <h3>
-                                    Complete Weekly Check-in
-                                </h3>
-
-                                <p>
-                                    Review the week, record
-                                    progress and schedule
-                                    the next coaching call.
-                                </p>
-                            </div>
+                        <form
+                            method="post"
+                            action="/dashboard/clients/{{ client.id }}/checkin"
+                            class="client-v2-form"
+                        >
 
 
-                            <form
-                                method="post"
-                                action="/dashboard/clients/{{ client.id }}/checkin"
-                                class="client-checkin-form"
-                            >
+                            <!-- CALL -->
 
-                                <div
-                                    class="client-checkin-grid"
-                                >
+                            <section class="client-v2-section">
+
+                                <div class="client-v2-section-heading">
+
+                                    <div>
+                                        <h3>
+                                            Call
+                                        </h3>
+
+                                        <p>
+                                            Record this week's coaching session.
+                                        </p>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="client-v2-form-grid">
 
                                     <div class="crm-field">
 
-                                        <label
-                                            for="call_date"
-                                        >
+                                        <label>
                                             Call date
                                         </label>
 
                                         <input
-                                            id="call_date"
                                             name="call_date"
                                             type="date"
                                             required
@@ -884,14 +988,11 @@
 
                                     <div class="crm-field">
 
-                                        <label
-                                            for="weight_kg"
-                                        >
+                                        <label>
                                             Weight (kg)
                                         </label>
 
                                         <input
-                                            id="weight_kg"
                                             name="weight_kg"
                                             type="number"
                                             step="0.1"
@@ -899,97 +1000,225 @@
 
                                     </div>
 
+                                </div>
+
+                            </section>
+
+
+
+                            <!-- MEASUREMENTS -->
+
+                            <section class="client-v2-section">
+
+                                <div class="client-v2-section-heading">
+
+                                    <div>
+                                        <h3>
+                                            Measurements
+                                        </h3>
+
+                                        <p>
+                                            Capture measurements when available.
+                                        </p>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="client-v2-measurement-toolbar">
+
+                                    <label>
+                                        Unit
+                                    </label>
+
+                                    <select name="measurement_unit">
+
+                                        <option value="inches">
+                                            Inches
+                                        </option>
+
+                                        <option value="cm">
+                                            Centimetres
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div class="client-v2-measurement-grid">
+
+                                    <div class="crm-field">
+                                        <label>Upper arm</label>
+                                        <input
+                                            name="upper_arm"
+                                            type="number"
+                                            step="0.1"
+                                        >
+                                    </div>
+
+                                    <div class="crm-field">
+                                        <label>Chest</label>
+                                        <input
+                                            name="chest"
+                                            type="number"
+                                            step="0.1"
+                                        >
+                                    </div>
+
+                                    <div class="crm-field">
+                                        <label>Waist</label>
+                                        <input
+                                            name="waist"
+                                            type="number"
+                                            step="0.1"
+                                        >
+                                    </div>
+
+                                    <div class="crm-field">
+                                        <label>Lower abdomen</label>
+                                        <input
+                                            name="lower_abdomen"
+                                            type="number"
+                                            step="0.1"
+                                        >
+                                    </div>
+
+                                    <div class="crm-field">
+                                        <label>Hip</label>
+                                        <input
+                                            name="hip"
+                                            type="number"
+                                            step="0.1"
+                                        >
+                                    </div>
+
+                                    <div class="crm-field">
+                                        <label>Thigh</label>
+                                        <input
+                                            name="thigh"
+                                            type="number"
+                                            step="0.1"
+                                        >
+                                    </div>
+
+                                </div>
+
+                            </section>
+
+
+
+                            <!-- COACHING REFLECTION -->
+
+                            <section class="client-v2-section">
+
+                                <div class="client-v2-section-heading">
+
+                                    <div>
+                                        <h3>
+                                            Weekly Review
+                                        </h3>
+
+                                        <p>
+                                            Capture the parts of the conversation
+                                            that matter for next week.
+                                        </p>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="client-v2-reflection-grid">
 
                                     <div class="crm-field">
 
-                                        <label
-                                            for="stress_score"
-                                        >
-                                            Stress
+                                        <label>
+                                            Wins
                                         </label>
 
-                                        <select
-                                            id="stress_score"
-                                            name="stress_score"
-                                        >
-                                            <option value="">
-                                                Choose
-                                            </option>
-
-                                            <option value="1">
-                                                1 · Very low
-                                            </option>
-
-                                            <option value="2">
-                                                2 · Low
-                                            </option>
-
-                                            <option value="3">
-                                                3 · Moderate
-                                            </option>
-
-                                            <option value="4">
-                                                4 · High
-                                            </option>
-
-                                            <option value="5">
-                                                5 · Very high
-                                            </option>
-                                        </select>
+                                        <textarea
+                                            name="wins"
+                                            rows="3"
+                                            placeholder="What went well?"
+                                        ></textarea>
 
                                     </div>
 
 
                                     <div class="crm-field">
 
-                                        <label
-                                            for="mood_score"
-                                        >
-                                            Mood
+                                        <label>
+                                            Struggles
                                         </label>
 
-                                        <select
-                                            id="mood_score"
-                                            name="mood_score"
-                                        >
-                                            <option value="">
-                                                Choose
-                                            </option>
-
-                                            <option value="1">
-                                                1 · Very low
-                                            </option>
-
-                                            <option value="2">
-                                                2 · Low
-                                            </option>
-
-                                            <option value="3">
-                                                3 · Okay
-                                            </option>
-
-                                            <option value="4">
-                                                4 · Good
-                                            </option>
-
-                                            <option value="5">
-                                                5 · Great
-                                            </option>
-                                        </select>
+                                        <textarea
+                                            name="struggles"
+                                            rows="3"
+                                            placeholder="What was difficult?"
+                                        ></textarea>
 
                                     </div>
 
 
                                     <div class="crm-field">
 
-                                        <label
-                                            for="next_call_date"
-                                        >
-                                            Next call
+                                        <label>
+                                            Improvements needed
+                                        </label>
+
+                                        <textarea
+                                            name="improvements_needed"
+                                            rows="3"
+                                            placeholder="What should she work on next?"
+                                        ></textarea>
+
+                                    </div>
+
+
+                                    <div class="crm-field">
+
+                                        <label>
+                                            Help / support from coach
+                                        </label>
+
+                                        <textarea
+                                            name="coach_support"
+                                            rows="3"
+                                            placeholder="What support does she need from Sushma?"
+                                        ></textarea>
+
+                                    </div>
+
+                                </div>
+
+                            </section>
+
+
+
+                            <!-- NEXT CALL -->
+
+                            <section class="client-v2-section">
+
+                                <div class="client-v2-section-heading">
+
+                                    <div>
+                                        <h3>
+                                            Next Coaching Call
+                                        </h3>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="client-v2-form-grid">
+
+                                    <div class="crm-field">
+
+                                        <label>
+                                            Next call date
                                         </label>
 
                                         <input
-                                            id="next_call_date"
                                             name="next_call_date"
                                             type="date"
                                         >
@@ -999,14 +1228,11 @@
 
                                     <div class="crm-field">
 
-                                        <label
-                                            for="next_call_time"
-                                        >
+                                        <label>
                                             Call time
                                         </label>
 
                                         <input
-                                            id="next_call_time"
                                             name="next_call_time"
                                             type="time"
                                         >
@@ -1015,17 +1241,17 @@
 
                                 </div>
 
+                            </section>
 
-                                <button
-                                    type="submit"
-                                    class="btn btn-primary"
-                                >
-                                    Save Weekly Check-in
-                                </button>
 
-                            </form>
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                Save Weekly Check-in
+                            </button>
 
-                        </div>
+                        </form>
 
                     </div>
 
@@ -1033,154 +1259,167 @@
 
 
 
-                <!-- ==========================================
-                     3. COACHING JOURNEY
-                     ========================================== -->
+                <!-- ==================================================
+                     4 — COACHING JOURNEY
+                     ================================================== -->
 
-                <details
-                    class="coaching-accordion-item"
-                >
+                <details class="client-v2-accordion">
 
-                    <summary
-                        class="coaching-accordion-summary"
-                    >
+                    <summary class="client-v2-summary">
 
-                        <div
-                            class="coaching-accordion-heading"
-                        >
+                        <div>
+
                             <span>
-                                History
+                                04
                             </span>
 
-                            <strong>
-                                Coaching Journey
-                            </strong>
+                            <div>
+                                <strong>
+                                    Coaching Journey
+                                </strong>
+
+                                <small>
+                                    Previous coaching weeks and progress
+                                </small>
+                            </div>
+
                         </div>
 
                     </summary>
 
 
-                    <div
-                        class="coaching-accordion-content"
-                    >
+                    <div class="client-v2-accordion-body">
 
-                        <div class="coaching-subsection">
+                        {% if checkins %}
 
+                        <div class="coaching-timeline">
 
-                            {% if checkins %}
+                            {% for checkin in checkins %}
 
-                            <div class="coaching-timeline">
+                            <article class="coaching-week-card">
 
-                                {% for checkin in checkins %}
+                                <div class="coaching-week-header">
 
-                                <article
-                                    class="coaching-week-card"
-                                >
+                                    <div>
 
-                                    <div
-                                        class="coaching-week-header"
-                                    >
+                                        <span>
+                                            Weekly check-in
+                                        </span>
 
-                                        <div>
-
-                                            <span>
-                                                Weekly check-in
-                                            </span>
-
-                                            <h3>
-                                                {{ checkin.call_date }}
-                                            </h3>
-
-                                        </div>
-
-
-                                        {% if checkin.weight_kg %}
-
-                                        <strong>
-                                            {{ checkin.weight_kg }}
-                                            kg
-                                        </strong>
-
-                                        {% endif %}
+                                        <h3>
+                                            {{ checkin.call_date }}
+                                        </h3>
 
                                     </div>
 
 
-                                    <div
-                                        class="coaching-week-metrics"
-                                    >
+                                    {% if checkin.weight_kg %}
 
-                                        <div>
-                                            <span>
-                                                Stress
-                                            </span>
+                                    <strong>
+                                        {{ checkin.weight_kg }} kg
+                                    </strong>
 
-                                            <strong>
-                                                {{
-                                                    checkin.stress_score
-                                                    or "—"
-                                                }}/5
-                                            </strong>
-                                        </div>
+                                    {% endif %}
+
+                                </div>
 
 
-                                        <div>
-                                            <span>
-                                                Mood
-                                            </span>
+                                {% if checkin.wins %}
 
-                                            <strong>
-                                                {{
-                                                    checkin.mood_score
-                                                    or "—"
-                                                }}/5
-                                            </strong>
-                                        </div>
+                                <div class="client-v2-history-block">
+
+                                    <span>
+                                        Wins
+                                    </span>
+
+                                    <p>
+                                        {{ checkin.wins }}
+                                    </p>
+
+                                </div>
+
+                                {% endif %}
 
 
-                                        <div>
-                                            <span>
-                                                Next call
-                                            </span>
+                                {% if checkin.struggles %}
 
-                                            <strong>
-                                                {{
-                                                    checkin.next_call_date
-                                                    or "Not scheduled"
-                                                }}
-                                            </strong>
-                                        </div>
+                                <div class="client-v2-history-block">
 
-                                    </div>
+                                    <span>
+                                        Struggles
+                                    </span>
 
-                                </article>
+                                    <p>
+                                        {{ checkin.struggles }}
+                                    </p>
 
-                                {% endfor %}
+                                </div>
 
-                            </div>
+                                {% endif %}
 
-                            {% else %}
 
-                            <div
-                                class="empty-coaching-state"
-                            >
+                                {% if checkin.improvements_needed %}
 
-                                <h3>
-                                    No coaching history yet
-                                </h3>
+                                <div class="client-v2-history-block">
 
-                                <p>
-                                    Weekly check-ins will
-                                    build the client's
-                                    coaching journey here.
-                                </p>
+                                    <span>
+                                        Improvements
+                                    </span>
 
-                            </div>
+                                    <p>
+                                        {{ checkin.improvements_needed }}
+                                    </p>
 
-                            {% endif %}
+                                </div>
 
+                                {% endif %}
+
+
+                                {% if checkin.coach_support %}
+
+                                <div class="client-v2-history-block">
+
+                                    <span>
+                                        Coach support
+                                    </span>
+
+                                    <p>
+                                        {{ checkin.coach_support }}
+                                    </p>
+
+                                </div>
+
+                                {% endif %}
+
+
+                                <div class="client-v2-history-next">
+
+                                    <span>
+                                        Next call
+                                    </span>
+
+                                    <strong>
+                                        {{
+                                            checkin.next_call_date
+                                            or "Not scheduled"
+                                        }}
+                                    </strong>
+
+                                </div>
+
+                            </article>
+
+                            {% endfor %}
 
                         </div>
+
+                        {% else %}
+
+                        <div class="client-v2-empty">
+                            No weekly coaching history yet.
+                        </div>
+
+                        {% endif %}
 
                     </div>
 
@@ -1189,9 +1428,9 @@
 
             </div>
 
-        </div>
+        </main>
 
-    </section>
+    </div>
 
 </div>
 
