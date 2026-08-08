@@ -549,7 +549,7 @@ def add_client_action(
     request: Request,
     client_id: int,
     action_name: str = Form(...),
-    target_count: int | None = Form(None),
+    target_count: str = Form(""),
     target_unit: str = Form(""),
 ):
     if not coach_is_logged_in(request):
@@ -560,11 +560,16 @@ def add_client_action(
 
     start_date = date.today()
     end_date = start_date + timedelta(days=6)
+    parsed_target_count = (
+    int(target_count)
+    if target_count.strip()
+    else None
+    )    
 
     ClientService.add_action(
         client_id=client_id,
         action_name=action_name.strip(),
-        target_count=target_count,
+        target_count=parsed_target_count,
         target_unit=target_unit.strip() or None,
         start_date=start_date,
         end_date=end_date,
