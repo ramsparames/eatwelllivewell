@@ -358,7 +358,7 @@ def create_database() -> None:
                         NOT NULL DEFAULT NOW()
                 )
                 """
-            }
+            )
                 
             cursor.execute(
                 """
