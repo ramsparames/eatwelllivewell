@@ -1,3 +1,24 @@
+from fastapi import (
+    APIRouter,
+    Form,
+    HTTPException,
+    Request,
+)
+
+from fastapi.responses import (
+    HTMLResponse,
+    RedirectResponse,
+)
+
+from fastapi.templating import Jinja2Templates
+
+from app.auth import coach_is_logged_in
+from app.services.client_service import ClientService
+
+router = APIRouter()
+
+templates: Jinja2Templates | None = None
+
 @router.get(
     "/dashboard/clients",
     response_class=HTMLResponse,
