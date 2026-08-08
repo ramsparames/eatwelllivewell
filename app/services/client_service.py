@@ -171,29 +171,29 @@ def add_checkin(
         }
         
     @staticmethod
-    def dashboard_clients():
-        clients = get_client_summaries()
+def dashboard_clients():
+    clients = get_client_summaries()
+
+    today = date.today()
+
+    for client in clients:
+        start_date = client.get("start_date")
+
+        if start_date:
+            days = (today - start_date).days
+
+            client["current_week"] = (
+                (days // 7) + 1
+                if days >= 0
+                else None
+            )
+        else:
+            client["current_week"] = None
+
+        client["weight_change"] = None
+
+    return clients
     
-        today = date.today()
-    
-        for client in clients:
-            start_date = client.get("start_date")
-    
-            if start_date:
-                days = (today - start_date).days
-    
-                client["current_week"] = (
-                    (days // 7) + 1
-                    if days >= 0
-                    else None
-                )
-            else:
-                client["current_week"] = None
-    
-        
-            client["weight_change"] = None
-    
-        return clients
     @staticmethod
     def add_action(
             client_id,
@@ -271,6 +271,7 @@ def add_checkin(
             start_date=start_date,
             end_date=end_date,
         )
+
 
 @staticmethod
 def save_intake(
