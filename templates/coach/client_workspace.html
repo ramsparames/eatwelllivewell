@@ -6,6 +6,221 @@
 
 {% block content %}
 
+{% if not intake %}
+
+<div class="client-setup-screen">
+
+    <div class="client-setup-screen-header">
+
+        <div>
+
+            <a
+                href="/dashboard/clients"
+                class="back-link"
+            >
+                ← Clients
+            </a>
+
+            <p class="page-kicker">
+                Client setup
+            </p>
+
+            <h1>
+                {{ client.name }}
+            </h1>
+
+            <p>
+                Complete the intake before starting weekly coaching.
+            </p>
+
+        </div>
+
+
+        <div class="client-setup-contact">
+
+            <div>
+                <span>Program</span>
+                <strong>
+                    {{ client.program or "Coaching" }}
+                </strong>
+            </div>
+
+            <div>
+                <span>Email</span>
+                <strong>
+                    {{ client.email or "—" }}
+                </strong>
+            </div>
+
+            <div>
+                <span>Phone</span>
+                <strong>
+                    {{ client.phone or "—" }}
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <section class="workspace-panel client-intake-panel">
+
+        <div class="panel-heading">
+
+            <div>
+                <p class="page-kicker">
+                    Week 0 · Baseline
+                </p>
+
+                <h2>
+                    Client Intake
+                </h2>
+
+                <p class="client-intake-subtitle">
+                    Capture her starting point before the first weekly call:
+                    where she is today, her goals and your initial coaching focus.
+                </p>
+            </div>
+
+        </div>
+
+
+        <form
+            method="post"
+            action="/dashboard/clients/{{ client.id }}/intake"
+            class="coach-form client-setup-intake-form"
+        >
+
+            <div class="form-grid form-grid-two">
+
+                <div class="field">
+
+                    <label>
+                        Intake date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="intake_date"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Present weight (kg)
+                    </label>
+
+                    <input
+                        type="number"
+                        step="0.1"
+                        name="present_weight_kg"
+                        placeholder="Baseline weight"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Goal weight (kg)
+                    </label>
+
+                    <input
+                        type="number"
+                        step="0.1"
+                        name="goal_weight_kg"
+                    >
+
+                </div>
+
+
+                <div class="field field-span-two">
+
+                    <label>
+                        Current situation
+                    </label>
+
+                    <textarea
+                        name="current_situation"
+                        rows="4"
+                        placeholder="What is happening currently? Health, energy, routine, symptoms, challenges..."
+                    ></textarea>
+
+                </div>
+
+
+                <div class="field field-span-two">
+
+                    <label>
+                        Primary goal
+                    </label>
+
+                    <textarea
+                        name="primary_goal"
+                        rows="3"
+                        placeholder="What is the main outcome she wants from coaching?"
+                    ></textarea>
+
+                </div>
+
+
+                <div class="field field-span-two">
+
+                    <label>
+                        Secondary goals
+                    </label>
+
+                    <textarea
+                        name="secondary_goals"
+                        rows="3"
+                        placeholder="Other outcomes that matter to her."
+                    ></textarea>
+
+                </div>
+
+
+                <div class="field field-span-two">
+
+                    <label>
+                        Coach focus
+                    </label>
+
+                    <textarea
+                        name="coach_focus"
+                        rows="3"
+                        placeholder="What should you keep in mind as her coach?"
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions form-actions-left">
+
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    Save Week 0 Intake
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% else %}
+
 <div class="client-workspace">
 
     <div class="client-workspace-header">
@@ -32,7 +247,7 @@
                     <p>
                         {{ client.program or "Coaching" }}
 
-                        {% if current_week %}
+                        {% if intake %}
                             · Week {{ current_week }}
                         {% endif %}
 
@@ -303,7 +518,7 @@
 
                             <span>
                                 {% if action.target_count %}
-                                    {{ action.target_count }}
+                                    {{ action["target_count"] }}
                                     {{ action.target_unit or "" }}
                                 {% else %}
                                     Weekly focus
@@ -582,6 +797,17 @@
                     <div>
                         <dt>Phone</dt>
                         <dd>{{ client.phone or "—" }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Baseline weight</dt>
+                        <dd>
+                            {% if measurements and measurements[-1].weight_kg %}
+                                {{ measurements[-1].weight_kg }} kg
+                            {% else %}
+                                —
+                            {% endif %}
+                        </dd>
                     </div>
 
                     <div>
@@ -946,6 +1172,140 @@
                         <span>04</span>
 
                         <div>
+                            <h3>This week's action plan</h3>
+
+                            <p>
+                                Choose a few focused actions. They will be
+                                created automatically when you save the
+                                weekly check-in.
+                            </p>
+                        </div>
+                    </div>
+
+
+                    <div class="action-picker">
+
+                        <div class="action-picker-row">
+
+                            <div class="field action-picker-field">
+
+                                <label>
+                                    Choose an action
+                                </label>
+
+                                <select data-action-picker-select>
+
+                                    <option value="">
+                                        Select from action library
+                                    </option>
+
+                                    {% for category in action_library %}
+
+                                    <optgroup
+                                        label="{{ category["category"] }}"
+                                    >
+
+                                        {% for action in category["items"] %}
+
+                                        <option
+                                            value="{{ action["key"] }}"
+                                            data-name="{{ action["name"] }}"
+                                            data-target="{{ action["target_count"] }} {{ action["target_unit"] }}"
+                                        >
+                                            {{ action["name"] }}
+                                        </option>
+
+                                        {% endfor %}
+
+                                    </optgroup>
+
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="button button-secondary action-picker-add"
+                                data-action-picker-add
+                            >
+                                Add
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            class="selected-action-list"
+                            data-selected-actions
+                        >
+
+                            <div
+                                class="selected-actions-empty"
+                                data-selected-actions-empty
+                            >
+                                No actions selected yet.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <details class="custom-action-disclosure">
+
+                        <summary>
+                            + Add a custom action
+                        </summary>
+
+                        <div class="form-grid form-grid-action custom-action-fields">
+
+                            <div class="field">
+                                <label>Custom action</label>
+
+                                <input
+                                    name="custom_action_name"
+                                    placeholder="e.g. Pack lunch before office"
+                                >
+                            </div>
+
+                            <div class="field">
+                                <label>Target</label>
+
+                                <input
+                                    name="custom_target_count"
+                                    type="number"
+                                    min="1"
+                                    placeholder="5"
+                                >
+                            </div>
+
+                            <div class="field">
+                                <label>Unit</label>
+
+                                <select name="custom_target_unit">
+                                    <option value="">—</option>
+                                    <option value="days">days</option>
+                                    <option value="sessions">sessions</option>
+                                    <option value="times">times</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                    </details>
+
+                </section>
+
+
+                <section class="form-section">
+
+                    <div class="form-section-heading">
+                        <span>05</span>
+
+                        <div>
                             <h3>Next call</h3>
                             <p>Close the loop before ending the session.</p>
                         </div>
@@ -980,10 +1340,11 @@
                 <div class="sticky-form-footer">
 
                     <div>
-                        <strong>Ready to save this week's coaching call?</strong>
+                        <strong>Ready to close this week's coaching call?</strong>
 
                         <span>
-                            The reflection and measurements will appear in Journey.
+                            Review, measurements, selected actions and the next call
+                            will be saved together.
                         </span>
                     </div>
 
@@ -1402,13 +1763,399 @@
 
 </div>
 
+{% endif %}
+
 {% endblock %}
 
+
+
+<style>
+.action-picker {
+    display: grid;
+    gap: 12px;
+}
+
+.action-picker-row {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto;
+
+    gap: 8px;
+    align-items: end;
+}
+
+.action-picker-field {
+    margin: 0;
+}
+
+.action-picker-add {
+    min-width: 72px;
+    margin-bottom: 0;
+}
+
+.selected-action-list {
+    display: grid;
+    gap: 6px;
+}
+
+.selected-actions-empty {
+    padding: 12px 14px;
+
+    border: 1px dashed var(--coach-border);
+    border-radius: 9px;
+
+    color: var(--coach-muted);
+    background: #fafafa;
+
+    font-size: 10px;
+}
+
+.selected-action-item {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto;
+
+    gap: 12px;
+    align-items: center;
+
+    padding: 10px 12px;
+
+    border: 1px solid var(--coach-border);
+    border-radius: 9px;
+
+    background: #fff;
+}
+
+.selected-action-copy {
+    display: grid;
+    gap: 2px;
+}
+
+.selected-action-copy strong {
+    color: var(--coach-text);
+
+    font-size: 10px;
+    font-weight: 680;
+}
+
+.selected-action-copy small {
+    color: var(--coach-muted);
+    font-size: 9px;
+}
+
+.selected-action-remove {
+    width: 28px;
+    height: 28px;
+
+    display: grid;
+    place-items: center;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 7px;
+
+    color: var(--coach-muted);
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 16px;
+}
+
+.selected-action-remove:hover {
+    color: #a84848;
+    background: #fbeeee;
+}
+
+@media (max-width: 620px) {
+    .action-picker-row {
+        grid-template-columns: 1fr;
+    }
+
+    .action-picker-add {
+        width: 100%;
+    }
+}
+
+.custom-action-disclosure {
+    margin-top: 16px;
+
+    border-top: 1px solid var(--coach-border);
+}
+
+.custom-action-disclosure > summary {
+    width: fit-content;
+
+    padding: 14px 0 0;
+
+    color: var(--coach-purple);
+
+    cursor: pointer;
+
+    font-size: 11px;
+    font-weight: 750;
+
+    list-style: none;
+}
+
+.custom-action-disclosure > summary::-webkit-details-marker {
+    display: none;
+}
+
+.custom-action-fields {
+    margin-top: 14px;
+}
+
+@media (max-width: 760px) {
+    .action-library-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+
+
+<style>
+.client-setup-screen {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.client-setup-screen-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 22px;
+}
+
+.client-setup-screen-header h1 {
+    margin: 4px 0 0;
+    font-size: 34px;
+    font-weight: 720;
+    letter-spacing: -0.025em;
+}
+
+.client-setup-screen-header > div:first-child > p:last-child {
+    margin: 7px 0 0;
+    color: var(--coach-muted);
+    font-size: 12px;
+}
+
+.client-setup-contact {
+    display: flex;
+    gap: 28px;
+}
+
+.client-setup-contact > div {
+    min-width: 110px;
+    display: grid;
+    gap: 3px;
+}
+
+.client-setup-contact span {
+    color: var(--coach-muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.client-setup-contact strong {
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.client-intake-panel {
+    max-width: 900px;
+}
+
+.client-intake-subtitle {
+    max-width: 650px;
+    margin: 5px 0 0;
+    color: var(--coach-muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.client-setup-intake-form textarea {
+    min-height: 86px;
+}
+
+@media (max-width: 800px) {
+    .client-setup-screen-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .client-setup-contact {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+</style>
 
 {% block scripts %}
 
 <script>
 (() => {
+
+    const actionPickerSelect =
+        document.querySelector(
+            "[data-action-picker-select]"
+        );
+
+    const actionPickerAdd =
+        document.querySelector(
+            "[data-action-picker-add]"
+        );
+
+    const selectedActions =
+        document.querySelector(
+            "[data-selected-actions]"
+        );
+
+    const selectedActionsEmpty =
+        document.querySelector(
+            "[data-selected-actions-empty]"
+        );
+
+    const selectedActionKeys =
+        new Set();
+
+
+    const updateSelectedActionsEmpty = () => {
+        if (!selectedActionsEmpty) {
+            return;
+        }
+
+        selectedActionsEmpty.hidden =
+            selectedActionKeys.size > 0;
+    };
+
+
+    const addSelectedAction = () => {
+        if (
+            !actionPickerSelect
+            || !selectedActions
+        ) {
+            return;
+        }
+
+        const option =
+            actionPickerSelect.options[
+                actionPickerSelect.selectedIndex
+            ];
+
+        const key = option?.value;
+
+        if (
+            !key
+            || selectedActionKeys.has(key)
+        ) {
+            return;
+        }
+
+        selectedActionKeys.add(key);
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "selected-action-item";
+
+        row.dataset.selectedActionKey =
+            key;
+
+        const copy =
+            document.createElement("span");
+
+        copy.className =
+            "selected-action-copy";
+
+        const name =
+            document.createElement("strong");
+
+        name.textContent =
+            option.dataset.name
+            || option.textContent.trim();
+
+        const target =
+            document.createElement("small");
+
+        target.textContent =
+            "Default: "
+            + (
+                option.dataset.target
+                || ""
+            );
+
+        copy.appendChild(name);
+        copy.appendChild(target);
+
+        const hidden =
+            document.createElement("input");
+
+        hidden.type = "hidden";
+        hidden.name = "action_keys";
+        hidden.value = key;
+
+        const remove =
+            document.createElement("button");
+
+        remove.type = "button";
+        remove.className =
+            "selected-action-remove";
+        remove.setAttribute(
+            "aria-label",
+            "Remove action"
+        );
+        remove.textContent = "×";
+
+        remove.addEventListener(
+            "click",
+            () => {
+                selectedActionKeys.delete(
+                    key
+                );
+
+                row.remove();
+
+                updateSelectedActionsEmpty();
+            }
+        );
+
+        row.appendChild(copy);
+        row.appendChild(hidden);
+        row.appendChild(remove);
+
+        selectedActions.appendChild(row);
+
+        actionPickerSelect.value = "";
+
+        updateSelectedActionsEmpty();
+    };
+
+
+    actionPickerAdd?.addEventListener(
+        "click",
+        addSelectedAction
+    );
+
+    actionPickerSelect?.addEventListener(
+        "change",
+        () => {
+            if (actionPickerSelect.value) {
+                addSelectedAction();
+            }
+        }
+    );
+
+    updateSelectedActionsEmpty();
+
     const storageKey =
         "nh-client-tab-{{ client.id }}";
 

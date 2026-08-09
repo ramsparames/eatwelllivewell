@@ -7,52 +7,130 @@ Clients | NourisHer Coach
 
 {% block content %}
 
-{{ ui.page_header(
-    "Coaching",
-    "Clients",
-    "See every active coaching relationship in one place.",
-    "+ Add client",
-    "data-open-add-client"
-) }}
+<section class="page-heading page-heading-row">
+
+    <div>
+        <p class="page-kicker">
+            Coaching
+        </p>
+
+        <h1>Clients</h1>
+
+        <p class="page-subtitle">
+            Scan every coaching relationship, spot who needs attention
+            and open the right client quickly.
+        </p>
+    </div>
 
 
-<section class="summary-strip">
-    {{ ui.stat_item("Active clients", active_clients|length) }}
-    {{ ui.stat_item("Calls today", calls_today|length) }}
-    {{ ui.stat_item("Calls this week", calls_this_week|length) }}
+    <button
+        type="button"
+        class="button button-primary"
+        data-open-add-client
+    >
+        + Add client
+    </button>
+
 </section>
 
 
-<section class="workspace-section">
+<section class="summary-strip clients-v2-summary">
 
-    <div class="table-toolbar">
+    {{ ui.stat_item(
+        "Active clients",
+        active_clients|length
+    ) }}
 
-        <label class="table-search">
-            <span>Search</span>
+    {{ ui.stat_item(
+        "Needs attention",
+        needs_attention|length
+    ) }}
+
+    {{ ui.stat_item(
+        "Calls today",
+        calls_today|length
+    ) }}
+
+    {{ ui.stat_item(
+        "Calls this week",
+        calls_this_week|length
+    ) }}
+
+</section>
+
+
+<section class="clients-v2-workspace">
+
+    <div class="clients-v2-toolbar">
+
+        <label class="table-search clients-v2-search">
+
+            <span>Search clients</span>
 
             <input
                 type="search"
-                placeholder="Name, email, phone or program"
+                placeholder="Name, program, email or phone"
                 data-client-search
             >
+
         </label>
 
-        <div class="table-filter-group">
-            <button
-                type="button"
-                class="filter-chip is-active"
-                data-client-filter="all"
-            >
-                All
-            </button>
 
-            <button
-                type="button"
-                class="filter-chip"
-                data-client-filter="active"
-            >
-                Active
-            </button>
+        <div class="clients-v2-toolbar-right">
+
+            <div class="table-filter-group">
+
+                <button
+                    type="button"
+                    class="filter-chip is-active"
+                    data-client-filter="all"
+                >
+                    All
+                </button>
+
+                <button
+                    type="button"
+                    class="filter-chip"
+                    data-client-filter="active"
+                >
+                    Active
+                </button>
+
+                <button
+                    type="button"
+                    class="filter-chip"
+                    data-client-filter="attention"
+                >
+                    Needs attention
+                </button>
+
+            </div>
+
+
+            <label class="clients-v2-sort-mobile">
+
+                <span>Sort</span>
+
+                <select data-mobile-sort>
+                    <option value="name-asc">
+                        Name A–Z
+                    </option>
+
+                    <option value="next-asc">
+                        Next call
+                    </option>
+
+                    <option value="week-desc">
+                        Highest week
+                    </option>
+
+                    <option value="last-desc">
+                        Latest check-in
+                    </option>
+                </select>
+
+            </label>
+
         </div>
 
     </div>
@@ -60,113 +138,283 @@ Clients | NourisHer Coach
 
     {% if clients %}
 
-    <div class="data-table-wrap">
+    <div class="clients-v2-table-shell">
 
-        <table class="data-table client-list-table">
+        <table class="clients-v2-table">
 
             <thead>
+
                 <tr>
-                    <th>Client</th>
-                    <th>Program</th>
-                    <th>Week</th>
-                    <th>Current weight</th>
-                    <th>Next call</th>
-                    <th>Contact</th>
-                    <th>Status</th>
-                    <th aria-label="Open"></th>
+
+                    <th class="health-column">
+                        Health
+                    </th>
+
+                    <th>
+                        <button
+                            type="button"
+                            class="sort-header is-active"
+                            data-sort-key="name"
+                            data-sort-type="text"
+                        >
+                            Client
+                            <span data-sort-icon>↑</span>
+                        </button>
+                    </th>
+
+                    <th>
+                        <button
+                            type="button"
+                            class="sort-header"
+                            data-sort-key="week"
+                            data-sort-type="number"
+                        >
+                            Week
+                            <span data-sort-icon>↕</span>
+                        </button>
+                    </th>
+
+                    <th>
+                        Weight
+                    </th>
+
+                    <th>
+                        <button
+                            type="button"
+                            class="sort-header"
+                            data-sort-key="last"
+                            data-sort-type="date"
+                        >
+                            Last check-in
+                            <span data-sort-icon>↕</span>
+                        </button>
+                    </th>
+
+                    <th>
+                        <button
+                            type="button"
+                            class="sort-header"
+                            data-sort-key="next"
+                            data-sort-type="date"
+                        >
+                            Next call
+                            <span data-sort-icon>↕</span>
+                        </button>
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th class="open-column">
+                        Open
+                    </th>
+
                 </tr>
+
             </thead>
 
-            <tbody>
+
+            <tbody data-client-table-body>
 
                 {% for client in clients %}
 
                 <tr
-                    class="client-row"
                     data-client-row
-                    data-client-status="{{ client.status or '' }}"
-                    data-client-search-text="{{ (
+                    data-status="{{ client.status or '' }}"
+                    data-health="{{ client.health_key or '' }}"
+                    data-name="{{ client.sort_name }}"
+                    data-week="{{ client.sort_week }}"
+                    data-next="{{ client.sort_next_call }}"
+                    data-last="{{ client.sort_last_checkin }}"
+                    data-search-text="{{ (
                         (client.name or '') ~ ' ' ~
                         (client.email or '') ~ ' ' ~
                         (client.phone or '') ~ ' ' ~
-                        (client.program or '')
+                        (client.program or '') ~ ' ' ~
+                        (client.health_label or '')
                     )|lower }}"
                 >
 
-                    <td>
-                        {{ ui.person_cell(
-                            client.name,
-                            client.email or "No email",
-                            "/dashboard/clients/" ~ client.id
-                        ) }}
-                    </td>
+                    <td class="health-column">
 
-                    <td>
-                        {{ client.program or "—" }}
-                    </td>
+                        <span
+                            class="client-health
+                            health-{{ client.health_key }}"
+                            title="{{ client.health_label }}"
+                        >
 
-                    <td>
-                        {% if client.current_week %}
-                            Week {{ client.current_week }}
-                        {% else %}
-                            —
-                        {% endif %}
-                    </td>
+                            <span
+                                class="client-health-dot"
+                                aria-hidden="true"
+                            ></span>
 
-                    <td>
-                        {% if client.current_weight_kg %}
-                            <strong>
-                                {{ client.current_weight_kg }} kg
-                            </strong>
-                        {% else %}
-                            —
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if client.next_call_date %}
-
-                            <strong>
-                                {{ client.next_call_date }}
-                            </strong>
-
-                            {% if client.next_call_time %}
-                                <small class="table-secondary">
-                                    {{ client.next_call_time }}
-                                </small>
-                            {% endif %}
-
-                        {% else %}
-                            <span class="table-muted">
-                                Not scheduled
+                            <span>
+                                {{ client.health_label }}
                             </span>
-                        {% endif %}
-                    </td>
 
-                    <td>
-                        <span class="table-contact">
-                            {{ client.phone or "—" }}
                         </span>
+
                     </td>
 
-                    <td>
-                        {% if client.status == "active" %}
-                            {{ ui.status_pill("Active", "active") }}
-                        {% else %}
-                            {{ ui.status_pill(
-                                (client.status or "active")|title,
-                                "neutral"
-                            ) }}
-                        {% endif %}
-                    </td>
 
-                    <td class="table-open">
+                    <td class="client-primary-column">
+
                         <a
                             href="/dashboard/clients/{{ client.id }}"
+                            class="client-list-identity"
+                        >
+
+                            <span class="table-avatar">
+                                {{ client.name[0]|upper }}
+                            </span>
+
+                            <span class="client-list-name">
+
+                                <strong>
+                                    {{ client.name }}
+                                </strong>
+
+                                <small>
+                                    {{ client.program or "Coaching" }}
+
+                                    {% if client.email %}
+                                        · {{ client.email }}
+                                    {% endif %}
+                                </small>
+
+                            </span>
+
+                        </a>
+
+                    </td>
+
+
+                    <td>
+
+                        {% if client.current_week %}
+
+                            <span class="week-value">
+                                {{ client.current_week }}
+                            </span>
+
+                        {% else %}
+
+                            <span class="table-muted">
+                                —
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if client.current_weight_kg %}
+
+                            <strong class="weight-value">
+                                {{ client.current_weight_kg }}
+                                <span>kg</span>
+                            </strong>
+
+                        {% else %}
+
+                            <span class="table-muted">
+                                —
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if client.last_checkin_date %}
+
+                            <strong class="date-value">
+                                {{ client.last_checkin_date.strftime(
+                                    "%d %b %Y"
+                                ) }}
+                            </strong>
+
+                        {% else %}
+
+                            <span class="table-muted">
+                                Not yet
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if client.next_call_date %}
+
+                            <div class="next-call-cell">
+
+                                <strong>
+                                    {{ client.next_call_date.strftime(
+                                        "%d %b %Y"
+                                    ) }}
+                                </strong>
+
+                                {% if client.next_call_time %}
+
+                                <small>
+                                    {{ client.next_call_time }}
+                                </small>
+
+                                {% endif %}
+
+                            </div>
+
+                        {% else %}
+
+                            <span class="next-call-missing">
+                                Schedule
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if client.status == "active" %}
+
+                            {{ ui.status_pill(
+                                "Active",
+                                "active"
+                            ) }}
+
+                        {% else %}
+
+                            {{ ui.status_pill(
+                                (client.status or "inactive")|title,
+                                "neutral"
+                            ) }}
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td class="open-column">
+
+                        <a
+                            href="/dashboard/clients/{{ client.id }}"
+                            class="client-open-button"
                             aria-label="Open {{ client.name }}"
                         >
-                            →
+                            Open
+                            <span>→</span>
                         </a>
+
                     </td>
 
                 </tr>
@@ -177,24 +425,38 @@ Clients | NourisHer Coach
 
         </table>
 
-    </div>
 
-    <div
-        class="table-empty"
-        data-client-empty
-        hidden
-    >
-        No clients match your search.
+        <div
+            class="clients-v2-empty-filter"
+            data-client-empty
+            hidden
+        >
+
+            <strong>
+                No clients match this view.
+            </strong>
+
+            <span>
+                Try a different search or filter.
+            </span>
+
+        </div>
+
     </div>
 
     {% else %}
 
-    {{ ui.empty_state(
-        "No clients yet",
-        "Add the first active coaching client to start building her coaching journey."
-    ) }}
+    <div class="empty-state">
 
-    <div class="empty-state-action">
+        <h2>
+            No clients yet
+        </h2>
+
+        <p>
+            Add the first coaching client to start
+            building her coaching journey.
+        </p>
+
         <button
             type="button"
             class="button button-primary"
@@ -202,6 +464,7 @@ Clients | NourisHer Coach
         >
             + Add client
         </button>
+
     </div>
 
     {% endif %}
@@ -230,6 +493,7 @@ Clients | NourisHer Coach
         <div class="form-grid form-grid-two">
 
             <div class="field field-span-two">
+
                 <label for="client_name">
                     Name
                 </label>
@@ -239,10 +503,12 @@ Clients | NourisHer Coach
                     name="name"
                     required
                 >
+
             </div>
 
 
             <div class="field">
+
                 <label for="client_email">
                     Email
                 </label>
@@ -252,10 +518,12 @@ Clients | NourisHer Coach
                     name="email"
                     type="email"
                 >
+
             </div>
 
 
             <div class="field">
+
                 <label for="client_phone">
                     Phone
                 </label>
@@ -264,10 +532,12 @@ Clients | NourisHer Coach
                     id="client_phone"
                     name="phone"
                 >
+
             </div>
 
 
             <div class="field field-span-two">
+
                 <label for="client_program">
                     Program
                 </label>
@@ -276,6 +546,7 @@ Clients | NourisHer Coach
                     id="client_program"
                     name="program"
                 >
+
                     <option value="Transformation">
                         Transformation
                     </option>
@@ -283,13 +554,16 @@ Clients | NourisHer Coach
                     <option value="Foundations">
                         Foundations
                     </option>
+
                 </select>
+
             </div>
 
         </div>
 
 
         <div class="form-actions">
+
             <button
                 type="button"
                 class="button button-secondary"
@@ -304,11 +578,448 @@ Clients | NourisHer Coach
             >
                 Add client
             </button>
+
         </div>
 
     </form>
 
 </dialog>
+
+
+<style>
+.clients-v2-summary {
+    grid-template-columns:
+        repeat(4, minmax(0, 170px));
+}
+
+.clients-v2-workspace {
+    min-width: 0;
+}
+
+.clients-v2-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 14px;
+}
+
+.clients-v2-search {
+    width: min(440px, 100%);
+}
+
+.clients-v2-toolbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 14px;
+}
+
+.clients-v2-sort-mobile {
+    display: none;
+}
+
+.clients-v2-table-shell {
+    position: relative;
+
+    width: 100%;
+
+    overflow: auto;
+
+    max-height: calc(100vh - 270px);
+
+    border: 1px solid var(--coach-border);
+    border-radius: 12px;
+
+    background: #fff;
+}
+
+.clients-v2-table {
+    width: 100%;
+    min-width: 1060px;
+
+    border-collapse: separate;
+    border-spacing: 0;
+
+    text-align: left;
+}
+
+.clients-v2-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.clients-v2-table th {
+    height: 42px;
+
+    padding: 0 14px;
+
+    border-bottom: 1px solid var(--coach-border);
+
+    color: var(--coach-muted);
+    background: #fafaf8;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+.clients-v2-table td {
+    min-height: 58px;
+
+    padding: 11px 14px;
+
+    border-bottom: 1px solid #ededeb;
+
+    color: #3c3e42;
+    background: #fff;
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+.clients-v2-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.clients-v2-table tbody tr:hover td {
+    background: #fbfafc;
+}
+
+.clients-v2-table tbody tr:hover
+.client-list-name strong {
+    color: var(--coach-purple);
+}
+
+.health-column {
+    width: 135px;
+}
+
+.open-column {
+    width: 82px;
+
+    text-align: right;
+}
+
+.client-health {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.client-health-dot {
+    width: 8px;
+    height: 8px;
+
+    flex: 0 0 8px;
+
+    border-radius: 50%;
+}
+
+.health-on_track {
+    color: #34704a;
+}
+
+.health-on_track
+.client-health-dot {
+    background: #49a36b;
+}
+
+.health-watch {
+    color: #946515;
+}
+
+.health-watch
+.client-health-dot {
+    background: #dfa238;
+}
+
+.health-attention {
+    color: #a84848;
+}
+
+.health-attention
+.client-health-dot {
+    background: #d76161;
+}
+
+.health-new {
+    color: var(--coach-purple);
+}
+
+.health-new
+.client-health-dot {
+    background: var(--coach-purple);
+}
+
+.health-neutral {
+    color: var(--coach-muted);
+}
+
+.health-neutral
+.client-health-dot {
+    background: #a7a9ae;
+}
+
+.client-primary-column {
+    min-width: 260px;
+}
+
+.client-list-identity {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    color: inherit;
+    text-decoration: none;
+}
+
+.client-list-name {
+    min-width: 0;
+
+    display: grid;
+    gap: 2px;
+}
+
+.client-list-name strong {
+    overflow: hidden;
+
+    color: var(--coach-text);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.client-list-name small {
+    max-width: 260px;
+
+    overflow: hidden;
+
+    color: var(--coach-muted);
+    font-size: 9px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.week-value {
+    display: inline-grid;
+    place-items: center;
+
+    min-width: 28px;
+    height: 28px;
+
+    border-radius: 8px;
+
+    color: var(--coach-purple);
+    background: var(--coach-purple-50);
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.weight-value {
+    color: var(--coach-text);
+    font-size: 12px;
+}
+
+.weight-value span {
+    color: var(--coach-muted);
+
+    font-size: 9px;
+    font-weight: 500;
+}
+
+.date-value {
+    color: var(--coach-text);
+
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.next-call-cell {
+    display: grid;
+    gap: 1px;
+}
+
+.next-call-cell strong {
+    color: var(--coach-text);
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.next-call-cell small {
+    color: var(--coach-muted);
+    font-size: 9px;
+}
+
+.next-call-missing {
+    color: #a84848;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.client-open-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 5px;
+
+    color: var(--coach-purple);
+
+    font-size: 10px;
+    font-weight: 750;
+
+    text-decoration: none;
+}
+
+.client-open-button span {
+    font-size: 14px;
+}
+
+.sort-header {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 0;
+
+    border: 0;
+
+    color: inherit;
+    background: transparent;
+
+    cursor: pointer;
+
+    font: inherit;
+    font-weight: inherit;
+
+    letter-spacing: inherit;
+    text-transform: inherit;
+}
+
+.sort-header:hover,
+.sort-header.is-active {
+    color: var(--coach-purple);
+}
+
+.sort-header span {
+    min-width: 10px;
+
+    color: #aaa5ae;
+
+    font-size: 10px;
+}
+
+.sort-header.is-active span {
+    color: var(--coach-purple);
+}
+
+.clients-v2-empty-filter {
+    display: grid;
+    justify-items: center;
+
+    gap: 3px;
+
+    padding: 48px 20px;
+
+    color: var(--coach-muted);
+
+    text-align: center;
+}
+
+.clients-v2-empty-filter strong {
+    color: var(--coach-text);
+    font-size: 12px;
+}
+
+.clients-v2-empty-filter span {
+    font-size: 10px;
+}
+
+
+@media (max-width: 900px) {
+
+    .clients-v2-summary {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .clients-v2-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .clients-v2-toolbar-right {
+        align-items: stretch;
+        justify-content: space-between;
+    }
+
+    .clients-v2-sort-mobile {
+        display: grid;
+        gap: 4px;
+    }
+
+    .clients-v2-sort-mobile span {
+        color: var(--coach-muted);
+
+        font-size: 8px;
+        font-weight: 800;
+
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .clients-v2-sort-mobile select {
+        min-height: 34px;
+
+        padding: 0 9px;
+
+        border: 1px solid var(--coach-border);
+        border-radius: 8px;
+
+        color: var(--coach-text);
+        background: #fff;
+
+        font-size: 10px;
+    }
+}
+
+
+@media (max-width: 620px) {
+
+    .clients-v2-toolbar-right {
+        flex-direction: column;
+    }
+
+    .clients-v2-table-shell {
+        max-height: none;
+    }
+}
+</style>
 
 {% endblock %}
 
@@ -317,8 +1028,8 @@ Clients | NourisHer Coach
 
 <script>
 (() => {
-    const search = document.querySelector(
-        "[data-client-search]"
+    const body = document.querySelector(
+        "[data-client-table-body]"
     );
 
     const rows = Array.from(
@@ -327,8 +1038,8 @@ Clients | NourisHer Coach
         )
     );
 
-    const empty = document.querySelector(
-        "[data-client-empty]"
+    const search = document.querySelector(
+        "[data-client-search]"
     );
 
     const filters = Array.from(
@@ -337,29 +1048,68 @@ Clients | NourisHer Coach
         )
     );
 
+    const headers = Array.from(
+        document.querySelectorAll(
+            "[data-sort-key]"
+        )
+    );
+
+    const mobileSort = document.querySelector(
+        "[data-mobile-sort]"
+    );
+
+    const empty = document.querySelector(
+        "[data-client-empty]"
+    );
+
     let currentFilter = "all";
 
-    const updateRows = () => {
+    let currentSort = {
+        key: "name",
+        direction: "asc",
+        type: "text",
+    };
+
+
+    const rowMatchesFilter = (row) => {
+        if (currentFilter === "all") {
+            return true;
+        }
+
+        if (currentFilter === "active") {
+            return row.dataset.status
+                === "active";
+        }
+
+        if (currentFilter === "attention") {
+            return row.dataset.health
+                === "attention";
+        }
+
+        return true;
+    };
+
+
+    const updateVisibleRows = () => {
         const query = (
-            search?.value || ""
+            search?.value
+            || ""
         ).trim().toLowerCase();
 
         let visibleCount = 0;
 
         rows.forEach((row) => {
-            const matchesSearch =
+            const searchMatch =
                 !query
-                || row.dataset.clientSearchText
+                || row.dataset.searchText
                     .includes(query);
 
-            const matchesFilter =
-                currentFilter === "all"
-                || row.dataset.clientStatus
-                    === currentFilter;
+            const filterMatch =
+                rowMatchesFilter(row);
 
             const show =
-                matchesSearch
-                && matchesFilter;
+                searchMatch
+                && filterMatch;
 
             row.hidden = !show;
 
@@ -374,10 +1124,108 @@ Clients | NourisHer Coach
         }
     };
 
+
+    const compareRows = (
+        a,
+        b,
+        key,
+        type,
+        direction
+    ) => {
+        let aValue =
+            a.dataset[key] || "";
+
+        let bValue =
+            b.dataset[key] || "";
+
+        if (type === "number") {
+            aValue =
+                Number(aValue) || 0;
+
+            bValue =
+                Number(bValue) || 0;
+        }
+
+        let result;
+
+        if (type === "number") {
+            result =
+                aValue - bValue;
+        } else {
+            result =
+                String(aValue).localeCompare(
+                    String(bValue)
+                );
+        }
+
+        return direction === "asc"
+            ? result
+            : -result;
+    };
+
+
+    const sortRows = (
+        key,
+        type,
+        direction
+    ) => {
+        if (!body) return;
+
+        rows
+            .slice()
+            .sort((a, b) => {
+                return compareRows(
+                    a,
+                    b,
+                    key,
+                    type,
+                    direction
+                );
+            })
+            .forEach((row) => {
+                body.appendChild(row);
+            });
+
+        currentSort = {
+            key,
+            type,
+            direction,
+        };
+
+        headers.forEach((header) => {
+            const active =
+                header.dataset.sortKey
+                === key;
+
+            header.classList.toggle(
+                "is-active",
+                active
+            );
+
+            const icon =
+                header.querySelector(
+                    "[data-sort-icon]"
+                );
+
+            if (icon) {
+                icon.textContent =
+                    active
+                    ? (
+                        direction === "asc"
+                        ? "↑"
+                        : "↓"
+                    )
+                    : "↕";
+            }
+        });
+    };
+
+
     search?.addEventListener(
         "input",
-        updateRows
+        updateVisibleRows
     );
+
 
     filters.forEach((button) => {
         button.addEventListener(
@@ -386,19 +1234,80 @@ Clients | NourisHer Coach
                 currentFilter =
                     button.dataset.clientFilter;
 
-                filters.forEach(
-                    (item) => {
-                        item.classList.toggle(
-                            "is-active",
-                            item === button
-                        );
-                    }
-                );
+                filters.forEach((item) => {
+                    item.classList.toggle(
+                        "is-active",
+                        item === button
+                    );
+                });
 
-                updateRows();
+                updateVisibleRows();
             }
         );
     });
+
+
+    headers.forEach((header) => {
+        header.addEventListener(
+            "click",
+            () => {
+                const key =
+                    header.dataset.sortKey;
+
+                const type =
+                    header.dataset.sortType
+                    || "text";
+
+                const direction =
+                    currentSort.key === key
+                    && currentSort.direction
+                        === "asc"
+                    ? "desc"
+                    : "asc";
+
+                sortRows(
+                    key,
+                    type,
+                    direction
+                );
+            }
+        );
+    });
+
+
+    mobileSort?.addEventListener(
+        "change",
+        () => {
+            const [
+                key,
+                direction,
+            ] = mobileSort.value.split(
+                "-"
+            );
+
+            const type =
+                key === "week"
+                ? "number"
+                : (
+                    key === "name"
+                    ? "text"
+                    : "date"
+                );
+
+            sortRows(
+                key,
+                type,
+                direction
+            );
+        }
+    );
+
+
+    sortRows(
+        "name",
+        "text",
+        "asc"
+    );
 
 
     const dialog = document.querySelector(
