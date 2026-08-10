@@ -1,0 +1,310 @@
+{% extends "client/base.html" %}
+{% block title %}My Check-in | NourisHer{% endblock %}
+
+{% block content %}
+<style>
+.cp,.cp *{box-sizing:border-box}
+.cp{
+  --purple:#5b0e91;--purple2:#8427b7;--ink:#28232c;--muted:#756f79;
+  --line:#e6dee9;--soft:#faf7fb;--green:#287a50;--gold:#d5b35a;
+  width:min(1180px,calc(100% - 34px));margin:17px auto 25px;color:var(--ink)
+}
+.cp-hero{
+  display:grid;grid-template-columns:minmax(0,1fr) 235px;gap:25px;align-items:center;
+  min-height:135px;padding:23px 28px;border-radius:24px;color:#fff;overflow:hidden;
+  position:relative;background:linear-gradient(120deg,#4d0879,#651097 58%,#882bb1);
+  box-shadow:0 15px 36px rgba(74,16,111,.13)
+}
+.cp-hero:after{content:"";position:absolute;width:270px;height:270px;right:-90px;top:-165px;border:1px solid rgba(255,255,255,.15);border-radius:50%}
+.cp-eyebrow{margin:0 0 8px;color:#f0d578;font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+.cp-hero h1{margin:0;font-size:clamp(34px,4vw,47px);line-height:1;letter-spacing:-.045em}
+.cp-sub{margin:8px 0 0;color:rgba(255,255,255,.8);font-size:13px}
+.cp-consistency{position:relative;z-index:1;padding:15px 17px;border:1px solid rgba(255,255,255,.18);border-radius:17px;background:rgba(255,255,255,.1)}
+.cp-consistency span{display:block;color:rgba(255,255,255,.72);font-size:9px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.cp-consistency strong{display:block;margin:4px 0 3px;font-size:26px;line-height:1}
+.cp-consistency small{color:rgba(255,255,255,.76);font-size:10px}
+.cp-alert{margin-top:10px;padding:10px 13px;border-radius:11px;background:#edf8f0;color:#286c49;font-size:11px}
+.cp-alert.error{background:#fff4ee;color:#98512e}
+.cp-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,.8fr);gap:14px;align-items:start;margin-top:14px}
+.cp-card{border:1px solid var(--line);border-radius:19px;background:#fff;box-shadow:0 5px 18px rgba(48,27,59,.04)}
+.cp-main{padding:21px 22px}
+.cp-side{display:grid;gap:12px}
+.cp-side .cp-card{padding:16px 18px}
+.cp-kicker{margin:0 0 5px;color:var(--purple);font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.cp-title-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.cp h2{margin:0;font-size:22px;line-height:1.15;letter-spacing:-.025em}
+.cp-intro{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+.cp-count{flex:none;padding:6px 9px;border-radius:999px;background:#f5eef8;color:var(--purple);font-size:10px;font-weight:850}
+.cp-actions{display:grid;gap:8px;margin-top:15px}
+.cp-action{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;min-height:59px;padding:9px 11px;border:1px solid #eee8f0;border-radius:13px;cursor:pointer}
+.cp-action input{position:absolute;opacity:0}
+.cp-check{width:31px;height:31px;display:grid;place-items:center;border:1.5px solid #d4cadb;border-radius:10px;color:transparent}
+.cp-check svg{width:16px}
+.cp-action:has(input:checked){background:#fbf7fd;border-color:#d9c1e6}
+.cp-action:has(input:checked) .cp-check{background:var(--purple);border-color:var(--purple);color:#fff}
+.cp-action-copy strong{display:block;font-size:13px;line-height:1.3}
+.cp-action-copy small{display:block;margin-top:2px;color:var(--muted);font-size:10px}
+.cp-done{color:transparent;font-size:9px;font-weight:900;text-transform:uppercase}
+.cp-action:has(input:checked) .cp-done{color:var(--purple)}
+.cp-action.locked{cursor:default}
+.cp-empty{margin-top:15px;padding:32px;border:1px dashed #dacfe0;border-radius:15px;text-align:center;background:#fcfafc}
+.cp-empty strong{display:block;font-size:15px}.cp-empty p{margin:5px 0 0;color:var(--muted);font-size:11px}
+
+.cp-daily-numbers{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px;padding-top:14px;border-top:1px solid #eee8f0}
+.cp-field label,.cp-field span{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:800}
+.cp-input,.cp-select{width:100%;height:41px;padding:0 11px;border:1px solid var(--line);border-radius:10px;background:#fbfafc;color:var(--ink);font-size:12px;outline:none}
+.cp-input:focus,.cp-select:focus{border-color:#b795c8;box-shadow:0 0 0 3px rgba(91,14,145,.06);background:#fff}
+.cp-input:disabled{opacity:1;background:#f5f2f6;color:#706a74}
+.cp-save{width:100%;min-height:45px;margin-top:12px;padding:0 14px;border:0;border-radius:11px;background:linear-gradient(135deg,#63109a,#4c0878);color:#fff;font-size:12px;font-weight:850;cursor:pointer}
+.cp-save:disabled{background:#e6dee9;color:#766f7a;cursor:default}
+.cp-lock{margin:7px 0 0;color:var(--green);font-size:10px;font-weight:750;text-align:center}
+
+.cp-week-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;margin-bottom:9px}
+.cp-week-head strong{display:block;font-size:18px}.cp-week-head span{color:var(--muted);font-size:10px}
+.cp-progress{height:6px;border-radius:999px;background:#eee8f0;overflow:hidden;margin-bottom:10px}
+.cp-progress span{display:block;height:100%;background:linear-gradient(90deg,#5b0e91,#8d35bd)}
+.cp-days{display:grid;gap:5px}
+.cp-day{border:1px solid #eee8f0;border-radius:10px;overflow:hidden;background:#fff}
+.cp-day summary{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:9px;align-items:center;min-height:37px;padding:7px 9px;list-style:none}
+.cp-day summary::-webkit-details-marker{display:none}.cp-day[data-submitted="true"] summary{cursor:pointer}
+.cp-day-date{font-size:10px;font-weight:850}.cp-day-state{color:var(--muted);font-size:9px}.cp-day-badge{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.cp-day[data-state="submitted"] .cp-day-badge{color:var(--green)}.cp-day[data-state="today"]{border-color:#d8bce7;background:#fcf9fd}.cp-day[data-state="today"] .cp-day-badge{color:var(--purple)}.cp-day[data-state="missed"] .cp-day-badge,.cp-day[data-state="upcoming"] .cp-day-badge{color:#aaa3ad}
+.cp-day-detail{padding:8px 10px 10px;border-top:1px solid #f0ebf2}
+.cp-day-action{display:flex;gap:7px;margin-top:3px;font-size:9px}.cp-day-action b{color:var(--purple)}
+.cp-day-meta{display:flex;flex-wrap:wrap;gap:7px 12px;margin-top:7px;color:var(--muted);font-size:9px}
+
+.cp-measure-head{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.cp-measure-badge{padding:5px 8px;border-radius:999px;background:#f5eef8;color:var(--purple);font-size:9px;font-weight:850}
+.cp-measure-form{display:grid;gap:10px;margin-top:12px}
+.cp-measure-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cp-measure-date-row{display:grid;grid-template-columns:1fr 105px;gap:8px}
+.cp-measure-saved{margin-top:12px;padding:11px;border-radius:11px;background:#faf7fb}
+.cp-measure-saved strong{display:block;font-size:12px}
+.cp-measure-values{display:flex;flex-wrap:wrap;gap:5px 11px;margin-top:7px;color:var(--muted);font-size:10px}
+.cp-small{margin:7px 0 0;color:var(--muted);font-size:9px;line-height:1.4}
+
+@media(max-width:900px){
+  .cp{width:min(100% - 24px,720px)}
+  .cp-hero{grid-template-columns:1fr auto}
+  .cp-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .cp{width:100%;padding:0 12px;margin-top:0}
+  .cp-hero{margin:0 -12px;border-radius:0 0 22px 22px;grid-template-columns:1fr;padding:21px 17px;gap:14px}
+  .cp-main,.cp-side .cp-card{padding:16px}
+  .cp-daily-numbers,.cp-measure-grid,.cp-measure-date-row{grid-template-columns:1fr}
+  .cp-action{grid-template-columns:31px minmax(0,1fr)}.cp-done{display:none}
+}
+</style>
+
+{% set today_locked = daily_entry and daily_entry.is_submitted %}
+
+<section class="cp">
+  <header class="cp-hero">
+    <div>
+      <p class="cp-eyebrow">NourisHer · Week {{ week_completion.week_number }}</p>
+      <h1>Hi {{ client.name.split(" ")[0] }} 👋</h1>
+      <p class="cp-sub">
+        {{ today.strftime("%d %b %Y") }}
+        · {% if today_locked %}Today’s check-in is complete.{% else %}Your daily check-in takes just a minute.{% endif %}
+      </p>
+    </div>
+    <aside class="cp-consistency">
+      <span>You’re building consistency</span>
+      <strong>{{ week_completion.checkins_completed }} of 7</strong>
+      <small>daily check-ins completed this coaching week</small>
+    </aside>
+  </header>
+
+  {% if saved %}
+  <div class="cp-alert"><strong>✓ Today submitted.</strong> Your daily check-in is now read-only.</div>
+  {% endif %}
+  {% if measurement_saved %}
+  <div class="cp-alert"><strong>✓ Weekly measurements saved.</strong> They’re available to Sushma for your weekly review.</div>
+  {% endif %}
+  {% if measurement_error %}
+  <div class="cp-alert error">
+    {% if measurement_error == "already_saved" %}
+      Measurements have already been submitted for this coaching week.
+    {% else %}
+      Please enter at least one measurement and choose a valid date from this coaching week.
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="cp-grid">
+    <section class="cp-card cp-main">
+      <form method="post" action="/client/{{ access_token }}/daily">
+        <div class="cp-title-row">
+          <div>
+            <p class="cp-kicker">Today</p>
+            <h2>Your daily check-in</h2>
+            <p class="cp-intro">Complete your actions, add your steps and weight if you want to track it.</p>
+          </div>
+          {% if actions %}
+          <span class="cp-count" data-completion-count>{{ actions|selectattr("completed_today")|list|length }} / {{ actions|length }} done</span>
+          {% endif %}
+        </div>
+
+        {% if actions %}
+        <div class="cp-actions">
+          {% for action in actions %}
+          <label class="cp-action {% if today_locked %}locked{% endif %}">
+            <input type="checkbox" name="completed_action_ids" value="{{ action.id }}" data-action-checkbox
+              {% if action.completed_today %}checked{% endif %}
+              {% if today_locked %}disabled{% endif %}>
+            <span class="cp-check">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M4.5 10.3L8.2 14l7.3-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="cp-action-copy">
+              <strong>{{ action.action_name }}</strong>
+              {% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }} weekly target</small>{% endif %}
+            </span>
+            <span class="cp-done">Done</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="cp-empty"><strong>Your plan is being prepared</strong><p>Your focus actions will appear here as soon as Sushma assigns them.</p></div>
+        {% endif %}
+
+        <div class="cp-daily-numbers">
+          <div class="cp-field">
+            <span>Steps</span>
+            <input class="cp-input" type="number" min="0" inputmode="numeric" name="steps"
+              value="{% if daily_entry and daily_entry.steps is not none %}{{ daily_entry.steps }}{% endif %}"
+              placeholder="e.g. 7000" {% if today_locked %}disabled{% endif %}>
+          </div>
+          <div class="cp-field">
+            <span>Weight (kg) · optional</span>
+            <input class="cp-input" type="number" step="0.1" inputmode="decimal" name="weight_kg"
+              value="{% if daily_entry and daily_entry.weight_kg is not none %}{{ daily_entry.weight_kg }}{% endif %}"
+              placeholder="Optional" {% if today_locked %}disabled{% endif %}>
+          </div>
+        </div>
+
+        <button class="cp-save" type="submit" {% if today_locked %}disabled{% endif %}>
+          {% if today_locked %}✓ Today submitted{% else %}Submit today’s check-in{% endif %}
+        </button>
+        {% if today_locked %}<p class="cp-lock">Submitted and locked for today.</p>{% endif %}
+      </form>
+    </section>
+
+    <aside class="cp-side">
+      <section class="cp-card">
+        <p class="cp-kicker">Your week</p>
+        <div class="cp-week-head">
+          <div><strong>Week {{ week_completion.week_number }}</strong><span>{{ week_completion.week_start.strftime("%d %b") }} – {{ week_completion.week_end.strftime("%d %b") }}</span></div>
+          <span>{{ week_completion.checkins_completed }} / 7 check-ins</span>
+        </div>
+        <div class="cp-progress"><span style="width:{{ week_completion.checkin_percent }}%"></span></div>
+
+        <div class="cp-days">
+          {% for day in week_completion.days %}
+          <details class="cp-day" data-state="{{ day.state }}" data-submitted="{{ 'true' if day.submitted else 'false' }}">
+            <summary>
+              <span class="cp-day-date">{{ day.date.strftime("%d %b") }}</span>
+              <span class="cp-day-state">
+                {% if day.submitted and day.actions_total %}{{ day.actions_completed }}/{{ day.actions_total }} actions
+                {% elif day.submitted %}Check-in saved
+                {% elif day.state == "today" %}Today
+                {% elif day.state == "missed" %}No check-in
+                {% else %}Upcoming{% endif %}
+              </span>
+              <span class="cp-day-badge">
+                {% if day.state == "submitted" %}✓ Submitted{% elif day.state == "today" %}● Today{% elif day.state == "missed" %}—{% else %}Soon{% endif %}
+              </span>
+            </summary>
+            {% if day.submitted %}
+            <div class="cp-day-detail">
+              {% for item in day.actions %}
+              <div class="cp-day-action"><b>{{ "✓" if item.completed else "○" }}</b><span>{{ item.action_name }}</span></div>
+              {% endfor %}
+              <div class="cp-day-meta">
+                <span>Steps: <strong>{{ day.steps if day.steps is not none else "—" }}</strong></span>
+                <span>Weight: <strong>{% if day.weight_kg is not none %}{{ day.weight_kg }} kg{% else %}—{% endif %}</strong></span>
+              </div>
+            </div>
+            {% endif %}
+          </details>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="cp-card">
+        <div class="cp-measure-head">
+          <div>
+            <p class="cp-kicker">Once this week</p>
+            <h2>Body measurements</h2>
+          </div>
+          <span class="cp-measure-badge">Optional weekly update</span>
+        </div>
+
+        {% if weekly_measurement %}
+        <div class="cp-measure-saved">
+          <strong>✓ Measurements saved · {{ weekly_measurement.measured_on.strftime("%d %b %Y") }}</strong>
+          <div class="cp-measure-values">
+            {% if weekly_measurement.upper_arm_cm is not none %}<span>Upper arm {{ weekly_measurement.upper_arm_cm }} cm</span>{% endif %}
+            {% if weekly_measurement.chest_cm is not none %}<span>Chest {{ weekly_measurement.chest_cm }} cm</span>{% endif %}
+            {% if weekly_measurement.waist_cm is not none %}<span>Waist {{ weekly_measurement.waist_cm }} cm</span>{% endif %}
+            {% if weekly_measurement.lower_abdomen_cm is not none %}<span>Lower abdomen {{ weekly_measurement.lower_abdomen_cm }} cm</span>{% endif %}
+            {% if weekly_measurement.hip_cm is not none %}<span>Hip {{ weekly_measurement.hip_cm }} cm</span>{% endif %}
+            {% if weekly_measurement.thigh_cm is not none %}<span>Thigh {{ weekly_measurement.thigh_cm }} cm</span>{% endif %}
+          </div>
+        </div>
+        <p class="cp-small">One body-measurement update is recorded per coaching week.</p>
+        {% else %}
+        <form class="cp-measure-form" method="post" action="/client/{{ access_token }}/measurements">
+          <div class="cp-measure-date-row">
+            <div class="cp-field">
+              <span>Date measured</span>
+              <input class="cp-input" type="date" name="measured_on"
+                min="{{ week_completion.week_start }}"
+                max="{{ today }}"
+                value="{{ today }}" required>
+            </div>
+            <div class="cp-field">
+              <span>Unit</span>
+              <select class="cp-select" name="measurement_unit">
+                <option value="cm">cm</option>
+                <option value="inches">inches</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="cp-measure-grid">
+            <div class="cp-field"><span>Upper arm</span><input class="cp-input" type="number" step="0.1" name="upper_arm"></div>
+            <div class="cp-field"><span>Chest</span><input class="cp-input" type="number" step="0.1" name="chest"></div>
+            <div class="cp-field"><span>Waist</span><input class="cp-input" type="number" step="0.1" name="waist"></div>
+            <div class="cp-field"><span>Lower abdomen</span><input class="cp-input" type="number" step="0.1" name="lower_abdomen"></div>
+            <div class="cp-field"><span>Hip</span><input class="cp-input" type="number" step="0.1" name="hip"></div>
+            <div class="cp-field"><span>Thigh</span><input class="cp-input" type="number" step="0.1" name="thigh"></div>
+          </div>
+
+          <button class="cp-save" type="submit">Save this week’s measurements</button>
+          <p class="cp-small">Choose the date you actually took the measurements. You only need to do this once during the week.</p>
+        </form>
+        {% endif %}
+      </section>
+    </aside>
+  </div>
+</section>
+
+<script>
+(() => {
+  const boxes = [...document.querySelectorAll("[data-action-checkbox]")];
+  const count = document.querySelector("[data-completion-count]");
+  const refresh = () => {
+    if (count) count.textContent = `${boxes.filter(b => b.checked).length} / ${boxes.length} done`;
+  };
+  boxes.forEach(b => b.addEventListener("change", refresh));
+  refresh();
+
+  document.querySelectorAll(".cp-day").forEach(day => {
+    if (day.dataset.submitted !== "true") {
+      day.addEventListener("click", event => event.preventDefault());
+    }
+  });
+})();
+</script>
+{% endblock %}
