@@ -7,9 +7,20 @@ from fastapi.templating import Jinja2Templates
 
 from app.auth import coach_is_logged_in
 from app.services.client_service import ClientService
+from app.client.portal import router as client_portal_router
+from app.services.client_portal_service import (
+    ensure_portal_access,
+    get_portal_access,
+    get_recent_client_activity,
+    get_coach_week_review,
+)
 
 
 router = APIRouter()
+
+# Client-facing routes live in app/client/portal.py.
+# Included here so no main.py change is required.
+router.include_router(client_portal_router)
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 templates = Jinja2Templates(
@@ -154,6 +165,46 @@ ACTION_LIBRARY_BY_KEY = {
     for item in category["items"]
 }
 
+CALL_TIME_SLOTS = [
+    {
+        "value": f"{hour:02d}:{minute:02d}",
+        "label": (
+            f"{12 if hour % 12 == 0 else hour % 12}:{minute:02d} "
+            f"{'AM' if hour < 12 else 'PM'}"
+        ),
+    }
+    for hour in range(6, 23)
+    for minute in (0, 30)
+    if not (hour == 22 and minute == 30)
+]
+
+
+def _coaching_week_bounds(client: dict, on_date: date | None = None):
+    """Return Week N and its real 7-day boundaries from clients.start_date."""
+    on_date = on_date or date.today()
+    start_date = client.get("start_date")
+
+    if not start_date:
+        return 0, None, None
+
+    if on_date < start_date:
+        return 1, start_date, start_date + timedelta(days=6)
+
+    elapsed = (on_date - start_date).days
+    week_number = (elapsed // 7) + 1
+    week_start = start_date + timedelta(days=(week_number - 1) * 7)
+    return week_number, week_start, week_start + timedelta(days=6)
+
+
+def _action_week_bounds(client_id: int, on_date: date):
+    client = ClientService.get(client_id) or {}
+    _, week_start, week_end = _coaching_week_bounds(client, on_date)
+    if week_start is None:
+        week_start = on_date
+        week_end = on_date + timedelta(days=6)
+    return week_start, week_end
+
+
 
 @router.get(
     "/dashboard/clients",
@@ -183,9 +234,13 @@ def clients_page(request: Request):
             else None
         )
 
-        # Intake is Week 0. Each saved weekly check-in advances
-        # the coaching week: first check-in = Week 1.
-        client["current_week"] = len(checkins)
+        week_number, week_start, week_end = _coaching_week_bounds(
+            client,
+            today,
+        )
+        client["current_week"] = week_number
+        client["current_week_start"] = week_start
+        client["current_week_end"] = week_end
 
         client["last_checkin_date"] = (
             latest_checkin.get("call_date")
@@ -355,6 +410,7 @@ def add_client(
     request: Request,
     name: str = Form(...),
     email: str = Form(""),
+    country_code: str = Form("+91"),
     phone: str = Form(""),
     program: str = Form("Transformation"),
 ):
@@ -364,12 +420,37 @@ def add_client(
             status_code=303,
         )
 
+    clean_phone = phone.strip()
+    if clean_phone and not clean_phone.startswith("+"):
+        clean_phone = f"{country_code.strip()} {clean_phone}".strip()
+
     client_id = ClientService.create(
         name=name.strip(),
         email=email.strip() or None,
-        phone=phone.strip() or None,
+        phone=clean_phone or None,
         program=program,
     )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}",
+        status_code=303,
+    )
+
+
+@router.post(
+    "/dashboard/clients/{client_id}/portal-access"
+)
+def create_client_portal_access(
+    request: Request,
+    client_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    ensure_portal_access(client_id)
 
     return RedirectResponse(
         f"/dashboard/clients/{client_id}",
@@ -386,36 +467,50 @@ def client_profile(
     client_id: int,
 ):
     if not coach_is_logged_in(request):
-        return RedirectResponse(
-            "/coach/login",
-            status_code=303,
-        )
+        return RedirectResponse("/coach/login", status_code=303)
 
     profile = ClientService.profile(client_id)
-
     if profile is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Client not found",
-        )
+        raise HTTPException(status_code=404, detail="Client not found")
 
-    # Before the first weekly check-in, use the intake measurement
-    # as the visible current weight.
-    if (
-        profile.get("current_weight") is None
-        and profile.get("measurements")
-    ):
+    if profile.get("current_weight") is None and profile.get("measurements"):
         latest_measurement = profile["measurements"][0]
-
         if latest_measurement.get("weight_kg") is not None:
-            profile["current_weight"] = (
-                latest_measurement.get("weight_kg")
-            )
+            profile["current_weight"] = latest_measurement.get("weight_kg")
 
-    # Intake is Week 0. The first saved weekly check-in is Week 1.
-    profile["current_week"] = len(
-        profile.get("checkins") or []
+    week_number, week_start, week_end = _coaching_week_bounds(
+        profile["client"],
+        date.today(),
     )
+    profile["current_week"] = week_number
+    profile["current_week_start"] = week_start
+    profile["current_week_end"] = week_end
+
+    for entry in profile.get("tracking") or []:
+        if entry.get("weight_kg") is not None:
+            profile["current_weight"] = entry.get("weight_kg")
+            break
+
+    portal_access = get_portal_access(client_id)
+    portal_activity = get_recent_client_activity(client_id, limit=14)
+
+    week_review = None
+    next_week_number = None
+    next_week_start = None
+    next_week_end = None
+    next_week_actions = []
+
+    if week_start and week_end:
+        week_review = get_coach_week_review(client_id, week_start, week_end)
+        next_week_number = week_number + 1
+        next_week_start = week_end + timedelta(days=1)
+        next_week_end = next_week_start + timedelta(days=6)
+        next_week_actions = ClientService.actions(
+            client_id,
+            status="active",
+            start_date=next_week_start,
+            end_date=next_week_end,
+        )
 
     return templates.TemplateResponse(
         "coach/client_workspace.html",
@@ -423,6 +518,16 @@ def client_profile(
             "request": request,
             "active_nav": "clients",
             "action_library": ACTION_LIBRARY,
+            "call_time_slots": CALL_TIME_SLOTS,
+            "portal_access": portal_access,
+            "portal_activity": portal_activity,
+            "week_review": week_review,
+            "next_week_number": next_week_number,
+            "next_week_start": next_week_start,
+            "next_week_end": next_week_end,
+            "next_week_action_names": {
+                row.get("action_name") for row in next_week_actions
+            },
             **profile,
         },
     )
@@ -435,31 +540,31 @@ def save_client_intake_route(
     request: Request,
     client_id: int,
     intake_date: str = Form(...),
+    phone: str = Form(""),
+    week_start_date: str = Form(...),
     current_situation: str = Form(""),
     primary_goal: str = Form(""),
     secondary_goals: str = Form(""),
     present_weight_kg: str = Form(""),
     goal_weight_kg: str = Form(""),
     coach_focus: str = Form(""),
+    action_keys: list[str] = Form(default=[]),
+    custom_action_name: str = Form(""),
+    custom_target_count: str = Form(""),
+    custom_target_unit: str = Form(""),
 ):
     if not coach_is_logged_in(request):
-        return RedirectResponse(
-            "/coach/login",
-            status_code=303,
-        )
+        return RedirectResponse("/coach/login", status_code=303)
 
     parsed_present_weight = (
-        float(present_weight_kg)
-        if present_weight_kg.strip()
-        else None
+        float(present_weight_kg) if present_weight_kg.strip() else None
     )
-
     parsed_goal_weight = (
-        float(goal_weight_kg)
-        if goal_weight_kg.strip()
-        else None
+        float(goal_weight_kg) if goal_weight_kg.strip() else None
     )
+    parsed_week_start = date.fromisoformat(week_start_date)
 
+    ClientService.set_phone(client_id, phone.strip() or None)
     ClientService.save_intake(
         client_id=client_id,
         intake_date=intake_date,
@@ -469,18 +574,70 @@ def save_client_intake_route(
         goal_weight_kg=parsed_goal_weight,
         coach_focus=coach_focus.strip() or None,
     )
+    ClientService.set_start_date(client_id, parsed_week_start)
 
-    # Treat intake as the client's baseline / Week 0.
-    # Store the present weight as the initial measurement so
-    # it becomes part of the client's progress history.
     if parsed_present_weight is not None:
         ClientService.add_measurement(
             client_id=client_id,
             measured_on=intake_date,
             weight_kg=parsed_present_weight,
-            measurement_unit="kg",
+            measurement_unit="cm",
             checkin_id=None,
         )
+
+    first_week_end = parsed_week_start + timedelta(days=6)
+    added_names = set()
+
+    for action_key in action_keys:
+        library_action = ACTION_LIBRARY_BY_KEY.get(action_key)
+        if not library_action or library_action["name"] in added_names:
+            continue
+        ClientService.add_action(
+            client_id=client_id,
+            action_name=library_action["name"],
+            target_count=library_action["target_count"],
+            target_unit=library_action["target_unit"],
+            start_date=parsed_week_start,
+            end_date=first_week_end,
+        )
+        added_names.add(library_action["name"])
+
+    if custom_action_name.strip() and custom_action_name.strip() not in added_names:
+        ClientService.add_action(
+            client_id=client_id,
+            action_name=custom_action_name.strip(),
+            target_count=(
+                int(custom_target_count)
+                if custom_target_count.strip()
+                else None
+            ),
+            target_unit=custom_target_unit.strip() or None,
+            start_date=parsed_week_start,
+            end_date=first_week_end,
+        )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}",
+        status_code=303,
+    )
+
+
+@router.post(
+    "/dashboard/clients/{client_id}/week-start"
+)
+def save_week_start(
+    request: Request,
+    client_id: int,
+    week_start_date: str = Form(...),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    parsed = date.fromisoformat(week_start_date)
+    ClientService.set_start_date(client_id, parsed)
 
     return RedirectResponse(
         f"/dashboard/clients/{client_id}",
@@ -494,9 +651,10 @@ def save_client_intake_route(
 def add_client_action(
     request: Request,
     client_id: int,
-    action_name: str = Form(...),
-    target_count: str = Form(""),
-    target_unit: str = Form(""),
+    action_key: str = Form(""),
+    custom_action_name: str = Form(""),
+    custom_target_count: str = Form(""),
+    custom_target_unit: str = Form(""),
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse(
@@ -504,23 +662,45 @@ def add_client_action(
             status_code=303,
         )
 
-    start_date = date.today()
-    end_date = start_date + timedelta(days=6)
+    action_name = None
+    target_count = None
+    target_unit = None
 
-    parsed_target_count = (
-        int(target_count)
-        if target_count.strip()
-        else None
-    )
+    if action_key:
+        library_action = ACTION_LIBRARY_BY_KEY.get(action_key)
+        if library_action:
+            action_name = library_action["name"]
+            target_count = library_action["target_count"]
+            target_unit = library_action["target_unit"]
 
-    ClientService.add_action(
-        client_id=client_id,
-        action_name=action_name.strip(),
-        target_count=parsed_target_count,
-        target_unit=target_unit.strip() or None,
-        start_date=start_date,
-        end_date=end_date,
-    )
+    if not action_name and custom_action_name.strip():
+        action_name = custom_action_name.strip()
+        target_count = (
+            int(custom_target_count)
+            if custom_target_count.strip()
+            else None
+        )
+        target_unit = custom_target_unit.strip() or None
+
+    if action_name:
+        existing_names = {
+            row.get("action_name")
+            for row in ClientService.actions(client_id, status="active")
+        }
+
+        if action_name not in existing_names:
+            start_date, end_date = _action_week_bounds(
+                client_id,
+                date.today(),
+            )
+            ClientService.add_action(
+                client_id=client_id,
+                action_name=action_name,
+                target_count=target_count,
+                target_unit=target_unit,
+                start_date=start_date,
+                end_date=end_date,
+            )
 
     return RedirectResponse(
         f"/dashboard/clients/{client_id}",
@@ -583,7 +763,7 @@ def save_client_tracking(
         strength_training=strength_training,
         stress_score=parsed_stress,
         mood_score=parsed_mood,
-        weight_kg=parsed_weight,
+        weight_kg=None,
         note=note.strip() or None,
     )
 
@@ -600,14 +780,6 @@ def add_client_checkin(
     request: Request,
     client_id: int,
     call_date: str = Form(...),
-    weight_kg: str = Form(""),
-    upper_arm: str = Form(""),
-    chest: str = Form(""),
-    waist: str = Form(""),
-    lower_abdomen: str = Form(""),
-    hip: str = Form(""),
-    thigh: str = Form(""),
-    measurement_unit: str = Form("inches"),
     wins: str = Form(""),
     struggles: str = Form(""),
     improvements_needed: str = Form(""),
@@ -620,24 +792,12 @@ def add_client_checkin(
     next_call_time: str = Form(""),
 ):
     if not coach_is_logged_in(request):
-        return RedirectResponse(
-            "/coach/login",
-            status_code=303,
-        )
-
-    def parse_float(value: str):
-        return (
-            float(value)
-            if value.strip()
-            else None
-        )
-
-    parsed_weight = parse_float(weight_kg)
+        return RedirectResponse("/coach/login", status_code=303)
 
     checkin_id = ClientService.add_checkin(
         client_id=client_id,
         call_date=call_date,
-        weight_kg=parsed_weight,
+        weight_kg=None,
         next_call_date=next_call_date or None,
         next_call_time=next_call_time or None,
         wins=wins.strip() or None,
@@ -646,74 +806,60 @@ def add_client_checkin(
         coach_support=coach_support.strip() or None,
     )
 
-    ClientService.add_measurement(
-        client_id=client_id,
-        checkin_id=checkin_id,
-        measured_on=call_date,
-        weight_kg=parsed_weight,
-        upper_arm=parse_float(upper_arm),
-        chest=parse_float(chest),
-        waist=parse_float(waist),
-        lower_abdomen=parse_float(lower_abdomen),
-        hip=parse_float(hip),
-        thigh=parse_float(thigh),
-        measurement_unit=measurement_unit,
+    client = ClientService.get(client_id) or {}
+    _, _, current_week_end = _coaching_week_bounds(
+        client,
+        date.fromisoformat(call_date),
     )
+    if current_week_end is None:
+        current_week_end = date.fromisoformat(call_date)
 
-    action_start_date = date.fromisoformat(
-        call_date
-    )
-    action_end_date = (
-        action_start_date
-        + timedelta(days=6)
-    )
+    action_start_date = current_week_end + timedelta(days=1)
+    action_end_date = action_start_date + timedelta(days=6)
+
+    existing_action_names = {
+        row.get("action_name")
+        for row in ClientService.actions(
+            client_id,
+            status="active",
+            start_date=action_start_date,
+            end_date=action_end_date,
+        )
+    }
 
     for action_key in action_keys:
-        library_action = (
-            ACTION_LIBRARY_BY_KEY.get(
-                action_key
-            )
-        )
-
+        library_action = ACTION_LIBRARY_BY_KEY.get(action_key)
         if not library_action:
             continue
-
+        if library_action["name"] in existing_action_names:
+            continue
         ClientService.add_action(
             client_id=client_id,
             action_name=library_action["name"],
-            target_count=library_action[
-                "target_count"
-            ],
-            target_unit=library_action[
-                "target_unit"
-            ],
+            target_count=library_action["target_count"],
+            target_unit=library_action["target_unit"],
             start_date=action_start_date,
             end_date=action_end_date,
             checkin_id=checkin_id,
         )
+        existing_action_names.add(library_action["name"])
 
-    if custom_action_name.strip():
-        parsed_custom_target = (
-            int(custom_target_count)
-            if custom_target_count.strip()
-            else None
-        )
-
+    if custom_action_name.strip() and custom_action_name.strip() not in existing_action_names:
         ClientService.add_action(
             client_id=client_id,
-            action_name=
-                custom_action_name.strip(),
-            target_count=
-                parsed_custom_target,
-            target_unit=
-                custom_target_unit.strip()
-                or None,
+            action_name=custom_action_name.strip(),
+            target_count=(
+                int(custom_target_count)
+                if custom_target_count.strip()
+                else None
+            ),
+            target_unit=custom_target_unit.strip() or None,
             start_date=action_start_date,
             end_date=action_end_date,
             checkin_id=checkin_id,
         )
 
     return RedirectResponse(
-        f"/dashboard/clients/{client_id}",
+        f"/dashboard/clients/{client_id}?tab=weekly",
         status_code=303,
     )

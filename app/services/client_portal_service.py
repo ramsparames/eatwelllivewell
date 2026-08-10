@@ -1,0 +1,678 @@
+import secrets
+from datetime import date, timedelta
+
+from app.database import get_connection
+from app.services.client_service import ClientService
+
+
+def create_portal_tables() -> None:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS client_portal_access (
+                    id BIGSERIAL PRIMARY KEY,
+                    client_id INTEGER NOT NULL UNIQUE
+                        REFERENCES clients(id) ON DELETE CASCADE,
+                    access_token TEXT NOT NULL UNIQUE,
+                    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+
+            # Daily action logs reference the same action-plan rows used
+            # by the coach workspace.
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS client_action_daily_logs (
+                    id BIGSERIAL PRIMARY KEY,
+                    client_id INTEGER NOT NULL
+                        REFERENCES clients(id) ON DELETE CASCADE,
+                    action_id INTEGER NOT NULL,
+                    tracked_on DATE NOT NULL,
+                    completed BOOLEAN NOT NULL DEFAULT FALSE,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    UNIQUE (action_id, tracked_on)
+                )
+            """)
+
+            # Mark a portal day as formally submitted. This is kept separate
+            # from client_daily_tracking because the coach can also add rows
+            # to that table manually.
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS client_portal_daily_submissions (
+                    id BIGSERIAL PRIMARY KEY,
+                    client_id INTEGER NOT NULL
+                        REFERENCES clients(id) ON DELETE CASCADE,
+                    tracked_on DATE NOT NULL,
+                    submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    UNIQUE (client_id, tracked_on)
+                )
+            """)
+
+            # Align older builds with client_action_plans.
+            cursor.execute("""
+                ALTER TABLE client_action_daily_logs
+                DROP CONSTRAINT IF EXISTS
+                    client_action_daily_logs_action_id_fkey
+            """)
+
+            cursor.execute("""
+                DELETE FROM client_action_daily_logs l
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM client_action_plans p
+                    WHERE p.id = l.action_id
+                )
+            """)
+
+            cursor.execute("""
+                ALTER TABLE client_action_daily_logs
+                ADD CONSTRAINT client_action_daily_logs_action_id_fkey
+                FOREIGN KEY (action_id)
+                REFERENCES client_action_plans(id)
+                ON DELETE CASCADE
+            """)
+
+
+def get_portal_access(client_id: int):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, client_id, access_token, enabled,
+                       created_at, updated_at
+                FROM client_portal_access
+                WHERE client_id = %s
+                LIMIT 1
+            """, (client_id,))
+            return cursor.fetchone()
+
+
+def ensure_portal_access(client_id: int):
+    existing = get_portal_access(client_id)
+    if existing:
+        return existing
+
+    token = secrets.token_urlsafe(32)
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO client_portal_access (
+                    client_id, access_token
+                )
+                VALUES (%s, %s)
+                RETURNING id, client_id, access_token, enabled,
+                          created_at, updated_at
+            """, (client_id, token))
+            return cursor.fetchone()
+
+
+def get_client_by_token(access_token: str):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT c.id, c.name, c.email, c.phone,
+                       c.program, c.status, c.start_date,
+                       p.access_token, p.enabled
+                FROM client_portal_access p
+                JOIN clients c ON c.id = p.client_id
+                WHERE p.access_token = %s
+                  AND p.enabled = TRUE
+                LIMIT 1
+            """, (access_token,))
+            return cursor.fetchone()
+
+
+def get_active_actions(client_id: int):
+    # Uses the same source as the coach workspace.
+    actions = ClientService.actions(
+        client_id,
+        status="active",
+    )
+    return [dict(action) for action in actions]
+
+
+def is_portal_day_submitted(client_id: int, tracked_on: date) -> bool:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 1
+                FROM client_portal_daily_submissions
+                WHERE client_id = %s
+                  AND tracked_on = %s
+                LIMIT 1
+            """, (client_id, tracked_on))
+            return cursor.fetchone() is not None
+
+
+def get_action_logs_for_date(client_id: int, tracked_on: date):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT action_id, completed
+                FROM client_action_daily_logs
+                WHERE client_id = %s
+                  AND tracked_on = %s
+            """, (client_id, tracked_on))
+            rows = cursor.fetchall()
+
+    return {
+        row["action_id"]: row["completed"]
+        for row in rows
+    }
+
+
+def save_action_logs(
+    client_id: int,
+    tracked_on: date,
+    active_action_ids: list[int],
+    completed_action_ids: list[int],
+):
+    # Submitted portal days are immutable.
+    if is_portal_day_submitted(client_id, tracked_on):
+        return
+
+    completed_set = set(completed_action_ids)
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            for action_id in active_action_ids:
+                cursor.execute("""
+                    INSERT INTO client_action_daily_logs (
+                        client_id, action_id, tracked_on, completed
+                    )
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (action_id, tracked_on)
+                    DO UPDATE SET
+                        completed = EXCLUDED.completed,
+                        updated_at = NOW()
+                """, (
+                    client_id,
+                    action_id,
+                    tracked_on,
+                    action_id in completed_set,
+                ))
+
+
+def get_daily_tracking_for_date(client_id: int, tracked_on: date):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    t.client_id,
+                    t.tracked_on,
+                    t.steps,
+                    t.weight_kg,
+                    t.note,
+                    s.submitted_at,
+                    (s.id IS NOT NULL) AS is_submitted
+                FROM client_daily_tracking t
+                LEFT JOIN client_portal_daily_submissions s
+                  ON s.client_id = t.client_id
+                 AND s.tracked_on = t.tracked_on
+                WHERE t.client_id = %s
+                  AND t.tracked_on = %s
+                LIMIT 1
+            """, (client_id, tracked_on))
+            row = cursor.fetchone()
+
+            if row:
+                return row
+
+            # Still return submission state if a very old/partial request
+            # somehow created the submission marker without tracking values.
+            cursor.execute("""
+                SELECT
+                    %s::INTEGER AS client_id,
+                    %s::DATE AS tracked_on,
+                    NULL::INTEGER AS steps,
+                    NULL::NUMERIC AS weight_kg,
+                    NULL::TEXT AS note,
+                    submitted_at,
+                    TRUE AS is_submitted
+                FROM client_portal_daily_submissions
+                WHERE client_id = %s
+                  AND tracked_on = %s
+                LIMIT 1
+            """, (client_id, tracked_on, client_id, tracked_on))
+            return cursor.fetchone()
+
+
+def save_client_daily_entry(
+    client_id: int,
+    tracked_on: date,
+    steps: int | None,
+    weight_kg: float | None,
+    note: str | None = None,
+):
+    """
+    Daily client submission:
+    actions are saved separately; this row stores only steps and optional weight.
+    Once submitted, that day is read-only.
+    """
+    if is_portal_day_submitted(client_id, tracked_on):
+        return
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO client_daily_tracking (
+                    client_id, tracked_on, steps, weight_kg, note
+                )
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (client_id, tracked_on)
+                DO UPDATE SET
+                    steps = EXCLUDED.steps,
+                    weight_kg = EXCLUDED.weight_kg,
+                    note = EXCLUDED.note,
+                    updated_at = NOW()
+            """, (
+                client_id,
+                tracked_on,
+                steps,
+                weight_kg,
+                None,
+            ))
+
+            cursor.execute("""
+                INSERT INTO client_portal_daily_submissions (
+                    client_id, tracked_on
+                )
+                VALUES (%s, %s)
+                ON CONFLICT (client_id, tracked_on)
+                DO NOTHING
+            """, (client_id, tracked_on))
+
+
+def get_current_week_measurement(client_id: int):
+    """
+    Return the latest body-measurement entry in the client's current coaching week.
+    The portal allows only one weekly measurement submission.
+    """
+    today = date.today()
+    _, week_start, week_end = _coaching_week(client_id, today)
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT *
+                FROM client_measurements
+                WHERE client_id = %s
+                  AND measured_on BETWEEN %s AND %s
+                  AND (
+                      upper_arm_cm IS NOT NULL OR
+                      chest_cm IS NOT NULL OR
+                      waist_cm IS NOT NULL OR
+                      lower_abdomen_cm IS NOT NULL OR
+                      hip_cm IS NOT NULL OR
+                      thigh_cm IS NOT NULL
+                  )
+                ORDER BY measured_on DESC, id DESC
+                LIMIT 1
+            """, (client_id, week_start, week_end))
+            return cursor.fetchone()
+
+
+def save_weekly_measurements(
+    client_id: int,
+    measured_on: date,
+    upper_arm: float | None = None,
+    chest: float | None = None,
+    waist: float | None = None,
+    lower_abdomen: float | None = None,
+    hip: float | None = None,
+    thigh: float | None = None,
+    measurement_unit: str = "cm",
+):
+    """
+    Save body measurements once per coaching week.
+    The client chooses the actual date on which she measured.
+    """
+    today = date.today()
+    _, week_start, week_end = _coaching_week(client_id, today)
+
+    if measured_on < week_start or measured_on > week_end:
+        raise ValueError("Measurement date must fall within the current coaching week.")
+
+    if measured_on > today:
+        raise ValueError("Measurement date cannot be in the future.")
+
+    if get_current_week_measurement(client_id):
+        return False
+
+    values = [
+        upper_arm,
+        chest,
+        waist,
+        lower_abdomen,
+        hip,
+        thigh,
+    ]
+    if not any(value is not None for value in values):
+        raise ValueError("Enter at least one body measurement.")
+
+    ClientService.add_measurement(
+        client_id=client_id,
+        measured_on=measured_on,
+        weight_kg=None,
+        upper_arm=upper_arm,
+        chest=chest,
+        waist=waist,
+        lower_abdomen=lower_abdomen,
+        hip=hip,
+        thigh=thigh,
+        measurement_unit=(
+            measurement_unit
+            if measurement_unit in {"cm", "inches"}
+            else "cm"
+        ),
+        checkin_id=None,
+    )
+    return True
+
+
+
+def get_recent_client_activity(client_id: int, limit: int = 14):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    t.tracked_on,
+                    t.steps,
+                    t.weight_kg,
+                    t.note,
+                    COUNT(l.id) AS actions_total,
+                    COUNT(l.id) FILTER (
+                        WHERE l.completed = TRUE
+                    ) AS actions_completed
+                FROM client_daily_tracking t
+                LEFT JOIN client_action_daily_logs l
+                  ON l.client_id = t.client_id
+                 AND l.tracked_on = t.tracked_on
+                WHERE t.client_id = %s
+                GROUP BY
+                    t.tracked_on,
+                    t.steps,
+                    t.weight_kg,
+                    t.note
+                ORDER BY t.tracked_on DESC
+                LIMIT %s
+            """, (client_id, limit))
+            return cursor.fetchall()
+
+
+def _coaching_week(client_id: int, today: date):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT start_date
+                FROM clients
+                WHERE id = %s
+                LIMIT 1
+            """, (client_id,))
+            client = cursor.fetchone()
+
+    start_date = client["start_date"] if client else None
+
+    if start_date and today >= start_date:
+        elapsed = (today - start_date).days
+        week_number = (elapsed // 7) + 1
+        week_start = start_date + timedelta(days=(week_number - 1) * 7)
+    elif start_date:
+        week_number = 1
+        week_start = start_date
+    else:
+        # Safe fallback when a client has no coaching start date yet.
+        week_number = 1
+        week_start = today
+
+    return week_number, week_start, week_start + timedelta(days=6)
+
+
+def get_week_completion(client_id: int):
+    """
+    Client-specific coaching week, not Monday-Sunday.
+
+    Returns:
+    - Week number + actual date range
+    - 7 date rows
+    - submitted-day count
+    - read-only detail for submitted dates
+    """
+    today = date.today()
+    week_number, week_start, week_end = _coaching_week(client_id, today)
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    t.tracked_on,
+                    t.steps,
+                    t.weight_kg,
+                    t.note,
+                    s.submitted_at
+                FROM client_portal_daily_submissions s
+                LEFT JOIN client_daily_tracking t
+                  ON t.client_id = s.client_id
+                 AND t.tracked_on = s.tracked_on
+                WHERE s.client_id = %s
+                  AND s.tracked_on BETWEEN %s AND %s
+                ORDER BY s.tracked_on
+            """, (client_id, week_start, week_end))
+            tracking_rows = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT DISTINCT ON (measured_on)
+                    measured_on, weight_kg, upper_arm_cm, chest_cm, waist_cm,
+                    lower_abdomen_cm, hip_cm, thigh_cm
+                FROM client_measurements
+                WHERE client_id = %s
+                  AND measured_on BETWEEN %s AND %s
+                ORDER BY measured_on, id DESC
+            """, (client_id, week_start, week_end))
+            measurement_rows = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT
+                    l.tracked_on,
+                    l.action_id,
+                    l.completed,
+                    p.action_name,
+                    p.target_count,
+                    p.target_unit
+                FROM client_action_daily_logs l
+                JOIN client_action_plans p
+                  ON p.id = l.action_id
+                WHERE l.client_id = %s
+                  AND l.tracked_on BETWEEN %s AND %s
+                ORDER BY l.tracked_on, p.id
+            """, (client_id, week_start, week_end))
+            action_rows = cursor.fetchall()
+
+    tracking_by_date = {
+        row["tracked_on"]: dict(row)
+        for row in tracking_rows
+    }
+
+    actions_by_date = {}
+    for row in action_rows:
+        actions_by_date.setdefault(row["tracked_on"], []).append(dict(row))
+
+    measurements_by_date = {
+        row["measured_on"]: dict(row)
+        for row in measurement_rows
+    }
+
+    days = []
+    submitted_days = 0
+
+    for offset in range(7):
+        day_date = week_start + timedelta(days=offset)
+        tracking = tracking_by_date.get(day_date)
+        submitted = tracking is not None
+
+        if submitted:
+            submitted_days += 1
+
+        if submitted:
+            state = "submitted"
+        elif day_date == today:
+            state = "today"
+        elif day_date < today:
+            state = "missed"
+        else:
+            state = "upcoming"
+
+        day_actions = actions_by_date.get(day_date, [])
+        completed_actions = sum(
+            1 for item in day_actions if item.get("completed")
+        )
+
+        days.append({
+            "date": day_date,
+            "state": state,
+            "submitted": submitted,
+            "steps": tracking.get("steps") if tracking else None,
+            "weight_kg": tracking.get("weight_kg") if tracking else None,
+            "note": tracking.get("note") if tracking else None,
+            "submitted_at": tracking.get("submitted_at") if tracking else None,
+            "actions": day_actions,
+            "actions_total": len(day_actions),
+            "actions_completed": completed_actions,
+            "measurements": measurements_by_date.get(day_date),
+        })
+
+    checkin_percent = round((submitted_days / 7) * 100)
+
+    # Keep old keys for any other existing caller/template.
+    return {
+        "week_number": week_number,
+        "week_start": week_start,
+        "week_end": week_end,
+        "days": days,
+        "checkins_completed": submitted_days,
+        "checkins_total": 7,
+        "checkin_percent": checkin_percent,
+        "total": 7,
+        "completed": submitted_days,
+        "percent": checkin_percent,
+    }
+
+
+def get_coach_week_review(
+    client_id: int,
+    week_start: date,
+    week_end: date,
+):
+    """Coach-facing complete view of one client coaching week."""
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    s.tracked_on,
+                    s.submitted_at,
+                    t.steps,
+                    t.weight_kg,
+                    t.note
+                FROM client_portal_daily_submissions s
+                LEFT JOIN client_daily_tracking t
+                  ON t.client_id = s.client_id
+                 AND t.tracked_on = s.tracked_on
+                WHERE s.client_id = %s
+                  AND s.tracked_on BETWEEN %s AND %s
+                ORDER BY s.tracked_on
+            """, (client_id, week_start, week_end))
+            submission_rows = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT
+                    p.id,
+                    p.action_name,
+                    p.target_count,
+                    p.target_unit,
+                    p.start_date,
+                    p.end_date
+                FROM client_action_plans p
+                WHERE p.client_id = %s
+                  AND p.start_date <= %s
+                  AND (p.end_date IS NULL OR p.end_date >= %s)
+                ORDER BY p.id
+            """, (client_id, week_end, week_start))
+            action_plan_rows = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT
+                    l.action_id,
+                    l.tracked_on,
+                    l.completed
+                FROM client_action_daily_logs l
+                WHERE l.client_id = %s
+                  AND l.tracked_on BETWEEN %s AND %s
+            """, (client_id, week_start, week_end))
+            log_rows = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT *
+                FROM client_measurements
+                WHERE client_id = %s
+                  AND measured_on BETWEEN %s AND %s
+                ORDER BY measured_on DESC, id DESC
+            """, (client_id, week_start, week_end))
+            measurement_rows = cursor.fetchall()
+
+    submissions = {row["tracked_on"]: dict(row) for row in submission_rows}
+    logs = {
+        (row["action_id"], row["tracked_on"]): bool(row["completed"])
+        for row in log_rows
+    }
+
+    days = []
+    for offset in range(7):
+        day_date = week_start + timedelta(days=offset)
+        submitted = submissions.get(day_date)
+        days.append({
+            "date": day_date,
+            "submitted": submitted is not None,
+            "steps": submitted.get("steps") if submitted else None,
+            "weight_kg": submitted.get("weight_kg") if submitted else None,
+            "note": submitted.get("note") if submitted else None,
+        })
+
+    actions = []
+    for plan in action_plan_rows:
+        item = dict(plan)
+        results = []
+        completed_count = 0
+        eligible_days = 0
+
+        for day in days:
+            d = day["date"]
+            eligible = (
+                d >= item["start_date"]
+                and (item["end_date"] is None or d <= item["end_date"])
+            )
+            completed = None
+            if eligible:
+                eligible_days += 1
+                completed = logs.get((item["id"], d))
+                if completed:
+                    completed_count += 1
+            results.append({
+                "date": d,
+                "eligible": eligible,
+                "completed": completed,
+            })
+
+        item["days"] = results
+        item["completed_count"] = completed_count
+        item["eligible_days"] = eligible_days
+        actions.append(item)
+
+    return {
+        "week_start": week_start,
+        "week_end": week_end,
+        "days": days,
+        "actions": actions,
+        "measurements": [dict(row) for row in measurement_rows],
+        "submitted_count": sum(1 for day in days if day["submitted"]),
+    }

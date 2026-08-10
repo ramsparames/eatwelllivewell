@@ -1,322 +1,205 @@
-{% extends "base.html" %}
-
-{% block title %}
-Home | NourisHer Coach
-{% endblock %}
+{% extends "coach/base.html" %}
+{% block title %}Coach Dashboard | Eat Well Live Well{% endblock %}
 
 {% block content %}
+<style>
+.cd,.cd *{box-sizing:border-box}
+.cd{max-width:1080px;margin:0 auto;display:grid;gap:15px}
+.cd-hero{display:flex;justify-content:space-between;align-items:end;gap:20px;padding:2px 0 3px}
+.cd-eyebrow{margin:0 0 5px;color:var(--coach-purple);font-size:12px;font-weight:850;letter-spacing:.11em;text-transform:uppercase}
+.cd-hero h1{margin:0;font-size:36px;line-height:1.05;letter-spacing:-.04em}
+.cd-hero p{margin:7px 0 0;color:var(--coach-muted);font-size:14px}
+.cd-date{padding:8px 11px;border:1px solid var(--coach-border);border-radius:999px;background:#fff;color:var(--coach-muted);font-size:12px;font-weight:750;white-space:nowrap}
 
-<div class="coach-home">
+.cd-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cd-kpi{min-height:108px;padding:16px;border:1px solid var(--coach-border);border-radius:15px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035)}
+.cd-kpi-label{display:block;color:var(--coach-muted);font-size:12px;font-weight:750}
+.cd-kpi strong{display:block;margin:7px 0 3px;color:var(--coach-purple);font-size:31px;line-height:1;letter-spacing:-.04em}
+.cd-kpi small{color:var(--coach-muted);font-size:11px}
 
-    <header class="coach-home-hero">
+.cd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.cd-lower{display:grid;grid-template-columns:1.25fr .75fr;gap:13px}
+.cd-panel{padding:18px;border:1px solid var(--coach-border);border-radius:16px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035)}
+.cd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:13px}
+.cd-head .over{display:block;margin-bottom:3px;color:var(--coach-purple);font-size:11px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
+.cd-head h2{margin:0;font-size:21px;letter-spacing:-.025em}
+.cd-head a{color:var(--coach-purple);text-decoration:none;font-size:12px;font-weight:800;white-space:nowrap}
 
+.cd-empty{min-height:105px;display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #eee8f0;border-radius:12px;background:#fcfafc}
+.cd-icon{width:38px;height:38px;display:grid;place-items:center;flex:none;border-radius:12px;background:#f2e8f7;color:var(--coach-purple);font-size:17px;font-weight:900}
+.cd-empty strong{display:block;font-size:14px}
+.cd-empty p{margin:3px 0 0;color:var(--coach-muted);font-size:12px}
+
+.cd-list{display:grid;gap:7px}
+.cd-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;background:#fff}
+.cd-item:hover{border-color:#d5bedf;background:#fdfafd}
+.cd-item strong{display:block;font-size:13px}
+.cd-item span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
+.cd-arrow{color:var(--coach-purple)!important;font-size:18px!important;line-height:1}
+
+.cd-attn{display:grid;grid-template-columns:9px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid #eee8f0}
+.cd-attn:first-child{padding-top:0;border-top:0}
+.cd-dot{width:8px;height:8px;border-radius:50%;background:var(--coach-purple)}
+.cd-dot.gold{background:#c68d1f}
+.cd-attn strong{display:block;font-size:13px}
+.cd-attn span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
+
+.cd-client{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;background:#fff}
+.cd-client strong{display:block;font-size:13px}
+.cd-client span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
+.cd-week{white-space:nowrap;color:var(--coach-muted);font-size:11px}
+
+.cd-quick{display:grid;gap:8px}
+.cd-quick a{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:42px;padding:0 12px;border-radius:10px;background:#f6eff9;color:var(--coach-purple);text-decoration:none;font-size:12px;font-weight:800}
+
+@media(max-width:850px){
+  .cd-kpis{grid-template-columns:1fr 1fr}
+  .cd-grid,.cd-lower{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .cd-hero{display:block}
+  .cd-date{display:inline-block;margin-top:10px}
+  .cd-kpis{grid-template-columns:1fr 1fr}
+  .cd-kpi{min-height:94px;padding:13px}
+  .cd-client{grid-template-columns:1fr auto}
+  .cd-week{display:none}
+}
+</style>
+
+{% set without_next_call = active_clients | rejectattr("next_call_date") | list %}
+
+<div class="cd">
+  <header class="cd-hero">
     <div>
-        <p class="eyebrow">
-            Coach command centre
-        </p>
-
-        <h1>
-            Good morning, Sushma 👋
-        </h1>
-
-        <p>
-            Here's what needs your attention...
-        </p>
-
+      <p class="cd-eyebrow">Eat Well Live Well</p>
+      <h1>Coach Dashboard</h1>
+      <p>Calls, follow-ups and clients who need your attention.</p>
     </div>
+    <div class="cd-date" data-today-date>Today</div>
+  </header>
 
-    </header>
+  <section class="cd-kpis">
+    <article class="cd-kpi">
+      <span class="cd-kpi-label">Calls today</span>
+      <strong>{{ calls_today|length if calls_today is defined else 0 }}</strong>
+      <small>Your coaching schedule</small>
+    </article>
+    <article class="cd-kpi">
+      <span class="cd-kpi-label">Active clients</span>
+      <strong>{{ active_clients|length if active_clients is defined else 0 }}</strong>
+      <small>Currently in coaching</small>
+    </article>
+    <article class="cd-kpi">
+      <span class="cd-kpi-label">New leads</span>
+      <strong>{{ new_leads if new_leads is defined else 0 }}</strong>
+      <small>Waiting for review</small>
+    </article>
+    <article class="cd-kpi">
+      <span class="cd-kpi-label">Calls this week</span>
+      <strong>{{ calls_this_week|length if calls_this_week is defined else 0 }}</strong>
+      <small>Scheduled this week</small>
+    </article>
+  </section>
 
+  <section class="cd-grid">
+    <article class="cd-panel">
+      <div class="cd-head">
+        <div><span class="over">Schedule</span><h2>Today's calls</h2></div>
+        <a href="/dashboard/clients">View clients →</a>
+      </div>
 
-    <!-- SUMMARY -->
-
-    <section class="coach-home-stats">
-
-        <a
-            href="/dashboard/clients"
-            class="coach-home-stat"
-        >
-            <span>
-                Active clients
-            </span>
-
-            <strong>
-                {{ active_clients|length }}
-            </strong>
-
-            <small>
-                View coaching →
-            </small>
+      {% if calls_today is defined and calls_today %}
+      <div class="cd-list">
+        {% for call in calls_today %}
+        <a class="cd-item" href="/dashboard/clients/{{ call.id }}">
+          <div>
+            <strong>{{ call.name }}</strong>
+            <span>{{ call.next_call_time or "Time not set" }}</span>
+          </div>
+          <span class="cd-arrow">→</span>
         </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="cd-empty">
+        <div class="cd-icon">✓</div>
+        <div><strong>No coaching calls today</strong><p>Your schedule is clear.</p></div>
+      </div>
+      {% endif %}
+    </article>
 
+    <article class="cd-panel">
+      <div class="cd-head"><div><span class="over">Action</span><h2>Needs attention</h2></div></div>
 
-        <article class="coach-home-stat">
+      <div>
+        <div class="cd-attn">
+          <span class="cd-dot gold"></span>
+          <div>
+            <strong>{{ without_next_call|length }} client{% if without_next_call|length != 1 %}s{% endif %} without a next call</strong>
+            <span>Schedule the next coaching conversation.</span>
+          </div>
+          <a class="cd-arrow" href="/dashboard/clients">→</a>
+        </div>
 
-            <span>
-                Calls today
-            </span>
+        <div class="cd-attn">
+          <span class="cd-dot"></span>
+          <div>
+            <strong>{{ new_leads if new_leads is defined else 0 }} new lead{% if (new_leads if new_leads is defined else 0) != 1 %}s{% endif %}</strong>
+            <span>Review new assessments and applications.</span>
+          </div>
+          <a class="cd-arrow" href="/dashboard/leads">→</a>
+        </div>
+      </div>
+    </article>
+  </section>
 
-            <strong>
-                {{ calls_today|length }}
-            </strong>
+  <section class="cd-lower">
+    <article class="cd-panel">
+      <div class="cd-head">
+        <div><span class="over">Clients</span><h2>Recent clients</h2></div>
+        <a href="/dashboard/clients">All clients →</a>
+      </div>
 
-            <small>
-                Coaching agenda
-            </small>
-
-        </article>
-
-
-        <article class="coach-home-stat">
-
-            <span>
-                Calls this week
-            </span>
-
-            <strong>
-                {{ calls_this_week|length }}
-            </strong>
-
-            <small>
-                Including today
-            </small>
-
-        </article>
-
-
-        <a
-            href="/dashboard/leads"
-            class="coach-home-stat"
-        >
-            <span>
-                New leads
-            </span>
-
-            <strong>
-                {{ new_leads }}
-            </strong>
-
-            <small>
-                Review leads →
-            </small>
+      {% if active_clients is defined and active_clients %}
+      <div class="cd-list">
+        {% for client in active_clients[:5] %}
+        <a class="cd-client" href="/dashboard/clients/{{ client.id }}">
+          <div><strong>{{ client.name }}</strong><span>{{ client.program or "Coaching" }}</span></div>
+          <div class="cd-week">{% if client.current_week %}Week {{ client.current_week }}{% else %}Setup{% endif %}</div>
+          <span class="cd-arrow">→</span>
         </a>
-
-    </section>
-
-
-    <!-- TODAY -->
-
-    <section class="dashboard-panel">
-
-        <div class="panel-heading">
-
-            <div>
-                <p class="eyebrow">
-                    Today
-                </p>
-
-                <h2>
-                    Coaching agenda
-                </h2>
-            </div>
-
-        </div>
-
-
-        {% if calls_today %}
-
-        <div class="home-agenda-list">
-
-            {% for call in calls_today %}
-
-            <a
-                href="/dashboard/clients/{{ call.client_id }}"
-                class="home-agenda-row"
-            >
-
-                <div class="home-agenda-time">
-
-                    {% if call.next_call_time %}
-                        {{ call.next_call_time }}
-                    {% else %}
-                        Time TBD
-                    {% endif %}
-
-                </div>
-
-
-                <div class="home-agenda-person">
-
-                    <strong>
-                        {{ call.name }}
-                    </strong>
-
-                    <span>
-                        {{ call.program }}
-                    </span>
-
-                </div>
-
-
-                <span class="home-agenda-open">
-                    Open →
-                </span>
-
-            </a>
-
-            {% endfor %}
-
-        </div>
-
-        {% else %}
-
-        <div class="coach-home-empty">
-
-            <strong>
-                No coaching calls today.
-            </strong>
-
-            <span>
-                Your coaching calendar is clear.
-            </span>
-
-        </div>
-
-        {% endif %}
-
-    </section>
-
-
-    <!-- THIS WEEK -->
-
-    <section class="dashboard-panel">
-
-        <div class="panel-heading">
-
-            <div>
-                <p class="eyebrow">
-                    Coming up
-                </p>
-
-                <h2>
-                    This week
-                </h2>
-            </div>
-
-        </div>
-
-
-        {% if calls_this_week %}
-
-        <div class="home-week-list">
-
-            {% for call in calls_this_week %}
-
-            <a
-                href="/dashboard/clients/{{ call.client_id }}"
-                class="home-week-row"
-            >
-
-                <div>
-                    <span>
-                        {{ call.next_call_date }}
-                    </span>
-
-                    <strong>
-                        {{ call.name }}
-                    </strong>
-                </div>
-
-
-                <div>
-                    <span>
-                        {{ call.program }}
-                    </span>
-
-                    {% if call.next_call_time %}
-                    <strong>
-                        {{ call.next_call_time }}
-                    </strong>
-                    {% endif %}
-                </div>
-
-            </a>
-
-            {% endfor %}
-
-        </div>
-
-        {% else %}
-
-        <div class="coach-home-empty">
-
-            <strong>
-                No upcoming calls this week.
-            </strong>
-
-            <span>
-                Schedule the next call from a
-                client’s coaching journey.
-            </span>
-
-        </div>
-
-        {% endif %}
-
-    </section>
-
-
-    <!-- QUICK ACCESS -->
-
-    <section class="coach-home-quick-grid">
-
-        <a
-            href="/dashboard/clients"
-            class="coach-home-quick-card"
-        >
-            <span class="coach-home-quick-icon">
-                ♡
-            </span>
-
-            <div>
-                <strong>
-                    Coaching
-                </strong>
-
-                <span>
-                    Clients, calls and weekly
-                    check-ins
-                </span>
-            </div>
-
-            <b>→</b>
-        </a>
-
-
-        <a
-            href="/dashboard/leads"
-            class="coach-home-quick-card"
-        >
-            <span class="coach-home-quick-icon">
-                ◎
-            </span>
-
-            <div>
-                <strong>
-                    Leads
-                </strong>
-
-                <span>
-                    Assessments, applications
-                    and follow-ups
-                </span>
-            </div>
-
-            <b>→</b>
-        </a>
-
-    </section>
-
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="cd-empty">
+        <div class="cd-icon">♡</div>
+        <div><strong>No active clients yet</strong><p>Add a client to begin coaching.</p></div>
+      </div>
+      {% endif %}
+    </article>
+
+    <article class="cd-panel">
+      <div class="cd-head"><div><span class="over">Quick access</span><h2>Jump back in</h2></div></div>
+      <div class="cd-quick">
+        <a href="/dashboard/clients"><span>Manage clients</span><span>→</span></a>
+        <a href="/dashboard/leads"><span>Review leads</span><span>→</span></a>
+        <a href="/" target="_blank" rel="noopener"><span>View website</span><span>↗</span></a>
+      </div>
+    </article>
+  </section>
 </div>
 
+<script>
+(() => {
+  const el = document.querySelector("[data-today-date]");
+  if (!el) return;
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  }).formatToParts(new Date());
+  const get = type => parts.find(p => p.type === type)?.value || "";
+  el.textContent = `${get("day")} ${get("month")} ${get("year")}`;
+})();
+</script>
 {% endblock %}

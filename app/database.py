@@ -1321,6 +1321,36 @@ def get_client(client_id):
 
         return cursor.fetchone()
         
+def update_client_start_date(client_id: int, start_date) -> bool:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE clients
+                SET start_date = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+                """,
+                (start_date, client_id),
+            )
+            return cursor.rowcount > 0
+
+
+def update_client_phone(client_id: int, phone: str | None) -> bool:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE clients
+                SET phone = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+                """,
+                (phone, client_id),
+            )
+            return cursor.rowcount > 0
+
+
 def create_weekly_checkin(
     client_id: int,
     call_date,
@@ -1553,36 +1583,45 @@ def create_client_action(
 def get_client_actions(
     client_id: int,
     status: str | None = None,
+    start_date=None,
+    end_date=None,
 ):
+    """
+    Fetch client action-plan rows.
+
+    With a date period: return plans overlapping that period.
+    Without a period: status='active' means active today.
+    """
+    conditions = ["client_id = %s"]
+    params = [client_id]
+
+    if status:
+        conditions.append("status = %s")
+        params.append(status)
+
+    if start_date is not None and end_date is not None:
+        conditions.append("start_date <= %s")
+        conditions.append("(end_date IS NULL OR end_date >= %s)")
+        params.extend([end_date, start_date])
+    elif status == "active":
+        conditions.append("start_date <= CURRENT_DATE")
+        conditions.append("(end_date IS NULL OR end_date >= CURRENT_DATE)")
+
+    where_clause = " AND ".join(conditions)
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
-
-            if status:
-                cursor.execute(
-                    """
-                    SELECT *
-                    FROM client_action_plans
-                    WHERE client_id = %s
-                      AND status = %s
-                    ORDER BY start_date DESC, id DESC
-                    """,
-                    (
-                        client_id,
-                        status,
-                    ),
-                )
-            else:
-                cursor.execute(
-                    """
-                    SELECT *
-                    FROM client_action_plans
-                    WHERE client_id = %s
-                    ORDER BY start_date DESC, id DESC
-                    """,
-                    (client_id,),
-                )
-
+            cursor.execute(
+                f"""
+                SELECT *
+                FROM client_action_plans
+                WHERE {where_clause}
+                ORDER BY start_date DESC, id DESC
+                """,
+                tuple(params),
+            )
             return cursor.fetchall()
+
 
 
 def complete_client_action(

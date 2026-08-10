@@ -2,103 +2,118 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
-
-    <title>
-        {% block title %}NourisHer Coach{% endblock %}
-    </title>
-
-    <link
-        rel="stylesheet"
-        href="/static/coach.css?v=1"
-    >
-    <link
-        rel="stylesheet"
-        href="/static/components.css?v=1"
-    >
-    <link
-        rel="stylesheet"
-        href="/static/tables.css?v=1"
-    >
-    <link
-        rel="stylesheet"
-        href="/static/forms.css?v=1"
-    >
-    <link
-        rel="stylesheet"
-        href="/static/leads.css?v=1"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Coach Dashboard | Eat Well Live Well{% endblock %}</title>
+    <style>
+        :root{
+            --coach-purple:#5b0e91;
+            --coach-purple-dark:#43066d;
+            --coach-gold:#d6ad3d;
+            --coach-text:#28232c;
+            --coach-muted:#756f79;
+            --coach-border:#e6dee9;
+            --coach-bg:#f8f5f9;
+            --coach-white:#fff;
+        }
+        *{box-sizing:border-box}
+        html{font-size:16px}
+        body{
+            margin:0;
+            background:var(--coach-bg);
+            color:var(--coach-text);
+            font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+            font-size:15px;
+            line-height:1.5;
+        }
+        a{color:inherit}
+        .coach-site-header{
+            position:sticky;top:0;z-index:40;
+            border-bottom:1px solid var(--coach-border);
+            background:rgba(255,255,255,.96);
+            backdrop-filter:blur(10px);
+        }
+        .coach-site-header-inner{
+            max-width:1240px;margin:0 auto;padding:12px 24px;
+            display:flex;align-items:center;justify-content:space-between;gap:24px;
+        }
+        .coach-brand{
+            display:flex;align-items:center;gap:15px;text-decoration:none;min-width:0;
+        }
+        .coach-brand img{
+            width:190px;max-width:36vw;height:48px;object-fit:contain;object-position:left center;
+        }
+        .coach-brand-copy{
+            padding-left:14px;border-left:1px solid var(--coach-border);
+        }
+        .coach-brand-copy strong{
+            display:block;font-size:16px;letter-spacing:-.01em;
+        }
+        .coach-brand-copy span{
+            display:block;margin-top:1px;color:var(--coach-muted);font-size:11px;
+        }
+        .coach-nav{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+        .coach-nav a{
+            padding:8px 11px;border-radius:9px;text-decoration:none;
+            color:var(--coach-muted);font-size:13px;font-weight:700;
+        }
+        .coach-nav a:hover,.coach-nav a.is-active{
+            color:var(--coach-purple);background:#f4edf7;
+        }
+        .coach-nav .coach-logout{margin-left:6px;border:1px solid var(--coach-border);background:#fff}
+        .coach-page{max-width:1240px;margin:0 auto;padding:26px 24px 42px;min-height:calc(100vh - 170px)}
+        .coach-site-footer{
+            margin-top:30px;border-top:1px solid var(--coach-border);background:#fff;
+        }
+        .coach-site-footer-inner{
+            max-width:1240px;margin:0 auto;padding:22px 24px;
+            display:flex;align-items:center;justify-content:space-between;gap:20px;
+            color:var(--coach-muted);font-size:12px;
+        }
+        .coach-site-footer strong{color:var(--coach-text)}
+        @media(max-width:760px){
+            .coach-site-header-inner{align-items:flex-start;flex-direction:column;padding:12px 16px}
+            .coach-brand-copy{display:none}
+            .coach-brand img{width:165px;max-width:70vw}
+            .coach-nav{width:100%}
+            .coach-nav a{font-size:12px}
+            .coach-page{padding:18px 14px 30px}
+            .coach-site-footer-inner{display:block;padding:18px 16px}
+            .coach-site-footer-inner span{display:block;margin-top:4px}
+        }
+    </style>
+    {% block head %}{% endblock %}
 </head>
-
-<body class="coach-body">
-
-<header class="coach-topnav">
-
-    <div class="coach-topnav-inner">
-
-        <a
-            href="/dashboard"
-            class="coach-brand"
-        >
-            <span class="coach-brand-mark">N</span>
-
-            <span>
-                <strong>NourisHer</strong>
-                <small>Coach</small>
+<body>
+<header class="coach-site-header">
+    <div class="coach-site-header-inner">
+        <a class="coach-brand" href="/dashboard" aria-label="Eat Well Live Well Coach Dashboard">
+            <img src="/static/eatwelllivewell-logo.png" alt="Eat Well Live Well">
+            <span class="coach-brand-copy">
+                <strong>Coach Dashboard</strong>
+                <span>Eat Well Live Well coaching</span>
             </span>
         </a>
 
-
         <nav class="coach-nav" aria-label="Coach navigation">
-
-            <a
-                href="/dashboard"
-                class="{% if active_nav == 'today' %}is-active{% endif %}"
-            >
-                Today
-            </a>
-
-            <a
-                href="/dashboard/clients"
-                class="{% if active_nav == 'clients' %}is-active{% endif %}"
-            >
-                Clients
-            </a>
-
-            <a
-                href="/dashboard/leads"
-                class="{% if active_nav == 'leads' %}is-active{% endif %}"
-            >
-                Leads
-            </a>
-
+            <a href="/dashboard" class="{% if active_nav == 'home' %}is-active{% endif %}">Dashboard</a>
+            <a href="/dashboard/leads" class="{% if active_nav == 'leads' %}is-active{% endif %}">Leads</a>
+            <a href="/dashboard/clients" class="{% if active_nav == 'clients' %}is-active{% endif %}">Clients</a>
+            <a href="/" target="_blank" rel="noopener">Website ↗</a>
+            <a class="coach-logout" href="/coach/logout">Log out</a>
         </nav>
-
-
-        <div class="coach-nav-actions">
-            <a href="/coach/logout">
-                Sign out
-            </a>
-        </div>
-
     </div>
-
 </header>
 
-
-<main class="coach-shell">
-
-    {% block content %}
-    {% endblock %}
-
+<main class="coach-page">
+    {% block content %}{% endblock %}
 </main>
 
-
-{% block scripts %}
-{% endblock %}
-
+<footer class="coach-site-footer">
+    <div class="coach-site-footer-inner">
+        <div><strong>Eat Well Live Well</strong> · Coach Dashboard</div>
+        <span>© 2026 Eat Well Live Well · Coaching by Sushma</span>
+    </div>
+</footer>
+{% block scripts %}{% endblock %}
 </body>
 </html>

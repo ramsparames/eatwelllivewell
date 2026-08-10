@@ -18,6 +18,8 @@ from app.database import (
     get_client_intake,
     save_client_measurement,
     get_client_measurements,
+    update_client_start_date,
+    update_client_phone,
 )
 
 
@@ -30,6 +32,20 @@ class ClientService:
     @staticmethod
     def get(client_id):
         return get_client(client_id)
+
+    @staticmethod
+    def set_start_date(client_id, start_date):
+        return update_client_start_date(
+            client_id,
+            start_date,
+        )
+
+    @staticmethod
+    def set_phone(client_id, phone):
+        return update_client_phone(
+            client_id,
+            phone,
+        )
 
     @staticmethod
     def create(
@@ -218,10 +234,14 @@ class ClientService:
     def actions(
         client_id,
         status=None,
+        start_date=None,
+        end_date=None,
     ):
         return get_client_actions(
             client_id,
             status=status,
+            start_date=start_date,
+            end_date=end_date,
         )
     
     
