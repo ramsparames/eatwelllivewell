@@ -32,142 +32,535 @@ templates = Jinja2Templates(
 )
 
 
-ACTION_LIBRARY = [
-    {
-        "category": "Nutrition",
-        "items": [
-            {
-                "key": "protein_first_meal",
-                "name": "Protein in the first meal",
-                "target_count": 7,
-                "target_unit": "days",
-            },
-            {
-                "key": "protein_each_meal",
-                "name": "Include a protein source in each main meal",
-                "target_count": 7,
-                "target_unit": "days",
-            },
-            {
-                "key": "veg_lunch",
-                "name": "Fill half the lunch plate with vegetables",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-            {
-                "key": "planned_evening_snack",
-                "name": "Have a planned protein-rich evening snack",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-            {
-                "key": "slow_eating",
-                "name": "Take at least 20 minutes to finish one main meal",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-        ],
-    },
-    {
-        "category": "Movement",
-        "items": [
-            {
-                "key": "post_meal_walk",
-                "name": "Walk 5–10 minutes after one meal",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-            {
-                "key": "strength_training",
-                "name": "Complete a strength-training session",
-                "target_count": 3,
-                "target_unit": "sessions",
-            },
-            {
-                "key": "movement_breaks",
-                "name": "Stand and move for 2–3 minutes every hour",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-            {
-                "key": "step_target",
-                "name": "Meet the agreed daily step target",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-        ],
-    },
-    {
-        "category": "Hydration",
-        "items": [
-            {
-                "key": "water_2l",
-                "name": "Drink at least 2 litres of water",
-                "target_count": 7,
-                "target_unit": "days",
-            },
-            {
-                "key": "water_morning",
-                "name": "Start the day with water before the first meal",
-                "target_count": 7,
-                "target_unit": "days",
-            },
-        ],
-    },
-    {
-        "category": "Sleep & Recovery",
-        "items": [
-            {
-                "key": "sleep_routine",
-                "name": "Follow the agreed wind-down routine",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-            {
-                "key": "morning_sunlight",
-                "name": "Get 10 minutes of morning sunlight",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-            {
-                "key": "screen_cutoff",
-                "name": "Keep screens away for 30 minutes before bed",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-        ],
-    },
-    {
-        "category": "Mindset & Consistency",
-        "items": [
-            {
-                "key": "pause_before_eating",
-                "name": "Pause and check hunger before unplanned eating",
-                "target_count": 5,
-                "target_unit": "times",
-            },
-            {
-                "key": "meditation",
-                "name": "Do 5–10 minutes of breathing or meditation",
-                "target_count": 5,
-                "target_unit": "days",
-            },
-            {
-                "key": "daily_checkin",
-                "name": "Complete the daily habit check-in",
-                "target_count": 7,
-                "target_unit": "days",
-            },
-        ],
-    },
-]
-
+ACTION_LIBRARY = [{'category': 'Nutrition',
+  'levels': [{'level': 'Beginner',
+              'items': [{'key': 'nutrition_beginner_protein_one_meal',
+                         'name': 'Add protein to one meal',
+                         'habit': 'Protein',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_beginner_protein_breakfast',
+                         'name': 'Add protein to breakfast',
+                         'habit': 'Protein',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_beginner_learn_protein_goal',
+                         'name': 'Learn your daily protein goal',
+                         'habit': 'Protein',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_beginner_vegetables_one_meal',
+                         'name': 'Add vegetables to one meal',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_beginner_one_fruit',
+                         'name': 'Eat one fruit daily',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_beginner_high_fibre_food',
+                         'name': 'Add one high-fibre food (sprouts/beans/oats)',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_beginner_water_waking',
+                         'name': 'Drink water after waking',
+                         'habit': 'Hydration',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_beginner_carry_bottle',
+                         'name': 'Carry a water bottle',
+                         'habit': 'Hydration',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_beginner_water_15_2l',
+                         'name': 'Meet 1.5–2 L water goal',
+                         'habit': 'Hydration',
+                         'target_unit': 'days'}]},
+             {'level': 'Intermediate',
+              'items': [{'key': 'nutrition_intermediate_protein_breakfast_lunch',
+                         'name': 'Add protein to breakfast + lunch',
+                         'habit': 'Protein',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_intermediate_protein_two_meals',
+                         'name': 'Include protein in two meals consistently',
+                         'habit': 'Protein',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_intermediate_vegetables_two_meals',
+                         'name': 'Add vegetables to two meals',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_intermediate_half_lunch_vegetables',
+                         'name': 'Fill half your lunch plate with vegetables',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_intermediate_two_fruits',
+                         'name': 'Eat 2 fruits/day',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_intermediate_seeds',
+                         'name': 'Add seeds (chia/flax/pumpkin)',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_intermediate_drink_before_meal',
+                         'name': 'Drink before every meal',
+                         'habit': 'Hydration',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_intermediate_personal_water',
+                         'name': 'Meet personalized water goal',
+                         'habit': 'Hydration',
+                         'target_unit': 'days'}]},
+             {'level': 'Advanced',
+              'items': [{'key': 'nutrition_advanced_protein_three_meals',
+                         'name': 'Include protein in all 3 meals',
+                         'habit': 'Protein',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_advanced_protein_target',
+                         'name': 'Meet personalized protein target daily',
+                         'habit': 'Protein',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_advanced_prep_protein',
+                         'name': 'Prep protein for tomorrow',
+                         'habit': 'Protein',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_advanced_veg_servings',
+                         'name': 'Eat 3–5 servings vegetables/day',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_advanced_rainbow',
+                         'name': 'Eat a rainbow of vegetables weekly',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_advanced_fermented',
+                         'name': 'Include fermented foods',
+                         'habit': 'Vegetables & Fibre',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_advanced_plan_tomorrow',
+                         'name': 'Plan meals for tomorrow',
+                         'habit': 'Nutrition Habits',
+                         'target_unit': 'days'},
+                        {'key': 'nutrition_advanced_meal_prep',
+                         'name': 'Meal prep for the week',
+                         'habit': 'Nutrition Habits',
+                         'target_unit': 'times'},
+                        {'key': 'nutrition_advanced_slow_mindful',
+                         'name': 'Eat slowly and mindfully',
+                         'habit': 'Nutrition Habits',
+                         'target_unit': 'days'}]}]},
+ {'category': 'Movement',
+  'levels': [{'level': 'Beginner',
+              'items': [{'key': 'movement_beginner_walk_10',
+                         'name': 'Walk 10 minutes',
+                         'habit': 'Walking',
+                         'target_unit': 'days'},
+                        {'key': 'movement_beginner_5000_steps',
+                         'name': 'Reach 5,000 steps',
+                         'habit': 'Steps',
+                         'target_unit': 'days'},
+                        {'key': 'movement_beginner_stretch_5',
+                         'name': 'Stretch 5 minutes',
+                         'habit': 'Mobility',
+                         'target_unit': 'days'},
+                        {'key': 'movement_beginner_strength_one',
+                         'name': 'Complete one strength workout/week',
+                         'habit': 'Strength',
+                         'target_unit': 'sessions'}]},
+             {'level': 'Intermediate',
+              'items': [{'key': 'movement_intermediate_walk_after_meal',
+                         'name': 'Walk after one meal',
+                         'habit': 'Walking',
+                         'target_unit': 'days'},
+                        {'key': 'movement_intermediate_7500_steps',
+                         'name': 'Reach 7,500 steps',
+                         'habit': 'Steps',
+                         'target_unit': 'days'},
+                        {'key': 'movement_intermediate_stretch_10',
+                         'name': 'Stretch 10 minutes',
+                         'habit': 'Mobility',
+                         'target_unit': 'days'},
+                        {'key': 'movement_intermediate_strength_two',
+                         'name': 'Complete two strength workouts/week',
+                         'habit': 'Strength',
+                         'target_unit': 'sessions'},
+                        {'key': 'movement_intermediate_mobility',
+                         'name': 'Practice mobility routine',
+                         'habit': 'Mobility',
+                         'target_unit': 'sessions'}]},
+             {'level': 'Advanced',
+              'items': [{'key': 'movement_advanced_step_goal',
+                         'name': 'Reach personalized step goal',
+                         'habit': 'Steps',
+                         'target_unit': 'days'},
+                        {'key': 'movement_advanced_walk_two_meals',
+                         'name': 'Walk after two meals',
+                         'habit': 'Walking',
+                         'target_unit': 'days'},
+                        {'key': 'movement_advanced_strength_three',
+                         'name': 'Complete three strength workouts/week',
+                         'habit': 'Strength',
+                         'target_unit': 'sessions'},
+                        {'key': 'movement_advanced_progressive_overload',
+                         'name': 'Progressive overload',
+                         'habit': 'Strength',
+                         'target_unit': 'sessions'},
+                        {'key': 'movement_advanced_recovery_walk',
+                         'name': 'Recovery walk',
+                         'habit': 'Recovery',
+                         'target_unit': 'sessions'},
+                        {'key': 'movement_advanced_yoga_mobility',
+                         'name': 'Yoga or mobility session',
+                         'habit': 'Mobility',
+                         'target_unit': 'sessions'}]}]},
+ {'category': 'Sleep',
+  'levels': [{'level': 'Beginner',
+              'items': [{'key': 'sleep_beginner_fixed_bedtime',
+                         'name': 'Fixed bedtime',
+                         'habit': 'Sleep Routine',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_beginner_fixed_wakeup',
+                         'name': 'Fixed wake-up time',
+                         'habit': 'Sleep Routine',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_beginner_no_screens',
+                         'name': 'No screens 30 minutes before bed',
+                         'habit': 'Sleep Routine',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_beginner_morning_sunlight',
+                         'name': 'Morning sunlight (10 minutes)',
+                         'habit': 'Sleep Routine',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_beginner_box_breathing',
+                         'name': 'Box Breathing',
+                         'habit': 'Breathing',
+                         'target_unit': 'sessions'},
+                        {'key': 'sleep_beginner_478',
+                         'name': '4-7-8 Breathing',
+                         'habit': 'Breathing',
+                         'target_unit': 'sessions'}]},
+             {'level': 'Intermediate',
+              'items': [{'key': 'sleep_intermediate_bedtime_routine',
+                         'name': 'Bedtime routine',
+                         'habit': 'Sleep Routine',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_intermediate_read',
+                         'name': 'Read before bed',
+                         'habit': 'Sleep Routine',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_intermediate_stretch',
+                         'name': 'Stretch before bed',
+                         'habit': 'Sleep Routine',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_intermediate_cool_dark',
+                         'name': 'Cool & dark bedroom',
+                         'habit': 'Sleep Environment',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_intermediate_left_nostril',
+                         'name': 'Left Nostril Breathing',
+                         'habit': 'Breathing',
+                         'target_unit': 'sessions'},
+                        {'key': 'sleep_intermediate_diaphragmatic',
+                         'name': 'Diaphragmatic Breathing',
+                         'habit': 'Breathing',
+                         'target_unit': 'sessions'},
+                        {'key': 'sleep_intermediate_alternate_nostril',
+                         'name': 'Alternate Nostril Breathing',
+                         'habit': 'Breathing',
+                         'target_unit': 'sessions'}]},
+             {'level': 'Advanced',
+              'items': [{'key': 'sleep_advanced_7_8_hours',
+                         'name': 'Sleep 7–8 hours consistently',
+                         'habit': 'Sleep Routine',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_advanced_consistent_schedule',
+                         'name': 'Consistent sleep schedule',
+                         'habit': 'Sleep Routine',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_advanced_journal',
+                         'name': 'Journal before bed',
+                         'habit': 'Relaxation',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_advanced_track_quality',
+                         'name': 'Track sleep quality',
+                         'habit': 'Sleep Tracking',
+                         'target_unit': 'days'},
+                        {'key': 'sleep_advanced_pmr',
+                         'name': 'Progressive Muscle Relaxation',
+                         'habit': 'Relaxation',
+                         'target_unit': 'sessions'},
+                        {'key': 'sleep_advanced_yoga_nidra',
+                         'name': 'Yoga Nidra',
+                         'habit': 'Relaxation',
+                         'target_unit': 'sessions'},
+                        {'key': 'sleep_advanced_guided_meditation',
+                         'name': 'Guided Sleep Meditation',
+                         'habit': 'Relaxation',
+                         'target_unit': 'sessions'}]}]},
+ {'category': 'Stress',
+  'levels': [{'level': 'Beginner',
+              'items': [{'key': 'stress_beginner_gratitude',
+                         'name': 'Practice gratitude',
+                         'habit': 'Stress Management',
+                         'target_unit': 'days'},
+                        {'key': 'stress_beginner_5_breaths',
+                         'name': 'Take 5 deep breaths',
+                         'habit': 'Breathing',
+                         'target_unit': 'sessions'},
+                        {'key': 'stress_beginner_outside',
+                         'name': 'Spend 10 minutes outside',
+                         'habit': 'Stress Management',
+                         'target_unit': 'days'},
+                        {'key': 'stress_beginner_music',
+                         'name': 'Listen to calming music',
+                         'habit': 'Stress Management',
+                         'target_unit': 'days'}]},
+             {'level': 'Intermediate',
+              'items': [{'key': 'stress_intermediate_meditation',
+                         'name': 'Meditation (5–10 min)',
+                         'habit': 'Meditation',
+                         'target_unit': 'sessions'},
+                        {'key': 'stress_intermediate_journal',
+                         'name': 'Journal emotions',
+                         'habit': 'Journaling',
+                         'target_unit': 'days'},
+                        {'key': 'stress_intermediate_plan_tomorrow',
+                         'name': 'Plan tomorrow',
+                         'habit': 'Planning',
+                         'target_unit': 'days'},
+                        {'key': 'stress_intermediate_declutter',
+                         'name': 'Declutter one space',
+                         'habit': 'Environment',
+                         'target_unit': 'times'},
+                        {'key': 'stress_intermediate_self_compassion',
+                         'name': 'Practice self-compassion',
+                         'habit': 'Mindset',
+                         'target_unit': 'days'}]},
+             {'level': 'Advanced',
+              'items': [{'key': 'stress_advanced_body_scan',
+                         'name': 'Body scan meditation',
+                         'habit': 'Meditation',
+                         'target_unit': 'sessions'},
+                        {'key': 'stress_advanced_progressive_relaxation',
+                         'name': 'Progressive relaxation',
+                         'habit': 'Relaxation',
+                         'target_unit': 'sessions'},
+                        {'key': 'stress_advanced_downtime',
+                         'name': 'Schedule intentional downtime',
+                         'habit': 'Recovery',
+                         'target_unit': 'sessions'},
+                        {'key': 'stress_advanced_digital_detox',
+                         'name': 'Digital detox',
+                         'habit': 'Recovery',
+                         'target_unit': 'sessions'},
+                        {'key': 'stress_advanced_nature_walk',
+                         'name': 'Nature walk',
+                         'habit': 'Recovery',
+                         'target_unit': 'sessions'},
+                        {'key': 'stress_advanced_weekly_wins',
+                         'name': 'Reflect on weekly wins',
+                         'habit': 'Reflection',
+                         'target_unit': 'times'}]}]},
+ {'category': 'Energy',
+  'levels': [{'level': 'Beginner',
+              'items': [{'key': 'energy_beginner_breakfast',
+                         'name': 'Eat breakfast',
+                         'habit': 'Fuel',
+                         'target_unit': 'days'},
+                        {'key': 'energy_beginner_water',
+                         'name': 'Drink water after waking',
+                         'habit': 'Hydration',
+                         'target_unit': 'days'},
+                        {'key': 'energy_beginner_sunlight',
+                         'name': 'Morning sunlight',
+                         'habit': 'Circadian Rhythm',
+                         'target_unit': 'days'},
+                        {'key': 'energy_beginner_supplements',
+                         'name': 'Take prescribed supplements',
+                         'habit': 'Health Routine',
+                         'target_unit': 'days'},
+                        {'key': 'energy_beginner_afternoon_walk',
+                         'name': 'Take a short afternoon walk',
+                         'habit': 'Movement',
+                         'target_unit': 'days'}]},
+             {'level': 'Intermediate',
+              'items': [{'key': 'energy_intermediate_protein_first',
+                         'name': 'Protein in first meal',
+                         'habit': 'Fuel',
+                         'target_unit': 'days'},
+                        {'key': 'energy_intermediate_balance_meals',
+                         'name': 'Balance meals throughout the day',
+                         'habit': 'Fuel',
+                         'target_unit': 'days'},
+                        {'key': 'energy_intermediate_reduce_crash',
+                         'name': 'Reduce afternoon energy crashes',
+                         'habit': 'Energy Rhythm',
+                         'target_unit': 'days'},
+                        {'key': 'energy_intermediate_no_skip',
+                         'name': 'Avoid skipping meals',
+                         'habit': 'Fuel',
+                         'target_unit': 'days'},
+                        {'key': 'energy_intermediate_move_hourly',
+                         'name': 'Move every hour',
+                         'habit': 'Movement',
+                         'target_unit': 'days'}]},
+             {'level': 'Advanced',
+              'items': [{'key': 'energy_advanced_stable_energy',
+                         'name': 'Maintain stable energy throughout the day',
+                         'habit': 'Energy Rhythm',
+                         'target_unit': 'days'},
+                        {'key': 'energy_advanced_busy_days',
+                         'name': 'Pre-plan busy days',
+                         'habit': 'Planning',
+                         'target_unit': 'days'},
+                        {'key': 'energy_advanced_fuel_workouts',
+                         'name': 'Fuel workouts properly',
+                         'habit': 'Fuel',
+                         'target_unit': 'days'},
+                        {'key': 'energy_advanced_meal_timing',
+                         'name': 'Maintain consistent meal timing',
+                         'habit': 'Fuel',
+                         'target_unit': 'days'},
+                        {'key': 'energy_advanced_track_energy',
+                         'name': 'Track energy daily',
+                         'habit': 'Tracking',
+                         'target_unit': 'days'}]}]},
+ {'category': 'Connection',
+  'levels': [{'level': 'Beginner',
+              'items': [{'key': 'connection_beginner_call_friend',
+                         'name': 'Call a friend',
+                         'habit': 'Social Connection',
+                         'target_unit': 'times'},
+                        {'key': 'connection_beginner_family_meal',
+                         'name': 'Eat one meal with family',
+                         'habit': 'Family',
+                         'target_unit': 'days'},
+                        {'key': 'connection_beginner_share_win',
+                         'name': 'Share one win',
+                         'habit': 'Support',
+                         'target_unit': 'times'},
+                        {'key': 'connection_beginner_ask_help',
+                         'name': 'Ask for help when needed',
+                         'habit': 'Support',
+                         'target_unit': 'times'}]},
+             {'level': 'Intermediate',
+              'items': [{'key': 'connection_intermediate_family_time',
+                         'name': 'Spend quality time with family',
+                         'habit': 'Family',
+                         'target_unit': 'sessions'},
+                        {'key': 'connection_intermediate_listening',
+                         'name': 'Practice active listening',
+                         'habit': 'Communication',
+                         'target_unit': 'days'},
+                        {'key': 'connection_intermediate_coaching_call',
+                         'name': 'Join the weekly coaching call',
+                         'habit': 'Coaching',
+                         'target_unit': 'sessions'},
+                        {'key': 'connection_intermediate_accountability',
+                         'name': 'Check in with your accountability partner',
+                         'habit': 'Accountability',
+                         'target_unit': 'times'}]},
+             {'level': 'Advanced',
+              'items': [{'key': 'connection_advanced_mentor',
+                         'name': 'Mentor someone',
+                         'habit': 'Community',
+                         'target_unit': 'times'},
+                        {'key': 'connection_advanced_gratitude',
+                         'name': 'Express gratitude to someone',
+                         'habit': 'Connection',
+                         'target_unit': 'times'},
+                        {'key': 'connection_advanced_community',
+                         'name': 'Participate in the NourisHer community',
+                         'habit': 'Community',
+                         'target_unit': 'sessions'},
+                        {'key': 'connection_advanced_celebrate',
+                         'name': "Celebrate another person's success",
+                         'habit': 'Connection',
+                         'target_unit': 'times'},
+                        {'key': 'connection_advanced_ritual',
+                         'name': 'Build a meaningful weekly connection ritual',
+                         'habit': 'Connection',
+                         'target_unit': 'sessions'}]}]}]
 
 ACTION_LIBRARY_BY_KEY = {
     item["key"]: item
     for category in ACTION_LIBRARY
-    for item in category["items"]
+    for level in category["levels"]
+    for item in level["items"]
 }
+
+
+def _safe_target_count(value: str | None) -> int | None:
+    value = (value or "").strip()
+    if not value:
+        return None
+    try:
+        parsed = int(value)
+    except ValueError:
+        return None
+    return parsed if 1 <= parsed <= 7 else None
+
+
+def _selected_library_assignments(
+    action_keys: list[str],
+    target_counts: list[str],
+    target_units: list[str],
+):
+    assignments = []
+    for index, action_key in enumerate(action_keys):
+        library_action = ACTION_LIBRARY_BY_KEY.get(action_key)
+        if not library_action:
+            continue
+
+        count = _safe_target_count(
+            target_counts[index] if index < len(target_counts) else ""
+        )
+        if count is None:
+            continue
+
+        unit = (
+            target_units[index].strip()
+            if index < len(target_units) and target_units[index].strip()
+            else library_action.get("target_unit", "days")
+        )
+        if unit not in {"days", "sessions", "times"}:
+            unit = library_action.get("target_unit", "days")
+
+        assignments.append(
+            {
+                "name": library_action["name"],
+                "target_count": count,
+                "target_unit": unit,
+            }
+        )
+    return assignments
+
+
+def _custom_action_assignments(
+    names: list[str],
+    target_counts: list[str],
+    target_units: list[str],
+):
+    assignments = []
+    for index, raw_name in enumerate(names):
+        name = (raw_name or "").strip()
+        if not name:
+            continue
+
+        count = _safe_target_count(
+            target_counts[index] if index < len(target_counts) else ""
+        )
+        if count is None:
+            continue
+
+        unit = (
+            target_units[index].strip()
+            if index < len(target_units) and target_units[index].strip()
+            else "days"
+        )
+        if unit not in {"days", "sessions", "times"}:
+            unit = "days"
+
+        assignments.append(
+            {
+                "name": name,
+                "target_count": count,
+                "target_unit": unit,
+            }
+        )
+    return assignments
+
 
 CALL_TIME_SLOTS = [
     {
@@ -608,9 +1001,11 @@ def save_client_intake_route(
     goal_weight_kg: str = Form(""),
     coach_focus: str = Form(""),
     action_keys: list[str] = Form(default=[]),
-    custom_action_name: str = Form(""),
-    custom_target_count: str = Form(""),
-    custom_target_unit: str = Form(""),
+    action_target_counts: list[str] = Form(default=[]),
+    action_target_units: list[str] = Form(default=[]),
+    custom_action_names: list[str] = Form(default=[]),
+    custom_target_counts: list[str] = Form(default=[]),
+    custom_target_units: list[str] = Form(default=[]),
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse("/coach/login", status_code=303)
@@ -647,33 +1042,31 @@ def save_client_intake_route(
     first_week_end = parsed_week_start + timedelta(days=6)
     added_names = set()
 
-    for action_key in action_keys:
-        library_action = ACTION_LIBRARY_BY_KEY.get(action_key)
-        if not library_action or library_action["name"] in added_names:
+    assignments = _selected_library_assignments(
+        action_keys,
+        action_target_counts,
+        action_target_units,
+    )
+    assignments.extend(
+        _custom_action_assignments(
+            custom_action_names,
+            custom_target_counts,
+            custom_target_units,
+        )
+    )
+
+    for assignment in assignments:
+        if assignment["name"] in added_names:
             continue
         ClientService.add_action(
             client_id=client_id,
-            action_name=library_action["name"],
-            target_count=library_action["target_count"],
-            target_unit=library_action["target_unit"],
+            action_name=assignment["name"],
+            target_count=assignment["target_count"],
+            target_unit=assignment["target_unit"],
             start_date=parsed_week_start,
             end_date=first_week_end,
         )
-        added_names.add(library_action["name"])
-
-    if custom_action_name.strip() and custom_action_name.strip() not in added_names:
-        ClientService.add_action(
-            client_id=client_id,
-            action_name=custom_action_name.strip(),
-            target_count=(
-                int(custom_target_count)
-                if custom_target_count.strip()
-                else None
-            ),
-            target_unit=custom_target_unit.strip() or None,
-            start_date=parsed_week_start,
-            end_date=first_week_end,
-        )
+        added_names.add(assignment["name"])
 
     return RedirectResponse(
         f"/dashboard/clients/{client_id}",
@@ -711,6 +1104,8 @@ def add_client_action(
     request: Request,
     client_id: int,
     action_key: str = Form(""),
+    target_count: str = Form(""),
+    target_unit: str = Form("days"),
     custom_action_name: str = Form(""),
     custom_target_count: str = Form(""),
     custom_target_unit: str = Form(""),
@@ -729,8 +1124,12 @@ def add_client_action(
         library_action = ACTION_LIBRARY_BY_KEY.get(action_key)
         if library_action:
             action_name = library_action["name"]
-            target_count = library_action["target_count"]
-            target_unit = library_action["target_unit"]
+            target_count = _safe_target_count(target_count)
+            target_unit = (
+                target_unit.strip()
+                if target_unit.strip() in {"days", "sessions", "times"}
+                else library_action.get("target_unit", "days")
+            )
 
     if not action_name and custom_action_name.strip():
         action_name = custom_action_name.strip()
@@ -844,9 +1243,11 @@ def add_client_checkin(
     improvements_needed: str = Form(""),
     coach_support: str = Form(""),
     action_keys: list[str] = Form(default=[]),
-    custom_action_name: str = Form(""),
-    custom_target_count: str = Form(""),
-    custom_target_unit: str = Form(""),
+    action_target_counts: list[str] = Form(default=[]),
+    action_target_units: list[str] = Form(default=[]),
+    custom_action_names: list[str] = Form(default=[]),
+    custom_target_counts: list[str] = Form(default=[]),
+    custom_target_units: list[str] = Form(default=[]),
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse("/coach/login", status_code=303)
@@ -884,37 +1285,32 @@ def add_client_checkin(
         )
     }
 
-    for action_key in action_keys:
-        library_action = ACTION_LIBRARY_BY_KEY.get(action_key)
-        if not library_action:
-            continue
-        if library_action["name"] in existing_action_names:
-            continue
-        ClientService.add_action(
-            client_id=client_id,
-            action_name=library_action["name"],
-            target_count=library_action["target_count"],
-            target_unit=library_action["target_unit"],
-            start_date=action_start_date,
-            end_date=action_end_date,
-            checkin_id=checkin_id,
+    assignments = _selected_library_assignments(
+        action_keys,
+        action_target_counts,
+        action_target_units,
+    )
+    assignments.extend(
+        _custom_action_assignments(
+            custom_action_names,
+            custom_target_counts,
+            custom_target_units,
         )
-        existing_action_names.add(library_action["name"])
+    )
 
-    if custom_action_name.strip() and custom_action_name.strip() not in existing_action_names:
+    for assignment in assignments:
+        if assignment["name"] in existing_action_names:
+            continue
         ClientService.add_action(
             client_id=client_id,
-            action_name=custom_action_name.strip(),
-            target_count=(
-                int(custom_target_count)
-                if custom_target_count.strip()
-                else None
-            ),
-            target_unit=custom_target_unit.strip() or None,
+            action_name=assignment["name"],
+            target_count=assignment["target_count"],
+            target_unit=assignment["target_unit"],
             start_date=action_start_date,
             end_date=action_end_date,
             checkin_id=checkin_id,
         )
+        existing_action_names.add(assignment["name"])
 
     return RedirectResponse(
         f"/dashboard/clients/{client_id}?tab=weekly",
