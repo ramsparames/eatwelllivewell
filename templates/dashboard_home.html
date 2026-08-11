@@ -12,10 +12,10 @@
 .cd-date{padding:8px 11px;border:1px solid var(--coach-border);border-radius:999px;background:#fff;color:var(--coach-muted);font-size:12px;font-weight:750;white-space:nowrap}
 
 .cd-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.cd-kpi{min-height:108px;padding:16px;border:1px solid var(--coach-border);border-radius:15px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035)}
+.cd-kpi{min-height:108px;padding:16px;border:1px solid var(--coach-border);border-radius:15px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035);text-decoration:none;color:inherit;display:block;transition:.15s ease}.cd-kpi:hover{transform:translateY(-1px);border-color:#d5bedf;box-shadow:0 8px 22px rgba(43,26,52,.07)}
 .cd-kpi-label{display:block;color:var(--coach-muted);font-size:12px;font-weight:750}
 .cd-kpi strong{display:block;margin:7px 0 3px;color:var(--coach-purple);font-size:31px;line-height:1;letter-spacing:-.04em}
-.cd-kpi small{color:var(--coach-muted);font-size:11px}
+.cd-kpi small{color:var(--coach-muted);font-size:11px}.cd-kpi-hint{float:right;color:var(--coach-purple);font-size:13px;font-weight:900}
 
 .cd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
 .cd-lower{display:grid;grid-template-columns:1.25fr .75fr;gap:13px}
@@ -30,7 +30,7 @@
 .cd-empty strong{display:block;font-size:14px}
 .cd-empty p{margin:3px 0 0;color:var(--coach-muted);font-size:12px}
 
-.cd-list{display:grid;gap:7px}
+.cd-list{display:grid;gap:7px}.cd-week-list{display:grid;grid-template-columns:1fr 1fr;gap:7px}.cd-week-call{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;background:#fff}.cd-week-call:hover{border-color:#d5bedf;background:#fdfafd}.cd-week-call strong{display:block;font-size:12px}.cd-week-call span{display:block;margin-top:2px;color:var(--coach-muted);font-size:10px}
 .cd-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;background:#fff}
 .cd-item:hover{border-color:#d5bedf;background:#fdfafd}
 .cd-item strong{display:block;font-size:13px}
@@ -54,7 +54,7 @@
 
 @media(max-width:850px){
   .cd-kpis{grid-template-columns:1fr 1fr}
-  .cd-grid,.cd-lower{grid-template-columns:1fr}
+  .cd-grid,.cd-lower{grid-template-columns:1fr}.cd-week-list{grid-template-columns:1fr}
 }
 @media(max-width:520px){
   .cd-hero{display:block}
@@ -66,7 +66,7 @@
 }
 </style>
 
-{% set without_next_call = active_clients | rejectattr("next_call_date") | list %}
+{% set without_next_call = clients_without_next_call if clients_without_next_call is defined else [] %}
 
 <div class="cd">
   <header class="cd-hero">
@@ -78,43 +78,50 @@
     <div class="cd-date" data-today-date>Today</div>
   </header>
 
+  {% if synamate_calendar_configured is defined and not synamate_calendar_configured %}
+  <div style="padding:10px 13px;border:1px solid #e7d7b3;border-radius:11px;background:#fffaf0;color:#7d6126;font-size:11px">
+    Waiting to identify one or more Synamate calendars from webhook activity.
+    <a href="/dashboard/synamate-calendars" style="color:inherit;font-weight:800">View calendar detection →</a>
+  </div>
+  {% endif %}
+
   <section class="cd-kpis">
-    <article class="cd-kpi">
-      <span class="cd-kpi-label">Calls today</span>
+    <a class="cd-kpi" href="#todays-schedule">
+      <span class="cd-kpi-label">Calls today <span class="cd-kpi-hint">↓</span></span>
       <strong>{{ calls_today|length if calls_today is defined else 0 }}</strong>
-      <small>Your coaching schedule</small>
-    </article>
-    <article class="cd-kpi">
-      <span class="cd-kpi-label">Active clients</span>
+      <small>Leads + coaching clients</small>
+    </a>
+    <a class="cd-kpi" href="/dashboard/clients">
+      <span class="cd-kpi-label">Active clients <span class="cd-kpi-hint">→</span></span>
       <strong>{{ active_clients|length if active_clients is defined else 0 }}</strong>
-      <small>Currently in coaching</small>
-    </article>
-    <article class="cd-kpi">
-      <span class="cd-kpi-label">New leads</span>
+      <small>View all coaching clients</small>
+    </a>
+    <a class="cd-kpi" href="/dashboard/leads">
+      <span class="cd-kpi-label">New leads <span class="cd-kpi-hint">→</span></span>
       <strong>{{ new_leads if new_leads is defined else 0 }}</strong>
-      <small>Waiting for review</small>
-    </article>
-    <article class="cd-kpi">
-      <span class="cd-kpi-label">Calls this week</span>
+      <small>Review leads</small>
+    </a>
+    <a class="cd-kpi" href="#weekly-schedule">
+      <span class="cd-kpi-label">Calls this week <span class="cd-kpi-hint">↓</span></span>
       <strong>{{ calls_this_week|length if calls_this_week is defined else 0 }}</strong>
-      <small>Scheduled this week</small>
-    </article>
+      <small>See this week’s schedule</small>
+    </a>
   </section>
 
   <section class="cd-grid">
-    <article class="cd-panel">
+    <article class="cd-panel" id="todays-schedule">
       <div class="cd-head">
-        <div><span class="over">Schedule</span><h2>Today's calls</h2></div>
-        <a href="/dashboard/clients">View clients →</a>
+        <div><span class="over">Schedule</span><h2>Today's schedule</h2></div>
+        <a href="#weekly-schedule">View this week →</a>
       </div>
 
       {% if calls_today is defined and calls_today %}
       <div class="cd-list">
         {% for call in calls_today %}
-        <a class="cd-item" href="/dashboard/clients/{{ call.id }}">
+        <a class="cd-item" href="{{ call.href or '/dashboard' }}">
           <div>
             <strong>{{ call.name }}</strong>
-            <span>{{ call.next_call_time or "Time not set" }}</span>
+            <span>{{ call.next_call_time or "Time not set" }} · {{ call.call_type or "Coaching call" }}</span>
           </div>
           <span class="cd-arrow">→</span>
         </a>
@@ -123,7 +130,7 @@
       {% else %}
       <div class="cd-empty">
         <div class="cd-icon">✓</div>
-        <div><strong>No coaching calls today</strong><p>Your schedule is clear.</p></div>
+        <div><strong>No calls today</strong><p>No clarity or coaching calls scheduled.</p></div>
       </div>
       {% endif %}
     </article>
@@ -151,6 +158,32 @@
         </div>
       </div>
     </article>
+  </section>
+
+  <section class="cd-panel" id="weekly-schedule">
+    <div class="cd-head">
+      <div><span class="over">Week</span><h2>This week’s schedule</h2></div>
+      <a href="#todays-schedule">Today ↑</a>
+    </div>
+
+    {% if calls_this_week is defined and calls_this_week %}
+    <div class="cd-week-list">
+      {% for call in calls_this_week %}
+      <a class="cd-week-call" href="{{ call.href or '/dashboard' }}">
+        <div>
+          <strong>{{ call.name }}</strong>
+          <span>{{ call.date_label }} · {{ call.time_label }} · {{ call.call_type }}</span>
+        </div>
+        <span class="cd-arrow">→</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="cd-empty">
+      <div class="cd-icon">✓</div>
+      <div><strong>No calls scheduled this week</strong><p>Clarity and coaching calls will appear here after Synamate syncs them.</p></div>
+    </div>
+    {% endif %}
   </section>
 
   <section class="cd-lower">

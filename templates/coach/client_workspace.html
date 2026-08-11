@@ -22,7 +22,37 @@
 .nw-review{display:grid;gap:14px}.nw-table-wrap{overflow:auto;border:1px solid var(--coach-border);border-radius:13px}.nw-table{width:100%;border-collapse:collapse;min-width:820px;font-size:14.5px}.nw-table th{padding:9px 8px;background:#faf7fb;color:var(--coach-muted);text-align:center}.nw-table th:first-child,.nw-table td:first-child{text-align:left;min-width:210px}.nw-table td{padding:9px 8px;border-top:1px solid #f0ebf1;text-align:center}.yes{color:#2b7b52;font-weight:900}.no{color:#b5adb8}.na{color:#d0c8d2}
 .nw-days{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.nw-day{padding:10px;border:1px solid var(--coach-border);border-radius:11px;background:#fff}.nw-day.submitted{background:#fbf8fc;border-color:#dfcde8}.nw-day strong{display:block;font-size:14px}.nw-day small{display:block;margin-top:2px;color:var(--coach-muted);font-size:10.5px}.nw-day p{margin:7px 0 0;font-size:10.5px;line-height:1.35;color:var(--coach-muted)}.nw-day-data{margin-top:6px;display:grid;gap:3px;font-size:10.5px}
 .nw-measures{display:grid;gap:8px}.nw-measure{padding:10px 12px;border:1px solid #eee7f0;border-radius:11px}.nw-measure strong{display:block;margin-bottom:6px;font-size:14px}.nw-values{display:flex;flex-wrap:wrap;gap:5px 12px;color:var(--coach-muted);font-size:14.5px}.nw-call{display:grid;gap:14px}.nw-call-notes{display:grid;grid-template-columns:1fr 1fr;gap:10px}.nw-next{padding:18px;border:1px solid #e4d5eb;border-radius:15px;background:#fdfafd}.nw-next h3{margin:0;font-size:16px}.nw-next p{margin:4px 0 12px;color:var(--coach-muted);font-size:14.5px}.nw-save{display:flex;justify-content:space-between;gap:14px;align-items:center}.nw-save p{margin:0;color:var(--coach-muted);font-size:14.5px}
-@media(max-width:900px){.nw-overview{grid-template-columns:1fr}.nw-days{grid-template-columns:repeat(4,1fr)}.nw-grid3{grid-template-columns:1fr 1fr}}@media(max-width:650px){.nw-top{display:block}.nw-meta{justify-content:flex-start;margin-top:12px}.nw-grid2,.nw-grid3,.nw-call-notes,.nw-library-items{grid-template-columns:1fr}.nw-action:nth-child(even){border-left:0}.nw-steps{grid-template-columns:1fr}.nw-days{grid-template-columns:1fr 1fr}.nw-note-grid{grid-template-columns:1fr}}
+
+.nw-prep-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.nw-prep-stat{padding:12px;border:1px solid #eee7f0;border-radius:11px;background:#fcfafc}
+.nw-prep-stat span{display:block;color:var(--coach-muted);font-size:10px}.nw-prep-stat strong{display:block;margin-top:4px;color:var(--coach-purple);font-size:18px}
+.nw-prep-actions{display:grid;gap:6px}.nw-prep-action{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:9px 10px;border:1px solid #eee7f0;border-radius:10px;font-size:11px}
+.nw-prep-alert{margin-top:8px;padding:9px 10px;border-radius:10px;background:#fff7eb;color:#875b18;font-size:10px}
+.nw-schedule-box{margin-top:12px;padding:12px;border:1px solid #e2d3e9;border-radius:11px;background:#fbf8fc}
+.nw-schedule-box strong{display:block;font-size:12px}.nw-schedule-box p{margin:3px 0 8px;color:var(--coach-muted);font-size:10px}
+.nw-next-call{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(230px,.6fr) auto;
+  gap:14px;
+  align-items:center;
+  margin-top:14px;
+  padding:16px;
+  border:1px solid #dcc9e6;
+  border-radius:14px;
+  background:linear-gradient(135deg,#fbf7fd,#fff)
+}
+.nw-next-call-copy h3{margin:0;font-size:17px;letter-spacing:-.015em}
+.nw-next-call-copy>p:last-child{margin:5px 0 0;color:var(--coach-muted);font-size:11px;line-height:1.45}
+.nw-next-call-status{padding:10px 11px;border:1px solid #e6dbea;border-radius:11px;background:#fff}
+.nw-next-call-status span{display:block;color:var(--coach-muted);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.nw-next-call-status strong{display:block;margin-top:3px;font-size:12px}
+.nw-next-call-status small{display:block;margin-top:2px;color:var(--coach-muted);font-size:9px}
+.nw-next-call-status.is-empty{background:#fcfafc}
+.nw-next-call-btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;white-space:nowrap}
+.nw-next-call-note{grid-column:1/-1;margin:0!important;padding-top:9px;border-top:1px solid #eee7f0;color:var(--coach-muted)!important;font-size:9px!important}
+
+
+@media(max-width:900px){.nw-next-call{grid-template-columns:1fr}.nw-overview{grid-template-columns:1fr}.nw-prep-grid{grid-template-columns:1fr 1fr}.nw-days{grid-template-columns:repeat(4,1fr)}.nw-grid3{grid-template-columns:1fr 1fr}}@media(max-width:650px){.nw-top{display:block}.nw-meta{justify-content:flex-start;margin-top:12px}.nw-grid2,.nw-grid3,.nw-call-notes,.nw-library-items{grid-template-columns:1fr}.nw-action:nth-child(even){border-left:0}.nw-steps{grid-template-columns:1fr}.nw-days{grid-template-columns:1fr 1fr}.nw-note-grid{grid-template-columns:1fr}}
 </style>
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
@@ -90,7 +120,7 @@
 <div class="nw">
   <header class="nw-top">
     <div><a class="nw-back" href="/dashboard/clients">← Clients</a><p class="nw-kicker">Client workspace</p><h1>{{ client.name }}</h1><p>{{ client.program or "Coaching" }} · {{ client.email or "No email" }} · {{ client.phone or "No phone" }}</p></div>
-    <div class="nw-meta"><span class="nw-chip"><strong>Week {{ current_week }}</strong> · {{ current_week_start.strftime("%d %b %Y") }} – {{ current_week_end.strftime("%d %b %Y") }}</span><span class="nw-chip">Next call: <strong>{% if next_call_date %}{{ next_call_date.strftime("%d %b %Y") }}{% else %}Not scheduled{% endif %}</strong></span><span class="nw-chip">{{ (client.status or "active")|title }}</span></div>
+    <div class="nw-meta"><span class="nw-chip"><strong>Week {{ current_week }}</strong> · {{ current_week_start.strftime("%d %b %Y") }} – {{ current_week_end.strftime("%d %b %Y") }}</span><span class="nw-chip">Next call: <strong>{% if next_synced_call and next_synced_call.local_start_time %}{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}{% else %}Not scheduled{% endif %}</strong></span><span class="nw-chip">{{ (client.status or "active")|title }}</span></div>
   </header>
 
   <nav class="nw-tabs"><button class="nw-tab active" type="button" data-tab="overview">Overview</button><button class="nw-tab" type="button" data-tab="weekly">Weekly Check-in</button></nav>
@@ -111,7 +141,7 @@
 
         <section class="nw-panel nw-pad">
           <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Progress journey</p><h2>Week by week</h2><p>A concise history of coaching conversations and progress.</p></div></div>
-          {% if checkins %}<div class="nw-timeline">{% for checkin in checkins %}<div class="nw-timeline-item"><div class="nw-timeline-date">{{ checkin.call_date.strftime("%d %b %Y") }}</div><div class="nw-timeline-copy"><strong>{{ checkin.wins or "Weekly check-in completed" }}</strong><p>{% if checkin.improvements_needed %}Next focus: {{ checkin.improvements_needed }}{% endif %}{% if checkin.next_call_date %} · Next call {{ checkin.next_call_date.strftime("%d %b %Y") }}{% endif %}</p></div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">The journey will begin after the first weekly call.</p>{% endif %}
+          {% if checkins %}<div class="nw-timeline">{% for checkin in checkins %}<div class="nw-timeline-item"><div class="nw-timeline-date">{{ checkin.call_date.strftime("%d %b %Y") }}</div><div class="nw-timeline-copy"><strong>{{ checkin.wins or "Weekly check-in completed" }}</strong><p>{% if checkin.improvements_needed %}Next focus: {{ checkin.improvements_needed }}{% endif %}</p></div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">The journey will begin after the first weekly call.</p>{% endif %}
         </section>
       </div>
 
@@ -123,7 +153,36 @@
 
         <section class="nw-panel nw-pad">
           <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Coaching logistics</p><h2>Week & client access</h2></div></div>
+          <div class="nw-schedule-box">
+            <strong>Next coaching call</strong>
+            {% if next_synced_call and next_synced_call.local_start_time %}
+              <p>{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }} · Synced with Synamate</p>
+            {% else %}
+              <p>Not scheduled yet. Set it during the Weekly Check-in.</p>
+            {% endif %}
+          </div>
           <form method="post" action="/dashboard/clients/{{ client.id }}/week-start"><label><span class="nw-label">Week 1 began</span><input class="nw-input" type="date" name="week_start_date" value="{{ client.start_date }}" required></label><p class="nw-helper">Change only if the coaching calendar needs correction.</p><button class="nw-btn nw-soft" type="submit" style="margin-top:9px">Update calendar</button></form>
+          <div style="height:1px;background:var(--coach-border);margin:16px 0"></div>
+          <span class="nw-label">Next coaching call · Synamate</span>
+          {% if next_synced_call and next_synced_call.local_start_time %}
+          <div class="nw-goal" style="margin-top:7px">
+            <span>Synced booking</span>
+            <strong>{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}</strong>
+            {% if next_synced_call.meeting_location %}<div class="nw-helper">{{ next_synced_call.meeting_location }}</div>{% endif %}
+          </div>
+          {% elif coaching_booking_url %}
+          <a class="nw-btn nw-primary"
+             href="{{ coaching_booking_url }}"
+             target="_blank"
+             rel="noopener"
+             style="display:inline-flex;align-items:center;text-decoration:none;margin-top:7px">
+            Schedule coaching call in Synamate ↗
+          </a>
+          <p class="nw-helper">Once booked, the webhook updates this workspace automatically.</p>
+          {% else %}
+          <p class="nw-helper">The Coaching Call calendar will identify itself automatically after its first webhook booking. Add the booking URL only if you want the Schedule button here.</p>
+          {% endif %}
+
           <div style="height:1px;background:var(--coach-border);margin:16px 0"></div>
           {% if portal_access %}<span class="nw-label">Client portal</span><div style="display:flex;gap:7px"><input class="nw-input" type="text" readonly value="{{ request.base_url }}client/{{ portal_access.access_token }}" data-client-link><button class="nw-btn nw-soft" type="button" data-copy>Copy</button></div>{% else %}<form method="post" action="/dashboard/clients/{{ client.id }}/portal-access"><button class="nw-btn nw-primary" type="submit">Create client portal link</button></form>{% endif %}
         </section>
@@ -134,6 +193,21 @@
   <section class="nw-panel-tab" data-panel="weekly">
     <div class="nw-week-banner"><div><strong>Week {{ current_week }} review</strong><span>{{ current_week_start.strftime("%d %b %Y") }} – {{ current_week_end.strftime("%d %b %Y") }}</span></div><div class="nw-week-stat"><b>{{ week_review.submitted_count if week_review else 0 }} / 7</b><span>client check-ins submitted</span></div></div>
     <div class="nw-review">
+      {% if call_prep %}
+      <section class="nw-panel nw-pad">
+        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Call prep</p><h2>What to know before the call</h2><p>A one-minute summary built from the client’s daily entries.</p></div></div>
+        <div class="nw-prep-grid">
+          <div class="nw-prep-stat"><span>Daily check-ins</span><strong>{{ call_prep.submitted_count }}/7</strong></div>
+          <div class="nw-prep-stat"><span>Action adherence</span><strong>{{ call_prep.action_percent }}%</strong></div>
+          <div class="nw-prep-stat"><span>Average steps</span><strong>{{ call_prep.average_steps if call_prep.average_steps else "—" }}</strong></div>
+          <div class="nw-prep-stat"><span>Weight change</span><strong>{% if call_prep.weight_change is not none %}{{ "%+.1f"|format(call_prep.weight_change) }} kg{% elif call_prep.weight_latest is not none %}{{ call_prep.weight_latest }} kg{% else %}—{% endif %}</strong></div>
+        </div>
+        {% if call_prep.action_rows %}<div class="nw-prep-actions">{% for action in call_prep.action_rows %}<div class="nw-prep-action"><span>{{ action.name }}</span><strong>{{ action.completed }}/{{ action.target }}</strong></div>{% endfor %}</div>{% endif %}
+        {% if call_prep.measurement_changes %}<div class="nw-prep-alert">Measurements vs previous entry: {% for item in call_prep.measurement_changes %}{{ item.label }} {{ "%+.1f"|format(item.change) }} cm{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
+        {% for item in call_prep.attention %}<div class="nw-prep-alert">{{ item }}</div>{% endfor %}
+      </section>
+      {% endif %}
+
       <section class="nw-panel nw-pad">
         <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Commitments</p><h2>All action-plan completion</h2><p>Every action across every day of this coaching week.</p></div></div>
         {% if week_review and week_review.actions %}<div class="nw-table-wrap"><table class="nw-table"><thead><tr><th>Action</th>{% for day in week_review.days %}<th>{{ day.date.strftime("%d %b") }}</th>{% endfor %}<th>Total</th></tr></thead><tbody>
@@ -153,7 +227,13 @@
 
       <form method="post" action="/dashboard/clients/{{ client.id }}/checkin" class="nw-panel nw-pad nw-call">
         <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Weekly call</p><h2>Review this week, then plan the next</h2><p>Review the data above, capture the conversation and assign Week {{ next_week_number }}.</p></div></div>
-        <div style="max-width:320px"><label><span class="nw-label">Call date</span><input class="nw-input" type="date" name="call_date" value="{{ current_week_end }}" required></label></div>
+        <div style="max-width:360px">
+          <label>
+            <span class="nw-label">This review date</span>
+            <input class="nw-input" type="date" name="call_date" value="{{ current_week_end }}" required>
+          </label>
+          <p class="nw-helper">The date this Week {{ current_week }} coaching review happened.</p>
+        </div>
         <div class="nw-call-notes"><label><span class="nw-label">Wins</span><textarea class="nw-textarea" name="wins"></textarea></label><label><span class="nw-label">Struggles</span><textarea class="nw-textarea" name="struggles"></textarea></label><label><span class="nw-label">Improvements / focus</span><textarea class="nw-textarea" name="improvements_needed"></textarea></label><label><span class="nw-label">Help / support needed</span><textarea class="nw-textarea" name="coach_support"></textarea></label></div>
 
         <div class="nw-next"><h3>Set Week {{ next_week_number }} action plan</h3><p>{{ next_week_start.strftime("%d %b %Y") }} – {{ next_week_end.strftime("%d %b %Y") }} · These actions start next week, not the week being reviewed.</p>
@@ -161,7 +241,51 @@
           <details class="nw-custom"><summary style="cursor:pointer;color:var(--coach-purple);font-size:14px;font-weight:800">+ Add a custom action for next week</summary><div class="nw-grid3" style="margin-top:10px"><label><span class="nw-label">Action</span><input class="nw-input" name="custom_action_name"></label><label><span class="nw-label">Target</span><input class="nw-input" name="custom_target_count" type="number" min="1"></label><label><span class="nw-label">Unit</span><select class="nw-select" name="custom_target_unit"><option value="">—</option><option value="days">days</option><option value="sessions">sessions</option><option value="times">times</option></select></label></div></details>
         </div>
 
-        <div class="nw-grid2"><label><span class="nw-label">Next call date</span><input class="nw-input" type="date" name="next_call_date"></label><label><span class="nw-label">Next call time</span><select class="nw-select" name="next_call_time"><option value="">Choose time</option>{% for slot in call_time_slots %}<option value="{{ slot.value }}">{{ slot.label }}</option>{% endfor %}</select></label></div>
+        
+        <section class="nw-next-call">
+          <div class="nw-next-call-copy">
+            <p class="nw-kicker" style="margin:0 0 4px">Before you finish</p>
+            <h3>Set the next coaching call</h3>
+            <p>Agree on the next weekly meeting with the client now. Synamate remains the scheduling source of truth.</p>
+          </div>
+
+          {% if next_synced_call and next_synced_call.local_start_time %}
+          <div class="nw-next-call-status">
+            <span>Next call already scheduled</span>
+            <strong>{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}</strong>
+            <small>Synced with Synamate</small>
+          </div>
+          {% if coaching_booking_url %}
+          <a class="nw-btn nw-soft nw-next-call-btn"
+             href="{{ coaching_booking_url }}"
+             target="_blank"
+             rel="noopener">
+            Reschedule in Synamate ↗
+          </a>
+          {% endif %}
+          {% elif coaching_booking_url %}
+          <div class="nw-next-call-status is-empty">
+            <span>Next call</span>
+            <strong>Not scheduled yet</strong>
+            <small>Choose the next slot together before ending the call. Client details are passed from NourisHer.</small>
+          </div>
+          <a class="nw-btn nw-primary nw-next-call-btn"
+             href="{{ coaching_booking_url }}"
+             target="_blank"
+             rel="noopener">
+            Schedule next call in Synamate ↗
+          </a>
+          {% else %}
+          <div class="nw-next-call-status is-empty">
+            <span>Next call</span>
+            <strong>Scheduling link not configured</strong>
+            <small>Add SYNAMATE_COACHING_CALL_URL to enable this button.</small>
+          </div>
+          {% endif %}
+
+          <p class="nw-next-call-note">Synamate opens in a new tab, so the notes and next-week actions on this page stay intact. After booking, save this review; the webhook will sync the appointment automatically.</p>
+        </section>
+
         <div class="nw-save"><p>Saving closes this review and creates the selected actions for Week {{ next_week_number }}.</p><button class="nw-btn nw-primary" type="submit">Save weekly check-in →</button></div>
       </form>
     </div>

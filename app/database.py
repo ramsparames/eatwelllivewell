@@ -139,6 +139,73 @@ def create_database() -> None:
                 )
                 """
             )
+
+            # Synamate calendar identity:
+            # older webhook parsing stored a workflow/trigger id in calendar_id.
+            # The real calendar identity lives inside raw_payload["calendar"].
+            cursor.execute(
+                """
+                ALTER TABLE clarity_call_appointments
+                ADD COLUMN IF NOT EXISTS calendar_name TEXT
+                """
+            )
+
+            cursor.execute(
+                """
+                UPDATE clarity_call_appointments
+                SET
+                    calendar_id = COALESCE(
+                        NULLIF(raw_payload #>> '{calendar,id}', ''),
+                        calendar_id
+                    ),
+                    calendar_name = COALESCE(
+                        NULLIF(raw_payload #>> '{calendar,calendarName}', ''),
+                        calendar_name
+                    ),
+                    title = COALESCE(
+                        NULLIF(raw_payload #>> '{calendar,title}', ''),
+                        title
+                    )
+                WHERE raw_payload IS NOT NULL
+                  AND (
+                      NULLIF(raw_payload #>> '{calendar,id}', '') IS NOT NULL
+                      OR NULLIF(raw_payload #>> '{calendar,calendarName}', '') IS NOT NULL
+                      OR NULLIF(raw_payload #>> '{calendar,title}', '') IS NOT NULL
+                  )
+                """
+            )
+
+            # Some Synamate workflow executions arrive as flattened
+            # appointments without the nested raw calendar object. Once at
+            # least one real Coaching Call webhook has identified the true
+            # calendar ID, classify "Weekly Review" rows against that known
+            # calendar identity.
+            cursor.execute(
+                """
+                WITH coaching_calendar AS (
+                    SELECT calendar_id
+                    FROM clarity_call_appointments
+                    WHERE LOWER(COALESCE(calendar_name, '')) =
+                          LOWER('Coaching Call with Sushma')
+                      AND calendar_id IS NOT NULL
+                    ORDER BY updated_at DESC, id DESC
+                    LIMIT 1
+                )
+                UPDATE clarity_call_appointments AS a
+                SET
+                    calendar_id = c.calendar_id,
+                    calendar_name = 'Coaching Call with Sushma',
+                    updated_at = NOW()
+                FROM coaching_calendar AS c
+                WHERE
+                    (
+                        a.calendar_name IS NULL
+                        OR BTRIM(a.calendar_name) = ''
+                    )
+                    AND LOWER(COALESCE(a.title, '')) LIKE '%%weekly review%%'
+                """
+            )
+
             cursor.execute(
                 """
                 ALTER TABLE snapshot_submissions
@@ -1150,6 +1217,54 @@ def upsert_clarity_call_appointment(
     end_time: str | None,
     raw_payload: dict[str, Any],
 ) -> int:
+    """
+    Persist a Synamate appointment using the TRUE calendar identity from the
+    nested webhook payload when available.
+
+    This intentionally does not trust the legacy calendar_id argument because
+    older workflow payloads supplied a workflow/trigger-level id there.
+    """
+    calendar_payload = (
+        raw_payload.get("calendar")
+        if isinstance(raw_payload, dict)
+        else None
+    )
+    if not isinstance(calendar_payload, dict):
+        calendar_payload = {}
+
+    true_calendar_id = (
+        str(calendar_payload.get("id") or "").strip()
+        or calendar_id
+    )
+    calendar_name = (
+        str(calendar_payload.get("calendarName") or "").strip()
+        or None
+    )
+    true_title = (
+        str(calendar_payload.get("title") or "").strip()
+        or title
+    )
+
+    # Synamate currently sends the appointment status in the nested calendar
+    # object using both correctly and incorrectly spelled keys across payloads.
+    nested_status = (
+        calendar_payload.get("appoinmentStatus")
+        or calendar_payload.get("appointmentStatus")
+        or calendar_payload.get("status")
+    )
+    true_status = (
+        str(nested_status).strip()
+        if nested_status is not None
+        else appointment_status
+    )
+
+    nested_location = calendar_payload.get("address")
+    true_meeting_location = (
+        str(nested_location).strip()
+        if nested_location
+        else meeting_location
+    )
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -1157,6 +1272,7 @@ def upsert_clarity_call_appointment(
                 INSERT INTO clarity_call_appointments (
                     external_appointment_id,
                     calendar_id,
+                    calendar_name,
                     contact_id,
                     name,
                     email,
@@ -1169,12 +1285,13 @@ def upsert_clarity_call_appointment(
                     raw_payload
                 )
                 VALUES (
-                    %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s
                 )
                 ON CONFLICT (external_appointment_id)
                 DO UPDATE SET
                     calendar_id = EXCLUDED.calendar_id,
+                    calendar_name = EXCLUDED.calendar_name,
                     contact_id = EXCLUDED.contact_id,
                     name = EXCLUDED.name,
                     email = EXCLUDED.email,
@@ -1190,14 +1307,15 @@ def upsert_clarity_call_appointment(
                 """,
                 (
                     external_appointment_id,
-                    calendar_id,
+                    true_calendar_id,
+                    calendar_name,
                     contact_id,
                     name,
                     email,
                     phone,
-                    appointment_status,
-                    title,
-                    meeting_location,
+                    true_status,
+                    true_title,
+                    true_meeting_location,
                     start_time,
                     end_time,
                     json.dumps(raw_payload),
@@ -1208,10 +1326,11 @@ def upsert_clarity_call_appointment(
 
             if not row:
                 raise RuntimeError(
-                    "Clarity call appointment could not be saved"
+                    "Synamate appointment could not be saved"
                 )
 
             return int(row["id"])
+
 
 
 def get_clarity_calls_for_day(
@@ -1939,3 +2058,285 @@ def get_client_measurements(
 if __name__ == "__main__":
     create_database()
     print("Database updated successfully.")
+
+
+
+def _normalise_phone_digits(value: str | None) -> str:
+    if not value:
+        return ""
+    return "".join(character for character in value if character.isdigit())
+
+
+def get_synamate_appointments_between(
+    start_time,
+    end_time,
+    calendar_id: str | None = None,
+):
+    conditions = [
+        "start_time >= %s",
+        "start_time < %s",
+        "COALESCE(LOWER(appointment_status), '') NOT IN ('cancelled', 'canceled')",
+    ]
+    params = [start_time, end_time]
+
+    if calendar_id:
+        conditions.append("calendar_id = %s")
+        params.append(calendar_id)
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f'''
+                SELECT *
+                FROM clarity_call_appointments
+                WHERE {' AND '.join(conditions)}
+                ORDER BY start_time ASC
+                ''',
+                tuple(params),
+            )
+            return cursor.fetchall()
+
+
+def get_next_synamate_appointment_for_person(
+    *,
+    email: str | None = None,
+    phone: str | None = None,
+    after_time=None,
+    calendar_id: str | None = None,
+):
+    if not email and not phone:
+        return None
+
+    phone_digits = _normalise_phone_digits(phone)
+    person_conditions = []
+    params = []
+
+    if email:
+        person_conditions.append("LOWER(COALESCE(email, '')) = LOWER(%s)")
+        params.append(email.strip())
+
+    if phone_digits:
+        person_conditions.append(
+            "regexp_replace(COALESCE(phone, ''), '[^0-9]', '', 'g') = %s"
+        )
+        params.append(phone_digits)
+
+    if not person_conditions:
+        return None
+
+    where_person = " OR ".join(person_conditions)
+    calendar_clause = ""
+
+    if calendar_id:
+        calendar_clause = "AND calendar_id = %s"
+        params.append(calendar_id)
+
+    params.append(after_time)
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f'''
+                SELECT *
+                FROM clarity_call_appointments
+                WHERE ({where_person})
+                  {calendar_clause}
+                  AND start_time >= COALESCE(%s, NOW())
+                  AND COALESCE(LOWER(appointment_status), '') NOT IN (
+                      'cancelled', 'canceled'
+                  )
+                ORDER BY start_time ASC
+                LIMIT 1
+                ''',
+                tuple(params),
+            )
+            return cursor.fetchone()
+
+
+
+def _normalise_calendar_name(value: str | None) -> str:
+    return " ".join(
+        (value or "")
+        .strip()
+        .lower()
+        .replace("-", " ")
+        .replace("_", " ")
+        .split()
+    )
+
+
+def _calendar_name_candidates(row: dict) -> list[str]:
+    """
+    Extract possible human calendar names from fields already captured by the
+    Synamate webhook. This intentionally avoids depending on an undocumented
+    external calendar-list API.
+    """
+    candidates = []
+
+    title = row.get("title")
+    if title:
+        candidates.append(str(title))
+
+    payload = row.get("raw_payload") or {}
+
+    def walk(value, key_hint=""):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                key_lower = str(key).lower()
+                if (
+                    isinstance(child, (str, int, float))
+                    and (
+                        "calendar" in key_lower
+                        or key_lower in {"title", "name"}
+                    )
+                ):
+                    candidates.append(str(child))
+                walk(child, key_lower)
+        elif isinstance(value, list):
+            for child in value:
+                walk(child, key_hint)
+
+    walk(payload)
+
+    # Keep order but remove duplicates/empty strings.
+    seen = set()
+    result = []
+    for candidate in candidates:
+        candidate = str(candidate).strip()
+        if not candidate or candidate in seen:
+            continue
+        seen.add(candidate)
+        result.append(candidate)
+
+    return result
+
+
+def resolve_synamate_calendar_id(
+    *,
+    role: str,
+    expected_name: str,
+    explicit_calendar_id: str | None = None,
+):
+    """
+    Resolve the real Synamate calendar ID from calendar_name captured from
+    raw_payload["calendar"]["calendarName"].
+
+    Explicit IDs remain supported only as emergency overrides.
+    """
+    if explicit_calendar_id:
+        return explicit_calendar_id.strip() or None
+
+    target = _normalise_calendar_name(expected_name)
+    if not target:
+        return None
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT calendar_id, calendar_name
+                FROM clarity_call_appointments
+                WHERE calendar_id IS NOT NULL
+                  AND calendar_name IS NOT NULL
+                ORDER BY start_time DESC
+                """
+            )
+            rows = cursor.fetchall()
+
+    # Prefer exact normalized name match.
+    for row in rows:
+        if _normalise_calendar_name(row.get("calendar_name")) == target:
+            return row.get("calendar_id")
+
+    # Safe fallback for minor wording differences.
+    for row in rows:
+        normalized = _normalise_calendar_name(row.get("calendar_name"))
+        if normalized and (target in normalized or normalized in target):
+            return row.get("calendar_id")
+
+    return None
+
+
+
+def get_synamate_calendar_resolution():
+    """
+    Diagnostic view showing how NourisHer currently maps the two known calendar
+    roles from webhook history.
+    """
+    import os
+
+    clarity_name = os.getenv(
+        "SYNAMATE_CLARITY_CALENDAR_NAME",
+        "Clarity Call with Sushma",
+    ).strip()
+
+    coaching_name = os.getenv(
+        "SYNAMATE_COACHING_CALENDAR_NAME",
+        "Coaching Call with Sushma",
+    ).strip()
+
+    clarity_id = resolve_synamate_calendar_id(
+        role="clarity",
+        expected_name=clarity_name,
+        explicit_calendar_id=os.getenv(
+            "SYNAMATE_CLARITY_CALENDAR_ID",
+            "",
+        ).strip(),
+    )
+
+    coaching_id = resolve_synamate_calendar_id(
+        role="coaching",
+        expected_name=coaching_name,
+        explicit_calendar_id=os.getenv(
+            "SYNAMATE_COACHING_CALENDAR_ID",
+            "",
+        ).strip(),
+    )
+
+    return {
+        "clarity": {
+            "name": clarity_name,
+            "calendar_id": clarity_id,
+        },
+        "coaching": {
+            "name": coaching_name,
+            "calendar_id": coaching_id,
+        },
+    }
+
+
+def get_synamate_calendar_summary():
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    calendar_id,
+                    calendar_name,
+                    MAX(title) AS example_title,
+                    COUNT(*) AS appointment_count,
+                    MAX(start_time) AS latest_start_time
+                FROM clarity_call_appointments
+                GROUP BY calendar_id, calendar_name
+                ORDER BY latest_start_time DESC NULLS LAST
+                """
+            )
+            return cursor.fetchall()
+
+
+
+def get_previous_measurement_before(client_id: int, before_date):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM client_measurements
+                WHERE client_id = %s
+                  AND measured_on < %s
+                ORDER BY measured_on DESC, id DESC
+                LIMIT 1
+                """,
+                (client_id, before_date),
+            )
+            return cursor.fetchone()

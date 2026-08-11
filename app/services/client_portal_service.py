@@ -1,6 +1,9 @@
+import os
 import secrets
 from datetime import date, timedelta
+from zoneinfo import ZoneInfo
 
+from app.database import get_next_synamate_appointment_for_person, get_previous_measurement_before, resolve_synamate_calendar_id
 from app.database import get_connection
 from app.services.client_service import ClientService
 
@@ -677,4 +680,162 @@ def get_coach_week_review(
         "actions": actions,
         "measurements": [dict(row) for row in measurement_rows],
         "submitted_count": sum(1 for day in days if day["submitted"]),
+    }
+
+
+
+def _extract_synamate_link(payload, keywords):
+    """Best-effort extraction of reschedule/cancel/booking URLs from webhook data."""
+    if not isinstance(payload, dict):
+        return None
+
+    lowered_keywords = tuple(keyword.lower() for keyword in keywords)
+
+    def walk(value):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                key_lower = str(key).lower()
+                if (
+                    isinstance(child, str)
+                    and child.startswith(('http://', 'https://'))
+                    and any(keyword in key_lower for keyword in lowered_keywords)
+                ):
+                    return child
+            for child in value.values():
+                found = walk(child)
+                if found:
+                    return found
+        elif isinstance(value, list):
+            for child in value:
+                found = walk(child)
+                if found:
+                    return found
+        return None
+
+    return walk(payload)
+
+
+def get_next_client_call(client: dict):
+    coaching_calendar_id = resolve_synamate_calendar_id(
+        role="coaching",
+        expected_name=os.getenv(
+            "SYNAMATE_COACHING_CALENDAR_NAME",
+            "Coaching Call with Sushma",
+        ).strip(),
+        explicit_calendar_id=os.getenv(
+            "SYNAMATE_COACHING_CALENDAR_ID",
+            "",
+        ).strip(),
+    )
+
+    if not coaching_calendar_id:
+        return None
+
+    appointment = get_next_synamate_appointment_for_person(
+        email=client.get("email"),
+        phone=client.get("phone"),
+        calendar_id=coaching_calendar_id,
+    )
+
+    if not appointment:
+        return None
+
+    item = dict(appointment)
+    payload = item.get("raw_payload") or {}
+    item["source"] = "synamate"
+    item["call_kind"] = "coaching"
+
+    client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
+    item["local_start_time"] = (
+        item["start_time"].astimezone(client_tz)
+        if item.get("start_time")
+        else None
+    )
+    item["reschedule_url"] = _extract_synamate_link(
+        payload,
+        ("reschedule", "rescheduleurl", "reschedule_url"),
+    )
+    item["cancel_url"] = _extract_synamate_link(
+        payload,
+        ("cancel", "cancelurl", "cancel_url"),
+    )
+    return item
+
+
+
+def build_call_prep(client_id: int, week_start: date, week_end: date):
+    """Create a compact pre-call summary from the client's current week."""
+    review = get_coach_week_review(client_id, week_start, week_end)
+
+    submitted_days = [day for day in review['days'] if day['submitted']]
+    step_values = [
+        int(day['steps'])
+        for day in submitted_days
+        if day.get('steps') is not None
+    ]
+    weight_points = [
+        (day['date'], float(day['weight_kg']))
+        for day in submitted_days
+        if day.get('weight_kg') is not None
+    ]
+
+    action_rows = []
+    target_total = 0
+    achieved_total = 0
+    for action in review['actions']:
+        target = action.get('target_count') or action.get('eligible_days') or 0
+        completed = action.get('completed_count') or 0
+        target = int(target)
+        completed = int(completed)
+        target_total += target
+        achieved_total += min(completed, target) if target else completed
+        action_rows.append({
+            'name': action.get('action_name'),
+            'completed': completed,
+            'target': target,
+            'unit': action.get('target_unit') or '',
+            'percent': round((completed / target) * 100) if target else 0,
+        })
+
+    measurement = review['measurements'][0] if review['measurements'] else None
+    previous_measurement = get_previous_measurement_before(client_id, week_start)
+
+    measurement_changes = []
+    if measurement and previous_measurement:
+        fields = [
+            ('waist_cm', 'Waist'),
+            ('lower_abdomen_cm', 'Lower abdomen'),
+            ('hip_cm', 'Hip'),
+        ]
+        for key, label in fields:
+            current = measurement.get(key)
+            previous = previous_measurement.get(key)
+            if current is not None and previous is not None:
+                measurement_changes.append({
+                    'label': label,
+                    'change': round(float(current) - float(previous), 1),
+                })
+
+    attention = []
+    if review['submitted_count'] < 5:
+        attention.append(f"Only {review['submitted_count']}/7 daily check-ins submitted")
+    if not measurement:
+        attention.append('Weekly measurements are still due')
+    low_actions = [row for row in action_rows if row['target'] and row['percent'] < 60]
+    if low_actions:
+        attention.append(
+            'Low completion: ' + ', '.join(row['name'] for row in low_actions[:2])
+        )
+
+    return {
+        'submitted_count': review['submitted_count'],
+        'action_rows': action_rows,
+        'action_percent': round((achieved_total / target_total) * 100) if target_total else 0,
+        'average_steps': round(sum(step_values) / len(step_values)) if step_values else None,
+        'weight_first': weight_points[0][1] if weight_points else None,
+        'weight_latest': weight_points[-1][1] if weight_points else None,
+        'weight_change': round(weight_points[-1][1] - weight_points[0][1], 1) if len(weight_points) >= 2 else None,
+        'measurement': measurement,
+        'measurement_changes': measurement_changes,
+        'attention': attention,
     }

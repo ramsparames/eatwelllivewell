@@ -206,13 +206,8 @@
         <h2>Your next coaching call</h2>
         <div class="cp-call-row">
           <div class="cp-call-when">
-            {% if next_call.source == "synamate" %}
-              <strong>{{ next_call.local_start_time.strftime("%d %b %Y") }}</strong>
-              <span>{{ next_call.local_start_time.strftime("%I:%M %p") }} · {{ next_call.title or "Coaching call" }}</span>
-            {% else %}
-              <strong>{{ next_call.next_call_date.strftime("%d %b %Y") }}</strong>
-              <span>{% if next_call.next_call_time %}{{ next_call.next_call_time.strftime("%I:%M %p") }}{% else %}Time to be confirmed{% endif %}</span>
-            {% endif %}
+            <strong>{{ next_call.local_start_time.strftime("%d %b %Y") }}</strong>
+            <span>{{ next_call.local_start_time.strftime("%I:%M %p") }} · Coaching call</span>
           </div>
           {% if next_call.reschedule_url %}<a class="cp-call-link" href="{{ next_call.reschedule_url }}" target="_blank" rel="noopener">Reschedule ↗</a>{% endif %}
         </div>

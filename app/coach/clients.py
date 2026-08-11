@@ -1,5 +1,7 @@
+import os
 from datetime import date, timedelta
 from pathlib import Path
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -13,6 +15,8 @@ from app.services.client_portal_service import (
     get_portal_access,
     get_recent_client_activity,
     get_coach_week_review,
+    build_call_prep,
+    get_next_client_call,
 )
 
 
@@ -206,6 +210,58 @@ def _action_week_bounds(client_id: int, on_date: date):
 
 
 
+
+def _build_synamate_booking_url(
+    base_url: str,
+    client: dict,
+) -> str:
+    """
+    Add NourisHer client identity to the Synamate public booking URL.
+
+    Synamate's public help center documents the contact fields used by the
+    calendar/contact system but does not publish a formal booking-URL query
+    parameter contract. We therefore send the common contact field names in
+    both full-name and split-name form. Existing query parameters are kept.
+    """
+    base_url = (base_url or "").strip()
+    if not base_url:
+        return ""
+
+    full_name = (client.get("name") or "").strip()
+    email = (client.get("email") or "").strip()
+    phone = (client.get("phone") or "").strip()
+
+    name_parts = full_name.split(maxsplit=1)
+    first_name = name_parts[0] if name_parts else ""
+    last_name = name_parts[1] if len(name_parts) > 1 else ""
+
+    parts = urlsplit(base_url)
+    query = dict(parse_qsl(parts.query, keep_blank_values=True))
+
+    # Use setdefault so an intentionally configured value in the base URL wins.
+    if full_name:
+        query.setdefault("name", full_name)
+        query.setdefault("full_name", full_name)
+    if first_name:
+        query.setdefault("first_name", first_name)
+    if last_name:
+        query.setdefault("last_name", last_name)
+    if email:
+        query.setdefault("email", email)
+    if phone:
+        query.setdefault("phone", phone)
+
+    return urlunsplit(
+        (
+            parts.scheme,
+            parts.netloc,
+            parts.path,
+            urlencode(query),
+            parts.fragment,
+        )
+    )
+
+
 @router.get(
     "/dashboard/clients",
     response_class=HTMLResponse,
@@ -248,35 +304,26 @@ def clients_page(request: Request):
             else None
         )
 
-        # Some summary queries already provide these fields.
-        # Fill them from the latest check-in only when needed.
-        if latest_checkin:
-            if client.get(
-                "current_weight_kg"
-            ) is None:
-                client["current_weight_kg"] = (
-                    latest_checkin.get(
-                        "weight_kg"
-                    )
-                )
+        # Keep weight fallback from the latest weekly review.
+        if latest_checkin and client.get("current_weight_kg") is None:
+            client["current_weight_kg"] = latest_checkin.get("weight_kg")
 
-            if not client.get(
-                "next_call_date"
-            ):
-                client["next_call_date"] = (
-                    latest_checkin.get(
-                        "next_call_date"
-                    )
-                )
+        # Synamate is now the single source of truth for the next coaching call.
+        # Populate the legacy display keys too so the existing Clients template
+        # can show the synced appointment without needing a markup change.
+        synced_call = get_next_client_call(client)
 
-            if not client.get(
-                "next_call_time"
-            ):
-                client["next_call_time"] = (
-                    latest_checkin.get(
-                        "next_call_time"
-                    )
-                )
+        client["next_synced_call"] = synced_call
+        client["next_call_date"] = None
+        client["next_call_time"] = None
+
+        if synced_call and synced_call.get("local_start_time"):
+            local_start = synced_call["local_start_time"]
+            client["next_call_date"] = local_start.date()
+            client["next_call_time"] = local_start.time().replace(tzinfo=None)
+            client["next_call_source"] = "synamate"
+        else:
+            client["next_call_source"] = None
 
         status = client.get("status")
 
@@ -292,9 +339,7 @@ def clients_page(request: Request):
             client["health_key"] = "new"
             client["health_label"] = "New"
 
-        elif not client.get(
-            "next_call_date"
-        ):
+        elif not client.get("next_synced_call"):
             client["health_key"] = "attention"
             client["health_label"] = (
                 "Needs attention"
@@ -359,13 +404,12 @@ def clients_page(request: Request):
         )
 
         client["sort_next_call"] = (
-            client.get(
-                "next_call_date"
-            ).isoformat()
-            if client.get(
-                "next_call_date"
+            client["next_synced_call"]["local_start_time"].isoformat()
+            if (
+                client.get("next_synced_call")
+                and client["next_synced_call"].get("local_start_time")
             )
-            else "9999-12-31"
+            else "9999-12-31T23:59:59"
         )
 
         client["sort_last_checkin"] = (
@@ -495,6 +539,7 @@ def client_profile(
     portal_activity = get_recent_client_activity(client_id, limit=14)
 
     week_review = None
+    call_prep = None
     next_week_number = None
     next_week_start = None
     next_week_end = None
@@ -502,6 +547,7 @@ def client_profile(
 
     if week_start and week_end:
         week_review = get_coach_week_review(client_id, week_start, week_end)
+        call_prep = build_call_prep(client_id, week_start, week_end)
         next_week_number = week_number + 1
         next_week_start = week_end + timedelta(days=1)
         next_week_end = next_week_start + timedelta(days=6)
@@ -511,6 +557,16 @@ def client_profile(
             start_date=next_week_start,
             end_date=next_week_end,
         )
+
+    next_synced_call = get_next_client_call(profile["client"])
+    coaching_booking_base_url = os.getenv(
+        "SYNAMATE_COACHING_CALL_URL",
+        "",
+    ).strip()
+    coaching_booking_url = _build_synamate_booking_url(
+        coaching_booking_base_url,
+        profile["client"],
+    )
 
     return templates.TemplateResponse(
         "coach/client_workspace.html",
@@ -522,6 +578,9 @@ def client_profile(
             "portal_access": portal_access,
             "portal_activity": portal_activity,
             "week_review": week_review,
+            "call_prep": call_prep,
+            "next_synced_call": next_synced_call,
+            "coaching_booking_url": coaching_booking_url,
             "next_week_number": next_week_number,
             "next_week_start": next_week_start,
             "next_week_end": next_week_end,
@@ -788,8 +847,6 @@ def add_client_checkin(
     custom_action_name: str = Form(""),
     custom_target_count: str = Form(""),
     custom_target_unit: str = Form(""),
-    next_call_date: str = Form(""),
-    next_call_time: str = Form(""),
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse("/coach/login", status_code=303)
@@ -798,8 +855,8 @@ def add_client_checkin(
         client_id=client_id,
         call_date=call_date,
         weight_kg=None,
-        next_call_date=next_call_date or None,
-        next_call_time=next_call_time or None,
+        next_call_date=None,
+        next_call_time=None,
         wins=wins.strip() or None,
         struggles=struggles.strip() or None,
         improvements_needed=improvements_needed.strip() or None,

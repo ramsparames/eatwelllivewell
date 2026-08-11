@@ -13,6 +13,7 @@ from app.services.client_portal_service import (
     get_daily_tracking_for_date,
     get_week_completion,
     get_current_week_measurement,
+    get_next_client_call,
     is_portal_day_submitted,
     save_action_logs,
     save_client_daily_entry,
@@ -54,6 +55,7 @@ def client_home(request: Request, access_token: str):
             "daily_entry": get_daily_tracking_for_date(client["id"], today),
             "week_completion": get_week_completion(client["id"]),
             "weekly_measurement": get_current_week_measurement(client["id"]),
+            "next_call": get_next_client_call(client),
             "saved": request.query_params.get("saved") == "1",
             "measurement_saved":
                 request.query_params.get("measurement_saved") == "1",

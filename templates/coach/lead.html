@@ -96,6 +96,10 @@
 .lp-insight-card strong{display:block;margin-top:4px;font-size:11px;line-height:1.45;font-weight:750}
 .lp-insight-empty{color:var(--coach-muted);font-size:10px}
 
+
+.lp-booking{margin-bottom:12px;padding:12px;border:1px solid #dfcce8;border-radius:11px;background:#fbf8fc}
+.lp-booking strong{display:block;font-size:12px}.lp-booking p{margin:3px 0 8px;color:var(--coach-muted);font-size:10px}.lp-booking a{display:inline-flex;min-height:38px;align-items:center;padding:0 11px;border-radius:9px;background:var(--coach-purple);color:#fff;text-decoration:none;font-size:10px;font-weight:850}
+
 @media(max-width:900px){.lp-grid{grid-template-columns:1fr}.lp-manage{position:static}}
 @media(max-width:620px){
   .lp-hero{display:block}.lp-status-score{margin-top:14px}.lp-response-grid,.lp-answer-list,.lp-snapshot,.lp-insight-cards{grid-template-columns:1fr}
@@ -367,6 +371,11 @@
       <section class="lp-panel lp-manage">
         {% if saved %}<div class="lp-success">✓ Lead details updated.</div>{% endif %}
         <div class="lp-head"><div><span>Lead management</span><h2>Next step</h2><p>Keep status, follow-up and coaching notes together.</p></div></div>
+        {% if next_clarity_call %}
+        <div class="lp-booking"><strong>Clarity Call booked</strong><p>{{ next_clarity_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}{% if next_clarity_call.meeting_location %} · {{ next_clarity_call.meeting_location }}{% endif %}</p></div>
+        {% elif clarity_booking_url %}
+        <div class="lp-booking"><strong>Ready to book?</strong><p>Open the Synamate Clarity Call calendar. Only bookings from the configured Clarity Call calendar are shown here.</p><a href="{{ clarity_booking_url }}" target="_blank" rel="noopener">Schedule Clarity Call ↗</a></div>
+        {% endif %}
 
         <form method="post" action="/dashboard/leads/{{ lead_type }}/{{ lead_id }}/update">
           <div class="lp-field">
