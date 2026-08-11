@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Coach Dashboard | Eat Well Live Well{% endblock %}</title>
+    <title>{% block title %}NourisHer Coach Dashboard{% endblock %}</title>
     <style>
         :root{
             --coach-purple:#5b0e91;
@@ -89,15 +89,15 @@
         <a class="coach-brand" href="/dashboard" aria-label="Eat Well Live Well Coach Dashboard">
             <img src="/static/eatwelllivewell-logo.png" alt="Eat Well Live Well">
             <span class="coach-brand-copy">
-                <strong>Coach Dashboard</strong>
-                <span>Eat Well Live Well coaching</span>
+                <strong>NourisHer Coach Dashboard</strong>
+                <span>Coaching workspace</span>
             </span>
         </a>
 
         <nav class="coach-nav" aria-label="Coach navigation">
             <a href="/dashboard" class="{% if active_nav == 'home' %}is-active{% endif %}">Dashboard</a>
-            <a href="/dashboard/leads" class="{% if active_nav == 'leads' %}is-active{% endif %}">Leads</a>
             <a href="/dashboard/clients" class="{% if active_nav == 'clients' %}is-active{% endif %}">Clients</a>
+            <a href="/dashboard/leads" class="{% if active_nav == 'leads' %}is-active{% endif %}">Leads</a>
             <a href="/" target="_blank" rel="noopener">Website ↗</a>
             <a class="coach-logout" href="/coach/logout">Log out</a>
         </nav>
@@ -110,8 +110,8 @@
 
 <footer class="coach-site-footer">
     <div class="coach-site-footer-inner">
-        <div><strong>Eat Well Live Well</strong> · Coach Dashboard</div>
-        <span>© 2026 Eat Well Live Well · Coaching by Sushma</span>
+        <div><strong>NourisHer Coach Dashboard</strong></div>
+        <span>Private coaching workspace</span>
     </div>
 </footer>
 {% block scripts %}{% endblock %}

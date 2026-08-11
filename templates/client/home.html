@@ -122,12 +122,15 @@
   {% if measurement_saved %}
   <div class="cp-alert"><strong>✓ Weekly measurements saved.</strong> They’re available to Sushma for your weekly review.</div>
   {% endif %}
+  {% if not weekly_measurement %}
+  <div class="cp-alert error"><strong>Weekly measurements are due.</strong> Complete all six once during this coaching week, using the date you actually measured.</div>
+  {% endif %}
   {% if measurement_error %}
   <div class="cp-alert error">
     {% if measurement_error == "already_saved" %}
       Measurements have already been submitted for this coaching week.
     {% else %}
-      Please enter at least one measurement and choose a valid date from this coaching week.
+      Please complete all six measurements and choose a valid date from this coaching week.
     {% endif %}
   </div>
   {% endif %}
@@ -234,10 +237,10 @@
       <section class="cp-card">
         <div class="cp-measure-head">
           <div>
-            <p class="cp-kicker">Once this week</p>
+            <p class="cp-kicker">Required once this week</p>
             <h2>Body measurements</h2>
           </div>
-          <span class="cp-measure-badge">Optional weekly update</span>
+          <span class="cp-measure-badge">Required this week</span>
         </div>
 
         {% if weekly_measurement %}
@@ -252,7 +255,7 @@
             {% if weekly_measurement.thigh_cm is not none %}<span>Thigh {{ weekly_measurement.thigh_cm }} cm</span>{% endif %}
           </div>
         </div>
-        <p class="cp-small">One body-measurement update is recorded per coaching week.</p>
+        <p class="cp-small">Your required body-measurement update for this coaching week is complete.</p>
         {% else %}
         <form class="cp-measure-form" method="post" action="/client/{{ access_token }}/measurements">
           <div class="cp-measure-date-row">
@@ -273,16 +276,16 @@
           </div>
 
           <div class="cp-measure-grid">
-            <div class="cp-field"><span>Upper arm</span><input class="cp-input" type="number" step="0.1" name="upper_arm"></div>
-            <div class="cp-field"><span>Chest</span><input class="cp-input" type="number" step="0.1" name="chest"></div>
-            <div class="cp-field"><span>Waist</span><input class="cp-input" type="number" step="0.1" name="waist"></div>
-            <div class="cp-field"><span>Lower abdomen</span><input class="cp-input" type="number" step="0.1" name="lower_abdomen"></div>
-            <div class="cp-field"><span>Hip</span><input class="cp-input" type="number" step="0.1" name="hip"></div>
-            <div class="cp-field"><span>Thigh</span><input class="cp-input" type="number" step="0.1" name="thigh"></div>
+            <div class="cp-field"><span>Upper arm</span><input class="cp-input" type="number" step="0.1" name="upper_arm" required></div>
+            <div class="cp-field"><span>Chest</span><input class="cp-input" type="number" step="0.1" name="chest" required></div>
+            <div class="cp-field"><span>Waist</span><input class="cp-input" type="number" step="0.1" name="waist" required></div>
+            <div class="cp-field"><span>Lower abdomen</span><input class="cp-input" type="number" step="0.1" name="lower_abdomen" required></div>
+            <div class="cp-field"><span>Hip</span><input class="cp-input" type="number" step="0.1" name="hip" required></div>
+            <div class="cp-field"><span>Thigh</span><input class="cp-input" type="number" step="0.1" name="thigh" required></div>
           </div>
 
           <button class="cp-save" type="submit">Save this week’s measurements</button>
-          <p class="cp-small">Choose the date you actually took the measurements. You only need to do this once during the week.</p>
+          <p class="cp-small">Choose the date you actually took the measurements. Complete all six measurements once during each coaching week.</p>
         </form>
         {% endif %}
       </section>

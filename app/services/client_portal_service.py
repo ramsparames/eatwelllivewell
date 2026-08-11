@@ -348,8 +348,10 @@ def save_weekly_measurements(
         hip,
         thigh,
     ]
-    if not any(value is not None for value in values):
-        raise ValueError("Enter at least one body measurement.")
+    if any(value is None for value in values):
+        raise ValueError(
+            "All weekly body measurements are required."
+        )
 
     ClientService.add_measurement(
         client_id=client_id,
