@@ -28,14 +28,14 @@
 .nw-action-choice input{margin-top:2px;accent-color:var(--coach-purple)}
 .nw-action-choice small{display:block;margin-top:2px;color:var(--coach-muted);font-size:10px}
 .nw-action-frequency{display:grid;grid-template-columns:74px 92px;gap:5px}
-.nw-frequency-count,.nw-frequency-unit{height:36px;padding:0 7px;font-size:10px}
+.nw-frequency-count,.nw-frequency-unit{height:36px;padding:0 7px;font-size:10px;background:#fff;cursor:pointer}
 .nw-action-help{margin:0 0 10px!important}
 .nw-custom{margin-top:12px;padding-top:12px;border-top:1px dashed var(--coach-border)}
 .nw-custom summary{cursor:pointer;color:var(--coach-purple);font-size:13px;font-weight:850}
 .nw-custom-list{display:grid;gap:7px;margin-top:10px}
 .nw-custom-row{display:grid;grid-template-columns:minmax(0,1fr) 90px 110px 34px;gap:7px;align-items:center}
-.nw-remove-custom{width:34px;height:38px;border:1px solid var(--coach-border);border-radius:9px;background:#fff;color:#8b6e96;cursor:pointer;font-size:18px}
-.nw-add-custom{margin-top:8px}
+.nw-remove-custom{width:34px;height:38px;border:1px solid var(--coach-border);border-radius:9px;background:#fff;color:#8b6e96;cursor:pointer;font-size:18px}.nw-remove-custom:hover{background:#f7f0fa;color:var(--coach-purple)}
+
 
 .nw-tabs{display:flex;gap:5px;margin-bottom:14px;padding:5px;width:max-content;border:1px solid var(--coach-border);border-radius:12px;background:#fff}.nw-tab{padding:8px 13px;border:0;border-radius:8px;background:transparent;color:var(--coach-muted);cursor:pointer;font-size:14.5px;font-weight:750}.nw-tab.active{color:#fff;background:var(--coach-purple)}.nw-panel-tab{display:none}.nw-panel-tab.active{display:block}
 .nw-overview{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:start}.nw-stack{display:grid;gap:14px}.nw-goal{padding:14px;border:1px solid #eee7f0;border-radius:13px;background:#fcfafc}.nw-goal span{display:block;color:var(--coach-muted);font-size:14.5px;text-transform:uppercase}.nw-goal strong{display:block;margin-top:5px;font-size:14.5px;line-height:1.4}.nw-note-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.nw-note{padding:12px;border:1px solid #eee7f0;border-radius:12px}.nw-note span{color:var(--coach-purple);font-size:14.5px;font-weight:850;text-transform:uppercase}.nw-note p{margin:5px 0 0;font-size:14px;line-height:1.45}.nw-timeline{display:grid;gap:9px}.nw-timeline-item{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;padding:12px 0;border-top:1px solid #f0ebf1}.nw-timeline-item:first-child{border-top:0;padding-top:0}.nw-timeline-date{color:var(--coach-muted);font-size:14.5px}.nw-timeline-copy strong{display:block;font-size:14.5px}.nw-timeline-copy p{margin:4px 0 0;color:var(--coach-muted);font-size:14.5px;line-height:1.4}
@@ -73,7 +73,18 @@
 .nw-next-call-note{grid-column:1/-1;margin:0!important;padding-top:9px;border-top:1px solid #eee7f0;color:var(--coach-muted)!important;font-size:9px!important}
 
 
-@media(max-width:900px){.nw-next-call{grid-template-columns:1fr}.nw-overview{grid-template-columns:1fr}.nw-prep-grid{grid-template-columns:1fr 1fr}.nw-days{grid-template-columns:repeat(4,1fr)}.nw-grid3{grid-template-columns:1fr 1fr}}@media(max-width:650px){.nw-top{display:block}.nw-meta{justify-content:flex-start;margin-top:12px}.nw-grid2,.nw-grid3,.nw-call-notes,.nw-library-items{grid-template-columns:1fr}.nw-action-row{grid-template-columns:1fr}.nw-action-frequency{grid-template-columns:1fr 1fr}.nw-custom-row{grid-template-columns:1fr 80px 100px 34px}.nw-action:nth-child(even){border-left:0}.nw-steps{grid-template-columns:1fr}.nw-days{grid-template-columns:1fr 1fr}.nw-note-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.nw-progress4{grid-template-columns:1fr 1fr}.nw-prep-focus{grid-template-columns:1fr}.nw-next-call{grid-template-columns:1fr}.nw-overview{grid-template-columns:1fr}.nw-prep-grid{grid-template-columns:1fr 1fr}.nw-days{grid-template-columns:repeat(4,1fr)}.nw-grid3{grid-template-columns:1fr 1fr}}@media(max-width:650px){.nw-top{display:block}.nw-meta{justify-content:flex-start;margin-top:12px}.nw-grid2,.nw-grid3,.nw-call-notes,.nw-library-items{grid-template-columns:1fr}.nw-action-row{grid-template-columns:1fr}.nw-action-frequency{grid-template-columns:1fr 1fr}.nw-custom-row{grid-template-columns:1fr 80px 100px 34px}.nw-action:nth-child(even){border-left:0}.nw-steps{grid-template-columns:1fr}.nw-days{grid-template-columns:1fr 1fr}.nw-note-grid{grid-template-columns:1fr}}
+
+.nw-progress4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.nw-progress-week{padding:12px;border:1px solid #eee7f0;border-radius:12px;background:#fcfafc}
+.nw-progress-week.current{border-color:#d7c0e1;background:#faf5fc}
+.nw-progress-week .wk{display:flex;justify-content:space-between;gap:8px;align-items:center}.nw-progress-week .wk strong{font-size:12px}.nw-progress-week .wk span{color:var(--coach-muted);font-size:9px}
+.nw-progress-metric{margin-top:10px}.nw-progress-metric div{display:flex;justify-content:space-between;gap:8px;color:var(--coach-muted);font-size:9px}.nw-progress-bar{height:5px;margin-top:4px;border-radius:999px;background:#eee8f0;overflow:hidden}.nw-progress-bar i{display:block;height:100%;background:var(--coach-purple);border-radius:inherit}
+.nw-progress-foot{display:flex;justify-content:space-between;gap:10px;margin-top:10px;padding-top:8px;border-top:1px solid #eee7f0;font-size:9px;color:var(--coach-muted)}
+.nw-prep-focus{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.nw-prep-focus-box{padding:11px;border:1px solid #e6d9eb;border-radius:11px;background:#fbf7fd}.nw-prep-focus-box h3{margin:0 0 6px;font-size:11px;color:var(--coach-purple)}.nw-prep-focus-box ul{margin:0;padding-left:16px}.nw-prep-focus-box li{margin:4px 0;font-size:10px;line-height:1.35}
+.nw-client-notes{display:grid;gap:6px}.nw-client-note{padding:9px 10px;border:1px solid #eee8f0;border-radius:10px;background:#fff}.nw-client-note strong{font-size:9px;color:var(--coach-purple)}.nw-client-note p{margin:3px 0 0;font-size:10px;line-height:1.4}
+.nw-day-note{margin-top:7px!important;padding:7px 8px;border-radius:8px;background:#faf5fc;color:#4e3c55!important;font-size:10px!important;line-height:1.4}
+.nw-measure-status{display:inline-flex;margin-left:8px;padding:4px 7px;border-radius:999px;background:#f2e9f6;color:var(--coach-purple);font-size:9px;font-weight:800}
 </style>
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
@@ -118,7 +129,7 @@
     <section class="nw-section">
       <div class="nw-section-title"><span>03 · Week 1 plan</span><h2>Choose the first action plan</h2></div>
 
-      <p class="nw-helper nw-action-help">Choose an action, then choose how often you want the client to complete it this week. There is no preset 5- or 7-day target.</p>
+      <p class="nw-helper nw-action-help">Choose the target frequency you want, then tick the action to assign it. No 5- or 7-day target is preselected.</p>
       <div class="nw-library">
         {% for category in action_library %}
         <details class="nw-library-group" {% if loop.first %}open{% endif %}>
@@ -131,18 +142,19 @@
                 {% for action in level["items"] %}
                 <div class="nw-action-row">
                   <label class="nw-action-choice">
-                    <input type="checkbox" name="action_keys" value="{{ action["key"] }}" data-library-action>
+                    <input type="checkbox" name="action_keys" value="{{ action["key"] }}">
+                    <input type="hidden" name="action_all_keys" value="{{ action["key"] }}">
                     <span>
                       <strong>{{ action["name"] }}</strong>
                       <small>{{ action["habit"] }}</small>
                     </span>
                   </label>
                   <div class="nw-action-frequency">
-                    <select class="nw-select nw-frequency-count" name="action_target_counts" data-action-count disabled>
+                    <select class="nw-select nw-frequency-count" name="action_target_counts">
                       <option value="">Target</option>
                       {% for n in range(1,8) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
                     </select>
-                    <select class="nw-select nw-frequency-unit" name="action_target_units" data-action-unit disabled>
+                    <select class="nw-select nw-frequency-unit" name="action_target_units">
                       <option value="days" {% if action["target_unit"]=="days" %}selected{% endif %}>days</option>
                       <option value="sessions" {% if action["target_unit"]=="sessions" %}selected{% endif %}>sessions</option>
                       <option value="times" {% if action["target_unit"]=="times" %}selected{% endif %}>times</option>
@@ -160,22 +172,43 @@
 
       <details class="nw-custom">
         <summary>+ Add custom actions</summary>
-        <div class="nw-custom-list" data-custom-list>
-          <div class="nw-custom-row" data-custom-row>
-            <input class="nw-input" name="custom_action_names" placeholder="Custom action">
+        <p class="nw-helper" style="margin:8px 0">Add as many custom actions as needed. Leave unused rows blank.</p>
+        <div class="nw-custom-list">
+          {% for custom_index in range(1,6) %}
+          <div class="nw-custom-row">
+            <input class="nw-input"
+                   name="custom_action_names"
+                   placeholder="Custom action {{ custom_index }}">
             <select class="nw-select" name="custom_target_counts">
               <option value="">Target</option>
-              {% for n in range(1,8) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+              {% for n in range(1,8) %}
+              <option value="{{ n }}">{{ n }}</option>
+              {% endfor %}
             </select>
             <select class="nw-select" name="custom_target_units">
               <option value="days">days</option>
               <option value="sessions">sessions</option>
               <option value="times">times</option>
             </select>
-            <button class="nw-remove-custom" type="button" data-remove-custom aria-label="Remove custom action">×</button>
+            <button
+              class="nw-remove-custom"
+              type="reset"
+              title="Clear this row"
+              onclick="
+                var r=this.closest('.nw-custom-row');
+                if(r){
+                  var i=r.querySelector('input');
+                  var s=r.querySelectorAll('select');
+                  if(i)i.value='';
+                  if(s[0])s[0].selectedIndex=0;
+                  if(s[1])s[1].selectedIndex=0;
+                }
+                return false;
+              "
+            >×</button>
           </div>
+          {% endfor %}
         </div>
-        <button class="nw-btn nw-soft nw-add-custom" type="button" data-add-custom>+ Add another custom action</button>
       </details>
     </section>
 
@@ -206,9 +239,39 @@
           </div>
         </section>
 
+        {% if progress_summary and progress_summary.weeks %}
+        <section class="nw-panel nw-pad">
+          <div class="nw-heading">
+            <div><p class="nw-kicker" style="margin-top:0">Progress</p><h2>Last {{ progress_summary.weeks|length }} coaching weeks</h2><p>Daily consistency, action adherence and weekly measurement trend.</p></div>
+          </div>
+          <div class="nw-progress4">
+            {% for item in progress_summary.weeks %}
+            <div class="nw-progress-week {% if item.week_number == current_week %}current{% endif %}">
+              <div class="wk"><strong>Week {{ item.week_number }}</strong><span>{{ item.week_start.strftime("%d %b") }}–{{ item.week_end.strftime("%d %b") }}</span></div>
+              <div class="nw-progress-metric">
+                <div><span>Daily updates</span><b>{{ item.submitted_count }}/7</b></div>
+                <div class="nw-progress-bar"><i style="width:{{ item.checkin_percent }}%"></i></div>
+              </div>
+              <div class="nw-progress-metric">
+                <div><span>Actions</span><b>{{ item.action_percent }}%</b></div>
+                <div class="nw-progress-bar"><i style="width:{{ item.action_percent }}%"></i></div>
+              </div>
+              <div class="nw-progress-foot">
+                <span>{% if item.average_steps %}Avg {{ item.average_steps }} steps{% else %}No step avg{% endif %}</span>
+                <span>{% if item.weight_kg is not none %}{{ item.weight_kg }} kg{% else %}No measure{% endif %}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% if progress_summary.weight_change is not none %}
+          <p class="nw-helper" style="margin-top:10px">Measurement weight change across these weeks: <strong>{{ "%+.1f"|format(progress_summary.weight_change) }} kg</strong>.</p>
+          {% endif %}
+        </section>
+        {% endif %}
+
         <section class="nw-panel nw-pad">
           <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Progress journey</p><h2>Week by week</h2><p>A concise history of coaching conversations and progress.</p></div></div>
-          {% if checkins %}<div class="nw-timeline">{% for checkin in checkins %}<div class="nw-timeline-item"><div class="nw-timeline-date">{{ checkin.call_date.strftime("%d %b %Y") }}</div><div class="nw-timeline-copy"><strong>{{ checkin.wins or "Weekly check-in completed" }}</strong><p>{% if checkin.improvements_needed %}Next focus: {{ checkin.improvements_needed }}{% endif %}</p></div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">The journey will begin after the first weekly call.</p>{% endif %}
+          {% if checkins %}<div class="nw-timeline">{% for checkin in checkins %}<div class="nw-timeline-item"><div class="nw-timeline-date">{{ checkin.call_date.strftime("%d %b %Y") }}</div><div class="nw-timeline-copy"><strong>{{ checkin.wins or "Weekly check-in completed" }}</strong><p>{% if checkin.improvements_needed %}Next focus: {{ checkin.improvements_needed }}{% endif %}</p></div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">Progress history will appear after the first completed weekly review.</p>{% endif %}
         </section>
       </div>
 
@@ -269,6 +332,30 @@
           <div class="nw-prep-stat"><span>Average steps</span><strong>{{ call_prep.average_steps if call_prep.average_steps else "—" }}</strong></div>
           <div class="nw-prep-stat"><span>Weight change</span><strong>{% if call_prep.weight_change is not none %}{{ "%+.1f"|format(call_prep.weight_change) }} kg{% elif call_prep.weight_latest is not none %}{{ call_prep.weight_latest }} kg{% else %}—{% endif %}</strong></div>
         </div>
+
+        <div class="nw-prep-focus">
+          <div class="nw-prep-focus-box">
+            <h3>Coach focus for this call</h3>
+            <ul>
+              {% for item in call_prep.top_focus %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="nw-prep-focus-box">
+            <h3>Client notes / help to discuss</h3>
+            {% if call_prep.client_notes %}
+            <div class="nw-client-notes">
+              {% for note in call_prep.client_notes[-3:] %}
+              <div class="nw-client-note"><strong>{{ note.date.strftime("%d %b") }}</strong><p>{{ note.note }}</p></div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="nw-helper" style="margin:0">No client notes were entered this week.</p>
+            {% endif %}
+          </div>
+        </div>
+
         {% if call_prep.action_rows %}<div class="nw-prep-actions">{% for action in call_prep.action_rows %}<div class="nw-prep-action"><span>{{ action.name }}</span><strong>{{ action.completed }}/{{ action.target }}</strong></div>{% endfor %}</div>{% endif %}
         {% if call_prep.measurement_changes %}<div class="nw-prep-alert">Measurements vs previous entry: {% for item in call_prep.measurement_changes %}{{ item.label }} {{ "%+.1f"|format(item.change) }} cm{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
         {% for item in call_prep.attention %}<div class="nw-prep-alert">{{ item }}</div>{% endfor %}
@@ -279,21 +366,21 @@
         <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Commitments</p><h2>All action-plan completion</h2><p>Every action across every day of this coaching week.</p></div></div>
         {% if week_review and week_review.actions %}<div class="nw-table-wrap"><table class="nw-table"><thead><tr><th>Action</th>{% for day in week_review.days %}<th>{{ day.date.strftime("%d %b") }}</th>{% endfor %}<th>Total</th></tr></thead><tbody>
           {% for action in week_review.actions %}<tr><td><strong>{{ action.action_name }}</strong><br><span style="color:var(--coach-muted)">{{ action.target_count or "—" }} {{ action.target_unit or "" }}</span></td>{% for result in action.days %}<td>{% if not result.eligible %}<span class="na">·</span>{% elif result.completed is true %}<span class="yes">✓</span>{% elif result.completed is false %}<span class="no">○</span>{% else %}<span class="na">—</span>{% endif %}</td>{% endfor %}<td><strong>{{ action.completed_count }}/{{ action.eligible_days }}</strong></td></tr>{% endfor %}
-        </tbody></table></div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">No action plan was assigned for this week.</p>{% endif %}
+        </tbody></table></div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">No commitments were assigned for this coaching week.</p>{% endif %}
       </section>
 
       <section class="nw-panel nw-pad">
-        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Daily data</p><h2>What the client entered</h2><p>Steps, weight and anything she wanted you to know.</p></div></div>
-        <div class="nw-days">{% if week_review %}{% for day in week_review.days %}<div class="nw-day {% if day.submitted %}submitted{% endif %}"><strong>{{ day.date.strftime("%d %b") }}</strong><small>{{ "✓ Submitted" if day.submitted else "No check-in" }}</small>{% if day.submitted %}<div class="nw-day-data"><span>Steps: <b>{{ day.steps if day.steps is not none else "—" }}</b></span><span>Weight: <b>{{ (day.weight_kg ~ " kg") if day.weight_kg is not none else "—" }}</b></span></div>{% if day.note %}<p>“{{ day.note }}”</p>{% endif %}{% endif %}</div>{% endfor %}{% endif %}</div>
+        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Daily data</p><h2>What the client entered</h2><p>One view of submitted days, steps and the notes that may need discussion.</p></div></div>
+        <div class="nw-days">{% if week_review %}{% for day in week_review.days %}<div class="nw-day {% if day.submitted %}submitted{% endif %}"><strong>{{ day.date.strftime("%d %b") }}</strong><small>{{ "✓ Submitted" if day.submitted else "No check-in" }}</small>{% if day.submitted %}<div class="nw-day-data"><span>Steps: <b>{{ day.steps if day.steps is not none else "—" }}</b></span><span>Weight: <b>{{ (day.weight_kg ~ " kg") if day.weight_kg is not none else "—" }}</b></span></div>{% if day.note %}<p class="nw-day-note"><strong>Client note:</strong> {{ day.note }}</p>{% endif %}{% endif %}</div>{% endfor %}{% endif %}</div>
       </section>
 
       <section class="nw-panel nw-pad">
-        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Measurements</p><h2>Measurements entered this week</h2></div></div>
-        {% if week_review and week_review.measurements %}<div class="nw-measures">{% for m in week_review.measurements %}<div class="nw-measure"><strong>{{ m.measured_on.strftime("%d %b %Y") }}</strong><div class="nw-values">{% if m.weight_kg is not none %}<span>Weight {{ m.weight_kg }} kg</span>{% endif %}{% if m.upper_arm_cm is not none %}<span>Upper arm {{ m.upper_arm_cm }} cm</span>{% endif %}{% if m.chest_cm is not none %}<span>Chest {{ m.chest_cm }} cm</span>{% endif %}{% if m.waist_cm is not none %}<span>Waist {{ m.waist_cm }} cm</span>{% endif %}{% if m.lower_abdomen_cm is not none %}<span>Lower abdomen {{ m.lower_abdomen_cm }} cm</span>{% endif %}{% if m.hip_cm is not none %}<span>Hip {{ m.hip_cm }} cm</span>{% endif %}{% if m.thigh_cm is not none %}<span>Thigh {{ m.thigh_cm }} cm</span>{% endif %}</div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">No client measurements were submitted this week.</p>{% endif %}
+        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Measurements</p><h2>Measurements entered this week {% if week_review and week_review.measurements %}<span class="nw-measure-status">Received</span>{% else %}<span class="nw-measure-status">Not entered</span>{% endif %}</h2></div></div>
+        {% if week_review and week_review.measurements %}<div class="nw-measures">{% for m in week_review.measurements %}<div class="nw-measure"><strong>{{ m.measured_on.strftime("%d %b %Y") }}</strong><div class="nw-values">{% if m.weight_kg is not none %}<span>Weight {{ m.weight_kg }} kg</span>{% endif %}{% if m.upper_arm_cm is not none %}<span>Upper arm {{ m.upper_arm_cm }} cm</span>{% endif %}{% if m.chest_cm is not none %}<span>Chest {{ m.chest_cm }} cm</span>{% endif %}{% if m.waist_cm is not none %}<span>Waist {{ m.waist_cm }} cm</span>{% endif %}{% if m.lower_abdomen_cm is not none %}<span>Lower abdomen {{ m.lower_abdomen_cm }} cm</span>{% endif %}{% if m.hip_cm is not none %}<span>Hip {{ m.hip_cm }} cm</span>{% endif %}{% if m.thigh_cm is not none %}<span>Thigh {{ m.thigh_cm }} cm</span>{% endif %}</div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">No weekly body measurements have been submitted for this coaching week.</p>{% endif %}
       </section>
 
       <form method="post" action="/dashboard/clients/{{ client.id }}/checkin" class="nw-panel nw-pad nw-call">
-        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Weekly call</p><h2>Review this week, then plan the next</h2><p>Review the data above, capture the conversation and assign Week {{ next_week_number }}.</p></div></div>
+        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Weekly call</p><h2>Review this week, then plan the next</h2><p>Start with the client notes and attention items above, capture the conversation, then assign Week {{ next_week_number }}.</p></div></div>
         <div style="max-width:360px">
           <label>
             <span class="nw-label">This review date</span>
@@ -305,7 +392,7 @@
 
         <div class="nw-next"><h3>Set Week {{ next_week_number }} action plan</h3><p>{{ next_week_start.strftime("%d %b %Y") }} – {{ next_week_end.strftime("%d %b %Y") }} · These actions start next week, not the week being reviewed.</p>
 
-          <p class="nw-helper nw-action-help">Select the actions for Week {{ next_week_number }} and choose the target frequency for each one.</p>
+          <p class="nw-helper nw-action-help">Choose the target frequency for each action you want, then tick it to assign it for Week {{ next_week_number }}.</p>
           <div class="nw-library">
             {% for category in action_library %}
             <details class="nw-library-group">
@@ -319,18 +406,19 @@
                     {% set already=action["name"] in next_week_action_names %}
                     <div class="nw-action-row {% if already %}disabled{% endif %}">
                       <label class="nw-action-choice">
-                        <input type="checkbox" name="action_keys" value="{{ action["key"] }}" data-library-action {% if already %}disabled{% endif %}>
+                        <input type="checkbox" name="action_keys" value="{{ action["key"] }}" {% if already %}disabled{% endif %}>
+                        <input type="hidden" name="action_all_keys" value="{{ action["key"] }}">
                         <span>
                           <strong>{{ action["name"] }}</strong>
                           <small>{{ action["habit"] }}{% if already %} · already assigned{% endif %}</small>
                         </span>
                       </label>
                       <div class="nw-action-frequency">
-                        <select class="nw-select nw-frequency-count" name="action_target_counts" data-action-count disabled>
+                        <select class="nw-select nw-frequency-count" name="action_target_counts">
                           <option value="">Target</option>
                           {% for n in range(1,8) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
                         </select>
-                        <select class="nw-select nw-frequency-unit" name="action_target_units" data-action-unit disabled>
+                        <select class="nw-select nw-frequency-unit" name="action_target_units">
                           <option value="days" {% if action["target_unit"]=="days" %}selected{% endif %}>days</option>
                           <option value="sessions" {% if action["target_unit"]=="sessions" %}selected{% endif %}>sessions</option>
                           <option value="times" {% if action["target_unit"]=="times" %}selected{% endif %}>times</option>
@@ -347,24 +435,45 @@
           </div>
 
           <details class="nw-custom">
-            <summary>+ Add custom actions for next week</summary>
-            <div class="nw-custom-list" data-custom-list>
-              <div class="nw-custom-row" data-custom-row>
-                <input class="nw-input" name="custom_action_names" placeholder="Custom action">
-                <select class="nw-select" name="custom_target_counts">
-                  <option value="">Target</option>
-                  {% for n in range(1,8) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
-                </select>
-                <select class="nw-select" name="custom_target_units">
-                  <option value="days">days</option>
-                  <option value="sessions">sessions</option>
-                  <option value="times">times</option>
-                </select>
-                <button class="nw-remove-custom" type="button" data-remove-custom aria-label="Remove custom action">×</button>
-              </div>
-            </div>
-            <button class="nw-btn nw-soft nw-add-custom" type="button" data-add-custom>+ Add another custom action</button>
-          </details>
+        <summary>+ Add custom actions for next week</summary>
+        <p class="nw-helper" style="margin:8px 0">Add as many custom actions as needed. Leave unused rows blank.</p>
+        <div class="nw-custom-list">
+          {% for custom_index in range(1,6) %}
+          <div class="nw-custom-row">
+            <input class="nw-input"
+                   name="custom_action_names"
+                   placeholder="Custom action {{ custom_index }}">
+            <select class="nw-select" name="custom_target_counts">
+              <option value="">Target</option>
+              {% for n in range(1,8) %}
+              <option value="{{ n }}">{{ n }}</option>
+              {% endfor %}
+            </select>
+            <select class="nw-select" name="custom_target_units">
+              <option value="days">days</option>
+              <option value="sessions">sessions</option>
+              <option value="times">times</option>
+            </select>
+            <button
+              class="nw-remove-custom"
+              type="reset"
+              title="Clear this row"
+              onclick="
+                var r=this.closest('.nw-custom-row');
+                if(r){
+                  var i=r.querySelector('input');
+                  var s=r.querySelectorAll('select');
+                  if(i)i.value='';
+                  if(s[0])s[0].selectedIndex=0;
+                  if(s[1])s[1].selectedIndex=0;
+                }
+                return false;
+              "
+            >×</button>
+          </div>
+          {% endfor %}
+        </div>
+      </details>
         </div>
 
         
@@ -419,86 +528,46 @@
 </div>
 
 <script>
-(()=>{
-  const tabs=[...document.querySelectorAll("[data-tab]")];
-  const panels=[...document.querySelectorAll("[data-panel]")];
+(function(){
+  var tabs = Array.prototype.slice.call(document.querySelectorAll("[data-tab]"));
+  var panels = Array.prototype.slice.call(document.querySelectorAll("[data-panel]"));
 
-  function go(n){
-    tabs.forEach(t=>t.classList.toggle("active",t.dataset.tab===n));
-    panels.forEach(p=>p.classList.toggle("active",p.dataset.panel===n));
-    try{sessionStorage.setItem("nwtab",n)}catch(e){}
+  function go(name){
+    tabs.forEach(function(tab){
+      tab.classList.toggle("active", tab.getAttribute("data-tab") === name);
+    });
+    panels.forEach(function(panel){
+      panel.classList.toggle("active", panel.getAttribute("data-panel") === name);
+    });
+    try { sessionStorage.setItem("nwtab", name); } catch(e) {}
   }
 
-  tabs.forEach(t=>t.addEventListener("click",()=>go(t.dataset.tab)));
-  const q=new URLSearchParams(location.search).get("tab");
-  let s=null;
-  try{s=sessionStorage.getItem("nwtab")}catch(e){}
-  go(q||s||"overview");
-
-  const b=document.querySelector("[data-copy]");
-  const i=document.querySelector("[data-client-link]");
-  if(b&&i)b.addEventListener("click",async()=>{
-    try{
-      await navigator.clipboard.writeText(i.value);
-      b.textContent="Copied";
-      setTimeout(()=>b.textContent="Copy",1200)
-    }catch(e){
-      i.select();
-      document.execCommand("copy")
-    }
-  });
-
-  // Library actions: target fields submit only when their checkbox is selected.
-  document.querySelectorAll("[data-library-action]").forEach(check=>{
-    const row=check.closest(".nw-action-row");
-    const count=row?.querySelector("[data-action-count]");
-    const unit=row?.querySelector("[data-action-unit]");
-
-    const sync=()=>{
-      const enabled=check.checked && !check.disabled;
-      if(count){
-        count.disabled=!enabled;
-        count.required=enabled;
-        if(!enabled) count.value="";
-      }
-      if(unit) unit.disabled=!enabled;
-    };
-
-    check.addEventListener("change",sync);
-    sync();
-  });
-
-  // Repeatable custom action rows. Each custom-action area works independently.
-  document.querySelectorAll("[data-custom-list]").forEach(list=>{
-    const details=list.closest(".nw-custom");
-    const add=details?.querySelector("[data-add-custom]");
-    const template=list.querySelector("[data-custom-row]");
-
-    function wire(row){
-      const remove=row.querySelector("[data-remove-custom]");
-      if(remove){
-        remove.addEventListener("click",()=>{
-          const rows=list.querySelectorAll("[data-custom-row]");
-          if(rows.length===1){
-            row.querySelectorAll("input").forEach(el=>el.value="");
-            row.querySelectorAll("select").forEach((el,index)=>el.selectedIndex=index===0?0:0);
-          }else{
-            row.remove();
-          }
-        });
-      }
-    }
-
-    wire(template);
-
-    add?.addEventListener("click",()=>{
-      const clone=template.cloneNode(true);
-      clone.querySelectorAll("input").forEach(el=>el.value="");
-      clone.querySelectorAll("select").forEach(el=>el.selectedIndex=0);
-      wire(clone);
-      list.appendChild(clone);
+  tabs.forEach(function(tab){
+    tab.addEventListener("click", function(){
+      go(tab.getAttribute("data-tab"));
     });
   });
+
+  var queryTab = new URLSearchParams(window.location.search).get("tab");
+  var savedTab = null;
+  try { savedTab = sessionStorage.getItem("nwtab"); } catch(e) {}
+  go(queryTab || savedTab || "overview");
+
+  var copyButton = document.querySelector("[data-copy]");
+  var copyInput = document.querySelector("[data-client-link]");
+  if(copyButton && copyInput){
+    copyButton.addEventListener("click", function(){
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(copyInput.value).then(function(){
+          copyButton.textContent = "Copied";
+          setTimeout(function(){ copyButton.textContent = "Copy"; }, 1200);
+        });
+      } else {
+        copyInput.select();
+        document.execCommand("copy");
+      }
+    });
+  }
 })();
 </script>
 {% endif %}

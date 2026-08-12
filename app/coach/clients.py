@@ -17,6 +17,8 @@ from app.services.client_portal_service import (
     get_coach_week_review,
     build_call_prep,
     get_next_client_call,
+    get_client_operations_status,
+    get_client_progress_summary,
 )
 
 
@@ -493,12 +495,23 @@ def _safe_target_count(value: str | None) -> int | None:
 
 
 def _selected_library_assignments(
-    action_keys: list[str],
+    selected_action_keys: list[str],
+    all_action_keys: list[str],
     target_counts: list[str],
     target_units: list[str],
 ):
+    """
+    The form submits target controls for every visible library action.
+    Only rows whose key is present in selected_action_keys are assigned.
+    This means target/unit controls can remain clickable without JavaScript.
+    """
+    selected = set(selected_action_keys)
     assignments = []
-    for index, action_key in enumerate(action_keys):
+
+    for index, action_key in enumerate(all_action_keys):
+        if action_key not in selected:
+            continue
+
         library_action = ACTION_LIBRARY_BY_KEY.get(action_key)
         if not library_action:
             continue
@@ -524,7 +537,9 @@ def _selected_library_assignments(
                 "target_unit": unit,
             }
         )
+
     return assignments
+
 
 
 def _custom_action_assignments(
@@ -718,72 +733,10 @@ def clients_page(request: Request):
         else:
             client["next_call_source"] = None
 
-        status = client.get("status")
-
-        if status != "active":
-            client["health_key"] = "neutral"
-            client["health_label"] = (
-                status.title()
-                if status
-                else "Inactive"
-            )
-
-        elif not latest_checkin:
-            client["health_key"] = "new"
-            client["health_label"] = "New"
-
-        elif not client.get("next_synced_call"):
-            client["health_key"] = "attention"
-            client["health_label"] = (
-                "Needs attention"
-            )
-
-        else:
-            last_checkin_date = (
-                client[
-                    "last_checkin_date"
-                ]
-            )
-
-            days_since_checkin = None
-
-            if last_checkin_date:
-                days_since_checkin = (
-                    today
-                    - last_checkin_date
-                ).days
-
-            if (
-                days_since_checkin
-                is not None
-                and days_since_checkin > 14
-            ):
-                client["health_key"] = (
-                    "attention"
-                )
-                client["health_label"] = (
-                    "Needs attention"
-                )
-
-            elif (
-                days_since_checkin
-                is not None
-                and days_since_checkin > 8
-            ):
-                client["health_key"] = (
-                    "watch"
-                )
-                client["health_label"] = (
-                    "Watch"
-                )
-
-            else:
-                client["health_key"] = (
-                    "on_track"
-                )
-                client["health_label"] = (
-                    "On track"
-                )
+        ops = get_client_operations_status(client, today)
+        client["operations"] = ops
+        client["health_key"] = ops["health_key"]
+        client["health_label"] = ops["health_label"]
 
         # Values used by the browser-side table sorter.
         client["sort_name"] = (
@@ -933,6 +886,7 @@ def client_profile(
 
     week_review = None
     call_prep = None
+    progress_summary = None
     next_week_number = None
     next_week_start = None
     next_week_end = None
@@ -941,6 +895,12 @@ def client_profile(
     if week_start and week_end:
         week_review = get_coach_week_review(client_id, week_start, week_end)
         call_prep = build_call_prep(client_id, week_start, week_end)
+        progress_summary = get_client_progress_summary(
+            client_id,
+            week_start,
+            week_number,
+            weeks=4,
+        )
         next_week_number = week_number + 1
         next_week_start = week_end + timedelta(days=1)
         next_week_end = next_week_start + timedelta(days=6)
@@ -972,6 +932,7 @@ def client_profile(
             "portal_activity": portal_activity,
             "week_review": week_review,
             "call_prep": call_prep,
+            "progress_summary": progress_summary,
             "next_synced_call": next_synced_call,
             "coaching_booking_url": coaching_booking_url,
             "next_week_number": next_week_number,
@@ -1001,6 +962,7 @@ def save_client_intake_route(
     goal_weight_kg: str = Form(""),
     coach_focus: str = Form(""),
     action_keys: list[str] = Form(default=[]),
+    action_all_keys: list[str] = Form(default=[]),
     action_target_counts: list[str] = Form(default=[]),
     action_target_units: list[str] = Form(default=[]),
     custom_action_names: list[str] = Form(default=[]),
@@ -1044,6 +1006,7 @@ def save_client_intake_route(
 
     assignments = _selected_library_assignments(
         action_keys,
+        action_all_keys,
         action_target_counts,
         action_target_units,
     )
@@ -1243,6 +1206,7 @@ def add_client_checkin(
     improvements_needed: str = Form(""),
     coach_support: str = Form(""),
     action_keys: list[str] = Form(default=[]),
+    action_all_keys: list[str] = Form(default=[]),
     action_target_counts: list[str] = Form(default=[]),
     action_target_units: list[str] = Form(default=[]),
     custom_action_names: list[str] = Form(default=[]),
@@ -1287,6 +1251,7 @@ def add_client_checkin(
 
     assignments = _selected_library_assignments(
         action_keys,
+        action_all_keys,
         action_target_counts,
         action_target_units,
     )

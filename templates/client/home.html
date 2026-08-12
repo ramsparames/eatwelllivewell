@@ -101,6 +101,15 @@
   .cp-daily-numbers,.cp-measure-grid,.cp-measure-date-row{grid-template-columns:1fr}
   .cp-action{grid-template-columns:31px minmax(0,1fr)}.cp-done{display:none}
 }
+
+.cp-status-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.cp-status-item{padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.cp-status-item span{display:block;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+.cp-status-item strong{display:block;margin-top:4px;font-size:12px}
+.cp-status-item.good strong{color:#31704c}.cp-status-item.due strong{color:#8b5f17}
+.cp-section-empty{padding:18px;border:1px dashed #d9cedf;border-radius:12px;background:#fcfafc;color:var(--muted);font-size:11px;line-height:1.45}
+.cp-date-note{margin-top:5px;color:var(--muted);font-size:9px}
+@media(max-width:560px){.cp-status-strip{grid-template-columns:1fr}}
 </style>
 
 {% set today_locked = daily_entry and daily_entry.is_submitted %}
@@ -113,6 +122,7 @@
       <p class="cp-sub">
         {{ today.strftime("%d %b %Y") }}
         · {% if today_locked %}Today’s check-in is complete.{% else %}Your daily check-in takes just a minute.{% endif %}
+        {% if client.timezone %}<span class="cp-date-note">Your coaching day follows {{ client.timezone }}.</span>{% endif %}
       </p>
     </div>
     <aside class="cp-consistency">
@@ -141,6 +151,21 @@
   </div>
   {% endif %}
 
+  <div class="cp-status-strip">
+    <div class="cp-status-item {% if today_locked %}good{% endif %}">
+      <span>Today</span>
+      <strong>{% if today_locked %}Check-in complete ✓{% else %}Daily check-in due{% endif %}</strong>
+    </div>
+    <div class="cp-status-item {% if weekly_measurement %}good{% else %}due{% endif %}">
+      <span>This week</span>
+      <strong>{% if weekly_measurement %}Measurements complete ✓{% else %}Measurements still due{% endif %}</strong>
+    </div>
+    <div class="cp-status-item">
+      <span>Next coaching call</span>
+      <strong>{% if next_call and next_call.local_start_time %}{{ next_call.local_start_time.strftime("%d %b · %I:%M %p") }}{% else %}Not scheduled yet{% endif %}</strong>
+    </div>
+  </div>
+
   <div class="cp-grid">
     <section class="cp-card cp-main">
       <form method="post" action="/client/{{ access_token }}/daily">
@@ -148,7 +173,7 @@
           <div>
             <p class="cp-kicker">Today</p>
             <h2>Your daily check-in</h2>
-            <p class="cp-intro">Complete your actions, add your steps and weight if you want to track it.</p>
+            <p class="cp-intro">Complete today’s actions and add your steps. Daily weight is optional; body measurements are completed once each coaching week.</p>
           </div>
           {% if actions %}
           <span class="cp-count" data-completion-count>{{ actions|selectattr("completed_today")|list|length }} / {{ actions|length }} done</span>
@@ -174,7 +199,7 @@
           {% endfor %}
         </div>
         {% else %}
-        <div class="cp-empty"><strong>Your plan is being prepared</strong><p>Your focus actions will appear here as soon as Sushma assigns them.</p></div>
+        <div class="cp-section-empty"><strong>No actions assigned for today.</strong><br>Your coaching plan may be between weeks or Sushma may still be preparing the next set of commitments.</div>
         {% endif %}
 
         <div class="cp-daily-numbers">
@@ -200,24 +225,21 @@
     </section>
 
     <aside class="cp-side">
-      {% if next_call %}
       <section class="cp-card cp-call-card">
         <p class="cp-kicker">Next call</p>
         <h2>Your next coaching call</h2>
+        {% if next_call and next_call.local_start_time %}
         <div class="cp-call-row">
           <div class="cp-call-when">
-            {% if next_call.source == "synamate" %}
-              <strong>{{ next_call.local_start_time.strftime("%d %b %Y") }}</strong>
-              <span>{{ next_call.local_start_time.strftime("%I:%M %p") }} · {{ next_call.title or "Coaching call" }}</span>
-            {% else %}
-              <strong>{{ next_call.next_call_date.strftime("%d %b %Y") }}</strong>
-              <span>{% if next_call.next_call_time %}{{ next_call.next_call_time.strftime("%I:%M %p") }}{% else %}Time to be confirmed{% endif %}</span>
-            {% endif %}
+            <strong>{{ next_call.local_start_time.strftime("%d %b %Y") }}</strong>
+            <span>{{ next_call.local_start_time.strftime("%I:%M %p") }} · Coaching call</span>
           </div>
           {% if next_call.reschedule_url %}<a class="cp-call-link" href="{{ next_call.reschedule_url }}" target="_blank" rel="noopener">Reschedule ↗</a>{% endif %}
         </div>
+        {% else %}
+        <div class="cp-section-empty">Your next coaching call has not been scheduled yet. Sushma will confirm it with you.</div>
+        {% endif %}
       </section>
-      {% endif %}
 
       <section class="cp-card">
         <p class="cp-kicker">Your week</p>

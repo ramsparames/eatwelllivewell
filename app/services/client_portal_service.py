@@ -1,6 +1,6 @@
 import os
 import secrets
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app.database import get_next_synamate_appointment_for_person, get_previous_measurement_before, resolve_synamate_calendar_id
@@ -287,12 +287,12 @@ def save_client_daily_entry(
             """, (client_id, tracked_on))
 
 
-def get_current_week_measurement(client_id: int):
+def get_current_week_measurement(client_id: int, on_date: date | None = None):
     """
     Return the latest body-measurement entry in the client's current coaching week.
     The portal allows only one weekly measurement submission.
     """
-    today = date.today()
+    today = on_date or date.today()
     _, week_start, week_end = _coaching_week(client_id, today)
 
     with get_connection() as connection:
@@ -319,6 +319,7 @@ def get_current_week_measurement(client_id: int):
 def save_weekly_measurements(
     client_id: int,
     measured_on: date,
+    on_date: date | None = None,
     upper_arm: float | None = None,
     chest: float | None = None,
     waist: float | None = None,
@@ -331,7 +332,7 @@ def save_weekly_measurements(
     Save body measurements once per coaching week.
     The client chooses the actual date on which she measured.
     """
-    today = date.today()
+    today = on_date or date.today()
     _, week_start, week_end = _coaching_week(client_id, today)
 
     if measured_on < week_start or measured_on > week_end:
@@ -340,7 +341,7 @@ def save_weekly_measurements(
     if measured_on > today:
         raise ValueError("Measurement date cannot be in the future.")
 
-    if get_current_week_measurement(client_id):
+    if get_current_week_measurement(client_id, on_date=today):
         return False
 
     values = [
@@ -434,7 +435,7 @@ def _coaching_week(client_id: int, today: date):
     return week_number, week_start, week_start + timedelta(days=6)
 
 
-def get_week_completion(client_id: int):
+def get_week_completion(client_id: int, on_date: date | None = None):
     """
     Client-specific coaching week, not Monday-Sunday.
 
@@ -444,7 +445,7 @@ def get_week_completion(client_id: int):
     - submitted-day count
     - read-only detail for submitted dates
     """
-    today = date.today()
+    today = on_date or date.today()
     week_number, week_start, week_end = _coaching_week(client_id, today)
 
     with get_connection() as connection:
@@ -562,6 +563,126 @@ def get_week_completion(client_id: int):
         "completed": submitted_days,
         "percent": checkin_percent,
     }
+
+
+def get_client_operations_status(client: dict, on_date: date | None = None):
+    """
+    Production operations status for one active coaching client.
+    Centralizes the rules used by the Coach Dashboard and Clients page.
+    """
+    client_id = client["id"]
+    timezone_name = client.get("timezone") or "Asia/Kolkata"
+    if on_date is None:
+        on_date = datetime.now(ZoneInfo(timezone_name)).date()
+
+    start_date = client.get("start_date")
+    if not start_date:
+        return {
+            "health_key": "setup",
+            "health_label": "Setup",
+            "week_number": 0,
+            "week_start": None,
+            "week_end": None,
+            "missed_daily_count": 0,
+            "measurement_due": False,
+            "weekly_review_overdue": False,
+            "no_next_call": True,
+            "next_call": get_next_client_call(client),
+            "reasons": ["Complete client setup"],
+            "attention_count": 1,
+        }
+
+    week_number, week_start, week_end = _coaching_week(client_id, on_date)
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT tracked_on
+                FROM client_portal_daily_submissions
+                WHERE client_id = %s
+                  AND tracked_on BETWEEN %s AND %s
+                """,
+                (client_id, week_start, week_end),
+            )
+            submitted_dates = {row["tracked_on"] for row in cursor.fetchall()}
+
+            cursor.execute(
+                """
+                SELECT 1
+                FROM client_measurements
+                WHERE client_id = %s
+                  AND measured_on BETWEEN %s AND %s
+                LIMIT 1
+                """,
+                (client_id, week_start, week_end),
+            )
+            has_measurement = cursor.fetchone() is not None
+
+            previous_review_done = True
+            if week_number > 1:
+                previous_week_end = week_start - timedelta(days=1)
+                previous_week_start = previous_week_end - timedelta(days=6)
+                cursor.execute(
+                    """
+                    SELECT 1
+                    FROM client_weekly_checkins
+                    WHERE client_id = %s
+                      AND call_date BETWEEN %s AND %s
+                    LIMIT 1
+                    """,
+                    (client_id, previous_week_start, previous_week_end),
+                )
+                previous_review_done = cursor.fetchone() is not None
+
+    missed_dates = []
+    cursor_date = week_start
+    while cursor_date < on_date and cursor_date <= week_end:
+        if cursor_date not in submitted_dates:
+            missed_dates.append(cursor_date)
+        cursor_date += timedelta(days=1)
+
+    day_number = max(1, min(7, (on_date - week_start).days + 1))
+    measurement_due = (not has_measurement) and day_number >= 5
+    weekly_review_overdue = week_number > 1 and not previous_review_done
+    next_call = get_next_client_call(client)
+    no_next_call = next_call is None
+
+    reasons = []
+    if weekly_review_overdue:
+        reasons.append("Weekly review overdue")
+    if len(missed_dates) >= 2:
+        reasons.append(f"{len(missed_dates)} missed daily updates")
+    if measurement_due:
+        reasons.append("Weekly measurements due")
+    if no_next_call:
+        reasons.append("Next coaching call not scheduled")
+
+    if weekly_review_overdue or len(missed_dates) >= 2 or measurement_due or no_next_call:
+        health_key = "attention"
+        health_label = "Needs attention"
+    elif len(missed_dates) == 1:
+        health_key = "watch"
+        health_label = "Watch"
+    else:
+        health_key = "on_track"
+        health_label = "On track"
+
+    return {
+        "health_key": health_key,
+        "health_label": health_label,
+        "week_number": week_number,
+        "week_start": week_start,
+        "week_end": week_end,
+        "missed_daily_count": len(missed_dates),
+        "measurement_due": measurement_due,
+        "weekly_review_overdue": weekly_review_overdue,
+        "no_next_call": no_next_call,
+        "next_call": next_call,
+        "reasons": reasons,
+        "attention_count": len(reasons),
+    }
+
 
 
 def get_coach_week_review(
@@ -763,6 +884,113 @@ def get_next_client_call(client: dict):
 
 
 
+
+def get_client_progress_summary(
+    client_id: int,
+    current_week_start: date,
+    current_week_number: int,
+    weeks: int = 4,
+):
+    """
+    Compact week-by-week progress for the coach workspace.
+    Uses the client's own coaching-week boundaries, never Mon-Sun.
+    """
+    rows = []
+
+    first_week_number = max(1, current_week_number - weeks + 1)
+
+    for week_number in range(first_week_number, current_week_number + 1):
+        offset_weeks = current_week_number - week_number
+        week_start = current_week_start - timedelta(days=7 * offset_weeks)
+        week_end = week_start + timedelta(days=6)
+        review = get_coach_week_review(client_id, week_start, week_end)
+
+        target_total = 0
+        achieved_total = 0
+
+        for action in review["actions"]:
+            target = int(
+                action.get("target_count")
+                or action.get("eligible_days")
+                or 0
+            )
+            completed = int(action.get("completed_count") or 0)
+            target_total += target
+            achieved_total += min(completed, target) if target else completed
+
+        action_percent = (
+            round((achieved_total / target_total) * 100)
+            if target_total
+            else 0
+        )
+
+        step_values = [
+            int(day["steps"])
+            for day in review["days"]
+            if day.get("submitted") and day.get("steps") is not None
+        ]
+
+        measurement = (
+            review["measurements"][0]
+            if review["measurements"]
+            else None
+        )
+
+        rows.append(
+            {
+                "week_number": week_number,
+                "week_start": week_start,
+                "week_end": week_end,
+                "submitted_count": review["submitted_count"],
+                "checkin_percent": round(
+                    (review["submitted_count"] / 7) * 100
+                ),
+                "action_percent": action_percent,
+                "average_steps": (
+                    round(sum(step_values) / len(step_values))
+                    if step_values
+                    else None
+                ),
+                "measurement_date": (
+                    measurement.get("measured_on")
+                    if measurement
+                    else None
+                ),
+                "weight_kg": (
+                    float(measurement["weight_kg"])
+                    if measurement
+                    and measurement.get("weight_kg") is not None
+                    else None
+                ),
+            }
+        )
+
+    weights = [
+        row["weight_kg"]
+        for row in rows
+        if row["weight_kg"] is not None
+    ]
+
+    return {
+        "weeks": rows,
+        "weight_change": (
+            round(weights[-1] - weights[0], 1)
+            if len(weights) >= 2
+            else None
+        ),
+        "latest_action_percent": (
+            rows[-1]["action_percent"]
+            if rows
+            else 0
+        ),
+        "latest_checkin_percent": (
+            rows[-1]["checkin_percent"]
+            if rows
+            else 0
+        ),
+    }
+
+
 def build_call_prep(client_id: int, week_start: date, week_end: date):
     """Create a compact pre-call summary from the client's current week."""
     review = get_coach_week_review(client_id, week_start, week_end)
@@ -827,6 +1055,33 @@ def build_call_prep(client_id: int, week_start: date, week_end: date):
             'Low completion: ' + ', '.join(row['name'] for row in low_actions[:2])
         )
 
+    client_notes = [
+        {
+            "date": day["date"],
+            "note": day["note"],
+        }
+        for day in submitted_days
+        if day.get("note")
+    ]
+
+    top_focus = []
+    if attention:
+        top_focus.extend(attention[:2])
+    elif action_rows:
+        strongest = sorted(
+            action_rows,
+            key=lambda row: row["percent"],
+            reverse=True,
+        )[0]
+        top_focus.append(
+            f"Build on: {strongest['name']} ({strongest['completed']}/{strongest['target']})"
+        )
+    else:
+        top_focus.append("Use the call to establish the next clear focus")
+
+    if client_notes:
+        top_focus.append("Client left a note that may need discussion")
+
     return {
         'submitted_count': review['submitted_count'],
         'action_rows': action_rows,
@@ -838,4 +1093,6 @@ def build_call_prep(client_id: int, week_start: date, week_end: date):
         'measurement': measurement,
         'measurement_changes': measurement_changes,
         'attention': attention,
+        'client_notes': client_notes,
+        'top_focus': top_focus,
     }

@@ -1,15 +1,23 @@
+import os
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from datetime import date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from app.auth import coach_is_logged_in
 from app.database import (
     get_all_leads,
     get_lead_profile,
     get_lead_events,
     update_lead_crm,
+    get_synamate_appointments_between,
+    get_next_synamate_appointment_for_person,
+    get_synamate_calendar_summary,
+    get_synamate_calendar_resolution,
+    resolve_synamate_calendar_id,
 )
 from app.services.client_service import ClientService
+from app.services.client_portal_service import get_client_operations_status
 from fastapi import Form
 
 router = APIRouter()
@@ -143,6 +151,43 @@ def dashboard(
                 }
             )
 
+    # Detail lists for clickable lead summary cards.
+    new_lead_items = []
+    application_leads = []
+
+    for lead in all_leads:
+        status = (
+            lead.get("application_status")
+            or lead.get("status")
+            or "new"
+        )
+
+        if lead.get("snapshot_id"):
+            lead_type = "assessment"
+            lead_id = lead["snapshot_id"]
+        else:
+            lead_type = "application"
+            lead_id = lead.get("application_id")
+
+        item = {
+            "name": lead.get("name") or "Lead",
+            "email": lead.get("email"),
+            "phone": lead.get("phone"),
+            "status": status,
+            "lead_type": lead_type,
+            "lead_id": lead_id,
+            "submitted_at": (
+                lead.get("application_submitted_at")
+                or lead.get("assessment_submitted_at")
+            ),
+        }
+
+        if status == "new":
+            new_lead_items.append(item)
+
+        if lead.get("has_application"):
+            application_leads.append(item)
+
     # Overdue follow-ups appear before today's follow-ups.
     today_followups.sort(
         key=lambda item: item["follow_up_date"]
@@ -227,6 +272,8 @@ def dashboard(
             "today_followups": today_followups,
             "new_applications": new_applications,
             "priority_applicants": priority_applicants,
+            "new_lead_items": new_lead_items,
+            "application_leads": application_leads,
         },
     )
     
@@ -270,6 +317,33 @@ def lead_profile(
         snapshot_id=lead.get("snapshot_id"),
         application_id=lead.get("application_id"),
     )
+    clarity_booking_url = os.getenv("SYNAMATE_CLARITY_CALL_URL", "").strip()
+    clarity_calendar_id = resolve_synamate_calendar_id(
+        role="clarity",
+        expected_name=os.getenv(
+            "SYNAMATE_CLARITY_CALENDAR_NAME",
+            "Clarity Call with Sushma",
+        ).strip(),
+        explicit_calendar_id=os.getenv(
+            "SYNAMATE_CLARITY_CALENDAR_ID",
+            "",
+        ).strip(),
+    )
+
+    next_clarity_call = (
+        get_next_synamate_appointment_for_person(
+            email=lead.get("email"),
+            phone=lead.get("phone") or lead.get("application_phone"),
+            calendar_id=clarity_calendar_id,
+        )
+        if clarity_calendar_id
+        else None
+    )
+    if next_clarity_call and next_clarity_call.get("start_time"):
+        next_clarity_call = dict(next_clarity_call)
+        next_clarity_call["local_start_time"] = next_clarity_call["start_time"].astimezone(
+            ZoneInfo("Asia/Kolkata")
+        )
     now = datetime.now(timezone.utc)
     today_date = now.date()
     yesterday_date = today_date - timedelta(days=1)
@@ -307,6 +381,8 @@ def lead_profile(
             "saved": request.query_params.get("saved") == "1",
             "events": events,
             "timeline_groups": timeline_groups,
+            "clarity_booking_url": clarity_booking_url,
+            "next_clarity_call": next_clarity_call,
         },
     )
 
@@ -357,27 +433,240 @@ def update_lead(
 )
 def dashboard_home(request: Request):
     if not coach_is_logged_in(request):
-        return RedirectResponse(
-            "/coach/login",
-            status_code=303,
-        )
+        return RedirectResponse("/coach/login", status_code=303)
 
     clients = ClientService.dashboard_clients()
-
-    calls_today = ClientService.calls_today()
-
-    calls_this_week = (
-        ClientService.calls_this_week()
-    )
-
     active_clients = [
-        client
+        dict(client)
         for client in clients
         if client.get("status") == "active"
     ]
 
-    all_leads = get_all_leads()
+    clarity_calendar_id = resolve_synamate_calendar_id(
+        role="clarity",
+        expected_name=os.getenv(
+            "SYNAMATE_CLARITY_CALENDAR_NAME",
+            "Clarity Call with Sushma",
+        ).strip(),
+        explicit_calendar_id=os.getenv(
+            "SYNAMATE_CLARITY_CALENDAR_ID",
+            "",
+        ).strip(),
+    )
 
+    coaching_calendar_id = resolve_synamate_calendar_id(
+        role="coaching",
+        expected_name=os.getenv(
+            "SYNAMATE_COACHING_CALENDAR_NAME",
+            "Coaching Call with Sushma",
+        ).strip(),
+        explicit_calendar_id=os.getenv(
+            "SYNAMATE_COACHING_CALENDAR_ID",
+            "",
+        ).strip(),
+    )
+
+    local_tz = ZoneInfo("Asia/Kolkata")
+    local_now = datetime.now(local_tz)
+    local_start = datetime.combine(
+        local_now.date(),
+        datetime.min.time(),
+        tzinfo=local_tz,
+    )
+    local_end = local_start + timedelta(days=1)
+
+    calls_today = []
+
+    def normalized_phone(value):
+        return "".join(ch for ch in (value or "") if ch.isdigit())
+
+    coaching_calls = (
+        get_synamate_appointments_between(
+            local_start.astimezone(timezone.utc),
+            local_end.astimezone(timezone.utc),
+            calendar_id=coaching_calendar_id,
+        )
+        if coaching_calendar_id
+        else []
+    )
+
+    for call in coaching_calls:
+        item = dict(call)
+        local_start_time = item["start_time"].astimezone(local_tz)
+        matched_client = None
+        call_email = (item.get("email") or "").strip().lower()
+        call_phone = normalized_phone(item.get("phone"))
+
+        for client in active_clients:
+            email_match = (
+                call_email
+                and (client.get("email") or "").strip().lower() == call_email
+            )
+            phone_match = (
+                call_phone
+                and normalized_phone(client.get("phone")) == call_phone
+            )
+            if email_match or phone_match:
+                matched_client = client
+                break
+
+        item["name"] = (
+            item.get("name")
+            or (matched_client or {}).get("name")
+            or "Coaching client"
+        )
+        item["next_call_time"] = local_start_time.strftime("%I:%M %p").lstrip("0")
+        item["call_type"] = "Coaching Call"
+        item["sort_time"] = local_start_time
+        item["href"] = (
+            f"/dashboard/clients/{matched_client['id']}?tab=weekly"
+            if matched_client
+            else "/dashboard/clients"
+        )
+        calls_today.append(item)
+
+    clarity_calls = (
+        get_synamate_appointments_between(
+            local_start.astimezone(timezone.utc),
+            local_end.astimezone(timezone.utc),
+            calendar_id=clarity_calendar_id,
+        )
+        if clarity_calendar_id
+        else []
+    )
+
+    for call in clarity_calls:
+        item = dict(call)
+        local_start_time = item["start_time"].astimezone(local_tz)
+        item["name"] = item.get("name") or "Clarity Call"
+        item["next_call_time"] = local_start_time.strftime("%I:%M %p").lstrip("0")
+        item["call_type"] = "Clarity Call · Lead"
+        item["sort_time"] = local_start_time
+        item["href"] = "/dashboard/leads"
+        calls_today.append(item)
+
+    calls_today.sort(key=lambda item: item.get("sort_time") or local_now)
+
+    week_start = local_start - timedelta(days=local_start.weekday())
+    week_end = week_start + timedelta(days=7)
+
+    coaching_week_calls = (
+        get_synamate_appointments_between(
+            week_start.astimezone(timezone.utc),
+            week_end.astimezone(timezone.utc),
+            calendar_id=coaching_calendar_id,
+        )
+        if coaching_calendar_id
+        else []
+    )
+    clarity_week_calls = (
+        get_synamate_appointments_between(
+            week_start.astimezone(timezone.utc),
+            week_end.astimezone(timezone.utc),
+            calendar_id=clarity_calendar_id,
+        )
+        if clarity_calendar_id
+        else []
+    )
+
+    # Build display-ready weekly schedule rows, not just raw appointment rows.
+    calls_this_week = []
+
+    for call in coaching_week_calls:
+        item = dict(call)
+        local_start_time = item["start_time"].astimezone(local_tz)
+        matched_client = None
+        call_email = (item.get("email") or "").strip().lower()
+        call_phone = normalized_phone(item.get("phone"))
+
+        for client in active_clients:
+            email_match = (
+                call_email
+                and (client.get("email") or "").strip().lower() == call_email
+            )
+            phone_match = (
+                call_phone
+                and normalized_phone(client.get("phone")) == call_phone
+            )
+            if email_match or phone_match:
+                matched_client = client
+                break
+
+        item["name"] = (
+            item.get("name")
+            or (matched_client or {}).get("name")
+            or "Coaching client"
+        )
+        item["call_type"] = "Coaching Call"
+        item["local_start_time"] = local_start_time
+        item["date_label"] = local_start_time.strftime("%a, %d %b")
+        item["time_label"] = local_start_time.strftime("%I:%M %p").lstrip("0")
+        item["href"] = (
+            f"/dashboard/clients/{matched_client['id']}?tab=weekly"
+            if matched_client
+            else "/dashboard/clients"
+        )
+        calls_this_week.append(item)
+
+    for call in clarity_week_calls:
+        item = dict(call)
+        local_start_time = item["start_time"].astimezone(local_tz)
+        item["name"] = item.get("name") or "Clarity Call"
+        item["call_type"] = "Clarity Call · Lead"
+        item["local_start_time"] = local_start_time
+        item["date_label"] = local_start_time.strftime("%a, %d %b")
+        item["time_label"] = local_start_time.strftime("%I:%M %p").lstrip("0")
+        item["href"] = "/dashboard/leads"
+        calls_this_week.append(item)
+
+    calls_this_week.sort(
+        key=lambda item: item.get("local_start_time") or local_now
+    )
+
+    # Production operations status: one rule set for dashboard + client list.
+    needs_attention_clients = []
+    clients_without_next_call = []
+    missed_update_clients = []
+    measurement_due_clients = []
+    review_overdue_clients = []
+    no_next_call_clients = []
+    operations_counts = {
+        "missed_daily": 0,
+        "measurement_due": 0,
+        "weekly_review_overdue": 0,
+        "no_next_call": 0,
+    }
+
+    for client in active_clients:
+        ops = get_client_operations_status(client, local_now.date())
+        client["operations"] = ops
+        client["current_week"] = ops["week_number"]
+        client["has_synced_next_call"] = not ops["no_next_call"]
+
+        if ops["no_next_call"]:
+            clients_without_next_call.append(client)
+            no_next_call_clients.append(client)
+            operations_counts["no_next_call"] += 1
+        if ops["missed_daily_count"] >= 2:
+            missed_update_clients.append(client)
+            operations_counts["missed_daily"] += 1
+        if ops["measurement_due"]:
+            measurement_due_clients.append(client)
+            operations_counts["measurement_due"] += 1
+        if ops["weekly_review_overdue"]:
+            review_overdue_clients.append(client)
+            operations_counts["weekly_review_overdue"] += 1
+        if ops["health_key"] == "attention":
+            needs_attention_clients.append(client)
+
+    needs_attention_clients.sort(
+        key=lambda client: (
+            -client["operations"]["attention_count"],
+            client.get("name") or "",
+        )
+    )
+
+    all_leads = get_all_leads()
     new_leads = 0
 
     for lead in all_leads:
@@ -386,7 +675,6 @@ def dashboard_home(request: Request):
             or lead.get("status")
             or "new"
         )
-
         if status == "new":
             new_leads += 1
 
@@ -394,13 +682,69 @@ def dashboard_home(request: Request):
         "dashboard_home.html",
         {
             "request": request,
-            "active_clients":
-                active_clients,
-            "calls_today":
-                calls_today,
-            "calls_this_week":
-                calls_this_week,
-            "new_leads":
-                new_leads,
+            "active_clients": active_clients,
+            "clients_without_next_call": clients_without_next_call,
+            "needs_attention_clients": needs_attention_clients,
+            "operations_counts": operations_counts,
+            "missed_update_clients": missed_update_clients,
+            "measurement_due_clients": measurement_due_clients,
+            "review_overdue_clients": review_overdue_clients,
+            "no_next_call_clients": no_next_call_clients,
+            "calls_today": calls_today,
+            "calls_this_week": calls_this_week,
+            "new_leads": new_leads,
+            "today": local_now.date(),
+            "synamate_calendar_configured": bool(
+                clarity_calendar_id and coaching_calendar_id
+            ),
         },
     )
+
+
+@router.get("/dashboard/synamate-calendars", response_class=HTMLResponse)
+def synamate_calendar_diagnostic(request: Request):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    rows = get_synamate_calendar_summary()
+    resolution = get_synamate_calendar_resolution()
+    clarity_id = resolution["clarity"]["calendar_id"]
+    coaching_id = resolution["coaching"]["calendar_id"]
+
+    body_rows = []
+    for row in rows:
+        role = "Unassigned"
+        if row.get("calendar_id") == clarity_id:
+            role = "Clarity Call"
+        elif row.get("calendar_id") == coaching_id:
+            role = "Coaching Call"
+
+        body_rows.append(
+            "<tr>"
+            f"<td>{role}</td>"
+            f"<td>{row.get('calendar_name') or '—'}</td>"
+            f"<td><code>{row.get('calendar_id')}</code></td>"
+            f"<td>{row.get('example_title') or '—'}</td>"
+            f"<td>{row.get('appointment_count')}</td>"
+            "</tr>"
+        )
+
+    html = (
+        "<html><head><title>Synamate Calendars</title>"
+        "<style>body{font-family:Arial,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;color:#29232e}"
+        "table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left}"
+        "code{background:#f6f1f8;padding:3px 6px;border-radius:5px}</style></head><body>"
+        "<h1>Synamate calendar IDs</h1>"
+        "<p>NourisHer automatically maps webhook calendars by name. Expected names: <b>Clarity Call with Sushma</b> and <b>Coaching Call with Sushma</b>.</p>"
+        "<table><tr><th>Role</th><th>Calendar name</th><th>Calendar ID</th><th>Example appointment</th><th>Appointments</th></tr>"
+        + "".join(body_rows)
+        + "</table>"
+        "<h2>Render environment variables</h2>"
+        "<p><code>SYNAMATE_CLARITY_CALENDAR_ID</code></p>"
+        "<p><code>SYNAMATE_COACHING_CALENDAR_ID</code></p>"
+        "<p><a href='/dashboard'>← Back to dashboard</a></p>"
+        "</body></html>"
+    )
+    return HTMLResponse(html)
+
+

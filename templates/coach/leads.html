@@ -12,9 +12,8 @@
   border:1px solid var(--coach-border);border-radius:17px;background:#fff;
   box-shadow:0 5px 18px rgba(45,25,54,.04)
 }
-.lead-summary-card{padding:17px 18px}
-.lead-summary-card span{display:block;color:var(--coach-muted);font-size:12px;font-weight:700}
-.lead-summary-card strong{display:block;margin-top:4px;font-size:27px;color:var(--coach-purple)}
+.lead-summary-card{padding:18px 19px;text-decoration:none;color:inherit;display:block;transition:.15s ease}.lead-summary-card:hover{transform:translateY(-1px);border-color:#cfb7db;background:#fdfafd}.lead-summary-card span{display:block;color:var(--coach-muted);font-size:12px;font-weight:700}.lead-summary-card strong{display:block;margin-top:5px;font-size:30px;color:var(--coach-purple)}.lead-summary-card small{display:block;margin-top:5px;color:var(--coach-purple);font-size:9px;font-weight:800}
+.lead-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lead-action-panel{scroll-margin-top:18px}.lead-mini-list{display:grid;gap:7px}.lead-mini{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:10px;text-decoration:none;color:inherit}.lead-mini:hover{border-color:#cfb7db;background:#fdfafd}.lead-mini strong{display:block;font-size:12px}.lead-mini span{display:block;margin-top:2px;color:var(--coach-muted);font-size:10px}.lead-mini b{color:var(--coach-purple);font-size:13px}
 .leads-panel{padding:20px}
 .leads-tools{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px}
 .leads-tools h2{margin:0;font-size:21px}
@@ -49,7 +48,7 @@
 @media(max-width:1050px){
   .lead-row{grid-template-columns:1.3fr .8fr .8fr .7fr 100px;gap:11px}
 }
-@media(max-width:800px){
+@media(max-width:800px){.lead-action-grid{grid-template-columns:1fr}
   .lead-summary{grid-template-columns:1fr 1fr}
   .leads-tools{display:block}.lead-search{margin-top:12px}
   .lead-row{grid-template-columns:1fr 1fr}
@@ -78,13 +77,59 @@
   </header>
 
   <section class="lead-summary">
-    <article class="lead-summary-card"><span>Total leads</span><strong>{{ computed_total }}</strong></article>
-    <article class="lead-summary-card"><span>New leads</span><strong>{{ computed_new }}</strong></article>
-    <article class="lead-summary-card"><span>Applications</span><strong>{{ computed_apps }}</strong></article>
-    <article class="lead-summary-card"><span>Follow-ups due</span><strong>{{ computed_followups }}</strong></article>
+    <a class="lead-summary-card" href="#all-leads"><span>Total leads</span><strong>{{ computed_total }}</strong><small>View all ↓</small></a>
+    <a class="lead-summary-card" href="#new-leads-detail"><span>New leads</span><strong>{{ computed_new }}</strong><small>See names ↓</small></a>
+    <a class="lead-summary-card" href="#applications-detail"><span>Applications</span><strong>{{ computed_apps }}</strong><small>See applications ↓</small></a>
+    <a class="lead-summary-card" href="#followups-detail"><span>Follow-ups due</span><strong>{{ computed_followups }}</strong><small>See follow-ups ↓</small></a>
   </section>
 
-  <section class="leads-panel">
+  <section class="lead-action-grid">
+    <div class="leads-panel lead-action-panel" id="new-leads-detail">
+      <div class="leads-tools"><h2>New leads</h2><span>{{ computed_new }}</span></div>
+      <div class="lead-mini-list">
+      {% for item in new_lead_items %}
+        <a class="lead-mini" href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}"><div><strong>{{ item.name }}</strong><span>{{ item.email or item.phone or "No contact details" }}</span></div><b>→</b></a>
+      {% else %}
+        <div class="lead-empty">No new leads waiting.</div>
+      {% endfor %}
+      </div>
+    </div>
+
+    <div class="leads-panel lead-action-panel" id="applications-detail">
+      <div class="leads-tools"><h2>Applications</h2><span>{{ computed_apps }}</span></div>
+      <div class="lead-mini-list">
+      {% for item in application_leads %}
+        <a class="lead-mini" href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}"><div><strong>{{ item.name }}</strong><span>{{ item.status|replace("_"," ")|title }}</span></div><b>→</b></a>
+      {% else %}
+        <div class="lead-empty">No applications yet.</div>
+      {% endfor %}
+      </div>
+    </div>
+
+    <div class="leads-panel lead-action-panel" id="followups-detail">
+      <div class="leads-tools"><h2>Follow-ups due</h2><span>{{ computed_followups }}</span></div>
+      <div class="lead-mini-list">
+      {% for item in today_followups %}
+        <a class="lead-mini" href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}"><div><strong>{{ item.name }}</strong><span>{{ "Overdue" if item.is_overdue else "Due today" }} · {{ item.follow_up_date.strftime("%d %b %Y") }}</span></div><b>→</b></a>
+      {% else %}
+        <div class="lead-empty">No follow-ups due.</div>
+      {% endfor %}
+      </div>
+    </div>
+
+    <div class="leads-panel lead-action-panel">
+      <div class="leads-tools"><h2>Priority applications</h2><span>{{ priority_applicants|length }}</span></div>
+      <div class="lead-mini-list">
+      {% for item in priority_applicants %}
+        <a class="lead-mini" href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}"><div><strong>{{ item.name }}</strong><span>Assessment score {{ item.total_score }}</span></div><b>→</b></a>
+      {% else %}
+        <div class="lead-empty">No priority applications right now.</div>
+      {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="leads-panel" id="all-leads">
     <div class="leads-tools">
       <h2>All leads</h2>
       <form class="lead-search" method="get" action="/dashboard/leads">

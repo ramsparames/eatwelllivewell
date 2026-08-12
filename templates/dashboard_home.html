@@ -64,6 +64,21 @@
   .cd-client{grid-template-columns:1fr auto}
   .cd-week{display:none}
 }
+
+.cd-attn-client{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:11px;align-items:start;padding:11px 0;border-top:1px solid #f0ebf1}
+.cd-attn-client:first-child{border-top:0;padding-top:0}
+.cd-attn-client strong{display:block;font-size:12px}.cd-attn-client .meta{display:block;margin-top:2px;color:var(--coach-muted);font-size:10px}
+.cd-reasons{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.cd-reason{padding:4px 7px;border-radius:999px;background:#f8f2fa;color:#6c377c;font-size:9px;font-weight:750}
+.cd-ops-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}.cd-op-mini{padding:12px 9px;border:1px solid #eee8f0;border-radius:11px;background:#fcfafc;text-align:center;text-decoration:none;color:inherit;transition:.15s ease}.cd-op-mini:hover{border-color:#cfb7db;background:#faf5fc;transform:translateY(-1px)}.cd-op-mini b{display:block;font-size:22px;line-height:1;color:var(--coach-purple)}.cd-op-mini span{display:block;margin-top:5px;color:var(--coach-muted);font-size:10px;font-weight:750;line-height:1.2}
+
+
+.cd-op-mini{cursor:pointer}
+.cd-op-mini.active{border-color:#b990c9;background:#f6edf9;box-shadow:0 6px 16px rgba(91,14,145,.08)}
+.cd-attn-list{display:grid}
+.cd-attn-client.is-hidden{display:none}
+.cd-ops-none{display:none;padding:15px 5px 4px;text-align:center;color:var(--coach-muted);font-size:10px}
+.cd-ops-none.show{display:block}
+.cd-ops-reset{border:0;background:transparent;color:var(--coach-purple);font-size:10px;font-weight:800;cursor:pointer;text-decoration:none}
 </style>
 
 {% set without_next_call = clients_without_next_call if clients_without_next_call is defined else [] %}
@@ -126,6 +141,7 @@
           <span class="cd-arrow">→</span>
         </a>
         {% endfor %}
+        <div class="cd-ops-none" data-ops-none>No clients in this category.</div>
       </div>
       {% else %}
       <div class="cd-empty">
@@ -136,27 +152,54 @@
     </article>
 
     <article class="cd-panel">
-      <div class="cd-head"><div><span class="over">Action</span><h2>Needs attention</h2></div></div>
-
-      <div>
-        <div class="cd-attn">
-          <span class="cd-dot gold"></span>
-          <div>
-            <strong>{{ without_next_call|length }} client{% if without_next_call|length != 1 %}s{% endif %} without a next call</strong>
-            <span>Schedule the next coaching conversation.</span>
-          </div>
-          <a class="cd-arrow" href="/dashboard/clients">→</a>
-        </div>
-
-        <div class="cd-attn">
-          <span class="cd-dot"></span>
-          <div>
-            <strong>{{ new_leads if new_leads is defined else 0 }} new lead{% if (new_leads if new_leads is defined else 0) != 1 %}s{% endif %}</strong>
-            <span>Review new assessments and applications.</span>
-          </div>
-          <a class="cd-arrow" href="/dashboard/leads">→</a>
-        </div>
+      <div class="cd-head">
+        <div><span class="over">Operations</span><h2>Needs attention</h2></div>
+        <button class="cd-ops-reset" type="button" data-ops-filter="all">Show all</button>
       </div>
+
+      <div class="cd-ops-summary">
+        <button class="cd-op-mini" type="button" data-ops-filter="missed"><b>{{ operations_counts.missed_daily or 0 }}</b><span>Missed updates</span></button>
+        <button class="cd-op-mini" type="button" data-ops-filter="measurement"><b>{{ operations_counts.measurement_due or 0 }}</b><span>Measurements due</span></button>
+        <button class="cd-op-mini" type="button" data-ops-filter="review"><b>{{ operations_counts.weekly_review_overdue or 0 }}</b><span>Reviews overdue</span></button>
+        <button class="cd-op-mini" type="button" data-ops-filter="call"><b>{{ operations_counts.no_next_call or 0 }}</b><span>No next call</span></button>
+      </div>
+
+      {% if needs_attention_clients %}
+      <div class="cd-attn-list" data-ops-list>
+        {% for client in needs_attention_clients %}
+        <div class="cd-attn-client"
+             data-missed="{{ '1' if client.operations.missed_daily_count >= 2 else '0' }}"
+             data-measurement="{{ '1' if client.operations.measurement_due else '0' }}"
+             data-review="{{ '1' if client.operations.weekly_review_overdue else '0' }}"
+             data-call="{{ '1' if client.operations.no_next_call else '0' }}">
+          <span class="cd-dot {% if client.operations.weekly_review_overdue %}{% else %}gold{% endif %}"></span>
+          <div>
+            <strong>{{ client.name }}</strong>
+            <span class="meta">{% if client.operations.week_number %}Week {{ client.operations.week_number }}{% else %}Setup{% endif %}</span>
+            <div class="cd-reasons">
+              {% for reason in client.operations.reasons %}
+              <span class="cd-reason">{{ reason }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <a class="cd-arrow" href="/dashboard/clients/{{ client.id }}?tab=weekly">→</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="cd-empty">
+        <div class="cd-icon">✓</div>
+        <div><strong>Clients are up to date</strong><p>No coaching operations need attention right now.</p></div>
+      </div>
+      {% endif %}
+
+      {% if new_leads %}
+      <div class="cd-attn" style="margin-top:10px">
+        <span class="cd-dot"></span>
+        <div><strong>{{ new_leads }} new lead{% if new_leads != 1 %}s{% endif %}</strong><span>Review assessments and applications.</span></div>
+        <a class="cd-arrow" href="/dashboard/leads">→</a>
+      </div>
+      {% endif %}
     </article>
   </section>
 
@@ -224,6 +267,32 @@
 
 <script>
 (() => {
+  const filterButtons = [...document.querySelectorAll("[data-ops-filter]")];
+  const rows = [...document.querySelectorAll("[data-ops-list] .cd-attn-client")];
+  const none = document.querySelector("[data-ops-none]");
+
+  function filterOperations(filter) {
+    let visible = 0;
+    rows.forEach(row => {
+      const show = filter === "all" || row.dataset[filter] === "1";
+      row.classList.toggle("is-hidden", !show);
+      if (show) visible += 1;
+    });
+
+    filterButtons.forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.opsFilter === filter && filter !== "all"
+      );
+    });
+
+    if (none) none.classList.toggle("show", rows.length > 0 && visible === 0);
+  }
+
+  filterButtons.forEach(button => {
+    button.addEventListener("click", () => filterOperations(button.dataset.opsFilter));
+  });
+
   const el = document.querySelector("[data-today-date]");
   if (!el) return;
   const parts = new Intl.DateTimeFormat("en-GB", {

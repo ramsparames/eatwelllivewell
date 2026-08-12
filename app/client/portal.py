@@ -1,5 +1,6 @@
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -37,7 +38,12 @@ def client_home(request: Request, access_token: str):
     if not client:
         raise HTTPException(status_code=404, detail="Client access link not found")
 
-    today = date.today()
+    try:
+        client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
+    except Exception:
+        client_tz = ZoneInfo("Asia/Kolkata")
+    today = datetime.now(client_tz).date()
+
     actions = get_active_actions(client["id"])
     logs = get_action_logs_for_date(client["id"], today)
 
@@ -53,8 +59,8 @@ def client_home(request: Request, access_token: str):
             "today": today,
             "actions": actions,
             "daily_entry": get_daily_tracking_for_date(client["id"], today),
-            "week_completion": get_week_completion(client["id"]),
-            "weekly_measurement": get_current_week_measurement(client["id"]),
+            "week_completion": get_week_completion(client["id"], on_date=today),
+            "weekly_measurement": get_current_week_measurement(client["id"], on_date=today),
             "next_call": get_next_client_call(client),
             "saved": request.query_params.get("saved") == "1",
             "measurement_saved":
@@ -76,7 +82,12 @@ def save_client_day(
     if not client:
         raise HTTPException(status_code=404, detail="Client access link not found")
 
-    today = date.today()
+    try:
+        client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
+    except Exception:
+        client_tz = ZoneInfo("Asia/Kolkata")
+    today = datetime.now(client_tz).date()
+
     if is_portal_day_submitted(client["id"], today):
         return RedirectResponse(
             f"/client/{access_token}?saved=1",
@@ -133,6 +144,12 @@ def save_client_measurements(
     if not client:
         raise HTTPException(status_code=404, detail="Client access link not found")
 
+    try:
+        client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
+    except Exception:
+        client_tz = ZoneInfo("Asia/Kolkata")
+    today = datetime.now(client_tz).date()
+
     def parse_float(value: str):
         return float(value) if value.strip() else None
 
@@ -140,6 +157,7 @@ def save_client_measurements(
         saved = save_weekly_measurements(
             client_id=client["id"],
             measured_on=date.fromisoformat(measured_on),
+            on_date=today,
             upper_arm=parse_float(upper_arm),
             chest=parse_float(chest),
             waist=parse_float(waist),
