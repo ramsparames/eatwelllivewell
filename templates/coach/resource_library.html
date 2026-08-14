@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.rl{width:min(1180px,calc(100% - 40px));margin:28px auto 54px;color:#28232c;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.rl *{box-sizing:border-box}.rl-hero{display:flex;justify-content:space-between;gap:24px;align-items:end;padding:27px 30px;border-radius:22px;background:linear-gradient(125deg,#4d0b78,#741fa5);color:#fff}
+.rl-kicker{margin:0 0 6px;color:#f0d988;font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.rl-hero h1{margin:0;font-size:32px}.rl-hero p{margin:7px 0 0;color:rgba(255,255,255,.77);font-size:12px}
+.rl-back{color:#fff;text-decoration:none;font-size:11px;font-weight:800}
+.rl-grid{display:grid;grid-template-columns:360px minmax(0,1fr);gap:18px;margin-top:18px}.rl-card{padding:20px;border:1px solid #e8e1eb;border-radius:18px;background:#fff;box-shadow:0 5px 20px rgba(44,25,54,.04)}
+.rl-card h2{margin:0 0 4px;font-size:20px}.rl-help{margin:0 0 15px;color:#77717d;font-size:11px;line-height:1.45}.rl-field{display:block;margin-top:10px}.rl-field span{display:block;margin-bottom:5px;color:#716a75;font-size:10px;font-weight:800}
+.rl-input,.rl-select,.rl-textarea{width:100%;padding:10px 11px;border:1px solid #e4dce7;border-radius:10px;background:#fcfbfc;font:inherit;font-size:11px;outline:none}.rl-textarea{min-height:80px;resize:vertical}.rl-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rl-btn{display:inline-flex;justify-content:center;align-items:center;margin-top:13px;padding:11px 14px;border:0;border-radius:10px;background:#5b0e91;color:#fff;text-decoration:none;font-size:11px;font-weight:850;cursor:pointer}
+.rl-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rl-item{padding:14px;border:1px solid #ece5ef;border-radius:13px;background:#fff}.rl-item.inactive{opacity:.55}.rl-type{display:inline-flex;padding:4px 7px;border-radius:999px;background:#f3e9f8;color:#5b0e91;font-size:8px;font-weight:850;text-transform:uppercase}.rl-item h3{margin:8px 0 3px;font-size:14px}.rl-meta{color:#77717d;font-size:9px}.rl-desc{margin:7px 0;color:#625c65;font-size:10px;line-height:1.45}.rl-actions{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:10px}.rl-link{color:#5b0e91;font-size:10px;font-weight:850;text-decoration:none}.rl-archive{padding:0;border:0;background:transparent;color:#9a879f;font-size:9px;cursor:pointer}
+.rl-empty{padding:28px;text-align:center;color:#77717d;font-size:11px}
+@media(max-width:900px){.rl-grid{grid-template-columns:1fr}.rl-list{grid-template-columns:1fr}}
+</style>
+
+<div class="rl">
+  <header class="rl-hero">
+    <div>
+      <p class="rl-kicker">NourisHer content</p>
+      <h1>Workout & Resource Library</h1>
+      <p>Add once, then assign the same workout, video, guide, audio or recipe to any client.</p>
+    </div>
+    <a class="rl-back" href="/dashboard/clients">← Back to clients</a>
+  </header>
+
+  <div class="rl-grid">
+    <section class="rl-card">
+      <h2>Add a resource</h2>
+      <p class="rl-help">For Phase A, use a stable YouTube, Vimeo, Google Drive, website or hosted-file URL.</p>
+
+      <form method="post" action="/dashboard/resources">
+        <label class="rl-field"><span>Title</span><input class="rl-input" name="title" placeholder="20-min Lower Body Strength" required></label>
+
+        <div class="rl-two">
+          <label class="rl-field"><span>Type</span>
+            <select class="rl-select" name="resource_type">
+              {% for item in resource_types %}<option value="{{ item }}">{{ item|title }}</option>{% endfor %}
+            </select>
+          </label>
+          <label class="rl-field"><span>Category</span>
+            <select class="rl-select" name="category">
+              {% for item in resource_categories %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+            </select>
+          </label>
+        </div>
+
+        <label class="rl-field"><span>Link</span><input class="rl-input" type="url" name="resource_url" placeholder="https://..." required></label>
+        <label class="rl-field"><span>Description</span><textarea class="rl-textarea" name="description" placeholder="Who this is for, equipment needed, key instructions..."></textarea></label>
+        <label class="rl-field"><span>Duration · minutes (optional)</span><input class="rl-input" type="number" min="1" name="duration_minutes"></label>
+        <button class="rl-btn" type="submit">Add to library →</button>
+      </form>
+    </section>
+
+    <section class="rl-card">
+      <h2>Your library</h2>
+      <p class="rl-help">{{ resources|length }} resource{% if resources|length != 1 %}s{% endif %} available in this workspace.</p>
+
+      {% if resources %}
+      <div class="rl-list">
+        {% for resource in resources %}
+        <article class="rl-item {% if not resource.active %}inactive{% endif %}">
+          <span class="rl-type">{{ resource.resource_type }}</span>
+          <h3>{{ resource.title }}</h3>
+          <div class="rl-meta">{{ resource.category }}{% if resource.duration_minutes %} · {{ resource.duration_minutes }} min{% endif %}</div>
+          {% if resource.description %}<p class="rl-desc">{{ resource.description }}</p>{% endif %}
+          <div class="rl-actions">
+            <a class="rl-link" href="{{ resource.resource_url }}" target="_blank" rel="noopener">Open ↗</a>
+            {% if resource.active %}
+            <form method="post" action="/dashboard/resources/{{ resource.id }}/archive"><button class="rl-archive" type="submit">Archive</button></form>
+            {% else %}<span class="rl-meta">Archived</span>{% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="rl-empty">Start by adding Sushma’s first workout or client guide.</div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

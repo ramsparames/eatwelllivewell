@@ -135,6 +135,40 @@ def get_active_actions(client_id: int):
     return [dict(action) for action in actions]
 
 
+def get_actions_for_date(client_id: int, tracked_on: date):
+    """
+    Return only assignments that belong to the selected coaching date.
+    A row may remain status='active' after its week ends, so date boundaries
+    are part of the source of truth for the client portal.
+    """
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM client_action_plans
+                WHERE client_id = %s
+                  AND status = 'active'
+                  AND start_date <= %s
+                  AND (end_date IS NULL OR end_date >= %s)
+                ORDER BY id
+                """,
+                (client_id, tracked_on, tracked_on),
+            )
+            return [dict(row) for row in cursor.fetchall()]
+
+
+def get_editable_week_dates(client_id: int, on_date: date):
+    _, week_start, week_end = _coaching_week(client_id, on_date)
+    last_editable = min(on_date, week_end)
+    dates = []
+    cursor_date = week_start
+    while cursor_date <= last_editable:
+        dates.append(cursor_date)
+        cursor_date += timedelta(days=1)
+    return dates
+
+
 def is_portal_day_submitted(client_id: int, tracked_on: date) -> bool:
     with get_connection() as connection:
         with connection.cursor() as cursor:
@@ -171,10 +205,8 @@ def save_action_logs(
     active_action_ids: list[int],
     completed_action_ids: list[int],
 ):
-    # Submitted portal days are immutable.
-    if is_portal_day_submitted(client_id, tracked_on):
-        return
-
+    # Current coaching-week days remain editable. Re-submission simply
+    # overwrites that date's action state.
     completed_set = set(completed_action_ids)
 
     with get_connection() as connection:
@@ -250,12 +282,9 @@ def save_client_daily_entry(
 ):
     """
     Daily client submission:
-    actions are saved separately; this row stores only steps and optional weight.
-    Once submitted, that day is read-only.
+    actions are saved separately; this row stores steps and optional weight.
+    Current coaching-week days may be submitted more than once.
     """
-    if is_portal_day_submitted(client_id, tracked_on):
-        return
-
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -283,7 +312,8 @@ def save_client_daily_entry(
                 )
                 VALUES (%s, %s)
                 ON CONFLICT (client_id, tracked_on)
-                DO NOTHING
+                DO UPDATE SET
+                    submitted_at = NOW()
             """, (client_id, tracked_on))
 
 
@@ -525,7 +555,7 @@ def get_week_completion(client_id: int, on_date: date | None = None):
         elif day_date == today:
             state = "today"
         elif day_date < today:
-            state = "missed"
+            state = "open"
         else:
             state = "upcoming"
 

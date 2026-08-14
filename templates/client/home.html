@@ -110,9 +110,25 @@
 .cp-section-empty{padding:18px;border:1px dashed #d9cedf;border-radius:12px;background:#fcfafc;color:var(--muted);font-size:11px;line-height:1.45}
 .cp-date-note{margin-top:5px;color:var(--muted);font-size:9px}
 @media(max-width:560px){.cp-status-strip{grid-template-columns:1fr}}
+
+.cp-resources{display:grid;gap:8px}.cp-resource{padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}.cp-resource-top{display:flex;justify-content:space-between;gap:8px;align-items:start}.cp-resource-tag{padding:4px 7px;border-radius:999px;background:#f1e7f6;color:var(--purple);font-size:8px;font-weight:850;text-transform:uppercase}.cp-resource h3{margin:7px 0 3px;font-size:13px}.cp-resource-meta{color:var(--muted);font-size:9px}.cp-resource p{margin:6px 0;color:var(--muted);font-size:10px;line-height:1.45}.cp-resource-note{padding:7px 8px;border-radius:8px;background:#faf5fc!important;color:#503e58!important}.cp-resource-link{display:inline-flex;margin-top:5px;padding:8px 10px;border-radius:9px;background:var(--purple);color:#fff;text-decoration:none;font-size:9px;font-weight:850}
+
+.cp-date-picker{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}.cp-date-pill{display:inline-flex;align-items:center;justify-content:center;padding:7px 9px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);text-decoration:none;font-size:9px;font-weight:800}.cp-date-pill:hover{border-color:#cab2d5}.cp-date-pill.active{border-color:var(--purple);background:#f6eef9;color:var(--purple)}.cp-date-pill.done:after{content:"✓";margin-left:5px;color:#31704c}
+.cp-edit-note{margin:8px 0 0;padding:9px 10px;border-radius:9px;background:#faf5fc;color:#65556b;font-size:9px;line-height:1.4}
+
+@media(min-width:980px){
+  .cp-layout{align-items:start}
+  .cp-side{position:sticky;top:18px}
+}
+
+.cp-selected-status{display:inline-flex;align-items:center;gap:6px;margin:8px 0 2px;padding:6px 9px;border-radius:999px;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.06em}
+.cp-selected-status.open{background:#f5eef8;color:#6a3c79}
+.cp-selected-status.today{background:#eee4f5;color:var(--purple)}
+.cp-selected-status.upcoming{background:#f4f2f5;color:#8f8792}
+.cp-date-pill.upcoming{opacity:.7}
+.cp-upcoming-box{padding:18px;border:1px dashed #d9cedf;border-radius:12px;background:#fcfafc;color:var(--muted);font-size:11px;line-height:1.5}
 </style>
 
-{% set today_locked = daily_entry and daily_entry.is_submitted %}
 
 <section class="cp">
   <header class="cp-hero">
@@ -121,7 +137,7 @@
       <h1>Hi {{ client.name.split(" ")[0] }} 👋</h1>
       <p class="cp-sub">
         {{ today.strftime("%d %b %Y") }}
-        · {% if today_locked %}Today’s check-in is complete.{% else %}Your daily check-in takes just a minute.{% endif %}
+        · Your current coaching week stays open for updates.
         {% if client.timezone %}<span class="cp-date-note">Your coaching day follows {{ client.timezone }}.</span>{% endif %}
       </p>
     </div>
@@ -133,7 +149,7 @@
   </header>
 
   {% if saved %}
-  <div class="cp-alert"><strong>✓ Today submitted.</strong> Your daily check-in is now read-only.</div>
+  <div class="cp-alert"><strong>✓ {{ selected_date.strftime("%d %b") }} saved.</strong> You can update it again anytime before this coaching week closes.</div>
   {% endif %}
   {% if measurement_saved %}
   <div class="cp-alert"><strong>✓ Weekly measurements saved.</strong> They’re available to Sushma for your weekly review.</div>
@@ -152,9 +168,9 @@
   {% endif %}
 
   <div class="cp-status-strip">
-    <div class="cp-status-item {% if today_locked %}good{% endif %}">
+    <div class="cp-status-item {% if week_completion.days|selectattr("date","equalto",today)|selectattr("submitted")|list %}good{% endif %}">
       <span>Today</span>
-      <strong>{% if today_locked %}Check-in complete ✓{% else %}Daily check-in due{% endif %}</strong>
+      <strong>Week remains editable</strong>
     </div>
     <div class="cp-status-item {% if weekly_measurement %}good{% else %}due{% endif %}">
       <span>This week</span>
@@ -169,24 +185,45 @@
   <div class="cp-grid">
     <section class="cp-card cp-main">
       <form method="post" action="/client/{{ access_token }}/daily">
+        <input type="hidden" name="tracked_on" value="{{ selected_date.isoformat() }}">
+        {% if selected_is_editable %}
         <div class="cp-title-row">
           <div>
-            <p class="cp-kicker">Today</p>
-            <h2>Your daily check-in</h2>
-            <p class="cp-intro">Complete today’s actions and add your steps. Daily weight is optional; body measurements are completed once each coaching week.</p>
+            <p class="cp-kicker">Daily update</p>
+            <h2>{{ selected_date.strftime("%d %b %Y") }}</h2>
+            <p class="cp-intro">Choose any date in this coaching week. Past days show as Open, today shows as Today, and future dates show as Upcoming.</p>
+            <div class="cp-date-picker">
+              {% for day in week_completion.days %}
+              <a class="cp-date-pill {% if day.date == selected_date %}active{% endif %} {% if day.submitted %}done{% endif %} {% if day.date > today %}upcoming{% endif %}"
+                 href="/client/{{ access_token }}?day={{ day.date.isoformat() }}">
+                {{ day.date.strftime("%d %b") }}
+              </a>
+              {% endfor %}
+            </div>
+
+            <div class="cp-selected-status {{ selected_state }}">
+              {% if selected_state == "today" %}● Today
+              {% elif selected_state == "open" %}Open to update
+              {% else %}Upcoming{% endif %}
+            </div>
+
+            {% if selected_is_editable %}
+            <div class="cp-edit-note">Entries stay editable until this coaching week ends on {{ week_completion.week_end.strftime("%d %b") }}.</div>
+            {% else %}
+            <div class="cp-edit-note">This date is upcoming. You can enter it once the day arrives.</div>
+            {% endif %}
           </div>
           {% if actions %}
-          <span class="cp-count" data-completion-count>{{ actions|selectattr("completed_today")|list|length }} / {{ actions|length }} done</span>
+          <span class="cp-count" data-completion-count>{{ actions|selectattr("completed_selected")|list|length }} / {{ actions|length }} done</span>
           {% endif %}
         </div>
 
         {% if actions %}
         <div class="cp-actions">
           {% for action in actions %}
-          <label class="cp-action {% if today_locked %}locked{% endif %}">
+          <label class="cp-action">
             <input type="checkbox" name="completed_action_ids" value="{{ action.id }}" data-action-checkbox
-              {% if action.completed_today %}checked{% endif %}
-              {% if today_locked %}disabled{% endif %}>
+              {% if action.completed_selected %}checked{% endif %}>
             <span class="cp-check">
               <svg viewBox="0 0 20 20" fill="none"><path d="M4.5 10.3L8.2 14l7.3-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span>
@@ -207,20 +244,26 @@
             <span>Steps</span>
             <input class="cp-input" type="number" min="0" inputmode="numeric" name="steps"
               value="{% if daily_entry and daily_entry.steps is not none %}{{ daily_entry.steps }}{% endif %}"
-              placeholder="e.g. 7000" {% if today_locked %}disabled{% endif %}>
+              placeholder="e.g. 7000">
           </div>
           <div class="cp-field">
             <span>Weight (kg) · optional</span>
             <input class="cp-input" type="number" step="0.1" inputmode="decimal" name="weight_kg"
               value="{% if daily_entry and daily_entry.weight_kg is not none %}{{ daily_entry.weight_kg }}{% endif %}"
-              placeholder="Optional" {% if today_locked %}disabled{% endif %}>
+              placeholder="Optional">
           </div>
         </div>
 
-        <button class="cp-save" type="submit" {% if today_locked %}disabled{% endif %}>
-          {% if today_locked %}✓ Today submitted{% else %}Submit today’s check-in{% endif %}
+        <button class="cp-save" type="submit">
+          {% if today_locked %}✓ Today submitted{% else %}Save this day’s check-in{% endif %}
         </button>
         {% if today_locked %}<p class="cp-lock">Submitted and locked for today.</p>{% endif %}
+        {% else %}
+        <div class="cp-upcoming-box">
+          <strong>{{ selected_date.strftime("%d %b %Y") }} is upcoming.</strong><br>
+          This day will open for actions, steps and optional weight once the date arrives.
+        </div>
+        {% endif %}
       </form>
     </section>
 
@@ -239,46 +282,6 @@
         {% else %}
         <div class="cp-section-empty">Your next coaching call has not been scheduled yet. Sushma will confirm it with you.</div>
         {% endif %}
-      </section>
-
-      <section class="cp-card">
-        <p class="cp-kicker">Your week</p>
-        <div class="cp-week-head">
-          <div><strong>Week {{ week_completion.week_number }}</strong><span>{{ week_completion.week_start.strftime("%d %b") }} – {{ week_completion.week_end.strftime("%d %b") }}</span></div>
-          <span>{{ week_completion.checkins_completed }} / 7 check-ins</span>
-        </div>
-        <div class="cp-progress"><span style="width:{{ week_completion.checkin_percent }}%"></span></div>
-
-        <div class="cp-days">
-          {% for day in week_completion.days %}
-          <details class="cp-day" data-state="{{ day.state }}" data-submitted="{{ 'true' if day.submitted else 'false' }}">
-            <summary>
-              <span class="cp-day-date">{{ day.date.strftime("%d %b") }}</span>
-              <span class="cp-day-state">
-                {% if day.submitted and day.actions_total %}{{ day.actions_completed }}/{{ day.actions_total }} actions
-                {% elif day.submitted %}Check-in saved
-                {% elif day.state == "today" %}Today
-                {% elif day.state == "missed" %}No check-in
-                {% else %}Upcoming{% endif %}
-              </span>
-              <span class="cp-day-badge">
-                {% if day.state == "submitted" %}✓ Submitted{% elif day.state == "today" %}● Today{% elif day.state == "missed" %}—{% else %}Soon{% endif %}
-              </span>
-            </summary>
-            {% if day.submitted %}
-            <div class="cp-day-detail">
-              {% for item in day.actions %}
-              <div class="cp-day-action"><b>{{ "✓" if item.completed else "○" }}</b><span>{{ item.action_name }}</span></div>
-              {% endfor %}
-              <div class="cp-day-meta">
-                <span>Steps: <strong>{{ day.steps if day.steps is not none else "—" }}</strong></span>
-                <span>Weight: <strong>{% if day.weight_kg is not none %}{{ day.weight_kg }} kg{% else %}—{% endif %}</strong></span>
-              </div>
-            </div>
-            {% endif %}
-          </details>
-          {% endfor %}
-        </div>
       </section>
 
       <section class="cp-card">

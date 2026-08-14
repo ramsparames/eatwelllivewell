@@ -85,6 +85,14 @@
 .nw-client-notes{display:grid;gap:6px}.nw-client-note{padding:9px 10px;border:1px solid #eee8f0;border-radius:10px;background:#fff}.nw-client-note strong{font-size:9px;color:var(--coach-purple)}.nw-client-note p{margin:3px 0 0;font-size:10px;line-height:1.4}
 .nw-day-note{margin-top:7px!important;padding:7px 8px;border-radius:8px;background:#faf5fc;color:#4e3c55!important;font-size:10px!important;line-height:1.4}
 .nw-measure-status{display:inline-flex;margin-left:8px;padding:4px 7px;border-radius:999px;background:#f2e9f6;color:var(--coach-purple);font-size:9px;font-weight:800}
+
+.nw-summary-ai{padding:14px;border:1px solid #ddcae6;border-radius:14px;background:linear-gradient(145deg,#faf5fc,#fff)}
+.nw-summary-ai-head{display:flex;justify-content:space-between;gap:12px;align-items:start}.nw-summary-ai-head h3{margin:0;font-size:16px}.nw-ai-badge{padding:4px 7px;border-radius:999px;background:#eee0f5;color:var(--coach-purple);font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.nw-summary-ai p{margin:5px 0 0;color:var(--coach-muted);font-size:10px}.nw-summary-cols{display:grid;grid-template-columns:1.2fr .8fr;gap:9px;margin-top:11px}.nw-summary-box{padding:10px;border:1px solid #eee7f0;border-radius:10px;background:#fff}.nw-summary-box strong{display:block;margin-bottom:5px;font-size:10px;color:var(--coach-purple)}.nw-summary-box ul{margin:0;padding-left:16px}.nw-summary-box li{margin:4px 0;font-size:10px;line-height:1.35}
+.nw-timeline{display:grid;gap:0}.nw-timeline-item{display:grid;grid-template-columns:78px 14px minmax(0,1fr);gap:9px;padding:9px 0}.nw-timeline-date{color:var(--coach-muted);font-size:9px;font-weight:750}.nw-timeline-line{position:relative}.nw-timeline-line:before{content:"";position:absolute;left:6px;top:0;bottom:-18px;width:1px;background:#e8dfea}.nw-timeline-item:last-child .nw-timeline-line:before{bottom:8px}.nw-timeline-dot{position:relative;z-index:1;width:13px;height:13px;border:3px solid #f1e8f5;border-radius:50%;background:var(--coach-purple)}.nw-timeline-copy{padding-bottom:7px;border-bottom:1px solid #f1edf2}.nw-timeline-copy strong{display:block;font-size:11px}.nw-timeline-copy p{margin:3px 0 0;color:var(--coach-muted);font-size:9px;line-height:1.4}
+.nw-res-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.nw-res-card{padding:12px;border:1px solid #ece5ef;border-radius:12px;background:#fff}.nw-res-tag{display:inline-flex;padding:3px 6px;border-radius:999px;background:#f2e8f7;color:var(--coach-purple);font-size:8px;font-weight:850;text-transform:uppercase}.nw-res-card h3{margin:7px 0 3px;font-size:12px}.nw-res-card p{margin:4px 0;color:var(--coach-muted);font-size:9px;line-height:1.4}.nw-res-meta{font-size:8px;color:var(--coach-muted)}.nw-res-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:9px}.nw-res-open{color:var(--coach-purple);font-size:9px;font-weight:850;text-decoration:none}.nw-res-remove{border:0;background:transparent;color:#9d899f;font-size:8px;cursor:pointer}
+.nw-res-assign{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:7px;align-items:end}.nw-library-link{display:inline-flex;margin-left:8px;color:var(--coach-purple);font-size:10px;font-weight:800;text-decoration:none}
+@media(max-width:900px){.nw-summary-cols,.nw-res-grid{grid-template-columns:1fr}.nw-res-assign{grid-template-columns:1fr}}
 </style>
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
@@ -223,7 +231,7 @@
     <div class="nw-meta"><span class="nw-chip"><strong>Week {{ current_week }}</strong> · {{ current_week_start.strftime("%d %b %Y") }} – {{ current_week_end.strftime("%d %b %Y") }}</span><span class="nw-chip">Next call: <strong>{% if next_synced_call and next_synced_call.local_start_time %}{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}{% else %}Not scheduled{% endif %}</strong></span><span class="nw-chip">{{ (client.status or "active")|title }}</span></div>
   </header>
 
-  <nav class="nw-tabs"><button class="nw-tab active" type="button" data-tab="overview">Overview</button><button class="nw-tab" type="button" data-tab="weekly">Weekly Check-in</button></nav>
+  <nav class="nw-tabs"><button class="nw-tab active" type="button" data-tab="overview">Overview</button><button class="nw-tab" type="button" data-tab="weekly">Weekly Check-in</button><button class="nw-tab" type="button" data-tab="resources">Resources</button><button class="nw-tab" type="button" data-tab="timeline">Timeline</button></nav>
 
   <section class="nw-panel-tab active" data-panel="overview">
     <div class="nw-overview">
@@ -326,7 +334,27 @@
       {% if call_prep %}
       <section class="nw-panel nw-pad">
         <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Call prep</p><h2>What to know before the call</h2><p>A one-minute summary built from the client’s daily entries.</p></div></div>
-        <div class="nw-prep-grid">
+
+        {% if coach_summary %}
+        <div class="nw-summary-ai">
+          <div class="nw-summary-ai-head">
+            <div><h3>{{ coach_summary.headline }}</h3><p>Generated from NourisHer tracking, commitments and weekly progress.</p></div>
+            <span class="nw-ai-badge">Coach summary</span>
+          </div>
+          <div class="nw-summary-cols">
+            <div class="nw-summary-box">
+              <strong>What the data says</strong>
+              <ul>{% for item in coach_summary.observations %}<li>{{ item }}</li>{% endfor %}</ul>
+            </div>
+            <div class="nw-summary-box">
+              <strong>Recommended focus</strong>
+              <p style="margin:0;color:var(--coach-ink)">{{ coach_summary.focus }}</p>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="nw-prep-grid" style="margin-top:10px">
           <div class="nw-prep-stat"><span>Daily check-ins</span><strong>{{ call_prep.submitted_count }}/7</strong></div>
           <div class="nw-prep-stat"><span>Action adherence</span><strong>{{ call_prep.action_percent }}%</strong></div>
           <div class="nw-prep-stat"><span>Average steps</span><strong>{{ call_prep.average_steps if call_prep.average_steps else "—" }}</strong></div>
@@ -524,6 +552,91 @@
         <div class="nw-save"><p>Saving closes this review and creates the selected actions for Week {{ next_week_number }}.</p><button class="nw-btn nw-primary" type="submit">Save weekly check-in →</button></div>
       </form>
     </div>
+  </section>
+
+  <section class="nw-panel-tab" data-panel="resources">
+    <div class="nw-stack">
+      <section class="nw-panel nw-pad">
+        <div class="nw-heading">
+          <div>
+            <p class="nw-kicker" style="margin-top:0">Client content</p>
+            <h2>Assigned workouts & resources</h2>
+            <p>Anything assigned here appears immediately in the client portal.</p>
+          </div>
+          <a class="nw-library-link" href="/dashboard/resources">Open Resource Library →</a>
+        </div>
+
+        {% if client_resources %}
+        <div class="nw-res-grid">
+          {% for resource in client_resources %}
+          <article class="nw-res-card">
+            <span class="nw-res-tag">{{ resource.resource_type }}</span>
+            <h3>{{ resource.title }}</h3>
+            <div class="nw-res-meta">{{ resource.category }}{% if resource.duration_minutes %} · {{ resource.duration_minutes }} min{% endif %} · assigned {{ resource.assigned_on.strftime("%d %b") }}</div>
+            {% if resource.description %}<p>{{ resource.description }}</p>{% endif %}
+            {% if resource.coach_note %}<p><strong>For this client:</strong> {{ resource.coach_note }}</p>{% endif %}
+            <div class="nw-res-actions">
+              <a class="nw-res-open" href="{{ resource.resource_url }}" target="_blank" rel="noopener">Open resource ↗</a>
+              <form method="post" action="/dashboard/clients/{{ client.id }}/resources/{{ resource.assignment_id }}/remove"><button class="nw-res-remove" type="submit">Remove</button></form>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="nw-inline-empty">No workouts or resources are assigned yet.</div>
+        {% endif %}
+      </section>
+
+      <section class="nw-panel nw-pad">
+        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Assign</p><h2>Push something to the client portal</h2><p>Choose from Sushma’s reusable library.</p></div></div>
+
+        {% if available_resources %}
+        <form class="nw-res-assign" method="post" action="/dashboard/clients/{{ client.id }}/resources">
+          <label>
+            <span class="nw-label">Resource</span>
+            <select class="nw-select" name="resource_id" required>
+              <option value="">Choose resource</option>
+              {% for resource in available_resources %}
+              <option value="{{ resource.id }}">{{ resource.category }} · {{ resource.title }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>
+            <span class="nw-label">Note for this client (optional)</span>
+            <input class="nw-input" name="coach_note" placeholder="Do this twice before our next call">
+          </label>
+          <button class="nw-btn nw-primary" type="submit">Assign →</button>
+        </form>
+        {% else %}
+        <div class="nw-inline-empty">Your resource library is empty. <a href="/dashboard/resources">Add the first workout or guide →</a></div>
+        {% endif %}
+      </section>
+    </div>
+  </section>
+
+  <section class="nw-panel-tab" data-panel="timeline">
+    <section class="nw-panel nw-pad">
+      <div class="nw-heading">
+        <div><p class="nw-kicker" style="margin-top:0">Coaching record</p><h2>Client timeline</h2><p>Intake, reviews, commitments, measurements, resources and Synamate calls in one chronology.</p></div>
+      </div>
+
+      {% if client_timeline %}
+      <div class="nw-timeline">
+        {% for item in client_timeline %}
+        <div class="nw-timeline-item">
+          <div class="nw-timeline-date">{{ item.event_date.strftime("%d %b %Y") }}</div>
+          <div class="nw-timeline-line"><div class="nw-timeline-dot"></div></div>
+          <div class="nw-timeline-copy">
+            <strong>{{ item.label }}</strong>
+            {% if item.detail %}<p>{{ item.detail }}</p>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="nw-inline-empty">The client timeline will build automatically as coaching activity is recorded.</div>
+      {% endif %}
+    </section>
   </section>
 </div>
 

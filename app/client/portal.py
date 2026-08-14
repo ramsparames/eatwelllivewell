@@ -6,10 +6,17 @@ from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from app.services.phase_a_service import (
+    create_phase_a_tables,
+    get_client_resources,
+)
+
 from app.services.client_portal_service import (
     create_portal_tables,
     get_action_logs_for_date,
     get_active_actions,
+    get_actions_for_date,
+    get_editable_week_dates,
     get_client_by_token,
     get_daily_tracking_for_date,
     get_week_completion,
@@ -27,6 +34,7 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 create_portal_tables()
+create_phase_a_tables()
 
 
 @router.get(
@@ -44,11 +52,48 @@ def client_home(request: Request, access_token: str):
         client_tz = ZoneInfo("Asia/Kolkata")
     today = datetime.now(client_tz).date()
 
-    actions = get_active_actions(client["id"])
-    logs = get_action_logs_for_date(client["id"], today)
+    week_completion = get_week_completion(client["id"], on_date=today)
+    editable_dates = get_editable_week_dates(client["id"], today)
+
+    requested_day = request.query_params.get("day")
+    selected_date = today
+    if requested_day:
+        try:
+            candidate = date.fromisoformat(requested_day)
+            if (
+                week_completion["week_start"]
+                <= candidate
+                <= week_completion["week_end"]
+            ):
+                selected_date = candidate
+        except ValueError:
+            pass
+
+    selected_is_editable = selected_date in editable_dates
+    if selected_date > today:
+        selected_state = "upcoming"
+    elif selected_date == today:
+        selected_state = "today"
+    else:
+        selected_state = "open"
+
+    actions = get_actions_for_date(client["id"], selected_date)
+    logs = (
+        get_action_logs_for_date(client["id"], selected_date)
+        if selected_is_editable
+        else {}
+    )
 
     for action in actions:
-        action["completed_today"] = bool(logs.get(action["id"], False))
+        action["completed_selected"] = bool(
+            logs.get(action["id"], False)
+        )
+
+    daily_entry = (
+        get_daily_tracking_for_date(client["id"], selected_date)
+        if selected_is_editable
+        else None
+    )
 
     return templates.TemplateResponse(
         "client/home.html",
@@ -57,11 +102,16 @@ def client_home(request: Request, access_token: str):
             "client": client,
             "access_token": access_token,
             "today": today,
+            "selected_date": selected_date,
+            "selected_state": selected_state,
+            "selected_is_editable": selected_is_editable,
+            "editable_dates": editable_dates,
             "actions": actions,
-            "daily_entry": get_daily_tracking_for_date(client["id"], today),
-            "week_completion": get_week_completion(client["id"], on_date=today),
+            "daily_entry": daily_entry,
+            "week_completion": week_completion,
             "weekly_measurement": get_current_week_measurement(client["id"], on_date=today),
             "next_call": get_next_client_call(client),
+            "assigned_resources": get_client_resources(client["id"]),
             "saved": request.query_params.get("saved") == "1",
             "measurement_saved":
                 request.query_params.get("measurement_saved") == "1",
@@ -74,6 +124,7 @@ def client_home(request: Request, access_token: str):
 @router.post("/client/{access_token}/daily")
 def save_client_day(
     access_token: str,
+    tracked_on: str = Form(...),
     completed_action_ids: list[int] = Form(default=[]),
     steps: str = Form(""),
     weight_kg: str = Form(""),
@@ -88,13 +139,19 @@ def save_client_day(
         client_tz = ZoneInfo("Asia/Kolkata")
     today = datetime.now(client_tz).date()
 
-    if is_portal_day_submitted(client["id"], today):
-        return RedirectResponse(
-            f"/client/{access_token}?saved=1",
-            status_code=303,
+    try:
+        selected_date = date.fromisoformat(tracked_on)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid check-in date")
+
+    editable_dates = get_editable_week_dates(client["id"], today)
+    if selected_date not in editable_dates:
+        raise HTTPException(
+            status_code=400,
+            detail="Only dates in the current coaching week up to today can be edited",
         )
 
-    actions = get_active_actions(client["id"])
+    actions = get_actions_for_date(client["id"], selected_date)
     active_ids = [action["id"] for action in actions]
     valid_completed = [
         action_id
@@ -110,20 +167,20 @@ def save_client_day(
 
     save_action_logs(
         client_id=client["id"],
-        tracked_on=today,
+        tracked_on=selected_date,
         active_action_ids=active_ids,
         completed_action_ids=valid_completed,
     )
 
     save_client_daily_entry(
         client_id=client["id"],
-        tracked_on=today,
+        tracked_on=selected_date,
         steps=parse_int(steps),
         weight_kg=parse_float(weight_kg),
     )
 
     return RedirectResponse(
-        f"/client/{access_token}?saved=1",
+        f"/client/{access_token}?saved=1&day={selected_date.isoformat()}",
         status_code=303,
     )
 

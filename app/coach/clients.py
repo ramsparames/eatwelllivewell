@@ -10,6 +10,19 @@ from fastapi.templating import Jinja2Templates
 from app.auth import coach_is_logged_in
 from app.services.client_service import ClientService
 from app.client.portal import router as client_portal_router
+from app.services.phase_a_service import (
+    RESOURCE_CATEGORIES,
+    RESOURCE_TYPES,
+    archive_resource,
+    assign_resource,
+    build_client_timeline,
+    build_coach_summary,
+    create_phase_a_tables,
+    create_resource,
+    get_client_resources,
+    list_resources,
+    unassign_resource,
+)
 from app.services.client_portal_service import (
     ensure_portal_access,
     get_portal_access,
@@ -32,6 +45,8 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 templates = Jinja2Templates(
     directory=str(BASE_DIR / "templates")
 )
+
+create_phase_a_tables()
 
 
 ACTION_LIBRARY = [{'category': 'Nutrition',
@@ -911,6 +926,11 @@ def client_profile(
             end_date=next_week_end,
         )
 
+    client_resources = get_client_resources(client_id)
+    available_resources = list_resources()
+    client_timeline = build_client_timeline(profile["client"])
+    coach_summary = build_coach_summary(call_prep, progress_summary)
+
     next_synced_call = get_next_client_call(profile["client"])
     coaching_booking_base_url = os.getenv(
         "SYNAMATE_COACHING_CALL_URL",
@@ -933,6 +953,12 @@ def client_profile(
             "week_review": week_review,
             "call_prep": call_prep,
             "progress_summary": progress_summary,
+            "coach_summary": coach_summary,
+            "client_timeline": client_timeline,
+            "client_resources": client_resources,
+            "available_resources": available_resources,
+            "resource_categories": RESOURCE_CATEGORIES,
+            "resource_types": RESOURCE_TYPES,
             "next_synced_call": next_synced_call,
             "coaching_booking_url": coaching_booking_url,
             "next_week_number": next_week_number,
@@ -943,6 +969,114 @@ def client_profile(
             },
             **profile,
         },
+    )
+
+
+
+@router.get(
+    "/dashboard/resources",
+    response_class=HTMLResponse,
+)
+def resource_library_page(request: Request):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    return templates.TemplateResponse(
+        "coach/resource_library.html",
+        {
+            "request": request,
+            "active_nav": "clients",
+            "resources": list_resources(active_only=False),
+            "resource_types": RESOURCE_TYPES,
+            "resource_categories": RESOURCE_CATEGORIES,
+        },
+    )
+
+
+@router.post("/dashboard/resources")
+def add_resource(
+    request: Request,
+    title: str = Form(...),
+    resource_type: str = Form("video"),
+    category: str = Form("Other"),
+    description: str = Form(""),
+    resource_url: str = Form(...),
+    duration_minutes: str = Form(""),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    duration = (
+        int(duration_minutes)
+        if duration_minutes.strip()
+        else None
+    )
+
+    create_resource(
+        title=title.strip(),
+        resource_type=resource_type,
+        category=category,
+        description=description.strip() or None,
+        resource_url=resource_url.strip(),
+        duration_minutes=duration,
+    )
+
+    return RedirectResponse(
+        "/dashboard/resources?added=1",
+        status_code=303,
+    )
+
+
+@router.post("/dashboard/resources/{resource_id}/archive")
+def archive_resource_route(
+    request: Request,
+    resource_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    archive_resource(resource_id)
+    return RedirectResponse("/dashboard/resources", status_code=303)
+
+
+@router.post("/dashboard/clients/{client_id}/resources")
+def assign_client_resource(
+    request: Request,
+    client_id: int,
+    resource_id: int = Form(...),
+    coach_note: str = Form(""),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    assign_resource(
+        client_id=client_id,
+        resource_id=resource_id,
+        coach_note=coach_note.strip() or None,
+    )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=resources",
+        status_code=303,
+    )
+
+
+@router.post(
+    "/dashboard/clients/{client_id}/resources/{assignment_id}/remove"
+)
+def remove_client_resource(
+    request: Request,
+    client_id: int,
+    assignment_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    unassign_resource(client_id, assignment_id)
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=resources",
+        status_code=303,
     )
 
 
