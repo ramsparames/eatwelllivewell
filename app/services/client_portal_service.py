@@ -1038,18 +1038,31 @@ def get_coach_week_review(
         completed_count = 0
         eligible_days = 0
 
+        # Action plans are coaching-week commitments.
+        #
+        # Older records may have start/end dates that are slightly out of sync
+        # with the client's actual coaching-week boundaries. If the action
+        # overlaps this coaching week at all, treat it as eligible for the
+        # full 7-day coaching week.
+        action_overlaps_week = (
+            item["start_date"] <= week_end
+            and (
+                item["end_date"] is None
+                or item["end_date"] >= week_start
+            )
+        )
+
         for day in days:
             d = day["date"]
-            eligible = (
-                d >= item["start_date"]
-                and (item["end_date"] is None or d <= item["end_date"])
-            )
+            eligible = action_overlaps_week
             completed = None
+
             if eligible:
                 eligible_days += 1
                 completed = logs.get((item["id"], d))
                 if completed:
                     completed_count += 1
+
             results.append({
                 "date": d,
                 "eligible": eligible,
