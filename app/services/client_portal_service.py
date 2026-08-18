@@ -595,6 +595,98 @@ def get_week_completion(client_id: int, on_date: date | None = None):
     }
 
 
+
+def get_coaching_week_view(
+    client_id: int,
+    week_number: int,
+    on_date: date | None = None,
+):
+    """
+    Return one specific coaching week for the client.
+
+    Past weeks are read-only.
+    Current week is editable through today.
+    Future weeks can be viewed, but not edited.
+    """
+    today = on_date or date.today()
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT start_date
+                FROM clients
+                WHERE id = %s
+                LIMIT 1
+                """,
+                (client_id,),
+            )
+            client = cursor.fetchone()
+
+    if not client or not client.get("start_date"):
+        return None
+
+    current_week_number, _, _ = _coaching_week(client_id, today)
+    week_number = max(1, int(week_number))
+
+    week_start = client["start_date"] + timedelta(
+        days=(week_number - 1) * 7
+    )
+    week_end = week_start + timedelta(days=6)
+
+    review = get_coach_week_review(
+        client_id,
+        week_start,
+        week_end,
+    )
+
+    days = []
+    for day in review["days"]:
+        row = dict(day)
+
+        if week_number < current_week_number:
+            state = "read_only"
+            editable = False
+        elif week_number > current_week_number:
+            state = "upcoming"
+            editable = False
+        else:
+            if day["date"] > today:
+                state = "upcoming"
+                editable = False
+            elif day["date"] == today:
+                state = "today"
+                editable = True
+            else:
+                state = "open"
+                editable = True
+
+        row["browser_state"] = state
+        row["editable"] = editable
+        days.append(row)
+
+    measurement = (
+        review["measurements"][0]
+        if review["measurements"]
+        else None
+    )
+
+    return {
+        "week_number": week_number,
+        "current_week_number": current_week_number,
+        "week_start": week_start,
+        "week_end": week_end,
+        "days": days,
+        "submitted_count": review["submitted_count"],
+        "measurement": measurement,
+        "is_current": week_number == current_week_number,
+        "is_past": week_number < current_week_number,
+        "is_future": week_number > current_week_number,
+        "can_go_previous": week_number > 1,
+        "can_go_next": week_number < current_week_number + 1,
+    }
+
+
 def get_client_operations_status(client: dict, on_date: date | None = None):
     """
     Production operations status for one active coaching client.

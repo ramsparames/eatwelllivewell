@@ -22,6 +22,7 @@ from app.services.client_portal_service import (
     get_week_completion,
     get_current_week_measurement,
     get_next_client_call,
+    get_coaching_week_view,
     is_portal_day_submitted,
     save_action_logs,
     save_client_daily_entry,
@@ -52,35 +53,74 @@ def client_home(request: Request, access_token: str):
         client_tz = ZoneInfo("Asia/Kolkata")
     today = datetime.now(client_tz).date()
 
-    week_completion = get_week_completion(client["id"], on_date=today)
-    editable_dates = get_editable_week_dates(client["id"], today)
+    current_week_completion = get_week_completion(
+        client["id"],
+        on_date=today,
+    )
+    current_week_number = current_week_completion["week_number"]
+
+    requested_week = request.query_params.get("week")
+    try:
+        selected_week_number = (
+            int(requested_week)
+            if requested_week
+            else current_week_number
+        )
+    except ValueError:
+        selected_week_number = current_week_number
+
+    selected_week_number = max(
+        1,
+        min(selected_week_number, current_week_number + 1),
+    )
+
+    week_view = get_coaching_week_view(
+        client["id"],
+        selected_week_number,
+        on_date=today,
+    )
 
     requested_day = request.query_params.get("day")
-    selected_date = today
+    selected_date = (
+        today
+        if selected_week_number == current_week_number
+        else week_view["week_start"]
+    )
+
     if requested_day:
         try:
             candidate = date.fromisoformat(requested_day)
             if (
-                week_completion["week_start"]
+                week_view["week_start"]
                 <= candidate
-                <= week_completion["week_end"]
+                <= week_view["week_end"]
             ):
                 selected_date = candidate
         except ValueError:
             pass
 
-    selected_is_editable = selected_date in editable_dates
-    if selected_date > today:
-        selected_state = "upcoming"
-    elif selected_date == today:
-        selected_state = "today"
-    else:
-        selected_state = "open"
+    selected_day = next(
+        (
+            day
+            for day in week_view["days"]
+            if day["date"] == selected_date
+        ),
+        week_view["days"][0],
+    )
+
+    selected_state = selected_day["browser_state"]
+    selected_is_editable = selected_day["editable"]
+
+    editable_dates = [
+        day["date"]
+        for day in week_view["days"]
+        if day["editable"]
+    ]
 
     actions = get_actions_for_date(client["id"], selected_date)
     logs = (
         get_action_logs_for_date(client["id"], selected_date)
-        if selected_is_editable
+        if not week_view["is_future"]
         else {}
     )
 
@@ -91,7 +131,7 @@ def client_home(request: Request, access_token: str):
 
     daily_entry = (
         get_daily_tracking_for_date(client["id"], selected_date)
-        if selected_is_editable
+        if not week_view["is_future"]
         else None
     )
 
@@ -108,7 +148,8 @@ def client_home(request: Request, access_token: str):
             "editable_dates": editable_dates,
             "actions": actions,
             "daily_entry": daily_entry,
-            "week_completion": week_completion,
+            "week_completion": current_week_completion,
+            "week_view": week_view,
             "weekly_measurement": get_current_week_measurement(client["id"], on_date=today),
             "next_call": get_next_client_call(client),
             "assigned_resources": get_client_resources(client["id"]),
@@ -125,6 +166,7 @@ def client_home(request: Request, access_token: str):
 def save_client_day(
     access_token: str,
     tracked_on: str = Form(...),
+    selected_week_number: int = Form(...),
     completed_action_ids: list[int] = Form(default=[]),
     steps: str = Form(""),
     weight_kg: str = Form(""),
@@ -180,7 +222,7 @@ def save_client_day(
     )
 
     return RedirectResponse(
-        f"/client/{access_token}?saved=1&day={selected_date.isoformat()}",
+        f"/client/{access_token}?saved=1&week={selected_week_number}&day={selected_date.isoformat()}",
         status_code=303,
     )
 
