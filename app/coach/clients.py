@@ -32,6 +32,7 @@ from app.services.client_portal_service import (
     get_next_client_call,
     get_client_operations_status,
     get_client_progress_summary,
+    get_coach_history_grid,
 )
 
 
@@ -891,6 +892,30 @@ def client_profile(
     profile["current_week_start"] = week_start
     profile["current_week_end"] = week_end
 
+    # Weekly Check-in can browse the client's coaching history using the
+    # exact same week boundaries as the Client Portal.
+    requested_week = request.query_params.get("week")
+    try:
+        coach_week_number = int(requested_week) if requested_week else week_number
+    except (TypeError, ValueError):
+        coach_week_number = week_number
+
+    coach_week_number = max(1, min(coach_week_number, week_number + 1))
+
+    client_start_date = profile["client"].get("start_date")
+    if client_start_date:
+        coach_week_start = client_start_date + timedelta(
+            days=(coach_week_number - 1) * 7
+        )
+        coach_week_end = coach_week_start + timedelta(days=6)
+    else:
+        coach_week_start = week_start
+        coach_week_end = week_end
+
+    coach_week_is_current = coach_week_number == week_number
+    coach_week_is_past = coach_week_number < week_number
+    coach_week_is_future = coach_week_number > week_number
+
     for entry in profile.get("tracking") or []:
         if entry.get("weight_kg") is not None:
             profile["current_weight"] = entry.get("weight_kg")
@@ -908,14 +933,27 @@ def client_profile(
     next_week_actions = []
 
     if week_start and week_end:
-        week_review = get_coach_week_review(client_id, week_start, week_end)
-        call_prep = build_call_prep(client_id, week_start, week_end)
+        # Overview remains anchored to the real current week.
         progress_summary = get_client_progress_summary(
             client_id,
             week_start,
             week_number,
             weeks=4,
         )
+
+        # Weekly Check-in follows the week selected by the coach.
+        week_review = get_coach_week_review(
+            client_id,
+            coach_week_start,
+            coach_week_end,
+        )
+        call_prep = build_call_prep(
+            client_id,
+            coach_week_start,
+            coach_week_end,
+        )
+
+        # Next-week planning is only actionable from the current week.
         next_week_number = week_number + 1
         next_week_start = week_end + timedelta(days=1)
         next_week_end = next_week_start + timedelta(days=6)
@@ -925,6 +963,11 @@ def client_profile(
             start_date=next_week_start,
             end_date=next_week_end,
         )
+
+    coach_history_grid = get_coach_history_grid(
+        client_id,
+        on_date=date.today(),
+    )
 
     client_resources = get_client_resources(client_id)
     available_resources = list_resources()
@@ -952,8 +995,17 @@ def client_profile(
             "portal_activity": portal_activity,
             "week_review": week_review,
             "call_prep": call_prep,
+            "coach_week_number": coach_week_number,
+            "coach_week_start": coach_week_start,
+            "coach_week_end": coach_week_end,
+            "coach_week_is_current": coach_week_is_current,
+            "coach_week_is_past": coach_week_is_past,
+            "coach_week_is_future": coach_week_is_future,
+            "coach_week_can_previous": coach_week_number > 1,
+            "coach_week_can_next": coach_week_number < week_number + 1,
             "progress_summary": progress_summary,
             "coach_summary": coach_summary,
+            "coach_history_grid": coach_history_grid,
             "client_timeline": client_timeline,
             "client_resources": client_resources,
             "available_resources": available_resources,

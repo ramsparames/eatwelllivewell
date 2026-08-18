@@ -18,6 +18,7 @@ from app.services.client_portal_service import (
     get_actions_for_date,
     get_editable_week_dates,
     get_client_by_token,
+    get_client_history_grid,
     get_daily_tracking_for_date,
     get_week_completion,
     get_current_week_measurement,
@@ -153,6 +154,10 @@ def client_home(request: Request, access_token: str):
             "weekly_measurement": get_current_week_measurement(client["id"], on_date=today),
             "next_call": get_next_client_call(client),
             "assigned_resources": get_client_resources(client["id"]),
+            "client_history_grid": get_client_history_grid(
+                client["id"],
+                on_date=today,
+            ),
             "saved": request.query_params.get("saved") == "1",
             "measurement_saved":
                 request.query_params.get("measurement_saved") == "1",
@@ -222,7 +227,7 @@ def save_client_day(
     )
 
     return RedirectResponse(
-        f"/client/{access_token}?saved=1&week={selected_week_number}&day={selected_date.isoformat()}",
+        f"/client/{access_token}?saved=1#client-grid",
         status_code=303,
     )
 
@@ -278,7 +283,7 @@ def save_client_measurements(
         )
 
     return RedirectResponse(
-        f"/client/{access_token}?measurement_saved=1",
+        f"/client/{access_token}?measurement_saved=1#client-grid",
         status_code=303,
     )
 

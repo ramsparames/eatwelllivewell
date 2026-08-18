@@ -687,6 +687,151 @@ def get_coaching_week_view(
     }
 
 
+
+def get_coach_history_grid(
+    client_id: int,
+    on_date: date | None = None,
+):
+    """Return all coaching weeks as one spreadsheet-style history."""
+    today = on_date or date.today()
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT start_date FROM clients WHERE id = %s LIMIT 1",
+                (client_id,),
+            )
+            client = cursor.fetchone()
+
+    if not client or not client.get("start_date"):
+        return {
+            "action_columns": [],
+            "rows": [],
+            "current_week_number": 0,
+        }
+
+    current_week_number, _, _ = _coaching_week(client_id, today)
+    all_actions = {}
+    rows = []
+
+    for week_number in range(1, current_week_number + 1):
+        week_start = client["start_date"] + timedelta(
+            days=(week_number - 1) * 7
+        )
+        week_end = week_start + timedelta(days=6)
+
+        review = get_coach_week_review(
+            client_id,
+            week_start,
+            week_end,
+        )
+
+        for action in review["actions"]:
+            all_actions[action["id"]] = {
+                "id": action["id"],
+                "name": action["action_name"],
+                "target_count": action.get("target_count"),
+                "target_unit": action.get("target_unit"),
+            }
+
+        status_by_key = {}
+        for action in review["actions"]:
+            for result in action["days"]:
+                status_by_key[(result["date"], action["id"])] = {
+                    "eligible": result["eligible"],
+                    "completed": result["completed"],
+                }
+
+        measurement = (
+            review["measurements"][0]
+            if review["measurements"]
+            else None
+        )
+
+        for day in review["days"]:
+            rows.append(
+                {
+                    "week_number": week_number,
+                    "date": day["date"],
+                    "submitted": day["submitted"],
+                    "steps": day["steps"],
+                    "weight_kg": day["weight_kg"],
+                    "note": day["note"],
+                    "actions": dict(status_by_key),
+                    "measurement": (
+                        measurement
+                        if measurement
+                        and measurement.get("measured_on") == day["date"]
+                        else None
+                    ),
+                    "is_current_week": (
+                        week_number == current_week_number
+                    ),
+                }
+            )
+
+    action_columns = list(all_actions.values())
+
+    for row in rows:
+        normalized = {}
+        for action in action_columns:
+            normalized[action["id"]] = row["actions"].get(
+                (row["date"], action["id"])
+            )
+        row["actions"] = normalized
+
+    rows.sort(
+        key=lambda row: (
+            -row["week_number"],
+            row["date"],
+        )
+    )
+
+    return {
+        "action_columns": action_columns,
+        "rows": rows,
+        "current_week_number": current_week_number,
+    }
+
+
+
+def get_client_history_grid(
+    client_id: int,
+    on_date: date | None = None,
+):
+    """
+    Client-facing spreadsheet history.
+
+    Past weeks are read-only.
+    Current week rows through today are editable.
+    Future dates are visible but locked.
+    """
+    today = on_date or date.today()
+    grid = get_coach_history_grid(client_id, on_date=today)
+    current_week_number = grid.get("current_week_number") or 0
+
+    for row in grid.get("rows", []):
+        row["is_past_week"] = row["week_number"] < current_week_number
+        row["is_future_day"] = (
+            row["week_number"] == current_week_number
+            and row["date"] > today
+        )
+        row["editable"] = (
+            row["week_number"] == current_week_number
+            and row["date"] <= today
+        )
+
+    # Build one weekly measurement summary per coaching week.
+    week_measurements = {}
+    for row in grid.get("rows", []):
+        if row.get("measurement"):
+            week_measurements[row["week_number"]] = row["measurement"]
+
+    grid["week_measurements"] = week_measurements
+    grid["today"] = today
+    return grid
+
+
 def get_client_operations_status(client: dict, on_date: date | None = None):
     """
     Production operations status for one active coaching client.

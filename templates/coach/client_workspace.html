@@ -93,6 +93,50 @@
 .nw-res-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.nw-res-card{padding:12px;border:1px solid #ece5ef;border-radius:12px;background:#fff}.nw-res-tag{display:inline-flex;padding:3px 6px;border-radius:999px;background:#f2e8f7;color:var(--coach-purple);font-size:8px;font-weight:850;text-transform:uppercase}.nw-res-card h3{margin:7px 0 3px;font-size:12px}.nw-res-card p{margin:4px 0;color:var(--coach-muted);font-size:9px;line-height:1.4}.nw-res-meta{font-size:8px;color:var(--coach-muted)}.nw-res-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:9px}.nw-res-open{color:var(--coach-purple);font-size:9px;font-weight:850;text-decoration:none}.nw-res-remove{border:0;background:transparent;color:#9d899f;font-size:8px;cursor:pointer}
 .nw-res-assign{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:7px;align-items:end}.nw-library-link{display:inline-flex;margin-left:8px;color:var(--coach-purple);font-size:10px;font-weight:800;text-decoration:none}
 @media(max-width:900px){.nw-summary-cols,.nw-res-grid{grid-template-columns:1fr}.nw-res-assign{grid-template-columns:1fr}}
+
+.nw-coach-week-browser{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:12px;padding:13px 15px;border:1px solid var(--coach-border);border-radius:14px;background:#fcfafc}
+.nw-coach-week-main{text-align:center;flex:1}
+.nw-coach-week-main strong{display:block;font-size:15px}
+.nw-coach-week-main span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px}
+.nw-coach-week-nav{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--coach-border);border-radius:10px;background:#fff;color:var(--coach-purple);text-decoration:none;font-size:18px;font-weight:900}
+.nw-coach-week-nav.disabled{opacity:.28;pointer-events:none}
+.nw-coach-week-mode{display:inline-flex!important;width:auto!important;margin-top:6px!important;padding:4px 8px;border-radius:999px;background:#f1e8f5;color:var(--coach-purple)!important;font-size:8px!important;font-weight:850;text-transform:uppercase}
+.nw-coach-week-mode.readonly{background:#f0eef1;color:#7b747e!important}
+.nw-coach-week-mode.future{background:#f4f2f5;color:#918a94!important}
+.nw-week-readonly-note{margin-bottom:10px;padding:10px 12px;border:1px solid #e9e2eb;border-radius:10px;background:#faf8fb;color:var(--coach-muted);font-size:10px}
+.nw-week-future-empty{padding:22px;border:1px dashed var(--coach-border);border-radius:12px;background:#fcfafc;color:var(--coach-muted);font-size:11px;text-align:center}
+
+.nw-grid-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:end;margin-bottom:10px}
+.nw-grid-toolbar h2{margin:2px 0 0}.nw-grid-toolbar p{margin:4px 0 0;color:var(--coach-muted);font-size:10px}
+.nw-grid-filters{display:flex;gap:7px;flex-wrap:wrap}
+.nw-grid-filter{padding:7px 9px;border:1px solid var(--coach-border);border-radius:9px;background:#fff;color:var(--coach-ink);font-size:9px;font-weight:800;cursor:pointer}
+.nw-grid-filter.active{border-color:#b991c9;background:#f6eef9;color:var(--coach-purple)}
+.nw-excel-wrap{overflow:auto;max-height:68vh;border:1px solid var(--coach-border);border-radius:12px;background:#fff}
+.nw-excel{border-collapse:separate;border-spacing:0;min-width:1280px;width:max-content;font-size:11px}
+.nw-excel th,.nw-excel td{padding:10px 11px;border-right:1px solid #eee8f0;border-bottom:1px solid #eee8f0;vertical-align:top;background:#fff;white-space:nowrap}
+.nw-excel thead th{position:sticky;top:0;z-index:6;background:#f8f4fa;color:#5e5362;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.nw-excel .sticky-week{position:sticky;left:0;z-index:5;min-width:72px}
+.nw-excel .sticky-date{position:sticky;left:72px;z-index:5;min-width:86px}
+.nw-excel thead .sticky-week,.nw-excel thead .sticky-date{z-index:8;background:#f4eef7}
+.nw-excel tbody tr.current-week td{background:#fdf9ff}
+.nw-excel tbody tr.current-week .sticky-week,.nw-excel tbody tr.current-week .sticky-date{background:#f9f1fc}
+.nw-excel tbody tr.week-start td{border-top:2px solid #cbb4d5}
+.nw-cell-state{display:inline-flex;padding:3px 6px;border-radius:999px;background:#f0eef1;color:#777078;font-size:7px;font-weight:850}
+.nw-cell-state.done{background:#eaf5ef;color:#31704c}
+.nw-action-cell{text-align:center;min-width:92px}
+.nw-action-cell .yes{color:#2f7b4f;font-weight:900;font-size:12px}
+.nw-action-cell .no{color:#9a6d2b;font-weight:900;font-size:11px}
+.nw-action-cell .na{color:#bbb2bd}
+.nw-note-cell{max-width:220px;white-space:normal!important;line-height:1.35}
+.nw-measure-cell{max-width:260px;white-space:normal!important;line-height:1.35}
+.nw-measure-chip{display:inline-block;margin:2px 3px 2px 0;padding:3px 5px;border-radius:7px;background:#f5f0f7;color:#625168;font-size:7px}
+.nw-action-head{max-width:150px;white-space:normal!important;line-height:1.2}
+.nw-action-head small{display:block;margin-top:3px;color:#8c828f;font-size:7px;font-weight:600;text-transform:none;letter-spacing:0}
+
+.nw-measure-week-row td{background:#fcfafc!important;border-top:1px solid #e7ddea}
+.nw-week-measure-inline{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.nw-week-measure-inline strong{margin-right:4px;font-size:10px;color:var(--coach-purple)}
+.nw-week-measure-inline span{padding:5px 7px;border:1px solid #eee7ef;border-radius:8px;background:#fff;color:#625c65;font-size:9px}
 </style>
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
@@ -231,7 +275,7 @@
     <div class="nw-meta"><span class="nw-chip"><strong>Week {{ current_week }}</strong> · {{ current_week_start.strftime("%d %b %Y") }} – {{ current_week_end.strftime("%d %b %Y") }}</span><span class="nw-chip">Next call: <strong>{% if next_synced_call and next_synced_call.local_start_time %}{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}{% else %}Not scheduled{% endif %}</strong></span><span class="nw-chip">{{ (client.status or "active")|title }}</span></div>
   </header>
 
-  <nav class="nw-tabs"><button class="nw-tab active" type="button" data-tab="overview">Overview</button><button class="nw-tab" type="button" data-tab="weekly">Weekly Check-in</button><button class="nw-tab" type="button" data-tab="resources">Resources</button><button class="nw-tab" type="button" data-tab="timeline">Timeline</button></nav>
+  <nav class="nw-tabs"><button class="nw-tab active" type="button" data-tab="overview">Overview</button><button class="nw-tab" type="button" data-tab="weekly">Weekly Check-in</button><button class="nw-tab" type="button" data-tab="clientdata">Client Data</button><button class="nw-tab" type="button" data-tab="resources">Resources</button><button class="nw-tab" type="button" data-tab="timeline">Timeline</button></nav>
 
   <section class="nw-panel-tab active" data-panel="overview">
     <div class="nw-overview">
@@ -329,9 +373,42 @@
   </section>
 
   <section class="nw-panel-tab" data-panel="weekly">
-    <div class="nw-week-banner"><div><strong>Week {{ current_week }} review</strong><span>{{ current_week_start.strftime("%d %b %Y") }} – {{ current_week_end.strftime("%d %b %Y") }}</span></div><div class="nw-week-stat"><b>{{ week_review.submitted_count if week_review else 0 }} / 7</b><span>client check-ins submitted</span></div></div>
+    <div class="nw-coach-week-browser">
+      {% if coach_week_can_previous %}
+      <a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number - 1 }}">←</a>
+      {% else %}
+      <span class="nw-coach-week-nav disabled">←</span>
+      {% endif %}
+
+      <div class="nw-coach-week-main">
+        <strong>Week {{ coach_week_number }}</strong>
+        <span>{{ coach_week_start.strftime("%d %b") }} – {{ coach_week_end.strftime("%d %b %Y") }}</span>
+        {% if coach_week_is_current %}
+        <span class="nw-coach-week-mode">Current week</span>
+        {% elif coach_week_is_past %}
+        <span class="nw-coach-week-mode readonly">Read-only history</span>
+        {% else %}
+        <span class="nw-coach-week-mode future">Upcoming week</span>
+        {% endif %}
+      </div>
+
+      {% if coach_week_can_next %}
+      <a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number + 1 }}">→</a>
+      {% else %}
+      <span class="nw-coach-week-nav disabled">→</span>
+      {% endif %}
+    </div>
+
+    <div class="nw-week-banner"><div><strong>Week {{ coach_week_number }} review</strong><span>{{ coach_week_start.strftime("%d %b %Y") }} – {{ coach_week_end.strftime("%d %b %Y") }}</span></div><div class="nw-week-stat"><b>{{ week_review.submitted_count if week_review else 0 }} / 7</b><span>client check-ins submitted</span></div></div>
+
+    {% if coach_week_is_past %}
+    <div class="nw-week-readonly-note">This coaching week is closed. Daily entries, commitments and body measurements are available for review only.</div>
+    {% elif coach_week_is_future %}
+    <div class="nw-week-readonly-note">This is the upcoming coaching week. Any actions already planned are shown for reference; client tracking has not opened yet.</div>
+    {% endif %}
+
     <div class="nw-review">
-      {% if call_prep %}
+      {% if call_prep and not coach_week_is_future %}
       <section class="nw-panel nw-pad">
         <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Call prep</p><h2>What to know before the call</h2><p>A one-minute summary built from the client’s daily entries.</p></div></div>
 
@@ -407,6 +484,7 @@
         {% if week_review and week_review.measurements %}<div class="nw-measures">{% for m in week_review.measurements %}<div class="nw-measure"><strong>{{ m.measured_on.strftime("%d %b %Y") }}</strong><div class="nw-values">{% if m.weight_kg is not none %}<span>Weight {{ m.weight_kg }} kg</span>{% endif %}{% if m.upper_arm_cm is not none %}<span>Upper arm {{ m.upper_arm_cm }} cm</span>{% endif %}{% if m.chest_cm is not none %}<span>Chest {{ m.chest_cm }} cm</span>{% endif %}{% if m.waist_cm is not none %}<span>Waist {{ m.waist_cm }} cm</span>{% endif %}{% if m.lower_abdomen_cm is not none %}<span>Lower abdomen {{ m.lower_abdomen_cm }} cm</span>{% endif %}{% if m.hip_cm is not none %}<span>Hip {{ m.hip_cm }} cm</span>{% endif %}{% if m.thigh_cm is not none %}<span>Thigh {{ m.thigh_cm }} cm</span>{% endif %}</div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">No weekly body measurements have been submitted for this coaching week.</p>{% endif %}
       </section>
 
+      {% if coach_week_is_current %}
       <form method="post" action="/dashboard/clients/{{ client.id }}/checkin" class="nw-panel nw-pad nw-call">
         <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Weekly call</p><h2>Review this week, then plan the next</h2><p>Start with the client notes and attention items above, capture the conversation, then assign Week {{ next_week_number }}.</p></div></div>
         <div style="max-width:360px">
@@ -414,7 +492,7 @@
             <span class="nw-label">This review date</span>
             <input class="nw-input" type="date" name="call_date" value="{{ current_week_end }}" required>
           </label>
-          <p class="nw-helper">The date this Week {{ current_week }} coaching review happened.</p>
+          <p class="nw-helper">The date this Week {{ coach_week_number }} coaching review happened.</p>
         </div>
         <div class="nw-call-notes"><label><span class="nw-label">Wins</span><textarea class="nw-textarea" name="wins"></textarea></label><label><span class="nw-label">Struggles</span><textarea class="nw-textarea" name="struggles"></textarea></label><label><span class="nw-label">Improvements / focus</span><textarea class="nw-textarea" name="improvements_needed"></textarea></label><label><span class="nw-label">Help / support needed</span><textarea class="nw-textarea" name="coach_support"></textarea></label></div>
 
@@ -551,7 +629,134 @@
 
         <div class="nw-save"><p>Saving closes this review and creates the selected actions for Week {{ next_week_number }}.</p><button class="nw-btn nw-primary" type="submit">Save weekly check-in →</button></div>
       </form>
+      {% elif coach_week_is_past %}
+      <section class="nw-panel nw-pad">
+        <div class="nw-heading">
+          <div><p class="nw-kicker" style="margin-top:0">Weekly call</p><h2>Closed coaching week</h2><p>This week is preserved as read-only history. Return to the current week to record the next coaching review and plan actions.</p></div>
+        </div>
+      </section>
+      {% else %}
+      <section class="nw-panel nw-pad">
+        <div class="nw-heading">
+          <div><p class="nw-kicker" style="margin-top:0">Upcoming</p><h2>Next coaching week</h2><p>Use the current week to complete the review and assign the action plan for this upcoming week.</p></div>
+        </div>
+      </section>
+      {% endif %}
     </div>
+  </section>
+
+  <section class="nw-panel-tab" data-panel="clientdata">
+    <section class="nw-panel nw-pad">
+      <div class="nw-grid-toolbar">
+        <div>
+          <p class="nw-kicker" style="margin-top:0">All coaching data</p>
+          <h2>Client data grid</h2>
+          <p>All weeks and dates in one spreadsheet-style view.</p>
+        </div>
+        <div class="nw-grid-filters">
+          <button class="nw-grid-filter active" type="button" data-grid-filter="all">All weeks</button>
+          <button class="nw-grid-filter" type="button" data-grid-filter="current">Current week</button>
+          <button class="nw-grid-filter" type="button" data-grid-filter="submitted">Submitted only</button>
+        </div>
+      </div>
+
+      {% if coach_history_grid and coach_history_grid.rows %}
+      <div class="nw-excel-wrap">
+        <table class="nw-excel">
+          <thead>
+            <tr>
+              <th class="sticky-week">Week</th>
+              <th class="sticky-date">Date</th>
+              <th>Status</th>
+              <th>Steps</th>
+              <th>Weight</th>
+              {% for action in coach_history_grid.action_columns %}
+              <th class="nw-action-head">
+                {{ action.name }}
+                {% if action.target_count %}
+                <small>{{ action.target_count }} {{ action.target_unit or "" }}</small>
+                {% endif %}
+              </th>
+              {% endfor %}
+              <th>Client note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set ns = namespace(last_week=None, week_measurement=None) %}
+            {% for row in coach_history_grid.rows %}
+            {% if ns.last_week != row.week_number %}
+              {% set ns.week_measurement = none %}
+            {% endif %}
+            {% if row.measurement %}
+              {% set ns.week_measurement = row.measurement %}
+            {% endif %}
+            <tr
+              class="{% if row.is_current_week %}current-week{% endif %} {% if ns.last_week != row.week_number %}week-start{% endif %}"
+              data-grid-current="{{ '1' if row.is_current_week else '0' }}"
+              data-grid-submitted="{{ '1' if row.submitted else '0' }}"
+            >
+              <td class="sticky-week"><strong>Week {{ row.week_number }}</strong></td>
+              <td class="sticky-date"><strong>{{ row.date.strftime("%d %b") }}</strong></td>
+              <td>
+                {% if row.submitted %}
+                <span class="nw-cell-state done">Entered</span>
+                {% else %}
+                <span class="nw-cell-state">No entry</span>
+                {% endif %}
+              </td>
+
+              <td>{{ row.steps if row.steps is not none else "—" }}</td>
+              <td>{% if row.weight_kg is not none %}{{ row.weight_kg }} kg{% else %}—{% endif %}</td>
+
+              {% for action in coach_history_grid.action_columns %}
+              {% set cell = row.actions.get(action.id) %}
+              <td class="nw-action-cell">
+                {% if not cell or not cell.eligible %}
+                  <span class="na">·</span>
+                {% elif cell.completed is true %}
+                  <span class="yes">✓</span>
+                {% elif cell.completed is false %}
+                  <span class="no">○</span>
+                {% else %}
+                  <span class="na">—</span>
+                {% endif %}
+              </td>
+              {% endfor %}
+
+              <td class="nw-note-cell">{{ row.note or "—" }}</td>
+            </tr>
+
+            {% if loop.index0 % 7 == 6 %}
+            <tr class="nw-measure-week-row">
+              <td class="sticky-week"></td>
+              <td class="sticky-date"><strong style="color:var(--coach-purple)">Measurements</strong></td>
+              <td colspan="{{ coach_history_grid.action_columns|length + 4 }}">
+                {% if ns.week_measurement %}
+                <div class="nw-week-measure-inline">
+                  <strong>{{ ns.week_measurement.measured_on.strftime("%d %b %Y") }}</strong>
+                  {% if ns.week_measurement.upper_arm_cm is not none %}<span>Arm {{ ns.week_measurement.upper_arm_cm }} cm</span>{% endif %}
+                  {% if ns.week_measurement.chest_cm is not none %}<span>Chest {{ ns.week_measurement.chest_cm }} cm</span>{% endif %}
+                  {% if ns.week_measurement.waist_cm is not none %}<span>Waist {{ ns.week_measurement.waist_cm }} cm</span>{% endif %}
+                  {% if ns.week_measurement.lower_abdomen_cm is not none %}<span>Lower abdomen {{ ns.week_measurement.lower_abdomen_cm }} cm</span>{% endif %}
+                  {% if ns.week_measurement.hip_cm is not none %}<span>Hip {{ ns.week_measurement.hip_cm }} cm</span>{% endif %}
+                  {% if ns.week_measurement.thigh_cm is not none %}<span>Thigh {{ ns.week_measurement.thigh_cm }} cm</span>{% endif %}
+                </div>
+                {% else %}
+                <span style="color:var(--coach-muted)">No weekly measurements entered.</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endif %}
+
+            {% set ns.last_week = row.week_number %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="nw-inline-empty">Client tracking history will appear here once daily updates begin.</div>
+      {% endif %}
+    </section>
   </section>
 
   <section class="nw-panel-tab" data-panel="resources">
@@ -665,6 +870,35 @@
   var savedTab = null;
   try { savedTab = sessionStorage.getItem("nwtab"); } catch(e) {}
   go(queryTab || savedTab || "overview");
+
+
+  var gridFilters = Array.prototype.slice.call(document.querySelectorAll("[data-grid-filter]"));
+  var gridRows = Array.prototype.slice.call(document.querySelectorAll("[data-grid-current]"));
+
+  function applyGridFilter(filter){
+    gridRows.forEach(function(row){
+      var show = true;
+      if(filter === "current"){
+        show = row.getAttribute("data-grid-current") === "1";
+      } else if(filter === "submitted"){
+        show = row.getAttribute("data-grid-submitted") === "1";
+      }
+      row.style.display = show ? "" : "none";
+    });
+
+    gridFilters.forEach(function(button){
+      button.classList.toggle(
+        "active",
+        button.getAttribute("data-grid-filter") === filter
+      );
+    });
+  }
+
+  gridFilters.forEach(function(button){
+    button.addEventListener("click", function(){
+      applyGridFilter(button.getAttribute("data-grid-filter"));
+    });
+  });
 
   var copyButton = document.querySelector("[data-copy]");
   var copyInput = document.querySelector("[data-client-link]");

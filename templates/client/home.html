@@ -162,6 +162,47 @@
 .cp-measure-saved-values{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .cp-measure-saved-values span{padding:5px 7px;border:1px solid #eee7ef;border-radius:8px;background:#fff;color:#625c65;font-size:8px}
 @media(max-width:650px){.cp-left-measurements-grid,.cp-left-measurements .cp-measure-date-row{grid-template-columns:1fr}}
+
+.cp-grid-shell{overflow:auto;max-height:72vh;border:1px solid var(--line);border-radius:13px;background:#fff}
+.cp-sheet{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:11px}
+.cp-sheet th,.cp-sheet td{padding:10px 11px;border-right:1px solid #eee8f0;border-bottom:1px solid #eee8f0;vertical-align:middle;background:#fff;white-space:nowrap}
+.cp-sheet thead th{position:sticky;top:0;z-index:6;background:#f8f4fa;color:#5e5362;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.cp-sheet .sticky-week{position:sticky;left:0;z-index:5;min-width:70px}
+.cp-sheet .sticky-date{position:sticky;left:70px;z-index:5;min-width:82px}
+.cp-sheet thead .sticky-week,.cp-sheet thead .sticky-date{z-index:8;background:#f4eef7}
+.cp-sheet tr.current-week td{background:#fdf9ff}
+.cp-sheet tr.current-week .sticky-week,.cp-sheet tr.current-week .sticky-date{background:#f9f1fc}
+.cp-sheet tr.week-start td{border-top:2px solid #cbb4d5}
+.cp-sheet-status{display:inline-flex;padding:3px 6px;border-radius:999px;background:#f0eef1;color:#777078;font-size:7px;font-weight:850}
+.cp-sheet-status.done{background:#eaf5ef;color:#31704c}
+.cp-sheet-status.open{background:#f5eef8;color:#6a3c79}
+.cp-sheet-status.today{background:#eee4f5;color:var(--purple)}
+.cp-sheet-status.future{background:#f4f2f5;color:#918a94}
+.cp-sheet-check{display:flex;align-items:center;justify-content:center}
+.cp-sheet-check input{width:16px;height:16px;accent-color:var(--purple)}
+.cp-sheet-check.readonly{font-size:12px;font-weight:900}
+.cp-sheet-check .yes{color:#31704c}.cp-sheet-check .no{color:#a26f2c}.cp-sheet-check .na{color:#bbb2bd}
+.cp-sheet-input{width:92px;padding:8px 7px;border:1px solid #ddd4e1;border-radius:8px;background:#fff;font:inherit;font-size:9px}
+.cp-sheet-input.weight{width:78px}
+.cp-sheet-save{padding:8px 10px;border:0;border-radius:8px;background:var(--purple);color:#fff;font-size:8px;font-weight:850;cursor:pointer}
+.cp-sheet-save:hover{filter:brightness(.96)}
+.cp-sheet-action-head{max-width:150px;white-space:normal!important;line-height:1.2}
+.cp-sheet-action-head small{display:block;margin-top:3px;color:#8c828f;font-size:7px;font-weight:600;text-transform:none;letter-spacing:0}
+.cp-measure-row td{background:#fcfafc!important}
+.cp-measure-label{font-weight:900;color:var(--purple)}
+.cp-measure-inline{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.cp-measure-inline span{padding:4px 6px;border:1px solid #eee7ef;border-radius:7px;background:#fff;font-size:8px;color:#625c65}
+.cp-measure-inline .cp-field{min-width:105px}
+.cp-measure-inline .cp-input,.cp-measure-inline .cp-select{padding:6px 7px;font-size:8px}
+.cp-measure-grid-inline{display:grid;grid-template-columns:repeat(6,78px);gap:5px}
+.cp-grid-help{margin:0 0 10px;color:var(--muted);font-size:10px;line-height:1.45}
+.cp-grid-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.cp-grid-legend span{font-size:8px;color:var(--muted)}
+.cp-grid-card{grid-column:1/-1;width:100%}
+@media(max-width:800px){
+  .cp-sheet{min-width:950px}
+  .cp-grid-shell{max-height:none}
+}
 </style>
 
 
@@ -172,7 +213,7 @@
       <h1>Hi {{ client.name.split(" ")[0] }} 👋</h1>
       <p class="cp-sub">
         {{ today.strftime("%d %b %Y") }}
-        · Your current coaching week stays open for updates.
+        · Update the current week directly in your coaching grid.
         {% if client.timezone %}<span class="cp-date-note">Your coaching day follows {{ client.timezone }}.</span>{% endif %}
       </p>
     </div>
@@ -218,244 +259,187 @@
   </div>
 
   <div class="cp-grid">
-    <section class="cp-card cp-main">
-
-      <div class="cp-week-browser">
-        {% if week_view.can_go_previous %}
-        <a class="cp-week-nav" href="/client/{{ access_token }}?week={{ week_view.week_number - 1 }}">←</a>
-        {% else %}
-        <span class="cp-week-nav disabled">←</span>
-        {% endif %}
-
-        <div class="cp-week-browser-main">
-          <strong>Week {{ week_view.week_number }}</strong>
-          <span>{{ week_view.week_start.strftime("%d %b") }} – {{ week_view.week_end.strftime("%d %b %Y") }}</span>
-          {% if week_view.is_current %}
-          <span class="cp-week-mode">Current week</span>
-          {% elif week_view.is_past %}
-          <span class="cp-week-mode readonly">Read-only</span>
-          {% else %}
-          <span class="cp-week-mode future">Upcoming week</span>
-          {% endif %}
-        </div>
-
-        {% if week_view.can_go_next %}
-        <a class="cp-week-nav" href="/client/{{ access_token }}?week={{ week_view.week_number + 1 }}">→</a>
-        {% else %}
-        <span class="cp-week-nav disabled">→</span>
-        {% endif %}
-      </div>
-
+    <section class="cp-card cp-grid-card" id="client-grid">
       <div class="cp-title-row">
         <div>
-          <p class="cp-kicker">{% if week_view.is_current %}Daily update{% else %}Day details{% endif %}</p>
-          <h2>{{ selected_date.strftime("%d %b %Y") }}</h2>
-          <p class="cp-intro">Choose a day within this week. Use the arrows above to move between coaching weeks.</p>
-
-          <div class="cp-date-picker">
-            {% for day in week_view.days %}
-            <a class="cp-date-pill {% if day.date == selected_date %}active{% endif %} {% if day.submitted %}done{% endif %} {% if day.browser_state == 'upcoming' %}upcoming{% endif %}"
-               href="/client/{{ access_token }}?week={{ week_view.week_number }}&day={{ day.date.isoformat() }}">
-              {{ day.date.strftime("%d %b") }}
-            </a>
-            {% endfor %}
-          </div>
-
-          <div class="cp-selected-status {{ selected_state }}">
-            {% if week_view.is_past %}Read-only
-            {% elif selected_state == "today" %}● Today
-            {% elif selected_state == "open" %}Open to update
-            {% else %}Upcoming{% endif %}
-          </div>
+          <p class="cp-kicker">Your coaching data</p>
+          <h2>All weeks</h2>
+          <p class="cp-grid-help">Past weeks are read-only. In the current week, you can update any day up to today directly in the grid.</p>
         </div>
-
-        {% if actions %}
-        <span class="cp-count" data-completion-count>{{ actions|selectattr("completed_selected")|list|length }} / {{ actions|length }} done</span>
-        {% endif %}
+        <span class="cp-count">Week {{ client_history_grid.current_week_number }}</span>
       </div>
 
-      {% if week_view.is_past %}
-        <div class="cp-readonly-entry">
-          <h3>Saved entry</h3>
-          {% if daily_entry and daily_entry.is_submitted %}
-          <div class="cp-readonly-grid">
-            <div class="cp-readonly-stat"><span>Steps</span><strong>{{ daily_entry.steps if daily_entry.steps is not none else "—" }}</strong></div>
-            <div class="cp-readonly-stat"><span>Weight</span><strong>{% if daily_entry.weight_kg is not none %}{{ daily_entry.weight_kg }} kg{% else %}—{% endif %}</strong></div>
-          </div>
+      <div class="cp-grid-legend">
+        <span>✓ completed</span>
+        <span>○ not completed</span>
+        <span>· not assigned that day</span>
+      </div>
 
-          {% if actions %}
-          <div class="cp-readonly-actions">
-            {% for action in actions %}
-            <div class="cp-readonly-action">
-              <b>{{ "✓" if action.completed_selected else "○" }}</b>
-              <span>{{ action.action_name }}</span>
-            </div>
-            {% endfor %}
-          </div>
-          {% endif %}
-          {% else %}
-          <div class="cp-section-empty">No entry was recorded for this day.</div>
-          {% endif %}
-        </div>
+      {% if client_history_grid and client_history_grid.rows %}
+      <div class="cp-grid-shell">
+        <table class="cp-sheet">
+          <thead>
+            <tr>
+              <th class="sticky-week">Week</th>
+              <th class="sticky-date">Date</th>
+              <th>Status</th>
+              <th>Steps</th>
+              <th>Weight</th>
+              {% for action in client_history_grid.action_columns %}
+              <th class="cp-sheet-action-head">
+                {{ action.name }}
+                {% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}
+              </th>
+              {% endfor %}
+              <th>Save</th>
+            </tr>
+          </thead>
 
-      {% elif selected_is_editable %}
-        <form method="post" action="/client/{{ access_token }}/daily">
-          <input type="hidden" name="tracked_on" value="{{ selected_date.isoformat() }}">
-          <input type="hidden" name="selected_week_number" value="{{ week_view.week_number }}">
+          <tbody>
+            {% set ns = namespace(last_week=None) %}
+            {% for row in client_history_grid.rows %}
+            <tr class="{% if row.is_current_week %}current-week{% endif %} {% if ns.last_week != row.week_number %}week-start{% endif %}">
+              <td class="sticky-week"><strong>Week {{ row.week_number }}</strong></td>
+              <td class="sticky-date"><strong>{{ row.date.strftime("%d %b") }}</strong></td>
+              <td>
+                {% if row.submitted %}
+                  <span class="cp-sheet-status done">Entered</span>
+                {% elif row.editable and row.date == today %}
+                  <span class="cp-sheet-status today">Today</span>
+                {% elif row.editable %}
+                  <span class="cp-sheet-status open">Open</span>
+                {% elif row.is_future_day %}
+                  <span class="cp-sheet-status future">Upcoming</span>
+                {% else %}
+                  <span class="cp-sheet-status">No entry</span>
+                {% endif %}
+              </td>
 
-          {% if actions %}
-          <div class="cp-actions">
-            {% for action in actions %}
-            <label class="cp-action">
-              <input type="checkbox" name="completed_action_ids" value="{{ action.id }}" data-action-checkbox
-                {% if action.completed_selected %}checked{% endif %}>
-              <span class="cp-check">
-                <svg viewBox="0 0 20 20" fill="none"><path d="M4.5 10.3L8.2 14l7.3-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </span>
-              <span class="cp-action-copy">
-                <strong>{{ action.action_name }}</strong>
-                {% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }} weekly target</small>{% endif %}
-              </span>
-              <span class="cp-done">Done</span>
-            </label>
-            {% endfor %}
-          </div>
-          {% else %}
-          <div class="cp-section-empty"><strong>No actions assigned for this day.</strong><br>Your coaching plan may still be being prepared for this week.</div>
-          {% endif %}
+              {% if row.editable %}
+                <form id="day-form-{{ row.date.isoformat() }}" method="post" action="/client/{{ access_token }}/daily">
+                  <input type="hidden" name="tracked_on" value="{{ row.date.isoformat() }}">
+                  <input type="hidden" name="selected_week_number" value="{{ row.week_number }}">
+                </form>
+              {% endif %}
 
-          <div class="cp-daily-numbers">
-            <div class="cp-field">
-              <span>Steps</span>
-              <input class="cp-input" type="number" min="0" inputmode="numeric" name="steps"
-                value="{% if daily_entry and daily_entry.steps is not none %}{{ daily_entry.steps }}{% endif %}"
-                placeholder="e.g. 7000">
-            </div>
-            <div class="cp-field">
-              <span>Weight (kg) · optional</span>
-              <input class="cp-input" type="number" step="0.1" inputmode="decimal" name="weight_kg"
-                value="{% if daily_entry and daily_entry.weight_kg is not none %}{{ daily_entry.weight_kg }}{% endif %}"
-                placeholder="Optional">
-            </div>
-          </div>
+              <td>
+                {% if row.editable %}
+                <input class="cp-sheet-input" type="number" min="0" inputmode="numeric"
+                       name="steps"
+                       form="day-form-{{ row.date.isoformat() }}"
+                       value="{{ row.steps if row.steps is not none else '' }}"
+                       placeholder="Steps">
+                {% else %}
+                {{ row.steps if row.steps is not none else "—" }}
+                {% endif %}
+              </td>
 
-          <button class="cp-save" type="submit">Save this day’s check-in</button>
-          {% if daily_entry and daily_entry.is_submitted %}<p class="cp-lock">Previously submitted · saving again will update this date.</p>{% endif %}
-        </form>
+              <td>
+                {% if row.editable %}
+                <input class="cp-sheet-input weight" type="number" step="0.1"
+                       name="weight_kg"
+                       form="day-form-{{ row.date.isoformat() }}"
+                       value="{{ row.weight_kg if row.weight_kg is not none else '' }}"
+                       placeholder="kg">
+                {% else %}
+                {% if row.weight_kg is not none %}{{ row.weight_kg }} kg{% else %}—{% endif %}
+                {% endif %}
+              </td>
 
-      {% else %}
-        <div class="cp-upcoming-box">
-          <strong>{{ selected_date.strftime("%d %b %Y") }} is upcoming.</strong><br>
-          This day will open for actions, steps and optional weight once the date arrives.
-        </div>
-      {% endif %}
+              {% for action in client_history_grid.action_columns %}
+                {% set cell = row.actions.get(action.id) %}
+                <td>
+                  <div class="cp-sheet-check {% if not row.editable %}readonly{% endif %}">
+                    {% if not cell or not cell.eligible %}
+                      <span class="na">·</span>
+                    {% elif row.editable %}
+                      <input type="checkbox"
+                             name="completed_action_ids"
+                             value="{{ action.id }}"
+                             form="day-form-{{ row.date.isoformat() }}"
+                             {% if cell.completed is true %}checked{% endif %}>
+                    {% elif cell.completed is true %}
+                      <span class="yes">✓</span>
+                    {% elif cell.completed is false %}
+                      <span class="no">○</span>
+                    {% else %}
+                      <span class="na">—</span>
+                    {% endif %}
+                  </div>
+                </td>
+              {% endfor %}
 
-      <div class="cp-left-measurements">
-        <div class="cp-left-measurements-head">
-          <div>
-            <p class="cp-kicker">Once per coaching week</p>
-            <h3>Body measurements</h3>
-            <p>Complete all six once during the week. After saving, they cannot be entered again for that week.</p>
-          </div>
+              <td>
+                {% if row.editable %}
+                <button class="cp-sheet-save" type="submit" form="day-form-{{ row.date.isoformat() }}">
+                  {% if row.submitted %}Update{% else %}Save{% endif %}
+                </button>
+                {% else %}—{% endif %}
+              </td>
+            </tr>
 
-          {% if week_view.is_current %}
-            {% if weekly_measurement %}
-            <span class="cp-left-measurements-badge">Complete ✓</span>
-            {% else %}
-            <span class="cp-left-measurements-badge">Required this week</span>
+            {% if loop.index0 % 7 == 6 %}
+              <tr class="cp-measure-row">
+                <td class="sticky-week"></td>
+                <td class="sticky-date"><span class="cp-measure-label">Measurements</span></td>
+                <td colspan="{{ client_history_grid.action_columns|length + 4 }}">
+                  {% set wm = client_history_grid.week_measurements.get(row.week_number) %}
+                  {% if wm %}
+                  <div class="cp-measure-inline">
+                    <strong>{{ wm.measured_on.strftime("%d %b %Y") }}</strong>
+                    {% if wm.upper_arm_cm is not none %}<span>Arm {{ wm.upper_arm_cm }}</span>{% endif %}
+                    {% if wm.chest_cm is not none %}<span>Chest {{ wm.chest_cm }}</span>{% endif %}
+                    {% if wm.waist_cm is not none %}<span>Waist {{ wm.waist_cm }}</span>{% endif %}
+                    {% if wm.lower_abdomen_cm is not none %}<span>Lower abd {{ wm.lower_abdomen_cm }}</span>{% endif %}
+                    {% if wm.hip_cm is not none %}<span>Hip {{ wm.hip_cm }}</span>{% endif %}
+                    {% if wm.thigh_cm is not none %}<span>Thigh {{ wm.thigh_cm }}</span>{% endif %}
+                  </div>
+
+                  {% elif row.week_number == client_history_grid.current_week_number %}
+                  <form method="post" action="/client/{{ access_token }}/measurements">
+                    <div class="cp-measure-inline">
+                      <div class="cp-field">
+                        <span>Date</span>
+                        <input class="cp-input" type="date" name="measured_on"
+                               min="{{ row.week_start if row.week_start is defined else week_completion.week_start }}"
+                               max="{{ today }}" value="{{ today }}" required>
+                      </div>
+                      <div class="cp-field">
+                        <span>Unit</span>
+                        <select class="cp-select" name="measurement_unit">
+                          <option value="cm">cm</option>
+                          <option value="inches">inches</option>
+                        </select>
+                      </div>
+                      <div class="cp-measure-grid-inline">
+                        <input class="cp-sheet-input" type="number" step="0.1" name="upper_arm" placeholder="Arm" required>
+                        <input class="cp-sheet-input" type="number" step="0.1" name="chest" placeholder="Chest" required>
+                        <input class="cp-sheet-input" type="number" step="0.1" name="waist" placeholder="Waist" required>
+                        <input class="cp-sheet-input" type="number" step="0.1" name="lower_abdomen" placeholder="Lower abd" required>
+                        <input class="cp-sheet-input" type="number" step="0.1" name="hip" placeholder="Hip" required>
+                        <input class="cp-sheet-input" type="number" step="0.1" name="thigh" placeholder="Thigh" required>
+                      </div>
+                      <button class="cp-sheet-save" type="submit">Save measurements</button>
+                    </div>
+                  </form>
+                  {% else %}
+                  <span style="color:var(--muted)">No measurements entered.</span>
+                  {% endif %}
+                </td>
+              </tr>
             {% endif %}
-          {% elif week_view.is_past %}
-          <span class="cp-left-measurements-badge">Read-only</span>
-          {% else %}
-          <span class="cp-left-measurements-badge">Upcoming</span>
-          {% endif %}
-        </div>
 
-        {% if week_view.is_current %}
-          {% if weekly_measurement %}
-          <div class="cp-measure-saved-simple">
-            <strong>✓ Saved · {{ weekly_measurement.measured_on.strftime("%d %b %Y") }}</strong>
-            <div class="cp-measure-saved-values">
-              {% if weekly_measurement.upper_arm_cm is not none %}<span>Upper arm {{ weekly_measurement.upper_arm_cm }} cm</span>{% endif %}
-              {% if weekly_measurement.chest_cm is not none %}<span>Chest {{ weekly_measurement.chest_cm }} cm</span>{% endif %}
-              {% if weekly_measurement.waist_cm is not none %}<span>Waist {{ weekly_measurement.waist_cm }} cm</span>{% endif %}
-              {% if weekly_measurement.lower_abdomen_cm is not none %}<span>Lower abdomen {{ weekly_measurement.lower_abdomen_cm }} cm</span>{% endif %}
-              {% if weekly_measurement.hip_cm is not none %}<span>Hip {{ weekly_measurement.hip_cm }} cm</span>{% endif %}
-              {% if weekly_measurement.thigh_cm is not none %}<span>Thigh {{ weekly_measurement.thigh_cm }} cm</span>{% endif %}
-            </div>
-          </div>
-          {% else %}
-          <form class="cp-measure-form" method="post" action="/client/{{ access_token }}/measurements">
-            <div class="cp-measure-date-row">
-              <div class="cp-field">
-                <span>Date measured</span>
-                <input class="cp-input" type="date" name="measured_on"
-                  min="{{ week_view.week_start }}"
-                  max="{{ today }}"
-                  value="{{ today }}" required>
-              </div>
-              <div class="cp-field">
-                <span>Unit</span>
-                <select class="cp-select" name="measurement_unit">
-                  <option value="cm">cm</option>
-                  <option value="inches">inches</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="cp-left-measurements-grid">
-              <div class="cp-field"><span>Upper arm</span><input class="cp-input" type="number" step="0.1" name="upper_arm" required></div>
-              <div class="cp-field"><span>Chest</span><input class="cp-input" type="number" step="0.1" name="chest" required></div>
-              <div class="cp-field"><span>Waist</span><input class="cp-input" type="number" step="0.1" name="waist" required></div>
-              <div class="cp-field"><span>Lower abdomen</span><input class="cp-input" type="number" step="0.1" name="lower_abdomen" required></div>
-              <div class="cp-field"><span>Hip</span><input class="cp-input" type="number" step="0.1" name="hip" required></div>
-              <div class="cp-field"><span>Thigh</span><input class="cp-input" type="number" step="0.1" name="thigh" required></div>
-            </div>
-
-            <button class="cp-save" type="submit">Save this week’s measurements</button>
-          </form>
-          {% endif %}
-
-        {% elif week_view.is_past %}
-          {% if week_view.measurement %}
-          <div class="cp-measure-saved-simple">
-            <strong>Saved · {{ week_view.measurement.measured_on.strftime("%d %b %Y") }}</strong>
-            <div class="cp-measure-saved-values">
-              {% if week_view.measurement.upper_arm_cm is not none %}<span>Upper arm {{ week_view.measurement.upper_arm_cm }} cm</span>{% endif %}
-              {% if week_view.measurement.chest_cm is not none %}<span>Chest {{ week_view.measurement.chest_cm }} cm</span>{% endif %}
-              {% if week_view.measurement.waist_cm is not none %}<span>Waist {{ week_view.measurement.waist_cm }} cm</span>{% endif %}
-              {% if week_view.measurement.lower_abdomen_cm is not none %}<span>Lower abdomen {{ week_view.measurement.lower_abdomen_cm }} cm</span>{% endif %}
-              {% if week_view.measurement.hip_cm is not none %}<span>Hip {{ week_view.measurement.hip_cm }} cm</span>{% endif %}
-              {% if week_view.measurement.thigh_cm is not none %}<span>Thigh {{ week_view.measurement.thigh_cm }} cm</span>{% endif %}
-            </div>
-          </div>
-          {% else %}
-          <div class="cp-section-empty">No body measurements were entered for this week.</div>
-          {% endif %}
-        {% else %}
-        <div class="cp-section-empty">Measurements will open when this coaching week begins.</div>
-        {% endif %}
+            {% set ns.last_week = row.week_number %}
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
+      {% else %}
+      <div class="cp-section-empty">Your coaching data will appear here once tracking begins.</div>
+      {% endif %}
     </section>
 
-    <aside class="cp-side">
-      <section class="cp-card cp-call-card">
-        <p class="cp-kicker">Next call</p>
-        <h2>Your next coaching call</h2>
-        {% if next_call and next_call.local_start_time %}
-        <div class="cp-call-row">
-          <div class="cp-call-when">
-            <strong>{{ next_call.local_start_time.strftime("%d %b %Y") }}</strong>
-            <span>{{ next_call.local_start_time.strftime("%I:%M %p") }} · Coaching call</span>
-          </div>
-          {% if next_call.reschedule_url %}<a class="cp-call-link" href="{{ next_call.reschedule_url }}" target="_blank" rel="noopener">Reschedule ↗</a>{% endif %}
-        </div>
-        {% else %}
-        <div class="cp-section-empty">Your next coaching call has not been scheduled yet. Sushma will confirm it with you.</div>
-        {% endif %}
-      </section>
 
-    </aside>
   </div>
 </section>
 
