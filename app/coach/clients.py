@@ -30,6 +30,13 @@ from app.services.macro_tracking_service import (
     save_macro_settings,
 )
 
+from app.services.action_identity_service import (
+    ensure_action_identity_schema,
+    new_custom_action_key,
+    normalize_action_name,
+    set_action_key,
+)
+
 from app.services.client_portal_service import (
     ensure_portal_access,
     get_portal_access,
@@ -506,6 +513,8 @@ ACTION_LIBRARY_BY_KEY = {
     for item in level["items"]
 }
 
+ensure_action_identity_schema(ACTION_LIBRARY_BY_KEY)
+
 
 def _safe_target_count(value: str | None) -> int | None:
     value = (value or "").strip()
@@ -557,6 +566,7 @@ def _selected_library_assignments(
         assignments.append(
             {
                 "name": library_action["name"],
+                "action_key": action_key,
                 "target_count": count,
                 "target_unit": unit,
             }
@@ -570,6 +580,7 @@ def _custom_action_assignments(
     names: list[str],
     target_counts: list[str],
     target_units: list[str],
+    action_keys: list[str] | None = None,
 ):
     assignments = []
     for index, raw_name in enumerate(names):
@@ -591,9 +602,15 @@ def _custom_action_assignments(
         if unit not in {"days", "sessions", "times"}:
             unit = "days"
 
+        supplied_key = (
+            action_keys[index].strip()
+            if action_keys and index < len(action_keys) and action_keys[index].strip()
+            else ""
+        )
         assignments.append(
             {
                 "name": name,
+                "action_key": supplied_key or new_custom_action_key(),
                 "target_count": count,
                 "target_unit": unit,
             }
@@ -651,6 +668,32 @@ def _action_week_bounds(client_id: int, on_date: date):
     return week_start, week_end
 
 
+
+
+def _add_action_with_identity(
+    *,
+    client_id: int,
+    assignment: dict,
+    start_date,
+    end_date,
+    checkin_id=None,
+):
+    ClientService.add_action(
+        client_id=client_id,
+        action_name=assignment["name"],
+        target_count=assignment["target_count"],
+        target_unit=assignment["target_unit"],
+        start_date=start_date,
+        end_date=end_date,
+        checkin_id=checkin_id,
+    )
+    set_action_key(
+        client_id=client_id,
+        action_name=assignment["name"],
+        start_date=start_date,
+        end_date=end_date,
+        action_key=assignment["action_key"],
+    )
 
 
 def _build_synamate_booking_url(
@@ -1027,14 +1070,18 @@ def client_profile(
             latest_by_name[name] = row
 
         for name, action in latest_by_name.items():
+            stable_key = (action.get("action_key") or "").strip()
             default = {
                 "name": name,
+                "action_key": stable_key,
                 "target_count": action.get("target_count"),
                 "target_unit": action.get("target_unit") or "days",
             }
 
-            library_key = library_key_by_name.get(
-                _normalize_action_name(name)
+            library_key = (
+                stable_key
+                if stable_key in ACTION_LIBRARY_BY_KEY
+                else library_key_by_name.get(_normalize_action_name(name))
             )
 
             if library_key:
@@ -1237,6 +1284,7 @@ def save_client_intake_route(
     action_target_counts: list[str] = Form(default=[]),
     action_target_units: list[str] = Form(default=[]),
     custom_action_names: list[str] = Form(default=[]),
+    custom_action_keys: list[str] = Form(default=[]),
     custom_target_counts: list[str] = Form(default=[]),
     custom_target_units: list[str] = Form(default=[]),
     macro_tracking_enabled: str = Form(""),
@@ -1301,17 +1349,16 @@ def save_client_intake_route(
             custom_action_names,
             custom_target_counts,
             custom_target_units,
+            custom_action_keys,
         )
     )
 
     for assignment in assignments:
         if assignment["name"] in added_names:
             continue
-        ClientService.add_action(
+        _add_action_with_identity(
             client_id=client_id,
-            action_name=assignment["name"],
-            target_count=assignment["target_count"],
-            target_unit=assignment["target_unit"],
+            assignment=assignment,
             start_date=parsed_week_start,
             end_date=first_week_end,
         )
@@ -1394,6 +1441,7 @@ def add_client_action(
         )
 
     action_name = None
+    action_identity_key = None
     target_count = None
     target_unit = None
 
@@ -1401,6 +1449,7 @@ def add_client_action(
         library_action = ACTION_LIBRARY_BY_KEY.get(action_key)
         if library_action:
             action_name = library_action["name"]
+            action_identity_key = action_key
             target_count = _safe_target_count(target_count)
             target_unit = (
                 target_unit.strip()
@@ -1410,6 +1459,7 @@ def add_client_action(
 
     if not action_name and custom_action_name.strip():
         action_name = custom_action_name.strip()
+        action_identity_key = new_custom_action_key()
         target_count = (
             int(custom_target_count)
             if custom_target_count.strip()
@@ -1428,11 +1478,14 @@ def add_client_action(
                 client_id,
                 date.today(),
             )
-            ClientService.add_action(
+            _add_action_with_identity(
                 client_id=client_id,
-                action_name=action_name,
-                target_count=target_count,
-                target_unit=target_unit,
+                assignment={
+                    "name": action_name,
+                    "action_key": action_identity_key,
+                    "target_count": target_count,
+                    "target_unit": target_unit,
+                },
                 start_date=start_date,
                 end_date=end_date,
             )
@@ -1524,6 +1577,7 @@ def add_client_checkin(
     action_target_counts: list[str] = Form(default=[]),
     action_target_units: list[str] = Form(default=[]),
     custom_action_names: list[str] = Form(default=[]),
+    custom_action_keys: list[str] = Form(default=[]),
     custom_target_counts: list[str] = Form(default=[]),
     custom_target_units: list[str] = Form(default=[]),
 ):
@@ -1574,17 +1628,16 @@ def add_client_checkin(
             custom_action_names,
             custom_target_counts,
             custom_target_units,
+            custom_action_keys,
         )
     )
 
     for assignment in assignments:
         if assignment["name"] in existing_action_names:
             continue
-        ClientService.add_action(
+        _add_action_with_identity(
             client_id=client_id,
-            action_name=assignment["name"],
-            target_count=assignment["target_count"],
-            target_unit=assignment["target_unit"],
+            assignment=assignment,
             start_date=action_start_date,
             end_date=action_end_date,
             checkin_id=checkin_id,

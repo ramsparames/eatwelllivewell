@@ -554,6 +554,9 @@
           {% for custom_index in range(custom_action_slot_count) %}
           {% set carried_custom = carry_forward_custom_actions[custom_index] if custom_index < carry_forward_custom_actions|length else none %}
           <div class="nw-custom-row {% if carried_custom %}carried-forward{% endif %}">
+            <input type="hidden"
+                   name="custom_action_keys"
+                   value="{{ carried_custom['action_key'] if carried_custom and carried_custom.get('action_key') else '' }}">
             <input class="nw-input"
                    name="custom_action_names"
                    value="{{ carried_custom['name'] if carried_custom else '' }}"
@@ -898,6 +901,9 @@
           {% for custom_index in range(custom_action_slot_count) %}
           {% set carried_custom = carry_forward_custom_actions[custom_index] if custom_index < carry_forward_custom_actions|length else none %}
           <div class="nw-custom-row {% if carried_custom %}carried-forward{% endif %}">
+            <input type="hidden"
+                   name="custom_action_keys"
+                   value="{{ carried_custom['action_key'] if carried_custom and carried_custom.get('action_key') else '' }}">
             <input class="nw-input"
                    name="custom_action_names"
                    value="{{ carried_custom['name'] if carried_custom else '' }}"

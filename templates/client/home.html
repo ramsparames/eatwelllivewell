@@ -553,7 +553,7 @@
                     {% elif row.editable %}
                       <input type="checkbox"
                              name="completed_action_ids"
-                             value="{{ action.id }}"
+                             value="{{ cell.action_id }}"
                              form="day-form-{{ row.date.isoformat() }}"
                              {% if cell.completed is true %}checked{% endif %}>
                     {% elif cell.completed is true %}
