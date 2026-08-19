@@ -993,6 +993,40 @@ def get_coach_week_review(
             """, (client_id, week_end, week_start))
             action_plan_rows = cursor.fetchall()
 
+            # If no action set overlaps this coaching week, carry forward
+            # the client's most recently assigned ACTIVE action set.
+            #
+            # NourisHer actions are coaching commitments: they should remain
+            # available until Sushma replaces them with a newer weekly set.
+            # This also protects against old/stale end_date values.
+            if not action_plan_rows:
+                cursor.execute("""
+                    SELECT MAX(start_date) AS latest_start
+                    FROM client_action_plans
+                    WHERE client_id = %s
+                      AND status = 'active'
+                      AND start_date <= %s
+                """, (client_id, week_end))
+                latest = cursor.fetchone()
+                latest_start = latest.get("latest_start") if latest else None
+
+                if latest_start is not None:
+                    cursor.execute("""
+                        SELECT
+                            p.id,
+                            p.action_name,
+                            p.target_count,
+                            p.target_unit,
+                            p.start_date,
+                            p.end_date
+                        FROM client_action_plans p
+                        WHERE p.client_id = %s
+                          AND p.status = 'active'
+                          AND p.start_date = %s
+                        ORDER BY p.id
+                    """, (client_id, latest_start))
+                    action_plan_rows = cursor.fetchall()
+
             cursor.execute("""
                 SELECT
                     l.action_id,
@@ -1044,17 +1078,14 @@ def get_coach_week_review(
         # with the client's actual coaching-week boundaries. If the action
         # overlaps this coaching week at all, treat it as eligible for the
         # full 7-day coaching week.
-        action_overlaps_week = (
-            item["start_date"] <= week_end
-            and (
-                item["end_date"] is None
-                or item["end_date"] >= week_start
-            )
-        )
+        # action_plan_rows already represents the action set that applies to
+        # this coaching week (direct overlap or carried-forward latest set).
+        # Therefore every selected action is eligible across all 7 days.
+        action_applies_to_week = True
 
         for day in days:
             d = day["date"]
-            eligible = action_overlaps_week
+            eligible = action_applies_to_week
             completed = None
 
             if eligible:

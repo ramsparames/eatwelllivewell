@@ -593,6 +593,16 @@ def _custom_action_assignments(
     return assignments
 
 
+def _normalize_action_name(value: str | None) -> str:
+    return " ".join((value or "").strip().lower().split())
+
+
+ACTION_LIBRARY_KEY_BY_NORMALIZED_NAME = {
+    _normalize_action_name(item["name"]): key
+    for key, item in ACTION_LIBRARY_BY_KEY.items()
+}
+
+
 CALL_TIME_SLOTS = [
     {
         "value": f"{hour:02d}:{minute:02d}",
@@ -969,6 +979,59 @@ def client_profile(
         on_date=date.today(),
     )
 
+    # Preselect every currently ACTIVE commitment for next week.
+    #
+    # Actions can be created at different times (especially custom actions),
+    # so they must not be grouped by one shared start_date/checkin.
+    # ClientService.actions() returns newest rows first. Keep only the newest
+    # active record for each action name, then classify it as library/custom.
+    carry_forward_action_defaults = {}
+    carry_forward_custom_actions = []
+
+    if coach_week_is_current:
+        library_key_by_name = ACTION_LIBRARY_KEY_BY_NORMALIZED_NAME
+
+        active_rows = ClientService.actions(
+            client_id,
+            status="active",
+        ) or []
+
+        latest_by_name = {}
+
+        for row in active_rows:
+            name = (row.get("action_name") or "").strip()
+            if not name:
+                continue
+
+            # Rows are returned newest first, so the first occurrence wins.
+            if name in latest_by_name:
+                continue
+
+            latest_by_name[name] = row
+
+        for name, action in latest_by_name.items():
+            default = {
+                "name": name,
+                "target_count": action.get("target_count"),
+                "target_unit": action.get("target_unit") or "days",
+            }
+
+            library_key = library_key_by_name.get(
+                _normalize_action_name(name)
+            )
+
+            if library_key:
+                carry_forward_action_defaults[library_key] = default
+            else:
+                carry_forward_custom_actions.append(default)
+
+    # Keep enough custom rows for all carried-forward custom actions plus
+    # a few blank rows for additions during the coaching call.
+    custom_action_slot_count = max(
+        5,
+        len(carry_forward_custom_actions) + 3,
+    )
+
     client_resources = get_client_resources(client_id)
     available_resources = list_resources()
     client_timeline = build_client_timeline(profile["client"])
@@ -1019,6 +1082,9 @@ def client_profile(
             "next_week_action_names": {
                 row.get("action_name") for row in next_week_actions
             },
+            "carry_forward_action_defaults": carry_forward_action_defaults,
+            "carry_forward_custom_actions": carry_forward_custom_actions,
+            "custom_action_slot_count": custom_action_slot_count,
             **profile,
         },
     )

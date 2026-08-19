@@ -284,6 +284,170 @@
     white-space:normal!important;
   }
 }
+
+/* Density + readability pass */
+.nw{width:min(1240px,calc(100% - 28px))!important;margin:18px auto 36px!important}
+.nw-panel,.nw-card{border-radius:16px!important}
+.nw-pad{padding:16px!important}
+.nw-heading{margin-bottom:10px!important}
+.nw-heading h2{font-size:21px!important;line-height:1.2!important}
+.nw-heading p,.nw-helper,.nw-sub,.nw-muted{font-size:11px!important;line-height:1.45!important}
+.nw-kicker,.nw-label{font-size:10px!important}
+.nw-input,.nw-select,.nw-textarea{font-size:11px!important;padding:9px 10px!important}
+.nw-btn{font-size:11px!important;padding:9px 12px!important}
+.nw-tabs{gap:6px!important;margin-bottom:12px!important}
+.nw-tab{padding:9px 12px!important;font-size:10px!important}
+.nw-stack,.nw-review{gap:12px!important}
+.nw-goal,.nw-prep-stat,.nw-prep-focus-box,.nw-summary-box,.nw-res-card{padding:10px!important}
+.nw-prep-stat span,.nw-prep-focus-box h3,.nw-summary-box strong,.nw-res-meta,.nw-res-card p{font-size:9px!important}
+.nw-prep-stat strong{font-size:18px!important}
+.nw-table{font-size:10px!important}
+.nw-table th,.nw-table td{padding:8px 9px!important}
+.nw-days{gap:8px!important}
+.nw-day{padding:10px!important}
+.nw-day strong{font-size:11px!important}
+.nw-day small,.nw-day-data,.nw-day-note{font-size:9px!important}
+.nw-week-banner{padding:12px 14px!important;margin-bottom:10px!important}
+.nw-week-banner strong{font-size:15px!important}
+.nw-week-banner span{font-size:9px!important}
+.nw-week-stat b{font-size:18px!important}
+.nw-excel-wrap{max-height:72vh!important}
+.nw-excel{font-size:11px!important}
+.nw-excel th,.nw-excel td{padding:9px 10px!important}
+.nw-excel thead th{font-size:9px!important}
+.nw-action-head small{font-size:8px!important}
+.nw-note-cell{font-size:10px!important}
+.nw-timeline-item{padding:10px 0!important}
+.nw-timeline-date{font-size:10px!important}
+.nw-timeline-copy strong{font-size:12px!important}
+.nw-timeline-copy p{font-size:10px!important}
+.nw-grid-toolbar{margin-bottom:8px!important}
+.nw-grid-toolbar h2{font-size:21px!important}
+.nw-grid-toolbar p{font-size:10px!important}
+.nw-grid-filter{font-size:9px!important;padding:7px 9px!important}
+@media(max-width:900px){
+  .nw{width:min(100% - 18px,1240px)!important;margin-top:10px!important}
+  .nw-pad{padding:13px!important}
+}
+
+/* Typography consistency pass — coach workspace */
+.nw{
+  font-size:13px!important;
+}
+
+.nw-kicker,
+.nw-label,
+.nw-helper,
+.nw-sub,
+.nw-muted,
+.nw-heading p,
+.nw-grid-toolbar p,
+.nw-week-banner span,
+.nw-day small,
+.nw-day-data,
+.nw-day-note,
+.nw-prep-stat span,
+.nw-prep-focus-box h3,
+.nw-summary-box strong,
+.nw-res-meta,
+.nw-res-card p,
+.nw-timeline-date,
+.nw-timeline-copy p,
+.nw-action-head small,
+.nw-note-cell,
+.nw-measure-chip,
+.nw-week-measure-inline span,
+.nw-cell-state,
+.nw-grid-filter{
+  font-size:11px!important;
+  line-height:1.45!important;
+}
+
+.nw-heading h2,
+.nw-grid-toolbar h2{
+  font-size:22px!important;
+}
+
+.nw-input,
+.nw-select,
+.nw-textarea,
+.nw-btn,
+.nw-tab{
+  font-size:12px!important;
+}
+
+.nw-table,
+.nw-excel{
+  font-size:12px!important;
+}
+
+.nw-table th,
+.nw-excel thead th{
+  font-size:11px!important;
+  line-height:1.3!important;
+}
+
+.nw-table td,
+.nw-excel td{
+  font-size:12px!important;
+  line-height:1.4!important;
+}
+
+.nw-action-head{
+  min-width:135px!important;
+  max-width:180px!important;
+  font-size:11px!important;
+  line-height:1.3!important;
+}
+
+.nw-action-cell .yes,
+.nw-action-cell .no{
+  font-size:15px!important;
+}
+
+.nw-week-measure-inline strong,
+.nw-measure-week-row strong{
+  font-size:12px!important;
+}
+
+.nw-prep-stat strong,
+.nw-week-stat b{
+  font-size:20px!important;
+}
+
+.nw-timeline-copy strong{
+  font-size:13px!important;
+}
+
+.nw-res-card h3,
+.nw-day strong{
+  font-size:12px!important;
+}
+
+.nw-summary-ai-head h3{
+  font-size:17px!important;
+}
+
+.nw-ai-badge,
+.nw-res-tag,
+.nw-measure-status{
+  font-size:10px!important;
+}
+
+/* Prefer scrolling instead of shrinking dense grids */
+.nw-excel{
+  min-width:1400px!important;
+}
+
+.nw-action-row.carried-forward,
+.nw-custom-row.carried-forward{
+  border-color:#ceb8d8!important;
+  background:#fbf7fd!important;
+}
+.nw-action-row.carried-forward .nw-action-choice small{
+  color:var(--coach-purple)!important;
+  font-weight:700!important;
+}
 </style>
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
@@ -373,26 +537,32 @@
         <summary>+ Add custom actions</summary>
         <p class="nw-helper" style="margin:8px 0">Add as many custom actions as needed. Leave unused rows blank.</p>
         <div class="nw-custom-list">
-          {% for custom_index in range(1,6) %}
-          <div class="nw-custom-row">
+          {% for custom_index in range(custom_action_slot_count) %}
+          {% set carried_custom = carry_forward_custom_actions[custom_index] if custom_index < carry_forward_custom_actions|length else none %}
+          <div class="nw-custom-row {% if carried_custom %}carried-forward{% endif %}">
             <input class="nw-input"
                    name="custom_action_names"
-                   placeholder="Custom action {{ custom_index }}">
+                   value="{{ carried_custom['name'] if carried_custom else '' }}"
+                   placeholder="Custom action {{ custom_index + 1 }}">
             <select class="nw-select" name="custom_target_counts">
               <option value="">Target</option>
               {% for n in range(1,8) %}
-              <option value="{{ n }}">{{ n }}</option>
+              <option value="{{ n }}"
+                {% if carried_custom and carried_custom["target_count"] == n %}selected{% endif %}>
+                {{ n }}
+              </option>
               {% endfor %}
             </select>
             <select class="nw-select" name="custom_target_units">
-              <option value="days">days</option>
-              <option value="sessions">sessions</option>
-              <option value="times">times</option>
+              {% set custom_unit = carried_custom["target_unit"] if carried_custom else "days" %}
+              <option value="days" {% if custom_unit=="days" %}selected{% endif %}>days</option>
+              <option value="sessions" {% if custom_unit=="sessions" %}selected{% endif %}>sessions</option>
+              <option value="times" {% if custom_unit=="times" %}selected{% endif %}>times</option>
             </select>
             <button
               class="nw-remove-custom"
               type="reset"
-              title="Clear this row"
+              title="Remove this action"
               onclick="
                 var r=this.closest('.nw-custom-row');
                 if(r){
@@ -401,6 +571,7 @@
                   if(i)i.value='';
                   if(s[0])s[0].selectedIndex=0;
                   if(s[1])s[1].selectedIndex=0;
+                  r.classList.remove('carried-forward');
                 }
                 return false;
               "
@@ -645,7 +816,7 @@
 
         <div class="nw-next"><h3>Set Week {{ next_week_number }} action plan</h3><p>{{ next_week_start.strftime("%d %b %Y") }} – {{ next_week_end.strftime("%d %b %Y") }} · These actions start next week, not the week being reviewed.</p>
 
-          <p class="nw-helper nw-action-help">Choose the target frequency for each action you want, then tick it to assign it for Week {{ next_week_number }}.</p>
+          <p class="nw-helper nw-action-help"><strong>Current actions are selected by default.</strong> Leave them checked to carry them into Week {{ next_week_number }}, uncheck anything you want to stop, adjust the target if needed, and add any new actions.</p>
           <div class="nw-library">
             {% for category in action_library %}
             <details class="nw-library-group">
@@ -657,24 +828,43 @@
                   <div class="nw-library-items">
                     {% for action in level["items"] %}
                     {% set already=action["name"] in next_week_action_names %}
-                    <div class="nw-action-row {% if already %}disabled{% endif %}">
+                    {% set carried=carry_forward_action_defaults.get(action["key"]) %}
+                    <div class="nw-action-row {% if already %}disabled{% elif carried %}carried-forward{% endif %}">
                       <label class="nw-action-choice">
-                        <input type="checkbox" name="action_keys" value="{{ action["key"] }}" {% if already %}disabled{% endif %}>
+                        <input
+                          type="checkbox"
+                          name="action_keys"
+                          value="{{ action["key"] }}"
+                          {% if carried and not already %}checked{% endif %}
+                          {% if already %}disabled{% endif %}>
                         <input type="hidden" name="action_all_keys" value="{{ action["key"] }}">
                         <span>
                           <strong>{{ action["name"] }}</strong>
-                          <small>{{ action["habit"] }}{% if already %} · already assigned{% endif %}</small>
+                          <small>
+                            {{ action["habit"] }}
+                            {% if already %}
+                              · already assigned
+                            {% elif carried %}
+                              · carrying forward
+                            {% endif %}
+                          </small>
                         </span>
                       </label>
                       <div class="nw-action-frequency">
                         <select class="nw-select nw-frequency-count" name="action_target_counts">
                           <option value="">Target</option>
-                          {% for n in range(1,8) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+                          {% for n in range(1,8) %}
+                          <option value="{{ n }}"
+                            {% if carried and carried["target_count"] == n %}selected{% endif %}>
+                            {{ n }}
+                          </option>
+                          {% endfor %}
                         </select>
                         <select class="nw-select nw-frequency-unit" name="action_target_units">
-                          <option value="days" {% if action["target_unit"]=="days" %}selected{% endif %}>days</option>
-                          <option value="sessions" {% if action["target_unit"]=="sessions" %}selected{% endif %}>sessions</option>
-                          <option value="times" {% if action["target_unit"]=="times" %}selected{% endif %}>times</option>
+                          {% set selected_unit = carried["target_unit"] if carried else action["target_unit"] %}
+                          <option value="days" {% if selected_unit=="days" %}selected{% endif %}>days</option>
+                          <option value="sessions" {% if selected_unit=="sessions" %}selected{% endif %}>sessions</option>
+                          <option value="times" {% if selected_unit=="times" %}selected{% endif %}>times</option>
                         </select>
                       </div>
                     </div>
@@ -688,29 +878,32 @@
           </div>
 
           <details class="nw-custom">
-        <summary>+ Add custom actions for next week</summary>
-        <p class="nw-helper" style="margin:8px 0">Add as many custom actions as needed. Leave unused rows blank.</p>
+        <summary>Custom actions for next week{% if carry_forward_custom_actions %} · {{ carry_forward_custom_actions|length }} carried forward{% endif %}</summary>
+        <p class="nw-helper" style="margin:8px 0">Your active custom actions are prefilled below with the same target. Keep them, edit them, remove them with ×, or add new ones.</p>
         <div class="nw-custom-list">
-          {% for custom_index in range(1,6) %}
-          <div class="nw-custom-row">
+          {% for custom_index in range(custom_action_slot_count) %}
+          {% set carried_custom = carry_forward_custom_actions[custom_index] if custom_index < carry_forward_custom_actions|length else none %}
+          <div class="nw-custom-row {% if carried_custom %}carried-forward{% endif %}">
             <input class="nw-input"
                    name="custom_action_names"
-                   placeholder="Custom action {{ custom_index }}">
+                   value="{{ carried_custom['name'] if carried_custom else '' }}"
+                   placeholder="Custom action {{ custom_index + 1 }}">
             <select class="nw-select" name="custom_target_counts">
               <option value="">Target</option>
               {% for n in range(1,8) %}
-              <option value="{{ n }}">{{ n }}</option>
+              <option value="{{ n }}" {% if carried_custom and carried_custom["target_count"] == n %}selected{% endif %}>{{ n }}</option>
               {% endfor %}
             </select>
             <select class="nw-select" name="custom_target_units">
-              <option value="days">days</option>
-              <option value="sessions">sessions</option>
-              <option value="times">times</option>
+              {% set custom_unit = carried_custom["target_unit"] if carried_custom else "days" %}
+              <option value="days" {% if custom_unit=="days" %}selected{% endif %}>days</option>
+              <option value="sessions" {% if custom_unit=="sessions" %}selected{% endif %}>sessions</option>
+              <option value="times" {% if custom_unit=="times" %}selected{% endif %}>times</option>
             </select>
             <button
               class="nw-remove-custom"
               type="reset"
-              title="Clear this row"
+              title="Remove this action"
               onclick="
                 var r=this.closest('.nw-custom-row');
                 if(r){
@@ -719,6 +912,7 @@
                   if(i)i.value='';
                   if(s[0])s[0].selectedIndex=0;
                   if(s[1])s[1].selectedIndex=0;
+                  r.classList.remove('carried-forward');
                 }
                 return false;
               "
