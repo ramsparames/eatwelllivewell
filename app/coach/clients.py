@@ -37,6 +37,15 @@ from app.services.action_identity_service import (
     set_action_key,
 )
 
+from app.services.workout_service import (
+    archive_workout,
+    assign_workout,
+    create_workout,
+    create_workout_tables,
+    get_client_workouts,
+    list_workouts,
+)
+
 from app.services.client_portal_service import (
     ensure_portal_access,
     get_portal_access,
@@ -62,6 +71,7 @@ templates = Jinja2Templates(
 )
 
 create_phase_a_tables()
+create_workout_tables()
 create_macro_tracking_tables()
 
 
@@ -1098,6 +1108,8 @@ def client_profile(
 
     client_resources = get_client_resources(client_id)
     available_resources = list_resources()
+    client_workouts = get_client_workouts(client_id)
+    available_workouts = list_workouts()
     client_timeline = build_client_timeline(profile["client"])
     coach_summary = build_coach_summary(call_prep, progress_summary)
 
@@ -1138,6 +1150,8 @@ def client_profile(
             "client_timeline": client_timeline,
             "client_resources": client_resources,
             "available_resources": available_resources,
+            "client_workouts": client_workouts,
+            "available_workouts": available_workouts,
             "resource_categories": RESOURCE_CATEGORIES,
             "resource_types": RESOURCE_TYPES,
             "next_synced_call": next_synced_call,
@@ -1171,9 +1185,110 @@ def resource_library_page(request: Request):
             "request": request,
             "active_nav": "clients",
             "resources": list_resources(active_only=False),
+            "workouts": list_workouts(active_only=False),
+            "clients": ClientService.dashboard_clients(),
             "resource_types": RESOURCE_TYPES,
             "resource_categories": RESOURCE_CATEGORIES,
         },
+    )
+
+
+@router.post("/dashboard/workouts")
+def add_workout(
+    request: Request,
+    title: str = Form(...),
+    description: str = Form(""),
+    category: str = Form("Strength"),
+    duration_minutes: str = Form(""),
+    equipment: str = Form(""),
+    exercise_titles: list[str] = Form(default=[]),
+    exercise_video_urls: list[str] = Form(default=[]),
+    exercise_sets: list[str] = Form(default=[]),
+    exercise_reps: list[str] = Form(default=[]),
+    exercise_rest_seconds: list[str] = Form(default=[]),
+    exercise_instructions: list[str] = Form(default=[]),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    exercises = []
+    for i, name in enumerate(exercise_titles):
+        name = name.strip()
+        if not name:
+            continue
+        exercises.append({
+            "title": name,
+            "video_url": exercise_video_urls[i] if i < len(exercise_video_urls) else "",
+            "sets": exercise_sets[i] if i < len(exercise_sets) else "3",
+            "reps_text": exercise_reps[i] if i < len(exercise_reps) else "",
+            "rest_seconds": exercise_rest_seconds[i] if i < len(exercise_rest_seconds) else "",
+            "instructions": exercise_instructions[i] if i < len(exercise_instructions) else "",
+        })
+
+    if not exercises:
+        raise HTTPException(status_code=400, detail="Add at least one exercise")
+
+    create_workout(
+        title=title.strip(),
+        description=description.strip() or None,
+        category=category.strip() or "Strength",
+        duration_minutes=int(duration_minutes) if duration_minutes.strip() else None,
+        equipment=equipment.strip() or None,
+        exercises=exercises,
+    )
+    return RedirectResponse("/dashboard/resources?workout_added=1", status_code=303)
+
+
+@router.post("/dashboard/workouts/{workout_id}/assign")
+def assign_workout_route(
+    request: Request,
+    workout_id: int,
+    client_ids: list[int] = Form(default=[]),
+    due_date: str = Form(""),
+    coach_note: str = Form(""),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    if not client_ids:
+        return RedirectResponse("/dashboard/resources?assign_error=clients", status_code=303)
+
+    parsed_due = date.fromisoformat(due_date) if due_date.strip() else None
+    assign_workout(
+        workout_id=workout_id,
+        client_ids=client_ids,
+        due_date=parsed_due,
+        coach_note=coach_note.strip() or None,
+    )
+    return RedirectResponse("/dashboard/resources?workout_assigned=1", status_code=303)
+
+
+@router.post("/dashboard/workouts/{workout_id}/archive")
+def archive_workout_route(request: Request, workout_id: int):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    archive_workout(workout_id)
+    return RedirectResponse("/dashboard/resources", status_code=303)
+
+
+@router.post("/dashboard/clients/{client_id}/workouts")
+def assign_client_workout_route(
+    request: Request,
+    client_id: int,
+    workout_id: int = Form(...),
+    due_date: str = Form(""),
+    coach_note: str = Form(""),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    assign_workout(
+        workout_id=workout_id,
+        client_ids=[client_id],
+        due_date=date.fromisoformat(due_date) if due_date.strip() else None,
+        coach_note=coach_note.strip() or None,
+    )
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=resources",
+        status_code=303,
     )
 
 

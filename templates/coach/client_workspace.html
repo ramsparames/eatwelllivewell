@@ -448,6 +448,8 @@
   color:var(--coach-purple)!important;
   font-weight:700!important;
 }
+
+.nw-workout-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.nw-workout-card{padding:14px;border:1px solid #e6dce9;border-radius:13px;background:#fff}.nw-workout-card h3{margin:7px 0 4px;font-size:15px}.nw-workout-meta{font-size:11px;color:var(--coach-muted)}.nw-workout-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f1edf3;font-size:10px;font-weight:850}.nw-workout-status.completed{background:#eaf5ef;color:#31704c}.nw-workout-status.in_progress{background:#fff4df;color:#8b5f17}.nw-workout-log{margin-top:9px;font-size:11px;line-height:1.45}.nw-workout-assign{display:grid;grid-template-columns:1.1fr .7fr 1.4fr auto;gap:8px;align-items:end}@media(max-width:850px){.nw-workout-grid{grid-template-columns:1fr}.nw-workout-assign{grid-template-columns:1fr}}
 </style>
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
@@ -1172,6 +1174,22 @@
           <a class="nw-library-link" href="/dashboard/resources">Open Resource Library →</a>
         </div>
 
+        {% if client_workouts %}
+        <div class="nw-workout-grid" style="margin-bottom:14px">
+          {% for workout in client_workouts %}
+          <article class="nw-workout-card">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:start">
+              <div><span class="nw-res-tag">Workout</span><h3>{{ workout.title }}</h3></div>
+              <span class="nw-workout-status {{ workout.status }}">{{ workout.status|replace("_"," ")|title }}</span>
+            </div>
+            <div class="nw-workout-meta">{{ workout.exercise_count }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}{% if workout.due_date %} · due {{ workout.due_date.strftime("%d %b") }}{% endif %}</div>
+            {% if workout.coach_note %}<p class="nw-workout-log"><strong>Coach note:</strong> {{ workout.coach_note }}</p>{% endif %}
+            {% if workout.completed_at %}<p class="nw-workout-log"><strong>Completed:</strong> {{ workout.completed_at.strftime("%d %b %Y") }}</p>{% endif %}
+          </article>
+          {% endfor %}
+        </div>
+        {% endif %}
+
         {% if client_resources %}
         <div class="nw-res-grid">
           {% for resource in client_resources %}
@@ -1195,6 +1213,15 @@
 
       <section class="nw-panel nw-pad">
         <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Assign</p><h2>Push something to the client portal</h2><p>Choose from Sushma’s reusable library.</p></div></div>
+
+        {% if available_workouts %}
+        <form class="nw-workout-assign" method="post" action="/dashboard/clients/{{ client.id }}/workouts" style="margin-bottom:16px">
+          <label><span class="nw-label">Workout program</span><select class="nw-select" name="workout_id" required><option value="">Choose workout</option>{% for workout in available_workouts %}<option value="{{ workout.id }}">{{ workout.title }} · {{ workout.exercise_count }} exercises</option>{% endfor %}</select></label>
+          <label><span class="nw-label">Due date</span><input class="nw-input" type="date" name="due_date"></label>
+          <label><span class="nw-label">Note for client</span><input class="nw-input" name="coach_note" placeholder="Complete before our next call"></label>
+          <button class="nw-btn nw-primary" type="submit">Assign workout →</button>
+        </form>
+        {% endif %}
 
         {% if available_resources %}
         <form class="nw-res-assign" method="post" action="/dashboard/clients/{{ client.id }}/resources">

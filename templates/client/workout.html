@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.cw{width:min(920px,calc(100% - 30px));margin:22px auto 50px;color:#29232d;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.cw *{box-sizing:border-box}.cw-back{color:#5b0e91;text-decoration:none;font-size:12px;font-weight:850}.cw-hero{margin-top:10px;padding:23px 25px;border-radius:20px;background:linear-gradient(125deg,#4d0b78,#7924a9);color:#fff}.cw-kicker{margin:0 0 6px;color:#f0d988;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.cw-hero h1{margin:0;font-size:30px}.cw-meta{margin-top:7px;color:rgba(255,255,255,.8);font-size:12px}.cw-note{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.12);font-size:12px}.cw-exercises{display:grid;gap:12px;margin-top:15px}.cw-ex{padding:18px;border:1px solid #e7dfea;border-radius:15px;background:#fff}.cw-ex-head{display:flex;justify-content:space-between;gap:12px;align-items:start}.cw-ex h2{margin:0;font-size:19px}.cw-prescription{margin-top:5px;color:#706875;font-size:12px}.cw-video{display:inline-flex;margin-top:9px;padding:8px 11px;border-radius:9px;background:#f2e9f7;color:#5b0e91;text-decoration:none;font-size:11px;font-weight:850}.cw-instructions{margin:10px 0 0;color:#625b66;font-size:12px;line-height:1.5}.cw-sets{margin-top:14px;border-top:1px solid #eee8f0}.cw-set{display:grid;grid-template-columns:65px 1fr 1fr 90px auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #f1edf2}.cw-set strong{font-size:12px}.cw-input{width:100%;padding:9px;border:1px solid #ded5e2;border-radius:9px;font-size:12px}.cw-check{display:flex;gap:6px;align-items:center;font-size:11px;font-weight:800}.cw-save{padding:9px 11px;border:0;border-radius:9px;background:#5b0e91;color:#fff;font-size:11px;font-weight:850;cursor:pointer}.cw-finish{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:15px;padding:16px;border:1px solid #e4d9e8;border-radius:14px;background:#fcfafc}.cw-finish h3{margin:0;font-size:17px}.cw-status{display:inline-flex;padding:6px 9px;border-radius:999px;background:#f1edf3;font-size:11px;font-weight:850}.cw-status.completed{background:#eaf5ef;color:#31704c}@media(max-width:650px){.cw-set{grid-template-columns:1fr 1fr}.cw-set strong{grid-column:1/-1}.cw-save{grid-column:1/-1}}
+</style>
+<div class="cw">
+  <a class="cw-back" href="/client/{{ access_token }}">← Back to your coaching portal</a>
+  <header class="cw-hero">
+    <p class="cw-kicker">NourisHer workout</p>
+    <h1>{{ workout.title }}</h1>
+    <div class="cw-meta">{{ workout.category }}{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}{% if workout.equipment %} · {{ workout.equipment }}{% endif %}{% if workout.due_date %} · Due {{ workout.due_date.strftime("%d %b %Y") }}{% endif %}</div>
+    {% if workout.description %}<p>{{ workout.description }}</p>{% endif %}
+    {% if workout.coach_note %}<div class="cw-note"><strong>Sushma:</strong> {{ workout.coach_note }}</div>{% endif %}
+  </header>
+
+  <div class="cw-exercises">
+    {% for exercise in workout.exercises %}
+    <section class="cw-ex">
+      <div class="cw-ex-head">
+        <div>
+          <p class="cw-kicker" style="color:#5b0e91">Exercise {{ loop.index }}</p>
+          <h2>{{ exercise.title }}</h2>
+          <div class="cw-prescription">{{ exercise.sets }} sets{% if exercise.reps_text %} · {{ exercise.reps_text }} reps{% endif %}{% if exercise.rest_seconds is not none %} · Rest {{ exercise.rest_seconds }} sec{% endif %}</div>
+        </div>
+        {% if exercise.video_url %}<a class="cw-video" href="{{ exercise.video_url }}" target="_blank" rel="noopener">Watch demo ▶</a>{% endif %}
+      </div>
+      {% if exercise.instructions %}<p class="cw-instructions">{{ exercise.instructions }}</p>{% endif %}
+
+      <div class="cw-sets">
+        {% for setlog in exercise.set_logs %}
+        <form class="cw-set" method="post" action="/client/{{ access_token }}/workouts/{{ workout.id }}/set">
+          <input type="hidden" name="exercise_id" value="{{ exercise.id }}">
+          <input type="hidden" name="set_number" value="{{ setlog.set_number }}">
+          <strong>Set {{ setlog.set_number }}</strong>
+          <input class="cw-input" type="number" step="0.1" min="0" name="weight_kg" placeholder="Weight kg" value="{{ setlog.weight_kg if setlog.weight_kg is not none else '' }}">
+          <input class="cw-input" type="number" min="0" name="reps" placeholder="Reps" value="{{ setlog.reps if setlog.reps is not none else '' }}">
+          <label class="cw-check"><input type="checkbox" name="completed" value="true" {% if setlog.completed %}checked{% endif %}> Done</label>
+          <button class="cw-save" type="submit">Save set</button>
+        </form>
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+  </div>
+
+  <section class="cw-finish">
+    <div>
+      <span class="cw-status {{ workout.status }}">{{ workout.status|replace("_"," ")|title }}</span>
+      <h3 style="margin-top:7px">{% if workout.status == "completed" %}Workout completed ✓{% else %}Finished all the exercises?{% endif %}</h3>
+    </div>
+    {% if workout.status == "completed" %}
+    <form method="post" action="/client/{{ access_token }}/workouts/{{ workout.id }}/reopen"><button class="cw-save" type="submit">Reopen workout</button></form>
+    {% else %}
+    <form method="post" action="/client/{{ access_token }}/workouts/{{ workout.id }}/complete"><button class="cw-save" type="submit">Complete workout ✓</button></form>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

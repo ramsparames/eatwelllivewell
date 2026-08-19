@@ -335,6 +335,8 @@
 
 .cp-sheet .macro-grid-input{width:88px!important;min-width:88px!important}
 .cp-sheet .macro-calories-cell{min-width:90px;font-weight:800}
+
+.cp-workout-section{margin-top:18px}.cp-workout-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cp-workout-card{padding:15px;border:1px solid var(--line);border-radius:13px;background:#fff}.cp-workout-card h3{margin:7px 0 4px;font-size:16px}.cp-workout-card p{font-size:11px;line-height:1.45;color:var(--muted)}.cp-workout-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f1edf3;color:#6c6370;font-size:10px;font-weight:850}.cp-workout-status.completed{background:#eaf5ef;color:#31704c}.cp-workout-status.in_progress{background:#fff4df;color:#8b5f17}.cp-workout-open{display:inline-flex;margin-top:8px;padding:9px 12px;border-radius:9px;background:var(--purple);color:#fff;text-decoration:none;font-size:11px;font-weight:850}.cp-regular-resources{margin-top:14px}@media(max-width:750px){.cp-workout-grid{grid-template-columns:1fr}}
 </style>
 
 
@@ -658,6 +660,49 @@
   });
 })();
 </script>
+
+<section class="cp-card cp-workout-section" style="padding:18px">
+  <div class="cp-title-row">
+    <div><p class="cp-kicker">Resources</p><h2>Your workouts & resources</h2><p class="cp-grid-help">Workouts assigned by Sushma appear here. Open one to watch the exercise demos and record your sets.</p></div>
+  </div>
+
+  {% if assigned_workouts %}
+  <div class="cp-workout-grid">
+    {% for workout in assigned_workouts %}
+    <article class="cp-workout-card">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+        <span class="cp-resource-tag">Workout</span>
+        <span class="cp-workout-status {{ workout.status }}">{{ workout.status|replace("_"," ")|title }}</span>
+      </div>
+      <h3>{{ workout.title }}</h3>
+      <p>{{ workout.exercise_count }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}{% if workout.due_date %} · Due {{ workout.due_date.strftime("%d %b") }}{% endif %}</p>
+      {% if workout.coach_note %}<p><strong>Sushma:</strong> {{ workout.coach_note }}</p>{% endif %}
+      <a class="cp-workout-open" href="/client/{{ access_token }}/workouts/{{ workout.assignment_id }}">{% if workout.status == "completed" %}View workout{% elif workout.status == "in_progress" %}Continue workout{% else %}Start workout{% endif %} →</a>
+    </article>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if assigned_resources %}
+  <div class="cp-resources cp-regular-resources">
+    {% for resource in assigned_resources %}
+    <article class="cp-resource">
+      <div class="cp-resource-top"><span class="cp-resource-tag">{{ resource.resource_type }}</span></div>
+      <h3>{{ resource.title }}</h3>
+      <div class="cp-resource-meta">{{ resource.category }}{% if resource.duration_minutes %} · {{ resource.duration_minutes }} min{% endif %}</div>
+      {% if resource.description %}<p>{{ resource.description }}</p>{% endif %}
+      {% if resource.coach_note %}<p class="cp-resource-note"><strong>Sushma:</strong> {{ resource.coach_note }}</p>{% endif %}
+      <a class="cp-resource-link" href="{{ resource.resource_url }}" target="_blank" rel="noopener">Open resource ↗</a>
+    </article>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if not assigned_workouts and not assigned_resources %}
+  <div class="cp-section-empty">Sushma has not assigned any workouts or resources yet.</div>
+  {% endif %}
+</section>
+
 {% endblock %}
 
 {% if macro_settings.enabled %}

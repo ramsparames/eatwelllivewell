@@ -14,6 +14,15 @@ from app.services.macro_tracking_service import (
     save_macro_log,
 )
 
+from app.services.workout_service import (
+    complete_workout,
+    create_workout_tables,
+    get_client_workout_assignment,
+    get_client_workouts,
+    reopen_workout,
+    save_set_log,
+)
+
 from app.services.phase_a_service import (
     create_phase_a_tables,
     get_client_resources,
@@ -45,6 +54,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 create_portal_tables()
 create_macro_tracking_tables()
+create_workout_tables()
 create_phase_a_tables()
 
 
@@ -187,12 +197,104 @@ def client_home(request: Request, access_token: str):
             "weekly_measurement": get_current_week_measurement(client["id"], on_date=today),
             "next_call": get_next_client_call(client),
             "assigned_resources": get_client_resources(client["id"]),
+            "assigned_workouts": get_client_workouts(client["id"]),
             "saved": request.query_params.get("saved") == "1",
             "measurement_saved":
                 request.query_params.get("measurement_saved") == "1",
             "measurement_error":
                 request.query_params.get("measurement_error"),
         },
+    )
+
+
+@router.get(
+    "/client/{access_token}/workouts/{assignment_id}",
+    response_class=HTMLResponse,
+)
+def client_workout_page(
+    request: Request,
+    access_token: str,
+    assignment_id: int,
+):
+    client = get_client_by_token(access_token)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client access link not found")
+
+    workout = get_client_workout_assignment(assignment_id, client["id"])
+    if not workout:
+        raise HTTPException(status_code=404, detail="Workout not found")
+
+    return templates.TemplateResponse(
+        "client/workout.html",
+        {
+            "request": request,
+            "client": client,
+            "access_token": access_token,
+            "workout": workout,
+            "saved": request.query_params.get("saved") == "1",
+        },
+    )
+
+
+@router.post("/client/{access_token}/workouts/{assignment_id}/set")
+def save_client_workout_set(
+    access_token: str,
+    assignment_id: int,
+    exercise_id: int = Form(...),
+    set_number: int = Form(...),
+    weight_kg: str = Form(""),
+    reps: str = Form(""),
+    completed: bool = Form(False),
+):
+    client = get_client_by_token(access_token)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client access link not found")
+
+    def optional_float(value: str):
+        return float(value) if value.strip() else None
+
+    def optional_int(value: str):
+        return int(value) if value.strip() else None
+
+    ok = save_set_log(
+        assignment_id=assignment_id,
+        client_id=client["id"],
+        exercise_id=exercise_id,
+        set_number=set_number,
+        weight_kg=optional_float(weight_kg),
+        reps=optional_int(reps),
+        completed=completed,
+    )
+    if not ok:
+        raise HTTPException(status_code=404, detail="Workout set not found")
+
+    return RedirectResponse(
+        f"/client/{access_token}/workouts/{assignment_id}?saved=1",
+        status_code=303,
+    )
+
+
+@router.post("/client/{access_token}/workouts/{assignment_id}/complete")
+def complete_client_workout(access_token: str, assignment_id: int):
+    client = get_client_by_token(access_token)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client access link not found")
+    complete_workout(assignment_id, client["id"])
+    return RedirectResponse(
+        f"/client/{access_token}/workouts/{assignment_id}",
+        status_code=303,
+    )
+
+
+@router.post("/client/{access_token}/workouts/{assignment_id}/reopen")
+def reopen_client_workout(access_token: str, assignment_id: int):
+    client = get_client_by_token(access_token)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client access link not found")
+    reopen_workout(assignment_id, client["id"])
+    return RedirectResponse(
+        f"/client/{access_token}/workouts/{assignment_id}",
+        status_code=303,
     )
 
 

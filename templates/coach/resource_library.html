@@ -1,81 +1,391 @@
-{% extends "base.html" %}
+{% extends "coach/base.html" %}
+{% block title %}Workout & Resource Library | NourisHer Coach{% endblock %}
 {% block content %}
 <style>
-.rl{width:min(1180px,calc(100% - 40px));margin:28px auto 54px;color:#28232c;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.rl *{box-sizing:border-box}.rl-hero{display:flex;justify-content:space-between;gap:24px;align-items:end;padding:27px 30px;border-radius:22px;background:linear-gradient(125deg,#4d0b78,#741fa5);color:#fff}
-.rl-kicker{margin:0 0 6px;color:#f0d988;font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.rl-hero h1{margin:0;font-size:32px}.rl-hero p{margin:7px 0 0;color:rgba(255,255,255,.77);font-size:12px}
-.rl-back{color:#fff;text-decoration:none;font-size:11px;font-weight:800}
-.rl-grid{display:grid;grid-template-columns:360px minmax(0,1fr);gap:18px;margin-top:18px}.rl-card{padding:20px;border:1px solid #e8e1eb;border-radius:18px;background:#fff;box-shadow:0 5px 20px rgba(44,25,54,.04)}
-.rl-card h2{margin:0 0 4px;font-size:20px}.rl-help{margin:0 0 15px;color:#77717d;font-size:11px;line-height:1.45}.rl-field{display:block;margin-top:10px}.rl-field span{display:block;margin-bottom:5px;color:#716a75;font-size:10px;font-weight:800}
-.rl-input,.rl-select,.rl-textarea{width:100%;padding:10px 11px;border:1px solid #e4dce7;border-radius:10px;background:#fcfbfc;font:inherit;font-size:11px;outline:none}.rl-textarea{min-height:80px;resize:vertical}.rl-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rl-btn{display:inline-flex;justify-content:center;align-items:center;margin-top:13px;padding:11px 14px;border:0;border-radius:10px;background:#5b0e91;color:#fff;text-decoration:none;font-size:11px;font-weight:850;cursor:pointer}
-.rl-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rl-item{padding:14px;border:1px solid #ece5ef;border-radius:13px;background:#fff}.rl-item.inactive{opacity:.55}.rl-type{display:inline-flex;padding:4px 7px;border-radius:999px;background:#f3e9f8;color:#5b0e91;font-size:8px;font-weight:850;text-transform:uppercase}.rl-item h3{margin:8px 0 3px;font-size:14px}.rl-meta{color:#77717d;font-size:9px}.rl-desc{margin:7px 0;color:#625c65;font-size:10px;line-height:1.45}.rl-actions{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:10px}.rl-link{color:#5b0e91;font-size:10px;font-weight:850;text-decoration:none}.rl-archive{padding:0;border:0;background:transparent;color:#9a879f;font-size:9px;cursor:pointer}
-.rl-empty{padding:28px;text-align:center;color:#77717d;font-size:11px}
-@media(max-width:900px){.rl-grid{grid-template-columns:1fr}.rl-list{grid-template-columns:1fr}}
+.nr,.nr *{box-sizing:border-box}
+.nr{max-width:1180px;margin:0 auto;color:var(--coach-text)}
+.nr-top{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:22px}
+.nr-back{color:var(--coach-purple);text-decoration:none;font-size:14px;font-weight:750}
+.nr-kicker{margin:12px 0 5px;color:var(--coach-purple);font-size:14px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+.nr-top h1{margin:0;font-size:35px;letter-spacing:-.035em}
+.nr-top p{margin:6px 0 0;color:var(--coach-muted);font-size:14.5px;line-height:1.5;max-width:720px}
+.nr-meta{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.nr-chip{padding:8px 11px;border:1px solid var(--coach-border);border-radius:999px;background:#fff;color:var(--coach-muted);font-size:14px}
+.nr-chip strong{color:var(--coach-text)}
+
+.nr-tabs{display:flex;gap:5px;margin-bottom:14px;padding:5px;width:max-content;border:1px solid var(--coach-border);border-radius:12px;background:#fff}
+.nr-tab{padding:8px 13px;border:0;border-radius:8px;background:transparent;color:var(--coach-muted);cursor:pointer;font-size:14.5px;font-weight:750}
+.nr-tab.active{color:#fff;background:var(--coach-purple)}
+.nr-panel{display:none}.nr-panel.active{display:block}
+
+.nr-card{border:1px solid var(--coach-border);border-radius:18px;background:#fff;box-shadow:0 5px 20px rgba(43,26,52,.04)}
+.nr-pad{padding:22px}
+.nr-stack{display:grid;gap:14px}
+.nr-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.nr-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:16px}
+.nr-heading h2{margin:0;font-size:21px}
+.nr-heading p{margin:5px 0 0;color:var(--coach-muted);font-size:14.5px;line-height:1.5}
+.nr-section-title{margin-bottom:14px}
+.nr-section-title span{color:var(--coach-purple);font-size:14px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.nr-section-title h2{margin:4px 0 0;font-size:21px}
+
+.nr-label{display:block;margin-bottom:6px;color:var(--coach-muted);font-size:14px;font-weight:750}
+.nr-input,.nr-select,.nr-textarea{width:100%;border:1px solid var(--coach-border);border-radius:10px;background:#fff;color:var(--coach-text);font:inherit;font-size:14px;outline:none}
+.nr-input,.nr-select{height:42px;padding:0 11px}
+.nr-textarea{min-height:88px;padding:10px 11px;resize:vertical}
+.nr-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.nr-field{display:block;margin-top:11px}
+.nr-helper{margin:5px 0 0;color:var(--coach-muted);font-size:14px;line-height:1.5}
+.nr-btn{min-height:42px;padding:0 16px;border:0;border-radius:10px;cursor:pointer;font-size:14.5px;font-weight:800}
+.nr-primary{color:#fff;background:var(--coach-purple)}
+.nr-soft{color:var(--coach-purple);background:#f6eff9}
+.nr-text-btn{padding:0;border:0;background:transparent;color:var(--coach-purple);cursor:pointer;font-size:13px;font-weight:800}
+
+.nr-workout-builder{display:grid;gap:14px}
+.nr-exercises{display:grid;gap:9px}
+.nr-exercise{padding:14px;border:1px solid #eee7f0;border-radius:13px;background:#fcfafc}
+.nr-exercise-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.nr-exercise-top strong{font-size:14px}
+.nr-exercise-grid{display:grid;grid-template-columns:1.2fr 1.45fr 76px 96px 90px;gap:8px}
+.nr-exercise-note{margin-top:8px}
+.nr-mini-label{display:block;margin-bottom:5px;color:var(--coach-muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.nr-mini{width:100%;height:38px;padding:0 9px;border:1px solid var(--coach-border);border-radius:9px;background:#fff;font:inherit;font-size:13px}
+.nr-mini-text{width:100%;min-height:58px;padding:8px 9px;border:1px solid var(--coach-border);border-radius:9px;background:#fff;font:inherit;font-size:13px;resize:vertical}
+
+.nr-library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.nr-item{padding:16px;border:1px solid #eee7f0;border-radius:14px;background:#fff}
+.nr-item.inactive{opacity:.55}
+.nr-item-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.nr-tag{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f3e9f8;color:var(--coach-purple);font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.04em}
+.nr-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f2f0f3;color:var(--coach-muted);font-size:11px;font-weight:800}
+.nr-item h3{margin:9px 0 4px;font-size:16px}
+.nr-meta-line{color:var(--coach-muted);font-size:13px;line-height:1.45}
+.nr-desc{margin:8px 0 0;color:var(--coach-muted);font-size:13.5px;line-height:1.5}
+.nr-actions{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:12px;padding-top:11px;border-top:1px solid #f0ebf1}
+.nr-link{color:var(--coach-purple);text-decoration:none;font-size:13px;font-weight:800}
+
+.nr-assign{margin-top:13px;padding-top:13px;border-top:1px solid #f0ebf1}
+.nr-assign summary{cursor:pointer;color:var(--coach-purple);font-size:13.5px;font-weight:850}
+.nr-client-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 12px;max-height:170px;overflow:auto;padding:10px;border:1px solid #eee7f0;border-radius:11px;background:#fcfafc}
+.nr-client{display:flex;gap:8px;align-items:center;font-size:13px}
+.nr-client input{accent-color:var(--coach-purple)}
+.nr-empty{padding:28px;border:1px dashed var(--coach-border);border-radius:14px;background:#fcfafc;text-align:center;color:var(--coach-muted);font-size:14px;line-height:1.5}
+
+.nr-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.nr-stat{padding:15px 17px;border:1px solid var(--coach-border);border-radius:15px;background:#fff}
+.nr-stat span{display:block;color:var(--coach-muted);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.nr-stat strong{display:block;margin-top:5px;font-size:22px}
+
+@media(max-width:950px){
+  .nr-grid,.nr-library-grid{grid-template-columns:1fr}
+  .nr-exercise-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:650px){
+  .nr-top{display:block}.nr-meta{justify-content:flex-start;margin-top:12px}
+  .nr-two,.nr-client-list,.nr-summary{grid-template-columns:1fr}
+  .nr-exercise-grid{grid-template-columns:1fr}
+}
 </style>
 
-<div class="rl">
-  <header class="rl-hero">
+<div class="nr">
+  <div class="nr-top">
     <div>
-      <p class="rl-kicker">NourisHer content</p>
+      <a class="nr-back" href="/dashboard/clients">← Back to clients</a>
+      <p class="nr-kicker">NourisHer Resources</p>
       <h1>Workout & Resource Library</h1>
-      <p>Add once, then assign the same workout, video, guide, audio or recipe to any client.</p>
+      <p>Create Sushma’s reusable coaching content once, then assign the right workout, video or guide to the right client.</p>
     </div>
-    <a class="rl-back" href="/dashboard/clients">← Back to clients</a>
-  </header>
+    <div class="nr-meta">
+      <span class="nr-chip"><strong>{{ workouts|length }}</strong> workouts</span>
+      <span class="nr-chip"><strong>{{ resources|length }}</strong> resources</span>
+    </div>
+  </div>
 
-  <div class="rl-grid">
-    <section class="rl-card">
-      <h2>Add a resource</h2>
-      <p class="rl-help">For Phase A, use a stable YouTube, Vimeo, Google Drive, website or hosted-file URL.</p>
+  <div class="nr-tabs">
+    <button class="nr-tab active" type="button" data-nr-tab="workouts">Workout Library</button>
+    <button class="nr-tab" type="button" data-nr-tab="resources">Other Resources</button>
+  </div>
 
-      <form method="post" action="/dashboard/resources">
-        <label class="rl-field"><span>Title</span><input class="rl-input" name="title" placeholder="20-min Lower Body Strength" required></label>
+  <section class="nr-panel active" data-nr-panel="workouts">
+    <div class="nr-stack">
+      <div class="nr-summary">
+        <div class="nr-stat"><span>Workout programs</span><strong>{{ workouts|length }}</strong></div>
+        <div class="nr-stat"><span>Active clients</span><strong>{{ clients|length }}</strong></div>
+        <div class="nr-stat"><span>Purpose</span><strong style="font-size:16px">Prescribe & track</strong></div>
+      </div>
 
-        <div class="rl-two">
-          <label class="rl-field"><span>Type</span>
-            <select class="rl-select" name="resource_type">
-              {% for item in resource_types %}<option value="{{ item }}">{{ item|title }}</option>{% endfor %}
-            </select>
-          </label>
-          <label class="rl-field"><span>Category</span>
-            <select class="rl-select" name="category">
-              {% for item in resource_categories %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
-            </select>
-          </label>
+      <section class="nr-card nr-pad">
+        <div class="nr-heading">
+          <div>
+            <p class="nr-kicker" style="margin-top:0">Create once</p>
+            <h2>Build a workout program</h2>
+            <p>Add the exercises, demo videos and prescription once. You can then push the same workout to selected clients.</p>
+          </div>
         </div>
 
-        <label class="rl-field"><span>Link</span><input class="rl-input" type="url" name="resource_url" placeholder="https://..." required></label>
-        <label class="rl-field"><span>Description</span><textarea class="rl-textarea" name="description" placeholder="Who this is for, equipment needed, key instructions..."></textarea></label>
-        <label class="rl-field"><span>Duration · minutes (optional)</span><input class="rl-input" type="number" min="1" name="duration_minutes"></label>
-        <button class="rl-btn" type="submit">Add to library →</button>
-      </form>
-    </section>
-
-    <section class="rl-card">
-      <h2>Your library</h2>
-      <p class="rl-help">{{ resources|length }} resource{% if resources|length != 1 %}s{% endif %} available in this workspace.</p>
-
-      {% if resources %}
-      <div class="rl-list">
-        {% for resource in resources %}
-        <article class="rl-item {% if not resource.active %}inactive{% endif %}">
-          <span class="rl-type">{{ resource.resource_type }}</span>
-          <h3>{{ resource.title }}</h3>
-          <div class="rl-meta">{{ resource.category }}{% if resource.duration_minutes %} · {{ resource.duration_minutes }} min{% endif %}</div>
-          {% if resource.description %}<p class="rl-desc">{{ resource.description }}</p>{% endif %}
-          <div class="rl-actions">
-            <a class="rl-link" href="{{ resource.resource_url }}" target="_blank" rel="noopener">Open ↗</a>
-            {% if resource.active %}
-            <form method="post" action="/dashboard/resources/{{ resource.id }}/archive"><button class="rl-archive" type="submit">Archive</button></form>
-            {% else %}<span class="rl-meta">Archived</span>{% endif %}
+        <form class="nr-workout-builder" method="post" action="/dashboard/workouts">
+          <div class="nr-two">
+            <label>
+              <span class="nr-label">Workout name</span>
+              <input class="nr-input" name="title" placeholder="Upper Body B" required>
+            </label>
+            <label>
+              <span class="nr-label">Category</span>
+              <input class="nr-input" name="category" value="Strength">
+            </label>
           </div>
-        </article>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="rl-empty">Start by adding Sushma’s first workout or client guide.</div>
-      {% endif %}
-    </section>
-  </div>
+
+          <div class="nr-two">
+            <label>
+              <span class="nr-label">Duration · minutes</span>
+              <input class="nr-input" type="number" min="1" name="duration_minutes" placeholder="35">
+            </label>
+            <label>
+              <span class="nr-label">Equipment</span>
+              <input class="nr-input" name="equipment" placeholder="Dumbbells, bench, resistance band">
+            </label>
+          </div>
+
+          <label>
+            <span class="nr-label">Workout instructions</span>
+            <textarea class="nr-textarea" name="description" placeholder="Warm up first. Use a load that leaves 1–2 reps in reserve..."></textarea>
+          </label>
+
+          <div>
+            <div class="nr-section-title">
+              <span>Exercises</span>
+              <h2>Build the session</h2>
+            </div>
+            <p class="nr-helper" style="margin-bottom:10px">Leave unused exercise rows blank.</p>
+
+            <div class="nr-exercises">
+              {% for i in range(1,9) %}
+              <div class="nr-exercise">
+                <div class="nr-exercise-top">
+                  <strong>Exercise {{ i }}</strong>
+                  <span class="nr-status">Optional until named</span>
+                </div>
+                <div class="nr-exercise-grid">
+                  <label>
+                    <span class="nr-mini-label">Exercise name</span>
+                    <input class="nr-mini" name="exercise_titles" placeholder="Flat Chest Press">
+                  </label>
+                  <label>
+                    <span class="nr-mini-label">Demo video URL</span>
+                    <input class="nr-mini" type="url" name="exercise_video_urls" placeholder="https://...">
+                  </label>
+                  <label>
+                    <span class="nr-mini-label">Sets</span>
+                    <input class="nr-mini" type="number" min="1" max="10" name="exercise_sets" value="3">
+                  </label>
+                  <label>
+                    <span class="nr-mini-label">Reps</span>
+                    <input class="nr-mini" name="exercise_reps" placeholder="8–12">
+                  </label>
+                  <label>
+                    <span class="nr-mini-label">Rest</span>
+                    <input class="nr-mini" type="number" min="0" name="exercise_rest_seconds" placeholder="90">
+                  </label>
+                </div>
+                <label class="nr-exercise-note">
+                  <span class="nr-mini-label">Exercise instructions</span>
+                  <textarea class="nr-mini-text" name="exercise_instructions" placeholder="Control the lowering phase. Keep ribs down..."></textarea>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div>
+            <button class="nr-btn nr-primary" type="submit">Create workout →</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="nr-card nr-pad">
+        <div class="nr-heading">
+          <div>
+            <p class="nr-kicker" style="margin-top:0">Reusable programs</p>
+            <h2>Your Workout Library</h2>
+            <p>Assign a workout to one client or several clients without rebuilding it.</p>
+          </div>
+        </div>
+
+        {% if workouts %}
+        <div class="nr-library-grid">
+          {% for workout in workouts %}
+          <article class="nr-item {% if not workout.active %}inactive{% endif %}">
+            <div class="nr-item-top">
+              <span class="nr-tag">Workout</span>
+              {% if workout.active %}<span class="nr-status">Active</span>{% else %}<span class="nr-status">Archived</span>{% endif %}
+            </div>
+            <h3>{{ workout.title }}</h3>
+            <div class="nr-meta-line">
+              {{ workout.category }} · {{ workout.exercise_count }} exercises
+              {% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}
+            </div>
+            {% if workout.description %}<p class="nr-desc">{{ workout.description }}</p>{% endif %}
+
+            {% if workout.active %}
+            <details class="nr-assign">
+              <summary>Assign to clients →</summary>
+              <form method="post" action="/dashboard/workouts/{{ workout.id }}/assign">
+                <div class="nr-client-list">
+                  {% for client in clients %}
+                  <label class="nr-client">
+                    <input type="checkbox" name="client_ids" value="{{ client.id }}">
+                    <span>{{ client.name }}</span>
+                  </label>
+                  {% endfor %}
+                </div>
+                <div class="nr-two">
+                  <label>
+                    <span class="nr-label">Due date · optional</span>
+                    <input class="nr-input" type="date" name="due_date">
+                  </label>
+                  <label>
+                    <span class="nr-label">Note to client · optional</span>
+                    <input class="nr-input" name="coach_note" placeholder="Complete once before our next call">
+                  </label>
+                </div>
+                <button class="nr-btn nr-primary" type="submit" style="margin-top:10px">Assign workout →</button>
+              </form>
+            </details>
+
+            <div class="nr-actions">
+              <span class="nr-meta-line">Reusable workout</span>
+              <form method="post" action="/dashboard/workouts/{{ workout.id }}/archive">
+                <button class="nr-text-btn" type="submit">Archive</button>
+              </form>
+            </div>
+            {% endif %}
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="nr-empty">No structured workouts yet. Create Sushma’s first workout above.</div>
+        {% endif %}
+      </section>
+    </div>
+  </section>
+
+  <section class="nr-panel" data-nr-panel="resources">
+    <div class="nr-grid">
+      <section class="nr-card nr-pad">
+        <div class="nr-heading">
+          <div>
+            <p class="nr-kicker" style="margin-top:0">Resource Library</p>
+            <h2>Add a regular resource</h2>
+            <p>Use this for guides, videos, audio, recipes and educational links that are not structured workouts.</p>
+          </div>
+        </div>
+
+        <form method="post" action="/dashboard/resources">
+          <label class="nr-field">
+            <span class="nr-label">Title</span>
+            <input class="nr-input" name="title" placeholder="Protein guide for women 40+" required>
+          </label>
+
+          <div class="nr-two">
+            <label class="nr-field">
+              <span class="nr-label">Type</span>
+              <select class="nr-select" name="resource_type">
+                {% for item in resource_types %}<option value="{{ item }}">{{ item|title }}</option>{% endfor %}
+              </select>
+            </label>
+            <label class="nr-field">
+              <span class="nr-label">Category</span>
+              <select class="nr-select" name="category">
+                {% for item in resource_categories %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+              </select>
+            </label>
+          </div>
+
+          <label class="nr-field">
+            <span class="nr-label">Link</span>
+            <input class="nr-input" type="url" name="resource_url" placeholder="https://..." required>
+          </label>
+
+          <label class="nr-field">
+            <span class="nr-label">Description</span>
+            <textarea class="nr-textarea" name="description" placeholder="What this resource is for and when the client should use it..."></textarea>
+          </label>
+
+          <label class="nr-field">
+            <span class="nr-label">Duration · minutes · optional</span>
+            <input class="nr-input" type="number" min="1" name="duration_minutes">
+          </label>
+
+          <button class="nr-btn nr-primary" type="submit" style="margin-top:13px">Add resource →</button>
+        </form>
+      </section>
+
+      <section class="nr-card nr-pad">
+        <div class="nr-heading">
+          <div>
+            <p class="nr-kicker" style="margin-top:0">Reusable content</p>
+            <h2>Other Resources</h2>
+            <p>{{ resources|length }} resource{% if resources|length != 1 %}s{% endif %} in the library.</p>
+          </div>
+        </div>
+
+        {% if resources %}
+        <div class="nr-stack">
+          {% for resource in resources %}
+          <article class="nr-item {% if not resource.active %}inactive{% endif %}">
+            <div class="nr-item-top">
+              <span class="nr-tag">{{ resource.resource_type }}</span>
+              {% if resource.active %}<span class="nr-status">Active</span>{% else %}<span class="nr-status">Archived</span>{% endif %}
+            </div>
+            <h3>{{ resource.title }}</h3>
+            <div class="nr-meta-line">
+              {{ resource.category }}
+              {% if resource.duration_minutes %} · {{ resource.duration_minutes }} min{% endif %}
+            </div>
+            {% if resource.description %}<p class="nr-desc">{{ resource.description }}</p>{% endif %}
+            <div class="nr-actions">
+              <a class="nr-link" href="{{ resource.resource_url }}" target="_blank" rel="noopener">Open resource ↗</a>
+              {% if resource.active %}
+              <form method="post" action="/dashboard/resources/{{ resource.id }}/archive">
+                <button class="nr-text-btn" type="submit">Archive</button>
+              </form>
+              {% endif %}
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="nr-empty">No regular resources yet.</div>
+        {% endif %}
+      </section>
+    </div>
+  </section>
 </div>
+
+<script>
+(function(){
+  var tabs = Array.prototype.slice.call(document.querySelectorAll("[data-nr-tab]"));
+  var panels = Array.prototype.slice.call(document.querySelectorAll("[data-nr-panel]"));
+
+  function openTab(name){
+    tabs.forEach(function(tab){
+      tab.classList.toggle("active", tab.getAttribute("data-nr-tab") === name);
+    });
+    panels.forEach(function(panel){
+      panel.classList.toggle("active", panel.getAttribute("data-nr-panel") === name);
+    });
+    try{ sessionStorage.setItem("nrResourceTab", name); }catch(e){}
+  }
+
+  tabs.forEach(function(tab){
+    tab.addEventListener("click", function(){
+      openTab(tab.getAttribute("data-nr-tab"));
+    });
+  });
+
+  var saved = null;
+  try{ saved = sessionStorage.getItem("nrResourceTab"); }catch(e){}
+  openTab(saved || "workouts");
+})();
+</script>
 {% endblock %}
