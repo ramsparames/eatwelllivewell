@@ -60,6 +60,13 @@ def create_workout_tables() -> None:
                 CREATE INDEX IF NOT EXISTS idx_client_workouts_client
                 ON client_workout_assignments(client_id, assigned_on DESC)
             """)
+
+            cursor.execute("""
+                CREATE UNIQUE INDEX IF NOT EXISTS
+                    uq_client_workout_assignment_active
+                ON client_workout_assignments(client_id, workout_id)
+                WHERE status IN ('assigned', 'in_progress', 'completed')
+            """)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS client_workout_set_logs (
                     id BIGSERIAL PRIMARY KEY,
@@ -175,15 +182,34 @@ def assign_workout(
     due_date: date | None = None,
     coach_note: str | None = None,
 ):
+    """
+    Assign once per client/workout while the assignment is active.
+    Returns the number of new assignments created.
+    """
+    created = 0
     with get_connection() as connection:
         with connection.cursor() as cursor:
             for client_id in client_ids:
+                cursor.execute("""
+                    SELECT id
+                    FROM client_workout_assignments
+                    WHERE client_id = %s
+                      AND workout_id = %s
+                      AND status IN ('assigned', 'in_progress', 'completed')
+                    ORDER BY id DESC
+                    LIMIT 1
+                """, (client_id, workout_id))
+                if cursor.fetchone():
+                    continue
+
                 cursor.execute("""
                     INSERT INTO client_workout_assignments (
                         client_id, workout_id, due_date, coach_note, status
                     )
                     VALUES (%s, %s, %s, %s, 'assigned')
                 """, (client_id, workout_id, due_date, coach_note))
+                created += 1
+    return created
 
 
 def get_client_workouts(client_id: int):
@@ -209,6 +235,7 @@ def get_client_workouts(client_id: int):
                 JOIN coach_workouts w ON w.id = a.workout_id
                 LEFT JOIN workout_exercises e ON e.workout_id = w.id
                 WHERE a.client_id = %s
+                  AND a.status <> 'removed'
                   AND w.active = TRUE
                 GROUP BY a.id, w.id
                 ORDER BY
@@ -221,6 +248,21 @@ def get_client_workouts(client_id: int):
                     a.id DESC
             """, (client_id,))
             return cursor.fetchall() or []
+
+
+def remove_workout_assignment(
+    assignment_id: int,
+    client_id: int,
+):
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE client_workout_assignments
+                SET status = 'removed',
+                    updated_at = NOW()
+                WHERE id = %s
+                  AND client_id = %s
+            """, (assignment_id, client_id))
 
 
 def get_client_workout_assignment(assignment_id: int, client_id: int):

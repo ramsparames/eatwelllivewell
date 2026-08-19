@@ -1187,6 +1187,9 @@
             {% if workout.completed_at %}<p class="nw-workout-log"><strong>Completed:</strong> {{ workout.completed_at.strftime("%d %b %Y") }}</p>{% endif %}
             <div class="nw-res-actions" style="margin-top:10px">
               <a class="nw-res-open" href="/dashboard/clients/{{ client.id }}/workouts/{{ workout.assignment_id }}">View workout progress →</a>
+              <form method="post" action="/dashboard/clients/{{ client.id }}/workouts/{{ workout.assignment_id }}/remove" onsubmit="return confirm('Remove this workout from the client?');">
+                <button class="nw-res-remove" type="submit">Remove</button>
+              </form>
             </div>
           </article>
           {% endfor %}

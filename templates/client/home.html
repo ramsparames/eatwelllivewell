@@ -3,7 +3,7 @@
 
 <section class="cp-card cp-workout-section" style="padding:18px">
   <div class="cp-title-row">
-    <div><p class="cp-kicker">Resources</p><h2>Your workouts & resources</h2><p class="cp-grid-help">Workouts assigned by Sushma appear here. Open one to watch the exercise demos and record your sets.</p></div>
+    <div><p class="cp-kicker">Resources</p><h2>Your workouts & resources</h2><p class="cp-grid-help">Workouts assigned by Sushma appear here. Open one to watch the exercise demos and record your sets.</p>{% if assigned_workouts %}<p class="cp-grid-help"><strong>{{ assigned_workouts|length }} workout{% if assigned_workouts|length != 1 %}s{% endif %} assigned</strong></p>{% endif %}</div>
   </div>
 
   {% if assigned_workouts %}

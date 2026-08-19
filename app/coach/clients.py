@@ -45,6 +45,7 @@ from app.services.workout_service import (
     get_client_workouts,
     get_workout_assignment_progress,
     list_workouts,
+    remove_workout_assignment,
 )
 
 from app.services.client_portal_service import (
@@ -1296,6 +1297,28 @@ def coach_client_workout_detail(
             "client": profile["client"],
             "workout": workout,
         },
+    )
+
+
+@router.post(
+    "/dashboard/clients/{client_id}/workouts/{assignment_id}/remove"
+)
+def remove_client_workout_assignment(
+    request: Request,
+    client_id: int,
+    assignment_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    remove_workout_assignment(
+        assignment_id=assignment_id,
+        client_id=client_id,
+    )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=resources",
+        status_code=303,
     )
 
 

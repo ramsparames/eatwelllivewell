@@ -176,6 +176,8 @@ def client_home(request: Request, access_token: str):
         for row in client_history_grid.get("rows") or []:
             row["macro"] = macro_history["by_date"].get(row["date"])
 
+    assigned_workouts = get_client_workouts(client["id"])
+
     return templates.TemplateResponse(
         "client/home.html",
         {
@@ -197,7 +199,7 @@ def client_home(request: Request, access_token: str):
             "weekly_measurement": get_current_week_measurement(client["id"], on_date=today),
             "next_call": get_next_client_call(client),
             "assigned_resources": get_client_resources(client["id"]),
-            "assigned_workouts": get_client_workouts(client["id"]),
+            "assigned_workouts": assigned_workouts,
             "saved": request.query_params.get("saved") == "1",
             "measurement_saved":
                 request.query_params.get("measurement_saved") == "1",
