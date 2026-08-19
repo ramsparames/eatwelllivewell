@@ -6,6 +6,14 @@ from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from app.services.macro_tracking_service import (
+    create_macro_tracking_tables,
+    get_macro_history,
+    get_macro_log,
+    get_macro_settings,
+    save_macro_log,
+)
+
 from app.services.phase_a_service import (
     create_phase_a_tables,
     get_client_resources,
@@ -18,12 +26,12 @@ from app.services.client_portal_service import (
     get_actions_for_date,
     get_editable_week_dates,
     get_client_by_token,
-    get_client_history_grid,
     get_daily_tracking_for_date,
     get_week_completion,
     get_current_week_measurement,
     get_next_client_call,
     get_coaching_week_view,
+    get_client_history_grid,
     is_portal_day_submitted,
     save_action_logs,
     save_client_daily_entry,
@@ -36,6 +44,7 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 create_portal_tables()
+create_macro_tracking_tables()
 create_phase_a_tables()
 
 
@@ -135,6 +144,27 @@ def client_home(request: Request, access_token: str):
         if not week_view["is_future"]
         else None
     )
+    macro_settings = get_macro_settings(client["id"])
+    macro_entry = (
+        get_macro_log(client["id"], selected_date)
+        if macro_settings.get("enabled") and not week_view["is_future"]
+        else None
+    )
+
+    client_history_grid = get_client_history_grid(
+        client["id"],
+        on_date=today,
+    )
+
+    macro_history = get_macro_history(
+        client["id"],
+        client.get("start_date"),
+        today,
+    )
+
+    if macro_settings.get("enabled"):
+        for row in client_history_grid.get("rows") or []:
+            row["macro"] = macro_history["by_date"].get(row["date"])
 
     return templates.TemplateResponse(
         "client/home.html",
@@ -149,15 +179,14 @@ def client_home(request: Request, access_token: str):
             "editable_dates": editable_dates,
             "actions": actions,
             "daily_entry": daily_entry,
+            "macro_settings": macro_settings,
+            "macro_entry": macro_entry,
+            "client_history_grid": client_history_grid,
             "week_completion": current_week_completion,
             "week_view": week_view,
             "weekly_measurement": get_current_week_measurement(client["id"], on_date=today),
             "next_call": get_next_client_call(client),
             "assigned_resources": get_client_resources(client["id"]),
-            "client_history_grid": get_client_history_grid(
-                client["id"],
-                on_date=today,
-            ),
             "saved": request.query_params.get("saved") == "1",
             "measurement_saved":
                 request.query_params.get("measurement_saved") == "1",
@@ -175,6 +204,9 @@ def save_client_day(
     completed_action_ids: list[int] = Form(default=[]),
     steps: str = Form(""),
     weight_kg: str = Form(""),
+    protein_g: str = Form(""),
+    carbs_g: str = Form(""),
+    fat_g: str = Form(""),
 ):
     client = get_client_by_token(access_token)
     if not client:
@@ -225,9 +257,18 @@ def save_client_day(
         steps=parse_int(steps),
         weight_kg=parse_float(weight_kg),
     )
+    macro_settings = get_macro_settings(client["id"])
+    if macro_settings.get("enabled"):
+        save_macro_log(
+            client_id=client["id"],
+            tracked_on=selected_date,
+            protein_g=parse_float(protein_g),
+            carbs_g=parse_float(carbs_g),
+            fat_g=parse_float(fat_g),
+        )
 
     return RedirectResponse(
-        f"/client/{access_token}?saved=1#client-grid",
+        f"/client/{access_token}?saved=1&week={selected_week_number}&day={selected_date.isoformat()}",
         status_code=303,
     )
 
@@ -283,7 +324,7 @@ def save_client_measurements(
         )
 
     return RedirectResponse(
-        f"/client/{access_token}?measurement_saved=1#client-grid",
+        f"/client/{access_token}?measurement_saved=1",
         status_code=303,
     )
 

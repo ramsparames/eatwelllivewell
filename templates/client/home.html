@@ -332,6 +332,9 @@
 .cp-grid-shell{
   overflow-x:auto!important;
 }
+
+.cp-sheet .macro-grid-input{width:88px!important;min-width:88px!important}
+.cp-sheet .macro-calories-cell{min-width:90px;font-weight:800}
 </style>
 
 
@@ -404,6 +407,18 @@
         <span>· not assigned that day</span>
       </div>
 
+      {% if macro_settings.enabled %}
+      <div class="cp-measure-saved-simple" style="margin-bottom:12px">
+        <strong>Macro tracking enabled</strong>
+        <div class="cp-measure-saved-values">
+          <span>Protein target {{ macro_settings.protein_target_g if macro_settings.protein_target_g is not none else "—" }} g</span>
+          <span>Carb target {{ macro_settings.carbs_target_g if macro_settings.carbs_target_g is not none else "—" }} g</span>
+          <span>Fat target {{ macro_settings.fat_target_g if macro_settings.fat_target_g is not none else "—" }} g</span>
+          <span>Calorie target {{ macro_settings.calorie_target if macro_settings.calorie_target is not none else "—" }}{% if macro_settings.calorie_target is not none %} kcal{% endif %}</span>
+        </div>
+      </div>
+      {% endif %}
+
       {% if client_history_grid and client_history_grid.rows %}
       <div class="cp-grid-shell">
         <table class="cp-sheet">
@@ -414,6 +429,12 @@
               <th>Status</th>
               <th>Steps</th>
               <th>Weight</th>
+              {% if macro_settings.enabled %}
+              <th>Protein</th>
+              <th>Carbs</th>
+              <th>Fat</th>
+              <th>Calories</th>
+              {% endif %}
               {% for action in client_history_grid.action_columns %}
               <th class="cp-sheet-action-head">
                 {{ action.name }}
@@ -475,6 +496,54 @@
                 {% endif %}
               </td>
 
+              {% if macro_settings.enabled %}
+                {% set macro = row.macro if row.macro is defined else none %}
+                <td>
+                  {% if row.editable %}
+                  <input class="cp-sheet-input macro-grid-input"
+                         type="number" min="0" step="0.1"
+                         name="protein_g"
+                         form="day-form-{{ row.date.isoformat() }}"
+                         value="{% if macro and macro.protein_g is not none %}{{ macro.protein_g }}{% endif %}"
+                         placeholder="g">
+                  {% else %}
+                  {% if macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if row.editable %}
+                  <input class="cp-sheet-input macro-grid-input"
+                         type="number" min="0" step="0.1"
+                         name="carbs_g"
+                         form="day-form-{{ row.date.isoformat() }}"
+                         value="{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }}{% endif %}"
+                         placeholder="g">
+                  {% else %}
+                  {% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if row.editable %}
+                  <input class="cp-sheet-input macro-grid-input"
+                         type="number" min="0" step="0.1"
+                         name="fat_g"
+                         form="day-form-{{ row.date.isoformat() }}"
+                         value="{% if macro and macro.fat_g is not none %}{{ macro.fat_g }}{% endif %}"
+                         placeholder="g">
+                  {% else %}
+                  {% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}
+                  {% endif %}
+                </td>
+                <td class="macro-calories-cell"
+                    data-macro-date="{{ row.date.isoformat() }}">
+                  {% if macro and macro.calories is not none %}
+                    {{ macro.calories }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+              {% endif %}
+
               {% for action in client_history_grid.action_columns %}
                 {% set cell = row.actions.get(action.id) %}
                 <td>
@@ -511,7 +580,7 @@
               <tr class="cp-measure-row">
                 <td class="sticky-week"></td>
                 <td class="sticky-date"><span class="cp-measure-label">Measurements</span></td>
-                <td colspan="{{ client_history_grid.action_columns|length + 4 }}">
+                <td colspan="{{ client_history_grid.action_columns|length + 4 + (4 if macro_settings.enabled else 0) }}">
                   {% set wm = client_history_grid.week_measurements.get(row.week_number) %}
                   {% if wm %}
                   <div class="cp-measure-inline">
@@ -590,3 +659,35 @@
 })();
 </script>
 {% endblock %}
+
+{% if macro_settings.enabled %}
+<script>
+(function(){
+  function recalcRow(formId){
+    const form = document.getElementById(formId);
+    if(!form) return;
+    const p = parseFloat(form.querySelector('[name="protein_g"]')?.value || 0);
+    const c = parseFloat(form.querySelector('[name="carbs_g"]')?.value || 0);
+    const f = parseFloat(form.querySelector('[name="fat_g"]')?.value || 0);
+    const date = form.querySelector('[name="tracked_on"]')?.value;
+    const cell = document.querySelector('[data-macro-date="'+date+'"]');
+    if(!cell) return;
+    const any = form.querySelector('[name="protein_g"]')?.value ||
+                form.querySelector('[name="carbs_g"]')?.value ||
+                form.querySelector('[name="fat_g"]')?.value;
+    cell.textContent = any ? Math.round((p*4)+(c*4)+(f*9)) : '—';
+  }
+
+  document.querySelectorAll('.macro-grid-input').forEach(function(input){
+    input.addEventListener('input', function(){
+      const formId = input.getAttribute('form');
+      if(formId) recalcRow(formId);
+    });
+  });
+
+  document.querySelectorAll('form[id^="day-form-"]').forEach(function(form){
+    recalcRow(form.id);
+  });
+})();
+</script>
+{% endif %}

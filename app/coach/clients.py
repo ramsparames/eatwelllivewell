@@ -23,6 +23,13 @@ from app.services.phase_a_service import (
     list_resources,
     unassign_resource,
 )
+from app.services.macro_tracking_service import (
+    create_macro_tracking_tables,
+    get_macro_history,
+    get_macro_settings,
+    save_macro_settings,
+)
+
 from app.services.client_portal_service import (
     ensure_portal_access,
     get_portal_access,
@@ -48,6 +55,7 @@ templates = Jinja2Templates(
 )
 
 create_phase_a_tables()
+create_macro_tracking_tables()
 
 
 ACTION_LIBRARY = [{'category': 'Nutrition',
@@ -978,6 +986,15 @@ def client_profile(
         client_id,
         on_date=date.today(),
     )
+    macro_settings = get_macro_settings(client_id)
+    macro_history = get_macro_history(
+        client_id,
+        profile["client"].get("start_date"),
+        date.today(),
+    )
+    if coach_history_grid and macro_settings.get("enabled"):
+        for row in coach_history_grid.get("rows") or []:
+            row["macro"] = macro_history["by_date"].get(row["date"])
 
     # Preselect every currently ACTIVE commitment for next week.
     #
@@ -1069,6 +1086,8 @@ def client_profile(
             "progress_summary": progress_summary,
             "coach_summary": coach_summary,
             "coach_history_grid": coach_history_grid,
+            "macro_settings": macro_settings,
+            "macro_history": macro_history,
             "client_timeline": client_timeline,
             "client_resources": client_resources,
             "available_resources": available_resources,
@@ -1220,6 +1239,10 @@ def save_client_intake_route(
     custom_action_names: list[str] = Form(default=[]),
     custom_target_counts: list[str] = Form(default=[]),
     custom_target_units: list[str] = Form(default=[]),
+    macro_tracking_enabled: str = Form(""),
+    macro_protein_target_g: str = Form(""),
+    macro_carbs_target_g: str = Form(""),
+    macro_fat_target_g: str = Form(""),
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse("/coach/login", status_code=303)
@@ -1243,6 +1266,17 @@ def save_client_intake_route(
         coach_focus=coach_focus.strip() or None,
     )
     ClientService.set_start_date(client_id, parsed_week_start)
+
+    def _optional_float(value: str):
+        return float(value) if value and value.strip() else None
+
+    save_macro_settings(
+        client_id=client_id,
+        enabled=(macro_tracking_enabled == "1"),
+        protein_target_g=_optional_float(macro_protein_target_g),
+        carbs_target_g=_optional_float(macro_carbs_target_g),
+        fat_target_g=_optional_float(macro_fat_target_g),
+    )
 
     if parsed_present_weight is not None:
         ClientService.add_measurement(
@@ -1285,6 +1319,34 @@ def save_client_intake_route(
 
     return RedirectResponse(
         f"/dashboard/clients/{client_id}",
+        status_code=303,
+    )
+
+
+@router.post("/dashboard/clients/{client_id}/macro-settings")
+def update_client_macro_settings(
+    request: Request,
+    client_id: int,
+    macro_tracking_enabled: str = Form(""),
+    macro_protein_target_g: str = Form(""),
+    macro_carbs_target_g: str = Form(""),
+    macro_fat_target_g: str = Form(""),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    def optional_float(value: str):
+        return float(value) if value and value.strip() else None
+
+    save_macro_settings(
+        client_id=client_id,
+        enabled=(macro_tracking_enabled == "1"),
+        protein_target_g=optional_float(macro_protein_target_g),
+        carbs_target_g=optional_float(macro_carbs_target_g),
+        fat_target_g=optional_float(macro_fat_target_g),
+    )
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=clientdata&macro_saved=1",
         status_code=303,
     )
 

@@ -490,6 +490,20 @@
     </section>
 
     <section class="nw-section">
+      <div class="nw-section-title"><span>Optional · Macro tracking</span><h2>Does this client need macro tracking?</h2></div>
+      <label class="nw-action-choice" style="max-width:420px">
+        <input type="checkbox" name="macro_tracking_enabled" value="1">
+        <span><strong>Enable macro tracking</strong><small>Only enable for clients Sushma wants to track macros with.</small></span>
+      </label>
+      <div class="nw-grid2" style="margin-top:14px">
+        <label><span class="nw-label">Protein target (g)</span><input class="nw-input" type="number" step="1" min="0" name="macro_protein_target_g" placeholder="e.g. 100"></label>
+        <label><span class="nw-label">Carb target (g)</span><input class="nw-input" type="number" step="1" min="0" name="macro_carbs_target_g" placeholder="e.g. 150"></label>
+        <label><span class="nw-label">Fat target (g)</span><input class="nw-input" type="number" step="1" min="0" name="macro_fat_target_g" placeholder="e.g. 50"></label>
+        <div><span class="nw-label">Calories</span><div class="nw-goal"><strong>Calculated automatically</strong><span>Protein × 4 + carbs × 4 + fat × 9</span></div></div>
+      </div>
+    </section>
+
+    <section class="nw-section">
       <div class="nw-section-title"><span>03 · Week 1 plan</span><h2>Choose the first action plan</h2></div>
 
       <p class="nw-helper nw-action-help">Choose the target frequency you want, then tick the action to assign it. No 5- or 7-day target is preselected.</p>
@@ -1001,6 +1015,36 @@
         </div>
       </div>
 
+      <section class="nw-panel nw-pad" style="margin-bottom:16px">
+        <div class="nw-heading">
+          <div><p class="nw-kicker" style="margin-top:0">Optional tracking</p><h2>Macro tracking</h2></div>
+          {% if macro_settings.enabled %}<span class="nw-cell-state done">Enabled</span>{% else %}<span class="nw-cell-state">Off</span>{% endif %}
+        </div>
+        <form method="post" action="/dashboard/clients/{{ client.id }}/macro-settings">
+          <label class="nw-action-choice" style="max-width:420px;margin-bottom:14px">
+            <input type="checkbox" name="macro_tracking_enabled" value="1" {% if macro_settings.enabled %}checked{% endif %}>
+            <span><strong>Enable for this client</strong><small>When off, macro fields are hidden from the client portal.</small></span>
+          </label>
+          <div class="nw-grid2">
+            <label><span class="nw-label">Protein target (g)</span><input class="nw-input" type="number" min="0" step="1" name="macro_protein_target_g" value="{{ macro_settings.protein_target_g if macro_settings.protein_target_g is not none else '' }}"></label>
+            <label><span class="nw-label">Carb target (g)</span><input class="nw-input" type="number" min="0" step="1" name="macro_carbs_target_g" value="{{ macro_settings.carbs_target_g if macro_settings.carbs_target_g is not none else '' }}"></label>
+            <label><span class="nw-label">Fat target (g)</span><input class="nw-input" type="number" min="0" step="1" name="macro_fat_target_g" value="{{ macro_settings.fat_target_g if macro_settings.fat_target_g is not none else '' }}"></label>
+            <div class="nw-goal"><span>Calculated calorie target</span><strong>{{ macro_settings.calorie_target if macro_settings.calorie_target is not none else "—" }}{% if macro_settings.calorie_target is not none %} kcal{% endif %}</strong></div>
+          </div>
+          <button class="nw-btn nw-primary" style="margin-top:14px" type="submit">Save macro settings</button>
+        </form>
+        {% if macro_settings.enabled and macro_history.week_summaries %}
+          {% set current_macro = macro_history.week_summaries.get(current_week) %}
+          {% if current_macro %}
+          <div class="nw-grid2" style="margin-top:16px">
+            <div class="nw-goal"><span>This week</span><strong>{{ current_macro.days_logged }}/7 days logged</strong></div>
+            <div class="nw-goal"><span>Average protein</span><strong>{{ current_macro.avg_protein if current_macro.avg_protein is not none else "—" }}{% if current_macro.avg_protein is not none %} g{% endif %}</strong></div>
+            <div class="nw-goal"><span>Average calories</span><strong>{{ current_macro.avg_calories if current_macro.avg_calories is not none else "—" }}{% if current_macro.avg_calories is not none %} kcal{% endif %}</strong></div>
+          </div>
+          {% endif %}
+        {% endif %}
+      </section>
+
       {% if coach_history_grid and coach_history_grid.rows %}
       <div class="nw-excel-wrap">
         <table class="nw-excel">
@@ -1011,6 +1055,9 @@
               <th>Status</th>
               <th>Steps</th>
               <th>Weight</th>
+              {% if macro_settings.enabled %}
+              <th>Protein</th><th>Carbs</th><th>Fat</th><th>Calories</th>
+              {% endif %}
               {% for action in coach_history_grid.action_columns %}
               <th class="nw-action-head">
                 {{ action.name }}
@@ -1048,6 +1095,13 @@
 
               <td>{{ row.steps if row.steps is not none else "—" }}</td>
               <td>{% if row.weight_kg is not none %}{{ row.weight_kg }} kg{% else %}—{% endif %}</td>
+              {% if macro_settings.enabled %}
+                {% set macro = row.macro %}
+                <td>{% if macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}</td>
+                <td>{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}</td>
+                <td>{% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</td>
+                <td>{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</td>
+              {% endif %}
 
               {% for action in coach_history_grid.action_columns %}
               {% set cell = row.actions.get(action.id) %}
@@ -1071,7 +1125,7 @@
             <tr class="nw-measure-week-row">
               <td class="sticky-week"></td>
               <td class="sticky-date"><strong style="color:var(--coach-purple)">Measurements</strong></td>
-              <td colspan="{{ coach_history_grid.action_columns|length + 4 }}">
+              <td colspan="{{ coach_history_grid.action_columns|length + 4 + (4 if macro_settings.enabled else 0) }}">
                 {% if ns.week_measurement %}
                 <div class="nw-week-measure-inline">
                   <strong>{{ ns.week_measurement.measured_on.strftime("%d %b %Y") }}</strong>
