@@ -346,3 +346,35 @@ def reopen_workout(assignment_id: int, client_id: int):
                     updated_at = NOW()
                 WHERE id = %s AND client_id = %s
             """, (assignment_id, client_id))
+
+
+def get_coach_workout_assignment(assignment_id: int, client_id: int):
+    """
+    Coach-side workout detail including exercise prescriptions and the
+    client's recorded weight/reps for every set.
+    """
+    return get_client_workout_assignment(assignment_id, client_id)
+
+
+def get_workout_assignment_progress(assignment_id: int, client_id: int):
+    assignment = get_client_workout_assignment(assignment_id, client_id)
+    if not assignment:
+        return None
+
+    total_sets = 0
+    completed_sets = 0
+
+    for exercise in assignment.get("exercises") or []:
+        for setlog in exercise.get("set_logs") or []:
+            total_sets += 1
+            if setlog.get("completed"):
+                completed_sets += 1
+
+    assignment["total_sets"] = total_sets
+    assignment["completed_sets"] = completed_sets
+    assignment["completion_percent"] = (
+        round((completed_sets / total_sets) * 100)
+        if total_sets
+        else 0
+    )
+    return assignment

@@ -1,0 +1,85 @@
+{% extends "coach/base.html" %}
+{% block title %}{{ workout.title }} | {{ client.name }} | NourisHer Coach{% endblock %}
+{% block content %}
+<style>
+.wd,.wd *{box-sizing:border-box}.wd{max-width:1180px;margin:0 auto;color:var(--coach-text)}
+.wd-top{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:20px}
+.wd-back{color:var(--coach-purple);text-decoration:none;font-size:14px;font-weight:750}
+.wd-kicker{margin:12px 0 5px;color:var(--coach-purple);font-size:14px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+.wd-top h1{margin:0;font-size:34px;letter-spacing:-.035em}.wd-top p{margin:6px 0 0;color:var(--coach-muted);font-size:14px}
+.wd-meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.wd-chip{padding:8px 11px;border:1px solid var(--coach-border);border-radius:999px;background:#fff;color:var(--coach-muted);font-size:13px}.wd-chip strong{color:var(--coach-text)}
+.wd-panel{border:1px solid var(--coach-border);border-radius:18px;background:#fff;box-shadow:0 5px 20px rgba(43,26,52,.04)}.wd-pad{padding:22px}
+.wd-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.wd-stat{padding:15px 17px;border:1px solid var(--coach-border);border-radius:15px;background:#fff}.wd-stat span{display:block;color:var(--coach-muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.wd-stat strong{display:block;margin-top:5px;font-size:21px}
+.wd-progress{height:9px;border-radius:999px;background:#eee8f0;overflow:hidden;margin-top:10px}.wd-progress > span{display:block;height:100%;background:var(--coach-purple)}
+.wd-exercises{display:grid;gap:12px}.wd-ex{padding:18px;border:1px solid #eee7f0;border-radius:15px;background:#fff}.wd-ex-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.wd-ex h2{margin:0;font-size:19px}.wd-prescription{margin-top:5px;color:var(--coach-muted);font-size:13px}.wd-video{color:var(--coach-purple);text-decoration:none;font-size:13px;font-weight:850}.wd-note{margin:10px 0 0;color:var(--coach-muted);font-size:13px;line-height:1.5}
+.wd-table-wrap{margin-top:13px;overflow:auto;border:1px solid var(--coach-border);border-radius:12px}.wd-table{width:100%;border-collapse:collapse;min-width:610px;font-size:13px}.wd-table th{padding:10px;background:#faf7fb;color:var(--coach-muted);text-align:left}.wd-table td{padding:10px;border-top:1px solid #f0ebf1}.wd-done{color:#31704c;font-weight:900}.wd-notdone{color:#a69ea8}.wd-empty{color:var(--coach-muted)}
+.wd-note-panel{margin-bottom:14px;padding:15px 17px;border:1px solid #eadfee;border-radius:14px;background:#fcfafc;font-size:13px;line-height:1.5}
+@media(max-width:850px){.wd-summary{grid-template-columns:1fr 1fr}.wd-top{display:block}.wd-meta{justify-content:flex-start;margin-top:12px}}@media(max-width:520px){.wd-summary{grid-template-columns:1fr}}
+</style>
+
+<div class="wd">
+  <div class="wd-top">
+    <div>
+      <a class="wd-back" href="/dashboard/clients/{{ client.id }}?tab=resources">← Back to {{ client.name }} · Resources</a>
+      <p class="wd-kicker">Workout progress</p>
+      <h1>{{ workout.title }}</h1>
+      <p>{{ client.name }} · assigned {{ workout.assigned_on.strftime("%d %b %Y") }}{% if workout.due_date %} · due {{ workout.due_date.strftime("%d %b %Y") }}{% endif %}</p>
+    </div>
+    <div class="wd-meta">
+      <span class="wd-chip"><strong>{{ workout.status|replace("_"," ")|title }}</strong></span>
+      {% if workout.duration_minutes %}<span class="wd-chip">{{ workout.duration_minutes }} min</span>{% endif %}
+      {% if workout.equipment %}<span class="wd-chip">{{ workout.equipment }}</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="wd-summary">
+    <div class="wd-stat"><span>Exercises</span><strong>{{ workout.exercises|length }}</strong></div>
+    <div class="wd-stat"><span>Sets completed</span><strong>{{ workout.completed_sets }}/{{ workout.total_sets }}</strong></div>
+    <div class="wd-stat"><span>Progress</span><strong>{{ workout.completion_percent }}%</strong></div>
+    <div class="wd-stat"><span>Completed</span><strong style="font-size:15px">{% if workout.completed_at %}{{ workout.completed_at.strftime("%d %b %Y") }}{% else %}Not yet{% endif %}</strong></div>
+  </div>
+
+  {% if workout.total_sets %}
+  <div class="wd-progress"><span style="width:{{ workout.completion_percent }}%"></span></div>
+  {% endif %}
+
+  {% if workout.coach_note %}
+  <div class="wd-note-panel" style="margin-top:14px"><strong>Sushma’s note to client:</strong> {{ workout.coach_note }}</div>
+  {% endif %}
+
+  <div class="wd-exercises">
+    {% for exercise in workout.exercises %}
+    <section class="wd-ex">
+      <div class="wd-ex-head">
+        <div>
+          <p class="wd-kicker" style="margin-top:0">Exercise {{ loop.index }}</p>
+          <h2>{{ exercise.title }}</h2>
+          <div class="wd-prescription">{{ exercise.sets }} sets{% if exercise.reps_text %} · {{ exercise.reps_text }} reps{% endif %}{% if exercise.rest_seconds is not none %} · Rest {{ exercise.rest_seconds }} sec{% endif %}</div>
+        </div>
+        {% if exercise.video_url %}<a class="wd-video" href="{{ exercise.video_url }}" target="_blank" rel="noopener">Open demo ↗</a>{% endif %}
+      </div>
+
+      {% if exercise.instructions %}<p class="wd-note">{{ exercise.instructions }}</p>{% endif %}
+
+      <div class="wd-table-wrap">
+        <table class="wd-table">
+          <thead>
+            <tr><th>Set</th><th>Weight used</th><th>Reps completed</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for setlog in exercise.set_logs %}
+            <tr>
+              <td><strong>Set {{ setlog.set_number }}</strong></td>
+              <td>{% if setlog.weight_kg is not none %}{{ setlog.weight_kg }} kg{% else %}<span class="wd-empty">—</span>{% endif %}</td>
+              <td>{% if setlog.reps is not none %}{{ setlog.reps }}{% else %}<span class="wd-empty">—</span>{% endif %}</td>
+              <td>{% if setlog.completed %}<span class="wd-done">✓ Done</span>{% else %}<span class="wd-notdone">Not done</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

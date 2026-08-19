@@ -43,6 +43,7 @@ from app.services.workout_service import (
     create_workout,
     create_workout_tables,
     get_client_workouts,
+    get_workout_assignment_progress,
     list_workouts,
 )
 
@@ -1268,6 +1269,34 @@ def archive_workout_route(request: Request, workout_id: int):
         return RedirectResponse("/coach/login", status_code=303)
     archive_workout(workout_id)
     return RedirectResponse("/dashboard/resources", status_code=303)
+
+
+@router.get(
+    "/dashboard/clients/{client_id}/workouts/{assignment_id}",
+    response_class=HTMLResponse,
+)
+def coach_client_workout_detail(
+    request: Request,
+    client_id: int,
+    assignment_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    profile = ClientService.profile(client_id)
+    workout = get_workout_assignment_progress(assignment_id, client_id)
+
+    if not profile or not workout:
+        raise HTTPException(status_code=404, detail="Workout assignment not found")
+
+    return templates.TemplateResponse(
+        "coach/workout_detail.html",
+        {
+            "request": request,
+            "client": profile["client"],
+            "workout": workout,
+        },
+    )
 
 
 @router.post("/dashboard/clients/{client_id}/workouts")
