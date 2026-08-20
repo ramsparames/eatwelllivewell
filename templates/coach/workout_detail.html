@@ -36,7 +36,7 @@
     <div class="wd-stat"><span>Exercises</span><strong>{{ workout.exercises|length }}</strong></div>
     <div class="wd-stat"><span>Sets completed</span><strong>{{ workout.completed_sets }}/{{ workout.total_sets }}</strong></div>
     <div class="wd-stat"><span>Progress</span><strong>{{ workout.completion_percent }}%</strong></div>
-    <div class="wd-stat"><span>Workout date</span><strong style="font-size:15px">{% if workout.workout_date %}{{ workout.workout_date.strftime("%d %b %Y") }}{% else %}Not yet{% endif %}</strong></div>
+    <div class="wd-stat"><span>Workout date</span><strong style="font-size:15px">{% if workout.workout_date %}{{ workout.workout_date.strftime("%d %b %Y") }}{% else %}Not recorded yet{% endif %}</strong></div>
   </div>
 
   {% if workout.total_sets %}

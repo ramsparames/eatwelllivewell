@@ -222,7 +222,7 @@ def get_client_workouts(client_id: int):
                 SELECT
                     a.id AS assignment_id,
                     a.assigned_on,
-                    a.due_date,
+                    a.workout_date,
                     a.coach_note,
                     a.status,
                     a.started_at,

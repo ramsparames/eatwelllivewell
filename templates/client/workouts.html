@@ -307,6 +307,32 @@
   .wk-date-input,.wk-complete-btn{width:100%}
   .wk-complete-btn{margin-top:8px}
 }
+
+.wk-head-actions{
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap
+}
+.wk-head-date span,.wk-recorded-date span{
+  display:block;
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:850
+}
+.wk-recorded-date{
+  padding:8px 11px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#faf7fb
+}
+.wk-recorded-date strong{font-size:13px}
+@media(max-width:700px){
+  .wk-detail-head{display:block}
+  .wk-head-actions{justify-content:flex-start;margin-top:12px}
+}
 </style>
 
 <div class="wk">
@@ -385,7 +411,26 @@
               {% if selected_workout.workout_date %} · Done {{ selected_workout.workout_date.strftime("%d %b %Y") }}{% endif %}
             </div>
           </div>
-          <span class="wk-status {{ selected_workout.status }}">{{ selected_workout.status|replace("_"," ")|title }}</span>
+          <div class="wk-head-actions">
+            {% if selected_workout.status != "completed" %}
+            <label class="wk-head-date">
+              <span>Workout date</span>
+              <input class="wk-date-input"
+                     type="date"
+                     name="workout_date"
+                     value="{{ today.isoformat() }}"
+                     max="{{ today.isoformat() }}"
+                     form="complete-workout-form"
+                     required>
+            </label>
+            {% else %}
+            <div class="wk-recorded-date">
+              <span>Workout date</span>
+              <strong>{{ selected_workout.workout_date.strftime("%d %b %Y") if selected_workout.workout_date else "Not recorded" }}</strong>
+            </div>
+            {% endif %}
+            <span class="wk-status {{ selected_workout.status }}">{{ selected_workout.status|replace("_"," ")|title }}</span>
+          </div>
         </div>
 
         {% if selected_workout.coach_note %}
@@ -451,11 +496,7 @@
             <button class="wk-complete-btn" type="submit">Reopen workout</button>
           </form>
           {% else %}
-          <form class="wk-complete-form" method="post" action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/complete">
-            <label>
-              <span class="wk-date-label">Workout date</span>
-              <input class="wk-date-input" type="date" name="workout_date" value="{{ today.isoformat() if today is defined else '' }}" required>
-            </label>
+          <form id="complete-workout-form" class="wk-complete-form" method="post" action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/complete">
             <button class="wk-complete-btn" type="submit">Complete workout ✓</button>
           </form>
           {% endif %}

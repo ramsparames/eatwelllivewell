@@ -1184,7 +1184,7 @@
             </div>
             <div class="nw-workout-meta">{{ workout.exercise_count }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}</div>
             {% if workout.coach_note %}<p class="nw-workout-log"><strong>Coach note:</strong> {{ workout.coach_note }}</p>{% endif %}
-            {% if workout.workout_date %}<p class="nw-workout-log"><strong>Workout date:</strong> {{ workout.workout_date.strftime("%d %b %Y") }}</p>{% endif %}
+            <p class="nw-workout-log"><strong>Workout date:</strong> {% if workout.workout_date %}{{ workout.workout_date.strftime("%d %b %Y") }}{% else %}Not recorded yet{% endif %}</p>
             <div class="nw-res-actions" style="margin-top:10px">
               <a class="nw-res-open" href="/dashboard/clients/{{ client.id }}/workouts/{{ workout.assignment_id }}">View workout progress →</a>
             </div>
