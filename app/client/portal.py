@@ -210,31 +210,66 @@ def client_home(request: Request, access_token: str):
 
 
 @router.get(
-    "/client/{access_token}/workouts/{assignment_id}",
+    "/client/{access_token}/workouts",
     response_class=HTMLResponse,
 )
-def client_workout_page(
+def client_workouts_page(
     request: Request,
     access_token: str,
-    assignment_id: int,
 ):
     client = get_client_by_token(access_token)
     if not client:
         raise HTTPException(status_code=404, detail="Client access link not found")
 
-    workout = get_client_workout_assignment(assignment_id, client["id"])
-    if not workout:
-        raise HTTPException(status_code=404, detail="Workout not found")
+    workouts = get_client_workouts(client["id"])
+
+    requested = request.query_params.get("workout")
+    selected_assignment_id = None
+    if requested:
+        try:
+            selected_assignment_id = int(requested)
+        except ValueError:
+            selected_assignment_id = None
+
+    valid_ids = {row["assignment_id"] for row in workouts}
+    if selected_assignment_id not in valid_ids:
+        selected_assignment_id = (
+            workouts[0]["assignment_id"] if workouts else None
+        )
+
+    selected_workout = (
+        get_client_workout_assignment(
+            selected_assignment_id,
+            client["id"],
+        )
+        if selected_assignment_id
+        else None
+    )
 
     return templates.TemplateResponse(
-        "client/workout.html",
+        "client/workouts.html",
         {
             "request": request,
             "client": client,
             "access_token": access_token,
-            "workout": workout,
+            "workouts": workouts,
+            "selected_workout": selected_workout,
+            "selected_assignment_id": selected_assignment_id,
             "saved": request.query_params.get("saved") == "1",
         },
+    )
+
+
+@router.get(
+    "/client/{access_token}/workouts/{assignment_id}",
+)
+def legacy_client_workout_page(
+    access_token: str,
+    assignment_id: int,
+):
+    return RedirectResponse(
+        f"/client/{access_token}/workouts?workout={assignment_id}",
+        status_code=303,
     )
 
 
@@ -271,7 +306,7 @@ def save_client_workout_set(
         raise HTTPException(status_code=404, detail="Workout set not found")
 
     return RedirectResponse(
-        f"/client/{access_token}/workouts/{assignment_id}?saved=1",
+        f"/client/{access_token}/workouts?workout={assignment_id}&saved=1",
         status_code=303,
     )
 
@@ -283,7 +318,7 @@ def complete_client_workout(access_token: str, assignment_id: int):
         raise HTTPException(status_code=404, detail="Client access link not found")
     complete_workout(assignment_id, client["id"])
     return RedirectResponse(
-        f"/client/{access_token}/workouts/{assignment_id}",
+        f"/client/{access_token}/workouts?workout={assignment_id}",
         status_code=303,
     )
 
@@ -295,7 +330,7 @@ def reopen_client_workout(access_token: str, assignment_id: int):
         raise HTTPException(status_code=404, detail="Client access link not found")
     reopen_workout(assignment_id, client["id"])
     return RedirectResponse(
-        f"/client/{access_token}/workouts/{assignment_id}",
+        f"/client/{access_token}/workouts?workout={assignment_id}",
         status_code=303,
     )
 

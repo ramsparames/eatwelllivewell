@@ -230,10 +230,13 @@ def get_client_workouts(client_id: int):
                     w.category,
                     w.duration_minutes,
                     w.equipment,
-                    COUNT(e.id)::int AS exercise_count
+                    COUNT(DISTINCT e.id)::int AS exercise_count,
+                    COUNT(DISTINCT sl.id) FILTER (WHERE sl.completed = TRUE)::int AS completed_sets,
+                    COUNT(DISTINCT sl.id)::int AS logged_sets
                 FROM client_workout_assignments a
                 JOIN coach_workouts w ON w.id = a.workout_id
                 LEFT JOIN workout_exercises e ON e.workout_id = w.id
+                LEFT JOIN client_workout_set_logs sl ON sl.assignment_id = a.id
                 WHERE a.client_id = %s
                   AND a.status <> 'removed'
                   AND w.active = TRUE

@@ -1,0 +1,440 @@
+{% extends "client/base.html" %}
+{% block title %}My Workouts | NourisHer{% endblock %}
+{% block content %}
+<style>
+.wk,.wk *{box-sizing:border-box}
+.wk{
+  --purple:#5b0e91;
+  --ink:#28232c;
+  --muted:#756f79;
+  --line:#e6dee9;
+  --soft:#faf7fb;
+  --green:#287a50;
+  width:min(1180px,calc(100% - 34px));
+  margin:17px auto 35px;
+  color:var(--ink)
+}
+.wk-top{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:flex-end;
+  margin-bottom:12px
+}
+.wk-kicker{
+  margin:0 0 5px;
+  color:var(--purple);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase
+}
+.wk-top h1{margin:0;font-size:32px;letter-spacing:-.035em}
+.wk-top p{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.5}
+.wk-tabs{
+  display:flex;
+  gap:5px;
+  width:max-content;
+  margin-bottom:14px;
+  padding:5px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff
+}
+.wk-tab{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 14px;
+  border-radius:8px;
+  color:var(--muted);
+  text-decoration:none;
+  font-size:14px;
+  font-weight:800
+}
+.wk-tab.active{background:var(--purple);color:#fff}
+.wk-tab span{
+  display:inline-flex;
+  min-width:20px;height:20px;
+  align-items:center;justify-content:center;
+  padding:0 6px;border-radius:999px;
+  background:rgba(255,255,255,.18);
+  color:#fff;font-size:11px;font-weight:900
+}
+
+.wk-shell{
+  display:grid;
+  grid-template-columns:320px minmax(0,1fr);
+  gap:14px;
+  align-items:start
+}
+.wk-panel{
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 5px 18px rgba(48,27,59,.04)
+}
+.wk-left{padding:15px}
+.wk-left-head{padding:2px 3px 12px}
+.wk-left-head h2{margin:0;font-size:18px}
+.wk-left-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.wk-list{display:grid;gap:8px}
+.wk-item{
+  display:block;
+  padding:13px;
+  border:1px solid #eee8f0;
+  border-radius:12px;
+  color:var(--ink);
+  text-decoration:none;
+  background:#fff
+}
+.wk-item:hover{border-color:#d7c6df;background:#fdfafd}
+.wk-item.active{
+  border-color:#caaedf;
+  background:#f7effb;
+  box-shadow:inset 3px 0 0 var(--purple)
+}
+.wk-item-top{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:flex-start
+}
+.wk-item h3{margin:7px 0 4px;font-size:15px;line-height:1.3}
+.wk-item-meta{color:var(--muted);font-size:11px;line-height:1.4}
+.wk-status{
+  flex:none;
+  padding:5px 7px;
+  border-radius:999px;
+  background:#f1edf3;
+  color:#6b626f;
+  font-size:10px;
+  font-weight:850
+}
+.wk-status.in_progress{background:#f3e9f8;color:var(--purple)}
+.wk-status.completed{background:#eaf5ef;color:#31704c}
+.wk-section-label{
+  margin:14px 3px 7px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase
+}
+
+.wk-detail{padding:22px}
+.wk-detail-head{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:flex-start;
+  padding-bottom:16px;
+  border-bottom:1px solid #eee8f0
+}
+.wk-detail-head h2{margin:0;font-size:25px;letter-spacing:-.025em}
+.wk-detail-meta{margin-top:6px;color:var(--muted);font-size:13px}
+.wk-note{
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#faf5fc;
+  color:#584d5e;
+  font-size:13px;
+  line-height:1.45
+}
+.wk-progress{
+  margin-top:12px;
+  height:8px;
+  border-radius:999px;
+  background:#eee8f0;
+  overflow:hidden
+}
+.wk-progress span{display:block;height:100%;background:var(--purple)}
+
+.wk-exercises{display:grid;gap:12px;margin-top:16px}
+.wk-ex{
+  padding:16px;
+  border:1px solid #eee8f0;
+  border-radius:14px;
+  background:#fff
+}
+.wk-ex-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start
+}
+.wk-ex h3{margin:0;font-size:18px}
+.wk-rx{margin-top:4px;color:var(--muted);font-size:12px}
+.wk-video{
+  flex:none;
+  display:inline-flex;
+  padding:8px 10px;
+  border-radius:9px;
+  background:#f3e9f8;
+  color:var(--purple);
+  text-decoration:none;
+  font-size:12px;
+  font-weight:850
+}
+.wk-instruction{margin:9px 0 0;color:var(--muted);font-size:12.5px;line-height:1.45}
+.wk-sets{
+  margin-top:12px;
+  overflow:auto;
+  border:1px solid #eee8f0;
+  border-radius:11px
+}
+.wk-set-head,.wk-set{
+  display:grid;
+  grid-template-columns:65px 1fr 1fr 90px 95px;
+  gap:8px;
+  align-items:center
+}
+.wk-set-head{
+  padding:9px 10px;
+  background:#faf7fb;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.05em
+}
+.wk-set{
+  padding:9px 10px;
+  border-top:1px solid #f0ebf1;
+  min-width:560px
+}
+.wk-set:first-of-type{border-top:0}
+.wk-set strong{font-size:12px}
+.wk-input{
+  width:100%;
+  height:38px;
+  padding:0 9px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#fff;
+  color:var(--ink);
+  font:inherit;
+  font-size:13px
+}
+.wk-done{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800
+}
+.wk-done input{accent-color:var(--purple)}
+.wk-save{
+  height:38px;
+  border:0;
+  border-radius:9px;
+  background:var(--purple);
+  color:#fff;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:850
+}
+.wk-complete{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:center;
+  margin-top:16px;
+  padding:15px 16px;
+  border:1px solid #e7ddea;
+  border-radius:13px;
+  background:#fcfafc
+}
+.wk-complete h3{margin:0;font-size:16px}
+.wk-complete p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.wk-complete-btn{
+  min-height:42px;
+  padding:0 15px;
+  border:0;
+  border-radius:10px;
+  background:var(--purple);
+  color:#fff;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:850
+}
+.wk-empty{
+  padding:45px 24px;
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.5
+}
+@media(max-width:850px){
+  .wk-shell{grid-template-columns:1fr}
+  .wk-left{position:static}
+  .wk-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .wk{width:100%;padding:0 12px}
+  .wk-list{grid-template-columns:1fr}
+  .wk-detail{padding:16px}
+  .wk-detail-head,.wk-complete{display:block}
+  .wk-complete-btn{margin-top:10px;width:100%}
+}
+</style>
+
+<div class="wk">
+  <div class="wk-top">
+    <div>
+      <p class="wk-kicker">NourisHer</p>
+      <h1>My workouts</h1>
+      <p>Open a workout, follow Sushma’s exercise demos, and record the weight and reps you complete.</p>
+    </div>
+  </div>
+
+  <nav class="wk-tabs">
+    <a class="wk-tab" href="/client/{{ access_token }}">My Data</a>
+    <a class="wk-tab active" href="/client/{{ access_token }}/workouts">Workouts{% if workouts %}<span>{{ workouts|length }}</span>{% endif %}</a>
+  </nav>
+
+  <div class="wk-shell">
+    <aside class="wk-panel wk-left">
+      <div class="wk-left-head">
+        <h2>Assigned workouts</h2>
+        <p>Select a workout to view and log it.</p>
+      </div>
+
+      {% if workouts %}
+      <div class="wk-list">
+        {% for workout in workouts if workout.status != "completed" %}
+        <a class="wk-item {% if workout.assignment_id == selected_assignment_id %}active{% endif %}"
+           href="/client/{{ access_token }}/workouts?workout={{ workout.assignment_id }}">
+          <div class="wk-item-top">
+            <span class="wk-status {{ workout.status }}">{{ workout.status|replace("_"," ")|title }}</span>
+            {% if workout.due_date %}<span class="wk-item-meta">{{ workout.due_date.strftime("%d %b") }}</span>{% endif %}
+          </div>
+          <h3>{{ workout.title }}</h3>
+          <div class="wk-item-meta">{{ workout.exercise_count }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}</div>
+        </a>
+        {% endfor %}
+
+        {% set completed = workouts|selectattr("status","equalto","completed")|list %}
+        {% if completed %}
+        <div class="wk-section-label">Completed</div>
+        {% for workout in completed %}
+        <a class="wk-item {% if workout.assignment_id == selected_assignment_id %}active{% endif %}"
+           href="/client/{{ access_token }}/workouts?workout={{ workout.assignment_id }}">
+          <div class="wk-item-top">
+            <span class="wk-status completed">Completed</span>
+          </div>
+          <h3>{{ workout.title }}</h3>
+          <div class="wk-item-meta">{{ workout.exercise_count }} exercises{% if workout.completed_at %} · {{ workout.completed_at.strftime("%d %b") }}{% endif %}</div>
+        </a>
+        {% endfor %}
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="wk-empty">No workouts have been assigned yet.</div>
+      {% endif %}
+    </aside>
+
+    <main class="wk-panel wk-detail">
+      {% if selected_workout %}
+        {% set ns = namespace(total=0, done=0) %}
+        {% for exercise in selected_workout.exercises %}
+          {% for setlog in exercise.set_logs %}
+            {% set ns.total = ns.total + 1 %}
+            {% if setlog.completed %}{% set ns.done = ns.done + 1 %}{% endif %}
+          {% endfor %}
+        {% endfor %}
+        {% set pct = ((ns.done / ns.total * 100)|round|int) if ns.total else 0 %}
+
+        <div class="wk-detail-head">
+          <div>
+            <p class="wk-kicker">Selected workout</p>
+            <h2>{{ selected_workout.title }}</h2>
+            <div class="wk-detail-meta">
+              {{ selected_workout.exercises|length }} exercises
+              {% if selected_workout.duration_minutes %} · {{ selected_workout.duration_minutes }} min{% endif %}
+              {% if selected_workout.due_date %} · Due {{ selected_workout.due_date.strftime("%d %b %Y") }}{% endif %}
+            </div>
+          </div>
+          <span class="wk-status {{ selected_workout.status }}">{{ selected_workout.status|replace("_"," ")|title }}</span>
+        </div>
+
+        {% if selected_workout.coach_note %}
+        <div class="wk-note"><strong>Sushma:</strong> {{ selected_workout.coach_note }}</div>
+        {% endif %}
+
+        <div class="wk-progress" title="{{ ns.done }} of {{ ns.total }} sets complete"><span style="width:{{ pct }}%"></span></div>
+
+        <div class="wk-exercises">
+          {% for exercise in selected_workout.exercises %}
+          <section class="wk-ex">
+            <div class="wk-ex-head">
+              <div>
+                <p class="wk-kicker" style="margin-top:0">Exercise {{ loop.index }}</p>
+                <h3>{{ exercise.title }}</h3>
+                <div class="wk-rx">
+                  {{ exercise.sets }} sets
+                  {% if exercise.reps_text %} · {{ exercise.reps_text }} reps{% endif %}
+                  {% if exercise.rest_seconds is not none %} · Rest {{ exercise.rest_seconds }} sec{% endif %}
+                </div>
+              </div>
+              {% if exercise.video_url %}
+              <a class="wk-video" href="{{ exercise.video_url }}" target="_blank" rel="noopener">Watch demo ▶</a>
+              {% endif %}
+            </div>
+
+            {% if exercise.instructions %}<p class="wk-instruction">{{ exercise.instructions }}</p>{% endif %}
+
+            <div class="wk-sets">
+              <div class="wk-set-head">
+                <span>Set</span><span>Weight kg</span><span>Reps</span><span>Done</span><span></span>
+              </div>
+              {% for setlog in exercise.set_logs %}
+              <form class="wk-set"
+                    method="post"
+                    action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/set">
+                <input type="hidden" name="exercise_id" value="{{ exercise.id }}">
+                <input type="hidden" name="set_number" value="{{ setlog.set_number }}">
+                <strong>Set {{ setlog.set_number }}</strong>
+                <input class="wk-input" type="number" step="0.1" min="0" name="weight_kg"
+                       value="{{ setlog.weight_kg if setlog.weight_kg is not none else '' }}" placeholder="kg">
+                <input class="wk-input" type="number" min="0" name="reps"
+                       value="{{ setlog.reps if setlog.reps is not none else '' }}" placeholder="reps">
+                <label class="wk-done">
+                  <input type="checkbox" name="completed" value="true" {% if setlog.completed %}checked{% endif %}>
+                  Done
+                </label>
+                <button class="wk-save" type="submit">Save</button>
+              </form>
+              {% endfor %}
+            </div>
+          </section>
+          {% endfor %}
+        </div>
+
+        <section class="wk-complete">
+          <div>
+            <h3>{% if selected_workout.status == "completed" %}Workout completed ✓{% else %}Finished this workout?{% endif %}</h3>
+            <p>{{ ns.done }} of {{ ns.total }} sets marked done.</p>
+          </div>
+          {% if selected_workout.status == "completed" %}
+          <form method="post" action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/reopen">
+            <button class="wk-complete-btn" type="submit">Reopen workout</button>
+          </form>
+          {% else %}
+          <form method="post" action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/complete">
+            <button class="wk-complete-btn" type="submit">Complete workout ✓</button>
+          </form>
+          {% endif %}
+        </section>
+      {% else %}
+      <div class="wk-empty">
+        <strong>No workout selected.</strong><br>
+        Sushma’s assigned workouts will appear here.
+      </div>
+      {% endif %}
+    </main>
+  </div>
+</div>
+{% endblock %}

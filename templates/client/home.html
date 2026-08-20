@@ -394,6 +394,201 @@
 @media(max-width:760px){
   .cp-workout-grid{grid-template-columns:1fr}
 }
+
+/* Assigned workouts — inside the main client portal shell */
+.cp-workout-section{
+  width:100%;
+  margin-top:14px;
+  padding:20px 22px!important;
+}
+.cp-workout-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:14px;
+}
+.cp-workout-card{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  min-height:170px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+}
+.cp-workout-card h3{
+  margin:11px 0 5px;
+  font-size:17px;
+  line-height:1.25;
+}
+.cp-workout-card p{
+  margin:5px 0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.4;
+}
+.cp-workout-open{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  width:max-content;
+  margin-top:auto!important;
+  padding:10px 13px!important;
+  border-radius:9px!important;
+  background:var(--purple)!important;
+  color:#fff!important;
+  text-decoration:none!important;
+  font-size:13px!important;
+  font-weight:850!important;
+}
+@media(max-width:760px){
+  .cp-workout-grid{grid-template-columns:1fr}
+}
+
+/* Client Resources — isolated final layout */
+.cp-res-panel{
+  margin-top:14px;
+  padding:21px 22px;
+  width:100%;
+  overflow:hidden;
+}
+.cp-res-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+}
+.cp-res-workouts{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:16px;
+}
+.cp-res-workout-card{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+}
+.cp-res-workout-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.cp-res-workout-card h3{
+  margin:12px 0 5px;
+  color:var(--ink);
+  font-size:18px;
+  line-height:1.25;
+}
+.cp-res-meta{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+.cp-res-note{
+  margin-top:10px;
+  padding:9px 10px;
+  border-radius:9px;
+  background:#faf5fc;
+  color:#594a60;
+  font-size:13px;
+  line-height:1.4;
+}
+.cp-res-status{
+  display:inline-flex;
+  padding:6px 9px;
+  border-radius:999px;
+  background:#f1edf3;
+  color:#685f6d;
+  font-size:12px;
+  font-weight:850;
+}
+.cp-res-status.completed{
+  background:#eaf5ef;
+  color:#31704c;
+}
+.cp-res-status.in_progress{
+  background:#f3e9f8;
+  color:var(--purple);
+}
+.cp-res-cta,
+.cp-res-cta:visited,
+.cp-res-cta:hover,
+.cp-res-cta:active{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  width:max-content;
+  min-height:42px;
+  margin-top:16px;
+  padding:0 15px;
+  border-radius:10px;
+  background:#5b0e91!important;
+  color:#ffffff!important;
+  text-decoration:none!important;
+  font-size:14px!important;
+  font-weight:850!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+.cp-res-other{
+  margin-top:14px;
+}
+@media(max-width:760px){
+  .cp-res-head{display:block}
+  .cp-res-head .cp-count{display:inline-flex;margin-top:10px}
+  .cp-res-workouts{grid-template-columns:1fr}
+}
+
+.cp-client-tabs{
+  display:flex;
+  gap:5px;
+  width:max-content;
+  margin-top:12px;
+  padding:5px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+}
+.cp-client-tab{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 14px;
+  border-radius:8px;
+  color:var(--muted);
+  text-decoration:none;
+  font-size:14px;
+  font-weight:800;
+}
+.cp-client-tab.active{
+  background:var(--purple);
+  color:#fff;
+}
+.cp-client-tab span{
+  display:inline-flex;
+  min-width:20px;
+  height:20px;
+  align-items:center;
+  justify-content:center;
+  padding:0 6px;
+  border-radius:999px;
+  background:#f3e9f8;
+  color:var(--purple);
+  font-size:11px;
+  font-weight:900;
+}
+.cp-client-tab.active span{
+  background:rgba(255,255,255,.18);
+  color:#fff;
+}
 </style>
 
 
@@ -414,6 +609,12 @@
       <small>daily check-ins completed this coaching week</small>
     </aside>
   </header>
+
+<nav class="cp-client-tabs" aria-label="Client portal sections">
+  <a class="cp-client-tab active" href="/client/{{ access_token }}">My Data</a>
+  <a class="cp-client-tab" href="/client/{{ access_token }}/workouts">Workouts{% if assigned_workouts %}<span>{{ assigned_workouts|length }}</span>{% endif %}</a>
+</nav>
+
 
   {% if saved %}
   <div class="cp-alert"><strong>✓ {{ selected_date.strftime("%d %b") }} saved.</strong> You can update it again anytime before this coaching week closes.</div>
@@ -698,6 +899,13 @@
 
 
   </div>
+
+
+
+
+
+
+
 </section>
 
 <script>
@@ -722,54 +930,7 @@
 
 
 
-<section class="cp-card cp-workout-section" style="padding:18px">
-  <div class="cp-title-row">
-    <div>
-      <p class="cp-kicker">Resources</p>
-      <h2>Your workouts & resources</h2>
-      <p class="cp-grid-help">Workouts assigned by Sushma appear here. Open one to watch the exercise demos and record your sets.</p>
-      {% if assigned_workouts %}
-      <p class="cp-grid-help"><strong>{{ assigned_workouts|length }} workout{% if assigned_workouts|length != 1 %}s{% endif %} assigned</strong></p>
-      {% endif %}
-    </div>
-  </div>
 
-  {% if assigned_workouts %}
-  <div class="cp-workout-grid">
-    {% for workout in assigned_workouts %}
-    <article class="cp-workout-card">
-      <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
-        <span class="cp-resource-tag">Workout</span>
-        <span class="cp-workout-status {{ workout.status }}">{{ workout.status|replace("_"," ")|title }}</span>
-      </div>
-      <h3>{{ workout.title }}</h3>
-      <p>{{ workout.exercise_count }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}{% if workout.due_date %} · Due {{ workout.due_date.strftime("%d %b") }}{% endif %}</p>
-      {% if workout.coach_note %}<p><strong>Sushma:</strong> {{ workout.coach_note }}</p>{% endif %}
-      <a class="cp-workout-open" href="/client/{{ access_token }}/workouts/{{ workout.assignment_id }}">{% if workout.status == "completed" %}View workout{% elif workout.status == "in_progress" %}Continue workout{% else %}Start workout{% endif %} →</a>
-    </article>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  {% if assigned_resources %}
-  <div class="cp-resources cp-regular-resources">
-    {% for resource in assigned_resources %}
-    <article class="cp-resource">
-      <div class="cp-resource-top"><span class="cp-resource-tag">{{ resource.resource_type }}</span></div>
-      <h3>{{ resource.title }}</h3>
-      <div class="cp-resource-meta">{{ resource.category }}{% if resource.duration_minutes %} · {{ resource.duration_minutes }} min{% endif %}</div>
-      {% if resource.description %}<p>{{ resource.description }}</p>{% endif %}
-      {% if resource.coach_note %}<p class="cp-resource-note"><strong>Sushma:</strong> {{ resource.coach_note }}</p>{% endif %}
-      <a class="cp-resource-link" href="{{ resource.resource_url }}" target="_blank" rel="noopener">Open resource ↗</a>
-    </article>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  {% if not assigned_workouts and not assigned_resources %}
-  <div class="cp-section-empty">Sushma has not assigned any workouts or resources yet.</div>
-  {% endif %}
-</section>
 
 {% endblock %}
 
