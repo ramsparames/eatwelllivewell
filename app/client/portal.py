@@ -246,6 +246,12 @@ def client_workouts_page(
         else None
     )
 
+    try:
+        client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
+    except Exception:
+        client_tz = ZoneInfo("Asia/Kolkata")
+    today = datetime.now(client_tz).date()
+
     return templates.TemplateResponse(
         "client/workouts.html",
         {
@@ -255,6 +261,7 @@ def client_workouts_page(
             "workouts": workouts,
             "selected_workout": selected_workout,
             "selected_assignment_id": selected_assignment_id,
+            "today": today,
             "saved": request.query_params.get("saved") == "1",
         },
     )
@@ -312,11 +319,37 @@ def save_client_workout_set(
 
 
 @router.post("/client/{access_token}/workouts/{assignment_id}/complete")
-def complete_client_workout(access_token: str, assignment_id: int):
+def complete_client_workout(
+    access_token: str,
+    assignment_id: int,
+    workout_date: str = Form(...),
+):
     client = get_client_by_token(access_token)
     if not client:
         raise HTTPException(status_code=404, detail="Client access link not found")
-    complete_workout(assignment_id, client["id"])
+
+    try:
+        client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
+    except Exception:
+        client_tz = ZoneInfo("Asia/Kolkata")
+    today = datetime.now(client_tz).date()
+
+    try:
+        actual_workout_date = date.fromisoformat(workout_date)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid workout date")
+
+    if actual_workout_date > today:
+        raise HTTPException(
+            status_code=400,
+            detail="Workout date cannot be in the future",
+        )
+
+    complete_workout(
+        assignment_id,
+        client["id"],
+        actual_workout_date,
+    )
     return RedirectResponse(
         f"/client/{access_token}/workouts?workout={assignment_id}",
         status_code=303,

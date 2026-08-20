@@ -45,7 +45,6 @@ from app.services.workout_service import (
     get_client_workouts,
     get_workout_assignment_progress,
     list_workouts,
-    remove_workout_assignment,
 )
 
 from app.services.client_portal_service import (
@@ -1246,7 +1245,6 @@ def assign_workout_route(
     request: Request,
     workout_id: int,
     client_ids: list[int] = Form(default=[]),
-    due_date: str = Form(""),
     coach_note: str = Form(""),
 ):
     if not coach_is_logged_in(request):
@@ -1254,11 +1252,9 @@ def assign_workout_route(
     if not client_ids:
         return RedirectResponse("/dashboard/resources?assign_error=clients", status_code=303)
 
-    parsed_due = date.fromisoformat(due_date) if due_date.strip() else None
     assign_workout(
         workout_id=workout_id,
         client_ids=client_ids,
-        due_date=parsed_due,
         coach_note=coach_note.strip() or None,
     )
     return RedirectResponse("/dashboard/resources?workout_assigned=1", status_code=303)
@@ -1300,34 +1296,11 @@ def coach_client_workout_detail(
     )
 
 
-@router.post(
-    "/dashboard/clients/{client_id}/workouts/{assignment_id}/remove"
-)
-def remove_client_workout_assignment(
-    request: Request,
-    client_id: int,
-    assignment_id: int,
-):
-    if not coach_is_logged_in(request):
-        return RedirectResponse("/coach/login", status_code=303)
-
-    remove_workout_assignment(
-        assignment_id=assignment_id,
-        client_id=client_id,
-    )
-
-    return RedirectResponse(
-        f"/dashboard/clients/{client_id}?tab=resources",
-        status_code=303,
-    )
-
-
 @router.post("/dashboard/clients/{client_id}/workouts")
 def assign_client_workout_route(
     request: Request,
     client_id: int,
     workout_id: int = Form(...),
-    due_date: str = Form(""),
     coach_note: str = Form(""),
 ):
     if not coach_is_logged_in(request):
@@ -1335,7 +1308,6 @@ def assign_client_workout_route(
     assign_workout(
         workout_id=workout_id,
         client_ids=[client_id],
-        due_date=date.fromisoformat(due_date) if due_date.strip() else None,
         coach_note=coach_note.strip() or None,
     )
     return RedirectResponse(

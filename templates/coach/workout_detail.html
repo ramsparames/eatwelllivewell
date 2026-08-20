@@ -23,7 +23,7 @@
       <a class="wd-back" href="/dashboard/clients/{{ client.id }}?tab=resources">← Back to {{ client.name }} · Resources</a>
       <p class="wd-kicker">Workout progress</p>
       <h1>{{ workout.title }}</h1>
-      <p>{{ client.name }} · assigned {{ workout.assigned_on.strftime("%d %b %Y") }}{% if workout.due_date %} · due {{ workout.due_date.strftime("%d %b %Y") }}{% endif %}</p>
+      <p>{{ client.name }} · assigned {{ workout.assigned_on.strftime("%d %b %Y") }}</p>
     </div>
     <div class="wd-meta">
       <span class="wd-chip"><strong>{{ workout.status|replace("_"," ")|title }}</strong></span>
@@ -36,7 +36,7 @@
     <div class="wd-stat"><span>Exercises</span><strong>{{ workout.exercises|length }}</strong></div>
     <div class="wd-stat"><span>Sets completed</span><strong>{{ workout.completed_sets }}/{{ workout.total_sets }}</strong></div>
     <div class="wd-stat"><span>Progress</span><strong>{{ workout.completion_percent }}%</strong></div>
-    <div class="wd-stat"><span>Completed</span><strong style="font-size:15px">{% if workout.completed_at %}{{ workout.completed_at.strftime("%d %b %Y") }}{% else %}Not yet{% endif %}</strong></div>
+    <div class="wd-stat"><span>Workout date</span><strong style="font-size:15px">{% if workout.workout_date %}{{ workout.workout_date.strftime("%d %b %Y") }}{% else %}Not yet{% endif %}</strong></div>
   </div>
 
   {% if workout.total_sets %}

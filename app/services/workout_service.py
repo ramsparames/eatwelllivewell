@@ -57,6 +57,10 @@ def create_workout_tables() -> None:
                 )
             """)
             cursor.execute("""
+                ALTER TABLE client_workout_assignments
+                ADD COLUMN IF NOT EXISTS workout_date DATE
+            """)
+            cursor.execute("""
                 CREATE INDEX IF NOT EXISTS idx_client_workouts_client
                 ON client_workout_assignments(client_id, assigned_on DESC)
             """)
@@ -179,12 +183,11 @@ def archive_workout(workout_id: int):
 def assign_workout(
     workout_id: int,
     client_ids: list[int],
-    due_date: date | None = None,
     coach_note: str | None = None,
 ):
     """
-    Assign once per client/workout while the assignment is active.
-    Returns the number of new assignments created.
+    Assign a workout without a due date. The client records the actual
+    workout_date when they complete the workout.
     """
     created = 0
     with get_connection() as connection:
@@ -204,10 +207,10 @@ def assign_workout(
 
                 cursor.execute("""
                     INSERT INTO client_workout_assignments (
-                        client_id, workout_id, due_date, coach_note, status
+                        client_id, workout_id, coach_note, status
                     )
-                    VALUES (%s, %s, %s, %s, 'assigned')
-                """, (client_id, workout_id, due_date, coach_note))
+                    VALUES (%s, %s, %s, 'assigned')
+                """, (client_id, workout_id, coach_note))
                 created += 1
     return created
 
@@ -368,17 +371,23 @@ def save_set_log(
             return True
 
 
-def complete_workout(assignment_id: int, client_id: int):
+def complete_workout(
+    assignment_id: int,
+    client_id: int,
+    workout_date: date,
+):
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute("""
                 UPDATE client_workout_assignments
                 SET status = 'completed',
+                    workout_date = %s,
                     started_at = COALESCE(started_at, NOW()),
                     completed_at = NOW(),
                     updated_at = NOW()
                 WHERE id = %s AND client_id = %s
-            """, (assignment_id, client_id))
+            """, (workout_date, assignment_id, client_id))
+
 
 
 def reopen_workout(assignment_id: int, client_id: int):
@@ -387,6 +396,7 @@ def reopen_workout(assignment_id: int, client_id: int):
             cursor.execute("""
                 UPDATE client_workout_assignments
                 SET status = 'in_progress',
+                    workout_date = NULL,
                     completed_at = NULL,
                     updated_at = NOW()
                 WHERE id = %s AND client_id = %s

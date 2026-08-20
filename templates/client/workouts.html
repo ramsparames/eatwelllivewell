@@ -279,6 +279,34 @@
   .wk-detail-head,.wk-complete{display:block}
   .wk-complete-btn{margin-top:10px;width:100%}
 }
+
+.wk-complete-form{
+  display:flex;
+  gap:10px;
+  align-items:flex-end
+}
+.wk-date-label{
+  display:block;
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:850
+}
+.wk-date-input{
+  height:42px;
+  padding:0 10px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+  color:var(--ink);
+  font:inherit;
+  font-size:13px
+}
+@media(max-width:560px){
+  .wk-complete-form{display:block}
+  .wk-date-input,.wk-complete-btn{width:100%}
+  .wk-complete-btn{margin-top:8px}
+}
 </style>
 
 <div class="wk">
@@ -309,7 +337,7 @@
            href="/client/{{ access_token }}/workouts?workout={{ workout.assignment_id }}">
           <div class="wk-item-top">
             <span class="wk-status {{ workout.status }}">{{ workout.status|replace("_"," ")|title }}</span>
-            {% if workout.due_date %}<span class="wk-item-meta">{{ workout.due_date.strftime("%d %b") }}</span>{% endif %}
+            
           </div>
           <h3>{{ workout.title }}</h3>
           <div class="wk-item-meta">{{ workout.exercise_count }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}</div>
@@ -326,7 +354,7 @@
             <span class="wk-status completed">Completed</span>
           </div>
           <h3>{{ workout.title }}</h3>
-          <div class="wk-item-meta">{{ workout.exercise_count }} exercises{% if workout.completed_at %} · {{ workout.completed_at.strftime("%d %b") }}{% endif %}</div>
+          <div class="wk-item-meta">{{ workout.exercise_count }} exercises{% if workout.workout_date %} · Done {{ workout.workout_date.strftime("%d %b") }}{% endif %}</div>
         </a>
         {% endfor %}
         {% endif %}
@@ -354,7 +382,7 @@
             <div class="wk-detail-meta">
               {{ selected_workout.exercises|length }} exercises
               {% if selected_workout.duration_minutes %} · {{ selected_workout.duration_minutes }} min{% endif %}
-              {% if selected_workout.due_date %} · Due {{ selected_workout.due_date.strftime("%d %b %Y") }}{% endif %}
+              {% if selected_workout.workout_date %} · Done {{ selected_workout.workout_date.strftime("%d %b %Y") }}{% endif %}
             </div>
           </div>
           <span class="wk-status {{ selected_workout.status }}">{{ selected_workout.status|replace("_"," ")|title }}</span>
@@ -423,7 +451,11 @@
             <button class="wk-complete-btn" type="submit">Reopen workout</button>
           </form>
           {% else %}
-          <form method="post" action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/complete">
+          <form class="wk-complete-form" method="post" action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/complete">
+            <label>
+              <span class="wk-date-label">Workout date</span>
+              <input class="wk-date-input" type="date" name="workout_date" value="{{ today.isoformat() if today is defined else '' }}" required>
+            </label>
             <button class="wk-complete-btn" type="submit">Complete workout ✓</button>
           </form>
           {% endif %}
