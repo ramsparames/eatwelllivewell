@@ -47,7 +47,9 @@ from app.services.client_portal_service import (
     save_weekly_measurements,
 )
 
-from app.services.coaching_insights_service import get_previous_exercise_performance
+from app.services.coaching_insights_service import {
+    get_previous_exercise_performance,
+}
 
 router = APIRouter()
 
@@ -248,12 +250,15 @@ def client_workouts_page(
         else None
     )
 
-    for exercise in selected_workout.get("exercises", []):
-        exercise["previous_performance"] = get_previous_exercise_performance(
-            client_id,
-            selected_workout["id"],
-            exercise["title"],
-        )
+    if selected_workout:
+        for exercise in selected_workout.get("exercises", []):
+            exercise["previous_performance"] = (
+                get_previous_exercise_performance(
+                    client["id"],
+                    selected_workout["id"],
+                    exercise["title"],
+                )
+            )
 
     try:
         client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
