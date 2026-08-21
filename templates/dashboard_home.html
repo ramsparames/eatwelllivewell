@@ -88,6 +88,63 @@
 @media(max-width:620px){
   .cd-ops-summary{grid-template-columns:repeat(2,1fr)}
 }
+
+.cd-attention-wrap{margin-top:18px}
+.cd-attention-wrap .cd-panel{width:100%}
+.cd-attention-wrap .cd-head h2{font-size:28px}
+.cd-attention-wrap .cd-ops-summary{
+  grid-template-columns:repeat(6,minmax(150px,1fr));
+  gap:10px;
+  margin-bottom:18px
+}
+.cd-attention-wrap .cd-op-mini{
+  min-height:108px;
+  padding:18px 12px;
+  border-radius:14px
+}
+.cd-attention-wrap .cd-op-mini b{
+  font-size:30px
+}
+.cd-attention-wrap .cd-op-mini span{
+  margin-top:8px;
+  font-size:12px
+}
+.cd-attention-wrap .cd-attn-client{
+  padding:16px 0;
+  gap:14px
+}
+.cd-attention-wrap .cd-attn-client strong{
+  font-size:15px
+}
+.cd-attention-wrap .cd-attn-client .meta{
+  font-size:12px
+}
+.cd-attention-wrap .cd-reason{
+  padding:6px 9px;
+  font-size:11px
+}
+.cd-schedule-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-top:18px
+}
+.cd-schedule-grid .cd-panel{
+  min-height:100%
+}
+@media(max-width:1150px){
+  .cd-attention-wrap .cd-ops-summary{
+    grid-template-columns:repeat(3,1fr)
+  }
+}
+@media(max-width:850px){
+  .cd-schedule-grid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .cd-attention-wrap .cd-ops-summary{
+    grid-template-columns:repeat(2,1fr)
+  }
+}
 </style>
 
 {% set without_next_call = clients_without_next_call if clients_without_next_call is defined else [] %}
@@ -132,34 +189,8 @@
     </a>
   </section>
 
-  <section class="cd-grid">
-    <article class="cd-panel" id="todays-schedule">
-      <div class="cd-head">
-        <div><span class="over">Schedule</span><h2>Today's schedule</h2></div>
-        <a href="#weekly-schedule">View this week →</a>
-      </div>
-
-      {% if calls_today is defined and calls_today %}
-      <div class="cd-list">
-        {% for call in calls_today %}
-        <a class="cd-item" href="{{ call.href or '/dashboard' }}">
-          <div>
-            <strong>{{ call.name }}</strong>
-            <span>{{ call.next_call_time or "Time not set" }} · {{ call.call_type or "Coaching call" }}</span>
-          </div>
-          <span class="cd-arrow">→</span>
-        </a>
-        {% endfor %}
-        <div class="cd-ops-none" data-ops-none>No clients in this category.</div>
-      </div>
-      {% else %}
-      <div class="cd-empty">
-        <div class="cd-icon">✓</div>
-        <div><strong>No calls today</strong><p>No clarity or coaching calls scheduled.</p></div>
-      </div>
-      {% endif %}
-    </article>
-
+  
+  <section class="cd-attention-wrap">
     <article class="cd-panel">
       <div class="cd-head">
         <div><span class="over">Operations</span><h2>Needs attention</h2></div>
@@ -234,10 +265,37 @@
     </article>
   </section>
 
-  <section class="cd-panel" id="weekly-schedule">
+  <section class="cd-schedule-grid">
+    <article class="cd-panel" id="todays-schedule">
+      <div class="cd-head">
+        <div><span class="over">Schedule</span><h2>Today's schedule</h2></div>
+        <a href="#weekly-schedule">This week →</a>
+      </div>
+
+      {% if calls_today is defined and calls_today %}
+      <div class="cd-list">
+        {% for call in calls_today %}
+        <a class="cd-item" href="{{ call.href or '/dashboard' }}">
+          <div>
+            <strong>{{ call.name }}</strong>
+            <span>{{ call.next_call_time or "Time not set" }} · {{ call.call_type or "Coaching call" }}</span>
+          </div>
+          <span class="cd-arrow">→</span>
+        </a>
+        {% endfor %}
+        <div class="cd-ops-none" data-ops-none>No clients in this category.</div>
+      </div>
+      {% else %}
+      <div class="cd-empty">
+        <div class="cd-icon">✓</div>
+        <div><strong>No calls today</strong><p>No clarity or coaching calls scheduled.</p></div>
+      </div>
+      {% endif %}
+    </article>
+    <article class="cd-panel" id="weekly-schedule">
     <div class="cd-head">
       <div><span class="over">Week</span><h2>This week’s schedule</h2></div>
-      <a href="#todays-schedule">Today ↑</a>
+      <a href="#todays-schedule">Today ←</a>
     </div>
 
     {% if calls_this_week is defined and calls_this_week %}
@@ -258,7 +316,10 @@
       <div><strong>No calls scheduled this week</strong><p>Clarity and coaching calls will appear here after Synamate syncs them.</p></div>
     </div>
     {% endif %}
+  </article>
   </section>
+
+
 
   <section class="cd-lower">
     <article class="cd-panel">
