@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}NourisHer Coach Dashboard{% endblock %}</title>
+    <title>{% block title %}Coach Dashboard | Eat Well Live Well{% endblock %}</title>
     <style>
         :root{
             --coach-purple:#5b0e91;
@@ -81,7 +81,18 @@
             .coach-site-footer-inner span{display:block;margin-top:4px}
         }
     </style>
-    {% block head %}{% endblock %}
+    <style>
+.coach-site-header-inner{max-width:1320px;padding:10px 24px}
+.coach-brand img{width:154px;height:42px}
+.coach-brand-copy strong{font-size:15px}.coach-brand-copy span{font-size:11px}
+.coach-nav{padding:4px;border-radius:12px;background:#f8f4fa;gap:2px}
+.coach-nav a{min-height:36px;display:inline-flex;align-items:center;padding:0 11px;border-radius:9px;font-size:12.5px}
+.coach-nav a:hover,.coach-nav a.is-active{background:#fff;color:var(--coach-purple);box-shadow:0 2px 9px rgba(65,25,83,.07)}
+.coach-nav .coach-logout{margin-left:4px}
+.coach-page{max-width:1320px;padding-top:20px}
+@media(max-width:900px){.coach-site-header-inner{display:block}.coach-nav{margin-top:10px;overflow:auto;flex-wrap:nowrap}}
+</style>
+{% block head %}{% endblock %}
 </head>
 <body>
 <header class="coach-site-header">
@@ -89,8 +100,8 @@
         <a class="coach-brand" href="/dashboard" aria-label="Eat Well Live Well Coach Dashboard">
             <img src="/static/eatwelllivewell-logo.png" alt="Eat Well Live Well">
             <span class="coach-brand-copy">
-                <strong>NourisHer Coach Dashboard</strong>
-                <span>Coaching workspace</span>
+                <strong>NourisHer Coach</strong>
+                <span>Sushma’s coaching workspace</span>
             </span>
         </a>
 
@@ -98,6 +109,7 @@
             <a href="/dashboard" class="{% if active_nav == 'home' %}is-active{% endif %}">Dashboard</a>
             <a href="/dashboard/clients" class="{% if active_nav == 'clients' %}is-active{% endif %}">Clients</a>
             <a href="/dashboard/leads" class="{% if active_nav == 'leads' %}is-active{% endif %}">Leads</a>
+            <a href="/dashboard/resources" class="{% if active_nav == 'resources' %}is-active{% endif %}">Resources</a>
             <a href="/" target="_blank" rel="noopener">Website ↗</a>
             <a class="coach-logout" href="/coach/logout">Log out</a>
         </nav>
@@ -110,8 +122,8 @@
 
 <footer class="coach-site-footer">
     <div class="coach-site-footer-inner">
-        <div><strong>NourisHer Coach Dashboard</strong></div>
-        <span>Private coaching workspace</span>
+        <div><strong>Eat Well Live Well</strong> · Coach Dashboard</div>
+        <span>© 2026 Eat Well Live Well · Coaching by Sushma</span>
     </div>
 </footer>
 {% block scripts %}{% endblock %}

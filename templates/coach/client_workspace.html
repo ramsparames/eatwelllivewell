@@ -49,6 +49,24 @@
 .nw-standing-plan span{display:block;margin-top:4px;color:#6e6871;font-size:13px;line-height:1.45}
 </style>
 
+<style>
+.nw{max-width:1180px}.nw-top{margin-bottom:14px;padding:16px 18px;border:1px solid var(--coach-border);border-radius:16px;background:#fff}
+.nw-top h1{font-size:29px}.nw-chip{padding:6px 9px;font-size:11px}
+.nw-tabs-polished{display:flex;gap:3px;margin-bottom:12px;padding:4px;border:1px solid var(--coach-border);border-radius:12px;background:#f8f4fa;overflow:auto}
+.nw-tabs-polished .nw-tab{min-height:38px;padding:0 13px;border:0;border-radius:9px;background:transparent;color:var(--coach-muted);font-size:12px;font-weight:800;white-space:nowrap}
+.nw-tabs-polished .nw-tab.active{background:#fff;color:var(--coach-purple);box-shadow:0 2px 9px rgba(65,25,83,.07)}
+.nw-client-snapshot{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}
+.nw-client-snapshot>div{padding:14px;border:1px solid var(--coach-border);border-radius:13px;background:#fff}
+.nw-client-snapshot span{display:block;color:var(--coach-muted);font-size:10px;font-weight:800}
+.nw-client-snapshot strong{display:block;margin-top:5px;color:var(--coach-purple);font-size:25px;line-height:1}
+.nw-client-snapshot small{display:block;margin-top:5px;color:var(--coach-muted);font-size:10px}
+.nw-workflow-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px;padding:8px;border:1px solid var(--coach-border);border-radius:13px;background:#fff}
+.nw-workflow-strip>div{display:grid;grid-template-columns:27px minmax(0,1fr);column-gap:8px;padding:8px;border-radius:9px}
+.nw-workflow-strip>div.active{background:#f7effa}.nw-workflow-strip span{grid-row:1/3;width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:#efe3f4;color:var(--coach-purple);font-size:11px;font-weight:900}
+.nw-workflow-strip strong{font-size:11px}.nw-workflow-strip small{color:var(--coach-muted);font-size:9px}
+.nw-panel{border-radius:15px;box-shadow:0 3px 14px rgba(43,26,52,.03)}.nw-pad{padding:19px}
+@media(max-width:850px){.nw-client-snapshot{grid-template-columns:1fr 1fr}.nw-workflow-strip{grid-template-columns:1fr 1fr}}
+</style>
 {% endblock %}
 {% block content %}
 <style>
@@ -689,13 +707,26 @@
 {% else %}
 <div class="nw">
   <header class="nw-top">
-    <div><a class="nw-back" href="/dashboard/clients">← Clients</a><p class="nw-kicker">Client workspace</p><h1>{{ client.name }}</h1><p>{{ client.program or "Coaching" }} · {{ client.email or "No email" }} · {{ client.phone or "No phone" }}</p></div>
+    <div><a class="nw-back" href="/dashboard/clients">← Clients</a><p class="nw-kicker">CLIENT WORKSPACE</p><h1>{{ client.name }}</h1><p>{{ client.program or "Coaching" }} · Week {{ current_week }} · {{ (client.status or "active")|title }}</p></div>
     <div class="nw-meta"><span class="nw-chip"><strong>Week {{ current_week }}</strong> · {{ current_week_start.strftime("%d %b %Y") }} – {{ current_week_end.strftime("%d %b %Y") }}</span><span class="nw-chip">Next call: <strong>{% if next_synced_call and next_synced_call.local_start_time %}{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}{% else %}Not scheduled{% endif %}</strong></span><span class="nw-chip">{{ (client.status or "active")|title }}</span></div>
   </header>
 
-  <nav class="nw-tabs"><button class="nw-tab active" type="button" data-tab="overview">Overview</button><button class="nw-tab" type="button" data-tab="weekly">Weekly Check-in</button><button class="nw-tab" type="button" data-tab="clientdata">Client Data</button><button class="nw-tab" type="button" data-tab="resources">Resources</button><button class="nw-tab" type="button" data-tab="timeline">Timeline</button></nav>
+  <nav class="nw-tabs nw-tabs-polished">
+    <button class="nw-tab active" type="button" data-tab="overview">Overview</button>
+    <button class="nw-tab" type="button" data-tab="weekly">Weekly Coaching</button>
+    <button class="nw-tab" type="button" data-tab="clientdata">Data</button>
+    <button class="nw-tab" type="button" data-tab="resources">Workouts & Resources</button>
+    <button class="nw-tab" type="button" data-tab="timeline">Progress</button>
+  </nav>
 
-  <section class="nw-panel-tab active" data-panel="overview">
+    <section class="nw-client-snapshot">
+    <div><span>Actions</span><strong>{{ coaching_week_summary.action_percent if coaching_week_summary.action_percent is not none else "—" }}{% if coaching_week_summary.action_percent is not none %}%{% endif %}</strong><small>{{ coaching_week_summary.action_completed }}/{{ coaching_week_summary.action_total }} complete</small></div>
+    <div><span>Average steps</span><strong>{{ "{:,}".format(coaching_week_summary.avg_steps) if coaching_week_summary.avg_steps else "—" }}</strong><small>{% if coaching_week_summary.step_change_pct is not none %}{{ "+" if coaching_week_summary.step_change_pct > 0 else "" }}{{ coaching_week_summary.step_change_pct }}% vs last week{% else %}this week{% endif %}</small></div>
+    <div><span>Strength</span><strong>{{ coaching_week_summary.workouts_completed }}/{{ coaching_week_summary.workouts_assigned }}</strong><small>workouts completed</small></div>
+    <div><span>Check-in</span><strong>{% if week_review %}{{ week_review.submitted_count or 0 }}/7{% else %}—{% endif %}</strong><small>daily updates</small></div>
+  </section>
+
+<section class="nw-panel-tab active" data-panel="overview">
     <div class="nw-overview">
       <div class="nw-stack">
         <section class="nw-panel nw-pad">
@@ -791,6 +822,14 @@
   </section>
 
   <section class="nw-panel-tab" data-panel="weekly">
+<div class="nw-workflow-strip">
+    <div class="active"><span>1</span><strong>Review</strong><small>This week’s data</small></div>
+    <div><span>2</span><strong>Coach</strong><small>Wins & barriers</small></div>
+    <div><span>3</span><strong>Plan</strong><small>Actions & workouts</small></div>
+    <div><span>4</span><strong>Respond</strong><small>Feedback to client</small></div>
+    <div><span>5</span><strong>Publish</strong><small>Save next week</small></div>
+  </div>
+
     <div class="nw-coach-week-browser">
       {% if coach_week_can_previous %}
       <a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number - 1 }}">←</a>
@@ -1118,7 +1157,7 @@
           <p class="nw-next-call-note">Synamate opens in a new tab, so the notes and next-week actions on this page stay intact. After booking, save this review; the webhook will sync the appointment automatically.</p>
         </section>
 
-        <div class="nw-save"><p>Saving closes this review and creates the selected actions for Week {{ next_week_number }}.</p><button class="nw-btn nw-primary" type="submit">Save weekly check-in →</button></div>
+        <div class="nw-save"><p>Saving closes this coaching review and publishes the plan for Week {{ next_week_number }}.</p><button class="nw-btn nw-primary" type="submit">Save & publish next week →</button></div>
       </form>
       {% elif coach_week_is_past %}
       <section class="nw-panel nw-pad">

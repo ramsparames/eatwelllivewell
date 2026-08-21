@@ -1,10 +1,24 @@
 {% extends "coach/base.html" %}
-{% block title %}Coach Dashboard | Eat Well Live Well{% endblock %}
+{% block title %}Coach Dashboard | Eat Well Live Well<style>
+.cd-section-help{margin:4px 0 0;color:var(--coach-muted);font-size:12px}
+.cd-signal-groups{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.cd-signal-group{padding:14px;border:1px solid #eee8f0;border-radius:15px;background:#fcfafc}
+.cd-signal-group.coaching{background:#fbf6fd;border-color:#e4d4ea}
+.cd-signal-label{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+.cd-signal-label span{color:var(--coach-purple);font-size:10px;font-weight:900;letter-spacing:.12em}
+.cd-signal-label small{color:var(--coach-muted);font-size:10px}
+.cd-signal-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cd-signal-cards .cd-op-mini{min-height:92px;padding:14px 10px;background:#fff}
+.cd-signal-cards .cd-op-mini b{font-size:28px}
+@media(max-width:850px){.cd-signal-groups{grid-template-columns:1fr}}
+@media(max-width:560px){.cd-signal-cards{grid-template-columns:1fr 1fr}}
+</style>
+{% endblock %}
 
 {% block content %}
 <style>
 .cd,.cd *{box-sizing:border-box}
-.cd{max-width:1080px;margin:0 auto;display:grid;gap:15px}
+.cd{max-width:1180px;margin:0 auto;display:grid;gap:15px}
 .cd-hero{display:flex;justify-content:space-between;align-items:end;gap:20px;padding:2px 0 3px}
 .cd-eyebrow{margin:0 0 5px;color:var(--coach-purple);font-size:12px;font-weight:850;letter-spacing:.11em;text-transform:uppercase}
 .cd-hero h1{margin:0;font-size:36px;line-height:1.05;letter-spacing:-.04em}
@@ -153,8 +167,8 @@
   <header class="cd-hero">
     <div>
       
-      <h1>NourisHer Coach Dashboard</h1>
-      <p>Calls, follow-ups and clients who need your attention.</p>
+      <p class="cd-eyebrow">TODAY</p><h1>Your coaching day</h1>
+      <p>Start with the clients who need you, then move into today’s calls and follow-ups.</p>
     </div>
     <div class="cd-date" data-today-date>Today</div>
   </header>
@@ -193,35 +207,27 @@
   <section class="cd-attention-wrap">
     <article class="cd-panel">
       <div class="cd-head">
-        <div><span class="over">Operations</span><h2>Needs attention</h2></div>
+        <div><span class="over">Priority</span><h2>Needs attention</h2><p class="cd-section-help">Coaching signals first, then operational follow-ups.</p></div>
         <button class="cd-ops-reset" type="button" data-ops-filter="all">Show all</button>
       </div>
 
-      <div class="cd-ops-summary">
-        <button class="cd-op-mini" type="button" data-ops-filter="missed">
-          <b>{{ operations_counts.missed_daily or 0 }}</b>
-          <span>Missed updates</span>
-        </button>
-        <button class="cd-op-mini" type="button" data-ops-filter="measurement">
-          <b>{{ operations_counts.measurement_due or 0 }}</b>
-          <span>Measurements due</span>
-        </button>
-        <button class="cd-op-mini" type="button" data-ops-filter="review">
-          <b>{{ operations_counts.weekly_review_overdue or 0 }}</b>
-          <span>Reviews overdue</span>
-        </button>
-        <button class="cd-op-mini" type="button" data-ops-filter="call">
-          <b>{{ operations_counts.no_next_call or 0 }}</b>
-          <span>No next call</span>
-        </button>
-        <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="adherence">
-          <b>{{ operations_counts.low_adherence or 0 }}</b>
-          <span>Low adherence</span>
-        </button>
-        <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="workout">
-          <b>{{ operations_counts.workouts_behind or 0 }}</b>
-          <span>Workouts behind</span>
-        </button>
+      <div class="cd-signal-groups">
+        <section class="cd-signal-group coaching">
+          <div class="cd-signal-label"><span>COACHING</span><small>Who may need support</small></div>
+          <div class="cd-signal-cards">
+            <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="adherence"><b>{{ operations_counts.low_adherence or 0 }}</b><span>Low adherence</span></button>
+            <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="workout"><b>{{ operations_counts.workouts_behind or 0 }}</b><span>Workouts behind</span></button>
+            <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="missed"><b>{{ operations_counts.missed_daily or 0 }}</b><span>Missed updates</span></button>
+          </div>
+        </section>
+        <section class="cd-signal-group operations">
+          <div class="cd-signal-label"><span>OPERATIONS</span><small>What needs follow-up</small></div>
+          <div class="cd-signal-cards">
+            <button class="cd-op-mini" type="button" data-ops-filter="measurement"><b>{{ operations_counts.measurement_due or 0 }}</b><span>Measurements due</span></button>
+            <button class="cd-op-mini" type="button" data-ops-filter="review"><b>{{ operations_counts.weekly_review_overdue or 0 }}</b><span>Reviews overdue</span></button>
+            <button class="cd-op-mini" type="button" data-ops-filter="call"><b>{{ operations_counts.no_next_call or 0 }}</b><span>No next call</span></button>
+          </div>
+        </section>
       </div>
 
       {% if needs_attention_clients %}

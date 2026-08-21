@@ -59,91 +59,122 @@
 @media(max-width:620px){.summary-row,.add-form,.client-row{grid-template-columns:1fr}.clients-heading{display:block}.clients-heading h1{font-size:29px}}
 </style>
 
-<div class="clients-page">
-    <header class="clients-heading">
-        <div>
-            <p style="margin:0 0 5px;color:var(--coach-purple);font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase">Client management</p>
-            <h1>Clients</h1>
-            <p>Set up new clients, see who needs attention and open each coaching workspace.</p>
+<style>
+.clients-page{max-width:1180px;margin:0 auto}
+.clients-heading.polished{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:16px}
+.clients-kicker,.panel-kicker{display:block;margin:0 0 4px;color:var(--coach-purple);font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+.clients-heading.polished h1{margin:0;font-size:34px;letter-spacing:-.035em}
+.clients-heading.polished p{margin:6px 0 0;color:var(--coach-muted);font-size:13px}
+.add-client-toggle{min-height:40px;padding:0 14px;border:0;border-radius:10px;background:var(--coach-purple);color:#fff;font-size:13px;font-weight:850;cursor:pointer}
+.polished-summary{grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.polished-summary .summary-card{padding:15px;border-radius:14px}.polished-summary .summary-card strong{font-size:27px}
+.polished-summary .summary-card small{display:block;margin-top:4px;color:var(--coach-muted);font-size:10px}
+.add-client-panel{margin-bottom:12px}.panel-close{border:0;background:transparent;color:var(--coach-muted);font-size:25px;cursor:pointer}
+.directory-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:13px}
+.directory-head h2{margin:2px 0 0;font-size:20px}.directory-tools{display:flex;align-items:center;gap:8px}
+.directory-tools input{height:38px;min-width:190px;padding:0 10px;border:1px solid var(--coach-border);border-radius:9px;font:inherit;font-size:12px}
+.client-filters{display:flex;gap:3px;padding:3px;border-radius:10px;background:#f7f3f8}
+.client-filters button{height:32px;padding:0 9px;border:0;border-radius:8px;background:transparent;color:var(--coach-muted);font-size:11px;font-weight:800;cursor:pointer}
+.client-filters button.active{background:#fff;color:var(--coach-purple);box-shadow:0 2px 7px rgba(50,20,65,.07)}
+.client-row.polished-client{grid-template-columns:minmax(250px,1.15fr) minmax(220px,1fr) 110px minmax(160px,.7fr) 24px;gap:16px;padding:13px 14px;border-radius:13px}
+.client-identity{display:flex;align-items:center;gap:10px;min-width:0}.client-avatar{width:36px;height:36px;display:grid;place-items:center;flex:none;border-radius:11px;background:#f0e4f5;color:var(--coach-purple);font-size:15px;font-weight:900}
+.client-identity strong{display:block;font-size:14px}.client-identity span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
+.client-coaching-snapshot{display:flex;gap:7px;flex-wrap:wrap}.client-coaching-snapshot span{padding:6px 8px;border-radius:8px;background:#faf7fb;color:var(--coach-muted);font-size:10px}.client-coaching-snapshot b{color:var(--coach-text);font-size:11px}
+.client-next span{display:block;color:var(--coach-muted);font-size:10px}.client-next strong{display:block;margin-top:3px;font-size:12px}
+.client-status small{display:block;margin-top:4px;color:var(--coach-muted);font-size:9px;line-height:1.3}
+.health-attention{background:#fff0f2;color:#9b4150}.health-on_track{background:#edf8f0;color:#2e7551}.health-watch{background:#fff8e9;color:#95701c}.health-setup{background:#f3eff5;color:#725d7a}
+.client-open{color:var(--coach-purple);font-size:18px;font-weight:900}.client-no-results{padding:28px;text-align:center;color:var(--coach-muted);font-size:12px}
+@media(max-width:980px){.client-row.polished-client{grid-template-columns:1fr 1fr auto}.client-coaching-snapshot{grid-column:1/3}.client-status{grid-column:1/3}.directory-head{display:block}.directory-tools{margin-top:10px;flex-wrap:wrap}}
+@media(max-width:650px){.clients-heading.polished{display:block}.add-client-toggle{margin-top:12px}.polished-summary{grid-template-columns:1fr 1fr 1fr}.client-row.polished-client{grid-template-columns:1fr auto}.client-coaching-snapshot,.client-status{grid-column:1/-1}}
+</style><div class="clients-page">
+  <header class="clients-heading polished">
+    <div><p class="clients-kicker">CLIENTS</p><h1>Your coaching clients</h1><p>See who needs attention, open the right coaching week, or add a new client.</p></div>
+    <button class="add-client-toggle" type="button" data-add-toggle>+ Add client</button>
+  </header>
+
+  <section class="summary-row polished-summary">
+    <article class="summary-card"><span>Active clients</span><strong>{{ active_clients|length }}</strong><small>currently coaching</small></article>
+    <article class="summary-card"><span>Needs attention</span><strong>{{ needs_attention|length }}</strong><small>worth reviewing today</small></article>
+    <article class="summary-card"><span>Calls today</span><strong>{{ calls_today|length }}</strong><small>scheduled coaching calls</small></article>
+  </section>
+
+  <section class="clients-panel add-client-panel" data-add-panel hidden>
+    <div class="panel-top"><div><span class="panel-kicker">NEW CLIENT</span><h2>Start a coaching workspace</h2></div><button class="panel-close" type="button" data-add-close>×</button></div>
+    <form method="post" action="/dashboard/clients" class="add-form">
+      <div class="field"><label>Name</label><input name="name" required placeholder="Client name"></div>
+      <div class="field"><label>Email</label><input type="email" name="email" placeholder="name@example.com"></div>
+      <div class="field"><label>Phone</label><div class="phone-fields">
+        <select name="country_code"><option value="+91" selected>🇮🇳 +91</option><option value="+1">🇺🇸 +1</option><option value="+44">🇬🇧 +44</option><option value="+61">🇦🇺 +61</option><option value="+65">🇸🇬 +65</option><option value="+971">🇦🇪 +971</option></select>
+        <input type="tel" name="phone" inputmode="tel" placeholder="98765 43210"></div></div>
+      <div class="field"><label>Program</label><select name="program"><option value="Transformation">Transformation</option><option value="NourisHer">NourisHer</option><option value="Foundations">Foundations</option><option value="Coaching">Coaching</option></select></div>
+      <button class="add-btn" type="submit">Add client →</button>
+    </form>
+  </section>
+
+  <section class="clients-panel">
+    <div class="directory-head">
+      <div><span class="panel-kicker">COACHING DIRECTORY</span><h2>Clients</h2></div>
+      <div class="directory-tools">
+        <input type="search" placeholder="Search client…" data-client-search>
+        <div class="client-filters">
+          <button class="active" type="button" data-client-filter="all">All</button>
+          <button type="button" data-client-filter="attention">Needs attention</button>
+          <button type="button" data-client-filter="on_track">On track</button>
+          <button type="button" data-client-filter="setup">Setup</button>
         </div>
-    </header>
+      </div>
+    </div>
 
-    <section class="summary-row">
-        <article class="summary-card"><span>Active clients</span><strong>{{ active_clients|length }}</strong></article>
-        <article class="summary-card"><span>Calls today</span><strong>{{ calls_today|length }}</strong></article>
-        <article class="summary-card"><span>Needs attention</span><strong>{{ needs_attention|length }}</strong></article>
-    </section>
-
-    <section class="clients-panel">
-        <div class="panel-top"><h2>Add new client</h2></div>
-
-        <form method="post" action="/dashboard/clients" class="add-form">
-            <div class="field">
-                <label>Name</label>
-                <input name="name" required placeholder="Client name">
-            </div>
-            <div class="field">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="name@example.com">
-            </div>
-            <div class="field">
-                <label>Phone</label>
-                <div class="phone-fields">
-                    <select name="country_code" aria-label="International calling code">
-                        <option value="+91" selected>🇮🇳 +91</option>
-                        <option value="+1">🇺🇸 +1</option>
-                        <option value="+44">🇬🇧 +44</option>
-                        <option value="+61">🇦🇺 +61</option>
-                        <option value="+65">🇸🇬 +65</option>
-                        <option value="+971">🇦🇪 +971</option>
-                        <option value="+974">🇶🇦 +974</option>
-                        <option value="+966">🇸🇦 +966</option>
-                    </select>
-                    <input type="tel" name="phone" inputmode="tel" placeholder="98765 43210">
-                </div>
-                
-            </div>
-            <div class="field">
-                <label>Program</label>
-                <select name="program">
-                    <option value="Transformation">Transformation</option>
-                    <option value="NourisHer">NourisHer</option>
-                    <option value="Foundations">Foundations</option>
-                    <option value="Coaching">Coaching</option>
-                </select>
-            </div>
-            <button class="add-btn" type="submit">Add client</button>
-        </form>
-    </section>
-
-    <section class="clients-panel">
-        <div class="panel-top"><h2>All clients</h2><span style="color:var(--coach-muted);font-size:12px">{{ clients|length }} total</span></div>
-
-        {% if clients %}
-        <div class="client-list">
-            {% for client in clients %}
-            <a class="client-row" href="/dashboard/clients/{{ client.id }}">
-                <div class="client-name">
-                    <strong>{{ client.name }}</strong>
-                    <span>{{ client.email or "No email" }} · {{ client.phone or "No phone" }}</span>
-                </div>
-                <div class="client-cell">
-                    <span>Program</span><strong>{{ client.program or "Coaching" }}</strong>
-                </div>
-                <div class="client-cell">
-                    <span>Week</span><strong>{% if client.current_week %}Week {{ client.current_week }}{% else %}Setup{% endif %}</strong>
-                </div>
-                <div class="client-cell">
-                    <span>Next call</span>
-                    <strong>{% if client.next_call_date %}{{ client.next_call_date.strftime("%d %b %Y") }}{% else %}Not scheduled{% endif %}</strong>
-                </div>
-                <span class="health">{{ client.health_label or (client.status or "active")|title }}</span>
-            </a>
-            {% endfor %}
+    {% if clients %}
+    <div class="client-list" data-client-list>
+      {% for client in clients %}
+      <a class="client-row polished-client" href="/dashboard/clients/{{ client.id }}"
+         data-client-row data-name="{{ client.name|lower }}"
+         data-health="{{ client.health_key or (client.operations.health_key if client.operations is defined else '') }}">
+        <div class="client-identity"><div class="client-avatar">{{ client.name[:1]|upper }}</div><div><strong>{{ client.name }}</strong><span>{{ client.program or "Coaching" }} · {% if client.current_week %}Week {{ client.current_week }}{% else %}Setup{% endif %}</span></div></div>
+        <div class="client-coaching-snapshot">
+          {% if client.operations is defined and client.operations %}
+            {% if client.operations.coaching_signals is defined %}
+              <span><b>{{ client.operations.coaching_signals.action_percent if client.operations.coaching_signals.action_percent is not none else "—" }}{% if client.operations.coaching_signals.action_percent is not none %}%{% endif %}</b> actions</span>
+              <span><b>{{ client.operations.coaching_signals.workouts_completed or 0 }}/{{ client.operations.coaching_signals.workouts_assigned or 0 }}</b> strength</span>
+            {% endif %}
+            <span><b>{{ 7 - (client.operations.missed_daily_count or 0) }}/7</b> updates</span>
+          {% else %}<span>Open workspace for coaching summary</span>{% endif %}
         </div>
-        {% else %}
-        <div class="empty">No clients yet. Add your first client above.</div>
-        {% endif %}
-    </section>
+        <div class="client-next"><span>Next call</span><strong>{% if client.next_call_date %}{{ client.next_call_date.strftime("%d %b") }}{% else %}Not scheduled{% endif %}</strong></div>
+        <div class="client-status"><span class="health health-{{ client.health_key or 'active' }}">{{ client.health_label or (client.status or "active")|title }}</span>{% if client.operations is defined and client.operations.reasons %}<small>{{ client.operations.reasons[0] }}</small>{% endif %}</div>
+        <span class="client-open">→</span>
+      </a>
+      {% endfor %}
+      <div class="client-no-results" data-client-empty hidden>No clients match this filter.</div>
+    </div>
+    {% else %}<div class="empty">No clients yet. Add your first client above.</div>{% endif %}
+  </section>
 </div>
+
+<script>
+(() => {
+  const panel=document.querySelector("[data-add-panel]");
+  document.querySelector("[data-add-toggle]")?.addEventListener("click",()=>{panel.hidden=false;panel.scrollIntoView({behavior:"smooth",block:"start"});});
+  document.querySelector("[data-add-close]")?.addEventListener("click",()=>panel.hidden=true);
+
+  const rows=[...document.querySelectorAll("[data-client-row]")];
+  const search=document.querySelector("[data-client-search]");
+  const buttons=[...document.querySelectorAll("[data-client-filter]")];
+  const empty=document.querySelector("[data-client-empty]");
+  let filter="all";
+  function apply(){
+    const q=(search?.value||"").trim().toLowerCase(); let visible=0;
+    rows.forEach(row=>{
+      const h=row.dataset.health||"";
+      const healthMatch=filter==="all"||(filter==="attention"&&h==="attention")||(filter==="on_track"&&(h==="on_track"||h==="watch"))||(filter==="setup"&&h==="setup");
+      const show=healthMatch&&(!q||row.dataset.name.includes(q));
+      row.hidden=!show;if(show)visible++;
+    });
+    if(empty)empty.hidden=visible!==0;
+  }
+  search?.addEventListener("input",apply);
+  buttons.forEach(btn=>btn.addEventListener("click",()=>{filter=btn.dataset.clientFilter;buttons.forEach(b=>b.classList.toggle("active",b===btn));apply();}));
+})();
+</script>
 {% endblock %}
