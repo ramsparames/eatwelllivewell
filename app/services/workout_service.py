@@ -90,6 +90,18 @@ def create_workout_tables() -> None:
                     UNIQUE (assignment_id, exercise_id, set_number)
                 )
             """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS client_workout_exercise_notes (
+                    id BIGSERIAL PRIMARY KEY,
+                    assignment_id BIGINT NOT NULL
+                        REFERENCES client_workout_assignments(id) ON DELETE CASCADE,
+                    exercise_id BIGINT NOT NULL
+                        REFERENCES workout_exercises(id) ON DELETE CASCADE,
+                    client_note TEXT,
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    UNIQUE (assignment_id, exercise_id)
+                )
+            """)
 
 
 def _optional_int(value):
@@ -335,7 +347,18 @@ def get_client_workout_assignment(assignment_id: int, client_id: int):
                 for row in (cursor.fetchall() or [])
             }
 
+            cursor.execute("""
+                SELECT exercise_id, client_note
+                FROM client_workout_exercise_notes
+                WHERE assignment_id = %s
+            """, (assignment_id,))
+            notes = {
+                row["exercise_id"]: row.get("client_note")
+                for row in (cursor.fetchall() or [])
+            }
+
             for exercise in exercises:
+                exercise["client_note"] = notes.get(exercise["id"])
                 exercise["set_logs"] = []
                 for set_number in range(1, int(exercise.get("sets") or 0) + 1):
                     log = logs.get((exercise["id"], set_number))
@@ -393,6 +416,104 @@ def save_set_log(
                     updated_at = NOW()
                 WHERE id = %s AND client_id = %s
             """, (assignment_id, client_id))
+            return True
+
+
+
+def save_exercise_log(
+    assignment_id: int,
+    client_id: int,
+    exercise_id: int,
+    sets: list[dict],
+    client_note: str | None = None,
+):
+    """
+    Save every set for one exercise plus one optional note in a single transaction.
+    Used by the client portal's no-refresh per-exercise Save button.
+    """
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT e.sets
+                FROM client_workout_assignments a
+                JOIN workout_exercises e ON e.workout_id = a.workout_id
+                WHERE a.id = %s
+                  AND a.client_id = %s
+                  AND e.id = %s
+                LIMIT 1
+            """, (assignment_id, client_id, exercise_id))
+            exercise = cursor.fetchone()
+            if not exercise:
+                return False
+
+            max_sets = int(exercise.get("sets") or 0)
+
+            for item in sets:
+                try:
+                    set_number = int(item.get("set_number"))
+                except (TypeError, ValueError):
+                    continue
+                if set_number < 1 or set_number > max_sets:
+                    continue
+
+                weight_kg = item.get("weight_kg")
+                reps = item.get("reps")
+                completed = bool(item.get("completed"))
+
+                if weight_kg in ("", None):
+                    weight_kg = None
+                else:
+                    weight_kg = float(weight_kg)
+
+                if reps in ("", None):
+                    reps = None
+                else:
+                    reps = int(reps)
+
+                cursor.execute("""
+                    INSERT INTO client_workout_set_logs (
+                        assignment_id, exercise_id, set_number,
+                        weight_kg, reps, completed
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (assignment_id, exercise_id, set_number)
+                    DO UPDATE SET
+                        weight_kg = EXCLUDED.weight_kg,
+                        reps = EXCLUDED.reps,
+                        completed = EXCLUDED.completed,
+                        updated_at = NOW()
+                """, (
+                    assignment_id,
+                    exercise_id,
+                    set_number,
+                    weight_kg,
+                    reps,
+                    completed,
+                ))
+
+            clean_note = (client_note or "").strip() or None
+            cursor.execute("""
+                INSERT INTO client_workout_exercise_notes (
+                    assignment_id, exercise_id, client_note
+                )
+                VALUES (%s, %s, %s)
+                ON CONFLICT (assignment_id, exercise_id)
+                DO UPDATE SET
+                    client_note = EXCLUDED.client_note,
+                    updated_at = NOW()
+            """, (assignment_id, exercise_id, clean_note))
+
+            cursor.execute("""
+                UPDATE client_workout_assignments
+                SET status = CASE
+                    WHEN status = 'completed' THEN status
+                    ELSE 'in_progress'
+                END,
+                    started_at = COALESCE(started_at, NOW()),
+                    updated_at = NOW()
+                WHERE id = %s AND client_id = %s
+            """, (assignment_id, client_id))
+
             return True
 
 

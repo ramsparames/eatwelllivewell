@@ -3,7 +3,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.services.macro_tracking_service import (
@@ -21,6 +21,7 @@ from app.services.workout_service import (
     get_client_workouts,
     reopen_workout,
     save_set_log,
+    save_exercise_log,
 )
 
 from app.services.phase_a_service import (
@@ -322,6 +323,68 @@ def legacy_client_workout_page(
         f"/client/{access_token}/workouts?workout={assignment_id}",
         status_code=303,
     )
+
+
+
+@router.post("/client/{access_token}/workouts/{assignment_id}/exercise")
+async def save_client_workout_exercise(
+    request: Request,
+    access_token: str,
+    assignment_id: int,
+):
+    client = get_client_by_token(access_token)
+    if not client:
+        return JSONResponse(
+            {"ok": False, "error": "Client access link not found"},
+            status_code=404,
+        )
+
+    try:
+        payload = await request.json()
+    except Exception:
+        return JSONResponse(
+            {"ok": False, "error": "Invalid exercise data"},
+            status_code=400,
+        )
+
+    try:
+        exercise_id = int(payload.get("exercise_id"))
+    except (TypeError, ValueError):
+        return JSONResponse(
+            {"ok": False, "error": "Invalid exercise"},
+            status_code=400,
+        )
+
+    sets = payload.get("sets")
+    if not isinstance(sets, list):
+        return JSONResponse(
+            {"ok": False, "error": "Sets must be a list"},
+            status_code=400,
+        )
+
+    ok = save_exercise_log(
+        assignment_id=assignment_id,
+        client_id=client["id"],
+        exercise_id=exercise_id,
+        sets=sets,
+        client_note=payload.get("client_note"),
+    )
+    if not ok:
+        return JSONResponse(
+            {"ok": False, "error": "Workout exercise not found"},
+            status_code=404,
+        )
+
+    completed_sets = sum(
+        1 for item in sets if bool(item.get("completed"))
+    )
+
+    return JSONResponse({
+        "ok": True,
+        "exercise_id": exercise_id,
+        "completed_sets": completed_sets,
+        "message": "Exercise saved",
+    })
 
 
 @router.post("/client/{access_token}/workouts/{assignment_id}/set")

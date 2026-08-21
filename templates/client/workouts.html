@@ -1,5 +1,92 @@
 {% extends "client/base.html" %}
-{% block title %}My Workouts | NourisHer{% endblock %}
+{% block title %}My Workouts | NourisHer
+<script>
+(() => {
+  const exerciseForms = [...document.querySelectorAll("[data-exercise-form]")];
+
+  function updateOverallProgress() {
+    const boxes = [...document.querySelectorAll("[data-exercise-form] [data-done]")];
+    const done = boxes.filter(box => box.checked).length;
+    const total = boxes.length;
+    const pct = total ? Math.round(done * 100 / total) : 0;
+
+    const bar = document.querySelector("[data-workout-progress-bar]");
+    const text = document.querySelector("[data-workout-progress-text]");
+    const wrap = document.querySelector("[data-workout-progress]");
+
+    if (bar) bar.style.width = pct + "%";
+    if (text) text.textContent = `${done} of ${total} sets marked done.`;
+    if (wrap) wrap.title = `${done} of ${total} sets complete`;
+  }
+
+  exerciseForms.forEach(form => {
+    const button = form.querySelector("[data-save-exercise]");
+    const state = form.querySelector("[data-save-state]");
+    if (!button) return;
+
+    button.addEventListener("click", async () => {
+      const sets = [...form.querySelectorAll("[data-set-row]")].map(row => ({
+        set_number: Number(row.dataset.setNumber),
+        weight_kg: row.querySelector("[data-weight]")?.value || null,
+        reps: row.querySelector("[data-reps]")?.value || null,
+        completed: !!row.querySelector("[data-done]")?.checked
+      }));
+
+      const payload = {
+        exercise_id: Number(form.dataset.exerciseId),
+        sets,
+        client_note: form.querySelector("[data-client-note]")?.value || ""
+      };
+
+      form.closest(".wk-ex")?.classList.add("is-saving");
+      button.disabled = true;
+      state.textContent = "Saving…";
+      state.className = "wk-save-state";
+
+      try {
+        const response = await fetch(form.dataset.saveUrl, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || "Unable to save");
+        }
+
+        state.textContent = "Saved ✓";
+        state.className = "wk-save-state saved";
+        updateOverallProgress();
+
+        window.setTimeout(() => {
+          if (state.textContent === "Saved ✓") state.textContent = "";
+        }, 2500);
+      } catch (error) {
+        state.textContent = "Could not save. Try again.";
+        state.className = "wk-save-state error";
+      } finally {
+        button.disabled = false;
+        form.closest(".wk-ex")?.classList.remove("is-saving");
+      }
+    });
+
+    form.querySelectorAll("input, textarea").forEach(input => {
+      input.addEventListener("input", () => {
+        if (state.classList.contains("saved")) {
+          state.textContent = "Unsaved changes";
+          state.className = "wk-save-state";
+        }
+      });
+      input.addEventListener("change", updateOverallProgress);
+    });
+  });
+
+  updateOverallProgress();
+})();
+</script>
+
+{% endblock %}
 {% block content %}
 <style>
 .wk,.wk *{box-sizing:border-box}
@@ -337,6 +424,27 @@
 .wk-last-time{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;align-items:center}
 .wk-last-time strong{font-size:12px;color:var(--purple)}
 .wk-last-time span{padding:5px 8px;border-radius:8px;background:#f6eff9;font-size:12px;font-weight:750}
+
+.wk-set-head-bulk,.wk-set-bulk{grid-template-columns:90px minmax(130px,1fr) minmax(130px,1fr) 130px}
+.wk-exercise-log{margin-top:10px}
+.wk-client-note{display:block;margin-top:14px}
+.wk-client-note>span{display:block;margin-bottom:6px;font-size:13px;font-weight:850;color:var(--muted)}
+.wk-client-note small{font-weight:650}
+.wk-client-note textarea{
+  width:100%;min-height:76px;padding:11px 12px;border:1px solid var(--line);
+  border-radius:10px;background:#fff;font:inherit;font-size:14px;resize:vertical
+}
+.wk-exercise-save-row{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:10px}
+.wk-save-exercise{min-width:145px}
+.wk-save-state{font-size:13px;font-weight:800;color:var(--muted)}
+.wk-save-state.saved{color:#31704c}
+.wk-save-state.error{color:#a13b3b}
+.wk-ex.is-saving{opacity:.78}
+@media(max-width:700px){
+  .wk-set-head-bulk{display:none}
+  .wk-set-bulk{grid-template-columns:70px 1fr 1fr}
+  .wk-set-bulk .wk-done{grid-column:2/4}
+}
 </style>
 
 <div class="wk">
@@ -441,7 +549,7 @@
         <div class="wk-note"><strong>Sushma:</strong> {{ selected_workout.coach_note }}</div>
         {% endif %}
 
-        <div class="wk-progress" title="{{ ns.done }} of {{ ns.total }} sets complete"><span style="width:{{ pct }}%"></span></div>
+        <div class="wk-progress" data-workout-progress title="{{ ns.done }} of {{ ns.total }} sets complete"><span data-workout-progress-bar style="width:{{ pct }}%"></span></div>
 
         <div class="wk-exercises">
           {% for exercise in selected_workout.exercises %}
@@ -472,28 +580,45 @@
 
             {% if exercise.instructions %}<p class="wk-instruction">{{ exercise.instructions }}</p>{% endif %}
 
-            <div class="wk-sets">
-              <div class="wk-set-head">
-                <span>Set</span><span>Weight kg</span><span>Reps</span><span>Done</span><span></span>
+            <div class="wk-exercise-log"
+                 data-exercise-form
+                 data-exercise-id="{{ exercise.id }}"
+                 data-save-url="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/exercise">
+              <div class="wk-sets">
+                <div class="wk-set-head wk-set-head-bulk">
+                  <span>Set</span><span>Weight kg</span><span>Reps</span><span>Done</span>
+                </div>
+                {% for setlog in exercise.set_logs %}
+                <div class="wk-set wk-set-bulk" data-set-row data-set-number="{{ setlog.set_number }}">
+                  <strong>Set {{ setlog.set_number }}</strong>
+                  <input class="wk-input" type="number" step="0.1" min="0"
+                         data-weight
+                         value="{{ setlog.weight_kg if setlog.weight_kg is not none else '' }}"
+                         placeholder="kg">
+                  <input class="wk-input" type="number" min="0"
+                         data-reps
+                         value="{{ setlog.reps if setlog.reps is not none else '' }}"
+                         placeholder="reps">
+                  <label class="wk-done">
+                    <input type="checkbox" data-done {% if setlog.completed %}checked{% endif %}>
+                    Done
+                  </label>
+                </div>
+                {% endfor %}
               </div>
-              {% for setlog in exercise.set_logs %}
-              <form class="wk-set"
-                    method="post"
-                    action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/set">
-                <input type="hidden" name="exercise_id" value="{{ exercise.id }}">
-                <input type="hidden" name="set_number" value="{{ setlog.set_number }}">
-                <strong>Set {{ setlog.set_number }}</strong>
-                <input class="wk-input" type="number" step="0.1" min="0" name="weight_kg"
-                       value="{{ setlog.weight_kg if setlog.weight_kg is not none else '' }}" placeholder="kg">
-                <input class="wk-input" type="number" min="0" name="reps"
-                       value="{{ setlog.reps if setlog.reps is not none else '' }}" placeholder="reps">
-                <label class="wk-done">
-                  <input type="checkbox" name="completed" value="true" {% if setlog.completed %}checked{% endif %}>
-                  Done
-                </label>
-                <button class="wk-save" type="submit">Save</button>
-              </form>
-              {% endfor %}
+
+              <label class="wk-client-note">
+                <span>Note for Sushma <small>optional</small></span>
+                <textarea data-client-note
+                  placeholder="e.g. Used 2 × 5 kg dumbbells, or used one 8 kg dumbbell for goblet squat.">{{ exercise.client_note or "" }}</textarea>
+              </label>
+
+              <div class="wk-exercise-save-row">
+                <span class="wk-save-state" data-save-state></span>
+                <button class="wk-save wk-save-exercise" type="button" data-save-exercise>
+                  Save exercise
+                </button>
+              </div>
             </div>
           </section>
           {% endfor %}
@@ -502,7 +627,7 @@
         <section class="wk-complete">
           <div>
             <h3>{% if selected_workout.status == "completed" %}Workout completed ✓{% else %}Finished this workout?{% endif %}</h3>
-            <p>{{ ns.done }} of {{ ns.total }} sets marked done.</p>
+            <p data-workout-progress-text>{{ ns.done }} of {{ ns.total }} sets marked done.</p>
           </div>
           {% if selected_workout.status == "completed" %}
           <form method="post" action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/reopen">
