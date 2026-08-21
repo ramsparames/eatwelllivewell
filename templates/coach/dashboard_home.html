@@ -123,7 +123,37 @@
     </a>
   </section>
 
-  <section class="cd-grid">
+  
+  <section class="cd-panel">
+    <div class="cd-head">
+      <div><span class="over">Coaching signals</span><h2>Who needs Sushma today?</h2></div>
+      <a href="/dashboard/clients">All clients →</a>
+    </div>
+    {% if coaching_attention is defined and coaching_attention %}
+    <div class="cd-attn-list">
+      {% for item in coaching_attention %}
+      <a class="cd-attn-client" href="{{ item.href }}" style="text-decoration:none;color:inherit">
+        <span class="cd-dot {% if item.severity < 3 %}gold{% endif %}"></span>
+        <div>
+          <strong>{{ item.name }}</strong>
+          <span class="meta">{% if item.week %}Week {{ item.week }}{% else %}Active client{% endif %}</span>
+          <div class="cd-reasons">
+            {% for reason in item.reasons %}<span class="cd-reason">{{ reason }}</span>{% endfor %}
+          </div>
+        </div>
+        <span class="cd-arrow">→</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="cd-empty">
+      <div class="cd-icon">✓</div>
+      <div><strong>Everyone looks on track</strong><p>No coaching signals need attention right now.</p></div>
+    </div>
+    {% endif %}
+  </section>
+
+<section class="cd-grid">
     <article class="cd-panel" id="todays-schedule">
       <div class="cd-head">
         <div><span class="over">Schedule</span><h2>Today's schedule</h2></div>

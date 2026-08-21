@@ -17,6 +17,7 @@ from app.database import (
     resolve_synamate_calendar_id,
 )
 from app.services.client_service import ClientService
+from app.services.coaching_insights_service import get_dashboard_coaching_attention
 from app.services.client_portal_service import get_client_operations_status
 from fastapi import Form
 
@@ -442,6 +443,8 @@ def dashboard_home(request: Request):
         if client.get("status") == "active"
     ]
 
+    coaching_attention = get_dashboard_coaching_attention(active_clients)
+
     clarity_calendar_id = resolve_synamate_calendar_id(
         role="clarity",
         expected_name=os.getenv(
@@ -684,6 +687,7 @@ def dashboard_home(request: Request):
             "request": request,
             "active_clients": active_clients,
             "clients_without_next_call": clients_without_next_call,
+            "coaching_attention": coaching_attention,
             "needs_attention_clients": needs_attention_clients,
             "operations_counts": operations_counts,
             "missed_update_clients": missed_update_clients,

@@ -433,3 +433,6 @@ def get_workout_assignment_progress(assignment_id: int, client_id: int):
         else 0
     )
     return assignment
+
+
+# Strength progression helper lives in coaching_insights_service.py

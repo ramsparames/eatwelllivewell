@@ -47,6 +47,11 @@ from app.services.workout_service import (
     list_workouts,
 )
 
+from app.services.coaching_insights_service import (
+    get_client_weekly_summary,
+    get_client_progress_charts,
+)
+
 from app.services.client_portal_service import (
     ensure_portal_access,
     get_portal_access,
@@ -1146,6 +1151,8 @@ def client_profile(
             "progress_summary": progress_summary,
             "coach_summary": coach_summary,
             "coach_history_grid": coach_history_grid,
+            "coaching_week_summary": coaching_week_summary,
+            "progress_charts": progress_charts,
             "macro_settings": macro_settings,
             "macro_history": macro_history,
             "client_timeline": client_timeline,
