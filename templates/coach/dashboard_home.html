@@ -84,6 +84,15 @@
 .cd-op-coaching b{color:#5b0e91}
 @media(max-width:1150px){.cd-ops-summary{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:620px){.cd-ops-summary{grid-template-columns:repeat(2,1fr)}}
+
+.cd-op-coaching{background:#fbf6fd}
+.cd-op-coaching b{color:var(--coach-purple)}
+@media(max-width:1150px){
+  .cd-ops-summary{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:620px){
+  .cd-ops-summary{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 
 {% set without_next_call = clients_without_next_call if clients_without_next_call is defined else [] %}
@@ -163,12 +172,30 @@
       </div>
 
       <div class="cd-ops-summary">
-        <button class="cd-op-mini" type="button" data-ops-filter="missed"><b>{{ operations_counts.missed_daily or 0 }}</b><span>Missed updates</span></button>
-        <button class="cd-op-mini" type="button" data-ops-filter="measurement"><b>{{ operations_counts.measurement_due or 0 }}</b><span>Measurements due</span></button>
-        <button class="cd-op-mini" type="button" data-ops-filter="review"><b>{{ operations_counts.weekly_review_overdue or 0 }}</b><span>Reviews overdue</span></button>
-        <button class="cd-op-mini" type="button" data-ops-filter="call"><b>{{ operations_counts.no_next_call or 0 }}</b><span>No next call</span></button>
-        <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="adherence"><b>{{ operations_counts.low_adherence or 0 }}</b><span>Low adherence</span></button>
-        <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="workout"><b>{{ operations_counts.workouts_behind or 0 }}</b><span>Workouts behind</span></button>
+        <button class="cd-op-mini" type="button" data-ops-filter="missed">
+          <b>{{ operations_counts.missed_daily or 0 }}</b>
+          <span>Missed updates</span>
+        </button>
+        <button class="cd-op-mini" type="button" data-ops-filter="measurement">
+          <b>{{ operations_counts.measurement_due or 0 }}</b>
+          <span>Measurements due</span>
+        </button>
+        <button class="cd-op-mini" type="button" data-ops-filter="review">
+          <b>{{ operations_counts.weekly_review_overdue or 0 }}</b>
+          <span>Reviews overdue</span>
+        </button>
+        <button class="cd-op-mini" type="button" data-ops-filter="call">
+          <b>{{ operations_counts.no_next_call or 0 }}</b>
+          <span>No next call</span>
+        </button>
+        <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="adherence">
+          <b>{{ operations_counts.low_adherence or 0 }}</b>
+          <span>Low adherence</span>
+        </button>
+        <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="workout">
+          <b>{{ operations_counts.workouts_behind or 0 }}</b>
+          <span>Workouts behind</span>
+        </button>
       </div>
 
       {% if needs_attention_clients %}
