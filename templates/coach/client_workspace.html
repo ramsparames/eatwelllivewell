@@ -67,6 +67,14 @@
 .nw-panel{border-radius:15px;box-shadow:0 3px 14px rgba(43,26,52,.03)}.nw-pad{padding:19px}
 @media(max-width:850px){.nw-client-snapshot{grid-template-columns:1fr 1fr}.nw-workflow-strip{grid-template-columns:1fr 1fr}}
 </style>
+
+<style>
+.nw-progress-intro{margin-bottom:12px;padding:18px 20px;border:1px solid var(--coach-border);border-radius:15px;background:#fff}
+.nw-progress-intro h2{margin:0;font-size:21px}
+.nw-progress-intro p:last-child{margin:5px 0 0;color:var(--coach-muted);font-size:13px}
+.nw-progress-moved{margin-bottom:12px}
+</style>
+
 {% endblock %}
 {% block content %}
 <style>
@@ -719,12 +727,7 @@
     <button class="nw-tab" type="button" data-tab="timeline">Progress</button>
   </nav>
 
-    <section class="nw-client-snapshot">
-    <div><span>Actions</span><strong>{{ coaching_week_summary.action_percent if coaching_week_summary.action_percent is not none else "—" }}{% if coaching_week_summary.action_percent is not none %}%{% endif %}</strong><small>{{ coaching_week_summary.action_completed }}/{{ coaching_week_summary.action_total }} complete</small></div>
-    <div><span>Average steps</span><strong>{{ "{:,}".format(coaching_week_summary.avg_steps) if coaching_week_summary.avg_steps else "—" }}</strong><small>{% if coaching_week_summary.step_change_pct is not none %}{{ "+" if coaching_week_summary.step_change_pct > 0 else "" }}{{ coaching_week_summary.step_change_pct }}% vs last week{% else %}this week{% endif %}</small></div>
-    <div><span>Strength</span><strong>{{ coaching_week_summary.workouts_completed }}/{{ coaching_week_summary.workouts_assigned }}</strong><small>workouts completed</small></div>
-    <div><span>Check-in</span><strong>{% if week_review %}{{ week_review.submitted_count or 0 }}/7{% else %}—{% endif %}</strong><small>daily updates</small></div>
-  </section>
+  
 
 <section class="nw-panel-tab active" data-panel="overview">
     <div class="nw-overview">
@@ -740,45 +743,12 @@
           </div>
         </section>
 
-        {% if progress_summary and progress_summary.weeks %}
-        <section class="nw-panel nw-pad">
-          <div class="nw-heading">
-            <div><p class="nw-kicker" style="margin-top:0">Progress</p><h2>Last {{ progress_summary.weeks|length }} coaching weeks</h2><p>Daily consistency, action adherence and weekly measurement trend.</p></div>
-          </div>
-          <div class="nw-progress4">
-            {% for item in progress_summary.weeks %}
-            <div class="nw-progress-week {% if item.week_number == current_week %}current{% endif %}">
-              <div class="wk"><strong>Week {{ item.week_number }}</strong><span>{{ item.week_start.strftime("%d %b") }}–{{ item.week_end.strftime("%d %b") }}</span></div>
-              <div class="nw-progress-metric">
-                <div><span>Daily updates</span><b>{{ item.submitted_count }}/7</b></div>
-                <div class="nw-progress-bar"><i style="width:{{ item.checkin_percent }}%"></i></div>
-              </div>
-              <div class="nw-progress-metric">
-                <div><span>Actions</span><b>{{ item.action_percent }}%</b></div>
-                <div class="nw-progress-bar"><i style="width:{{ item.action_percent }}%"></i></div>
-              </div>
-              <div class="nw-progress-foot">
-                <span>{% if item.average_steps %}Avg {{ item.average_steps }} steps{% else %}No step avg{% endif %}</span>
-                <span>{% if item.weight_kg is not none %}{{ item.weight_kg }} kg{% else %}No measure{% endif %}</span>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-          {% if progress_summary.weight_change is not none %}
-          <p class="nw-helper" style="margin-top:10px">Measurement weight change across these weeks: <strong>{{ "%+.1f"|format(progress_summary.weight_change) }} kg</strong>.</p>
-          {% endif %}
-        </section>
-        {% endif %}
 
-        <section class="nw-panel nw-pad">
-          <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Progress journey</p><h2>Week by week</h2><p>A concise history of coaching conversations and progress.</p></div></div>
-          {% if checkins %}<div class="nw-timeline">{% for checkin in checkins %}<div class="nw-timeline-item"><div class="nw-timeline-date">{{ checkin.call_date.strftime("%d %b %Y") }}</div><div class="nw-timeline-copy"><strong>{{ checkin.wins or "Weekly check-in completed" }}</strong><p>{% if checkin.improvements_needed %}Next focus: {{ checkin.improvements_needed }}{% endif %}</p></div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">Progress history will appear after the first completed weekly review.</p>{% endif %}
-        </section>
       </div>
 
       <div class="nw-stack">
         <section class="nw-panel nw-pad">
-          <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Latest coaching review</p><h2>What matters right now</h2></div></div>
+          <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Coaching brief</p><h2>What matters right now</h2></div></div>
           {% if checkins %}{% set latest=checkins[0] %}<div class="nw-note-grid"><div class="nw-note"><span>Wins</span><p>{{ latest.wins or "—" }}</p></div><div class="nw-note"><span>Struggles</span><p>{{ latest.struggles or "—" }}</p></div><div class="nw-note"><span>Improve next</span><p>{{ latest.improvements_needed or "—" }}</p></div><div class="nw-note"><span>Support needed</span><p>{{ latest.coach_support or "—" }}</p></div></div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">This will populate after the first weekly coaching call.</p>{% endif %}
         </section>
 
@@ -1417,6 +1387,61 @@
   </section>
 
   <section class="nw-panel-tab" data-panel="timeline">
+
+  <div class="nw-progress-intro">
+    <p class="nw-kicker" style="margin-top:0">PROGRESS</p>
+    <h2>Progress over time</h2>
+    <p>Trends and coaching history live here, so Overview can stay focused on what matters now.</p>
+  </div>
+
+  <section class="nw-client-snapshot">
+    <div><span>Actions</span><strong>{{ coaching_week_summary.action_percent if coaching_week_summary.action_percent is not none else "—" }}{% if coaching_week_summary.action_percent is not none %}%{% endif %}</strong><small>{{ coaching_week_summary.action_completed }}/{{ coaching_week_summary.action_total }} complete</small></div>
+    <div><span>Average steps</span><strong>{{ "{:,}".format(coaching_week_summary.avg_steps) if coaching_week_summary.avg_steps else "—" }}</strong><small>{% if coaching_week_summary.step_change_pct is not none %}{{ "+" if coaching_week_summary.step_change_pct > 0 else "" }}{{ coaching_week_summary.step_change_pct }}% vs last week{% else %}this week{% endif %}</small></div>
+    <div><span>Strength</span><strong>{{ coaching_week_summary.workouts_completed }}/{{ coaching_week_summary.workouts_assigned }}</strong><small>workouts completed</small></div>
+    <div><span>Check-in</span><strong>{% if week_review %}{{ week_review.submitted_count or 0 }}/7{% else %}—{% endif %}</strong><small>daily updates</small></div>
+  </section>
+
+<div class="nw-progress-moved">
+        {% if progress_summary and progress_summary.weeks %}
+        <section class="nw-panel nw-pad">
+          <div class="nw-heading">
+            <div><p class="nw-kicker" style="margin-top:0">Progress</p><h2>Last {{ progress_summary.weeks|length }} coaching weeks</h2><p>Daily consistency, action adherence and weekly measurement trend.</p></div>
+          </div>
+          <div class="nw-progress4">
+            {% for item in progress_summary.weeks %}
+            <div class="nw-progress-week {% if item.week_number == current_week %}current{% endif %}">
+              <div class="wk"><strong>Week {{ item.week_number }}</strong><span>{{ item.week_start.strftime("%d %b") }}–{{ item.week_end.strftime("%d %b") }}</span></div>
+              <div class="nw-progress-metric">
+                <div><span>Daily updates</span><b>{{ item.submitted_count }}/7</b></div>
+                <div class="nw-progress-bar"><i style="width:{{ item.checkin_percent }}%"></i></div>
+              </div>
+              <div class="nw-progress-metric">
+                <div><span>Actions</span><b>{{ item.action_percent }}%</b></div>
+                <div class="nw-progress-bar"><i style="width:{{ item.action_percent }}%"></i></div>
+              </div>
+              <div class="nw-progress-foot">
+                <span>{% if item.average_steps %}Avg {{ item.average_steps }} steps{% else %}No step avg{% endif %}</span>
+                <span>{% if item.weight_kg is not none %}{{ item.weight_kg }} kg{% else %}No measure{% endif %}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% if progress_summary.weight_change is not none %}
+          <p class="nw-helper" style="margin-top:10px">Measurement weight change across these weeks: <strong>{{ "%+.1f"|format(progress_summary.weight_change) }} kg</strong>.</p>
+          {% endif %}
+        </section>
+        {% endif %}
+
+
+</div>
+
+<div class="nw-progress-moved">
+        <section class="nw-panel nw-pad">
+          <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Progress journey</p><h2>Week by week</h2><p>A concise history of coaching conversations and progress.</p></div></div>
+          {% if checkins %}<div class="nw-timeline">{% for checkin in checkins %}<div class="nw-timeline-item"><div class="nw-timeline-date">{{ checkin.call_date.strftime("%d %b %Y") }}</div><div class="nw-timeline-copy"><strong>{{ checkin.wins or "Weekly check-in completed" }}</strong><p>{% if checkin.improvements_needed %}Next focus: {{ checkin.improvements_needed }}{% endif %}</p></div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">Progress history will appear after the first completed weekly review.</p>{% endif %}
+        </section>
+</div>
+
     <section class="nw-panel nw-pad">
       <div class="nw-heading">
         <div><p class="nw-kicker" style="margin-top:0">Coaching record</p><h2>Client timeline</h2><p>Intake, reviews, commitments, measurements, resources and Synamate calls in one chronology.</p></div>

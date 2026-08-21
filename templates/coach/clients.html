@@ -1,5 +1,11 @@
 {% extends "coach/base.html" %}
-{% block title %}Clients | Coach Dashboard{% endblock %}
+{% block title %}Clients | Coach Dashboard
+<style>
+/* Filtering: explicit rule because .client-row sets display:grid. */
+.client-row[hidden], [data-client-row][hidden], .client-no-results[hidden]{display:none!important}
+</style>
+
+{% endblock %}
 
 {% block content %}
 <style>
