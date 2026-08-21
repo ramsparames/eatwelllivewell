@@ -1055,6 +1055,18 @@ def client_profile(
         for row in coach_history_grid.get("rows") or []:
             row["macro"] = macro_history["by_date"].get(row["date"])
 
+    # Coaching intelligence for the current client workspace.
+    # These are computed before TemplateResponse so the Jinja context never
+    # references undefined variables.
+    coaching_week_summary = get_client_weekly_summary(
+        client_id,
+        week_start=week_start,
+    )
+    progress_charts = get_client_progress_charts(
+        client_id,
+        weeks=12,
+    )
+
     # Preselect every currently ACTIVE commitment for next week.
     #
     # Actions can be created at different times (especially custom actions),
