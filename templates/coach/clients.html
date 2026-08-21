@@ -63,6 +63,11 @@
 .empty{padding:26px;text-align:center;color:var(--coach-muted);font-size:13px}
 @media(max-width:1050px){.add-form{grid-template-columns:1fr 1fr}.add-btn{width:100%}.client-row{grid-template-columns:1.4fr .8fr .6fr .8fr 100px;gap:12px}}@media(max-width:760px){.client-row{grid-template-columns:1fr 1fr}.client-row .health{justify-self:start}}
 @media(max-width:620px){.summary-row,.add-form,.client-row{grid-template-columns:1fr}.clients-heading{display:block}.clients-heading h1{font-size:29px}}
+
+
+.client-row[hidden],[data-client-row][hidden],.client-no-results[hidden],[data-client-empty][hidden]{display:none!important}
+.client-row.is-filter-hidden{display:none!important}
+
 </style>
 
 <style>
@@ -175,7 +180,7 @@
       const h=row.dataset.health||"";
       const healthMatch=filter==="all"||(filter==="attention"&&h==="attention")||(filter==="on_track"&&(h==="on_track"||h==="watch"))||(filter==="setup"&&h==="setup");
       const show=healthMatch&&(!q||row.dataset.name.includes(q));
-      row.hidden=!show;if(show)visible++;
+      row.hidden=!show;row.classList.toggle("is-filter-hidden",!show);if(show)visible++;
     });
     if(empty)empty.hidden=visible!==0;
   }
