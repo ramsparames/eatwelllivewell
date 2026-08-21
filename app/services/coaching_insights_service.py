@@ -232,3 +232,100 @@ def get_previous_exercise_performance(client_id: int, assignment_id: int, exerci
             for r in same
         ]
     }
+
+
+def get_dashboard_client_coaching_signals(
+    client_id: int,
+    week_start: date,
+    week_end: date,
+    on_date: date,
+) -> dict:
+    """
+    Coaching-only signals layered on top of the existing operational alerts.
+
+    Rules deliberately avoid creating noise early in the coaching week:
+    - low action adherence: <60%, from day 3 onward, with enough logged opportunities
+    - workouts behind: completed sessions are below an evenly-paced expectation
+      for the number of workouts assigned during this coaching week
+    """
+    day_number = max(1, min(7, (on_date - week_start).days + 1))
+
+    action = _row("""
+        SELECT
+            COUNT(*)::int AS total,
+            COUNT(*) FILTER (WHERE completed = TRUE)::int AS completed
+        FROM client_action_daily_logs
+        WHERE client_id = %s
+          AND tracked_on BETWEEN %s AND %s
+          AND tracked_on <= %s
+    """, (client_id, week_start, week_end, on_date)) or {
+        "total": 0,
+        "completed": 0,
+    }
+
+    action_total = int(action.get("total") or 0)
+    action_completed = int(action.get("completed") or 0)
+    action_percent = (
+        round(action_completed * 100 / action_total)
+        if action_total
+        else None
+    )
+
+    low_adherence = (
+        day_number >= 3
+        and action_total >= 3
+        and action_percent is not None
+        and action_percent < 60
+    )
+
+    workouts = _row("""
+        SELECT
+            COUNT(*)::int AS assigned,
+            COUNT(*) FILTER (WHERE status = 'completed')::int AS completed
+        FROM client_workout_assignments
+        WHERE client_id = %s
+          AND status <> 'removed'
+          AND assigned_on BETWEEN %s AND %s
+    """, (client_id, week_start, week_end)) or {
+        "assigned": 0,
+        "completed": 0,
+    }
+
+    workouts_assigned = int(workouts.get("assigned") or 0)
+    workouts_completed = int(workouts.get("completed") or 0)
+
+    # Example for 3 assigned sessions:
+    # day 1-2 -> expected 0, day 3-4 -> expected 1,
+    # day 5-6 -> expected 2, day 7 -> expected 3.
+    expected_workouts = (
+        (workouts_assigned * day_number) // 7
+        if workouts_assigned
+        else 0
+    )
+    if day_number == 7:
+        expected_workouts = workouts_assigned
+
+    workouts_behind = (
+        workouts_assigned > 0
+        and workouts_completed < expected_workouts
+    )
+
+    reasons = []
+    if low_adherence:
+        reasons.append(f"Action adherence {action_percent}%")
+    if workouts_behind:
+        reasons.append(
+            f"Strength workouts {workouts_completed}/{workouts_assigned}"
+        )
+
+    return {
+        "action_percent": action_percent,
+        "action_total": action_total,
+        "action_completed": action_completed,
+        "low_adherence": low_adherence,
+        "workouts_assigned": workouts_assigned,
+        "workouts_completed": workouts_completed,
+        "expected_workouts": expected_workouts,
+        "workouts_behind": workouts_behind,
+        "reasons": reasons,
+    }

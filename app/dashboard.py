@@ -17,8 +17,8 @@ from app.database import (
     resolve_synamate_calendar_id,
 )
 from app.services.client_service import ClientService
-from app.services.coaching_insights_service import get_dashboard_coaching_attention
 from app.services.client_portal_service import get_client_operations_status
+from app.services.coaching_insights_service import get_dashboard_client_coaching_signals
 from fastapi import Form
 
 router = APIRouter()
@@ -443,8 +443,6 @@ def dashboard_home(request: Request):
         if client.get("status") == "active"
     ]
 
-    coaching_attention = get_dashboard_coaching_attention(active_clients)
-
     clarity_calendar_id = resolve_synamate_calendar_id(
         role="clarity",
         expected_name=os.getenv(
@@ -638,10 +636,63 @@ def dashboard_home(request: Request):
         "measurement_due": 0,
         "weekly_review_overdue": 0,
         "no_next_call": 0,
+        "low_adherence": 0,
+        "workouts_behind": 0,
     }
 
     for client in active_clients:
-        ops = get_client_operations_status(client, local_now.date())
+        # Existing operational alerts: missed updates, measurements,
+        # overdue review and no next call.
+        ops = dict(
+            get_client_operations_status(
+                client,
+                local_now.date(),
+            )
+        )
+        ops["reasons"] = list(ops.get("reasons") or [])
+
+        # Add coaching intelligence using this client's own coaching-week
+        # boundaries, not calendar Monday-Sunday weeks.
+        coaching_signals = {
+            "action_percent": None,
+            "low_adherence": False,
+            "workouts_assigned": 0,
+            "workouts_completed": 0,
+            "workouts_behind": False,
+            "reasons": [],
+        }
+
+        if ops.get("week_start") and ops.get("week_end"):
+            coaching_signals = get_dashboard_client_coaching_signals(
+                client["id"],
+                ops["week_start"],
+                ops["week_end"],
+                local_now.date(),
+            )
+
+        ops["coaching_signals"] = coaching_signals
+
+        for reason in coaching_signals.get("reasons") or []:
+            if reason not in ops["reasons"]:
+                ops["reasons"].append(reason)
+
+        if coaching_signals.get("low_adherence"):
+            operations_counts["low_adherence"] += 1
+
+        if coaching_signals.get("workouts_behind"):
+            operations_counts["workouts_behind"] += 1
+
+        # Coaching signals should bring a client into the SAME Needs attention
+        # list even if operational housekeeping is otherwise up to date.
+        if (
+            coaching_signals.get("low_adherence")
+            or coaching_signals.get("workouts_behind")
+        ):
+            ops["health_key"] = "attention"
+            ops["health_label"] = "Needs attention"
+
+        ops["attention_count"] = len(ops["reasons"])
+
         client["operations"] = ops
         client["current_week"] = ops["week_number"]
         client["has_synced_next_call"] = not ops["no_next_call"]
@@ -687,7 +738,6 @@ def dashboard_home(request: Request):
             "request": request,
             "active_clients": active_clients,
             "clients_without_next_call": clients_without_next_call,
-            "coaching_attention": coaching_attention,
             "needs_attention_clients": needs_attention_clients,
             "operations_counts": operations_counts,
             "missed_update_clients": missed_update_clients,
