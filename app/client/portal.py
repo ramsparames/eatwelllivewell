@@ -31,6 +31,7 @@ from app.services.phase_a_service import (
 
 from app.services.coaching_workflow_service import (
     create_coaching_workflow_tables,
+    get_client_coaching_history,
     get_coach_weekly_feedback,
     get_weekly_reflection,
     save_weekly_reflection,
@@ -40,6 +41,8 @@ from app.services.coaching_workflow_service import (
 )
 
 from app.services.coaching_insights_service import (
+    get_client_progress_journey,
+    get_client_weekly_summary,
     get_previous_exercise_performance,
 )
 
@@ -78,7 +81,76 @@ create_coaching_workflow_tables()
     "/client/{access_token}",
     response_class=HTMLResponse,
 )
-def client_home(request: Request, access_token: str):
+def client_portal_home(request: Request, access_token: str):
+    client = get_client_by_token(access_token)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client access link not found")
+
+    try:
+        client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
+    except Exception:
+        client_tz = ZoneInfo("Asia/Kolkata")
+    today = datetime.now(client_tz).date()
+
+    week_completion = get_week_completion(client["id"], on_date=today)
+    ensure_week_actions_carried_forward(
+        client["id"],
+        week_completion["week_start"],
+        week_completion["week_end"],
+    )
+
+    summary = get_client_weekly_summary(
+        client["id"],
+        week_start=week_completion["week_start"],
+    )
+    actions = get_actions_for_date(client["id"], today)
+    logs = get_action_logs_for_date(client["id"], today)
+
+    for action in actions:
+        action["completed_selected"] = bool(logs.get(action["id"], False))
+
+    workouts = get_client_workouts(client["id"])
+    active_workouts = [
+        workout for workout in workouts
+        if workout.get("status") != "completed"
+    ]
+    current_reflection = get_weekly_reflection(
+        client["id"],
+        week_completion["week_start"],
+    )
+    current_feedback = get_coach_weekly_feedback(
+        client["id"],
+        week_completion["week_start"],
+    )
+
+    return templates.TemplateResponse(
+        "client/portal_home.html",
+        {
+            "request": request,
+            "client": client,
+            "access_token": access_token,
+            "active_tab": "home",
+            "portal_week_number": week_completion["week_number"],
+            "today": today,
+            "week_completion": week_completion,
+            "summary": summary,
+            "actions": actions,
+            "active_workouts": active_workouts,
+            "all_workouts": workouts,
+            "weekly_reflection": current_reflection,
+            "coach_weekly_feedback": current_feedback,
+            "next_call": get_next_client_call(client),
+            "reflection_saved":
+                request.query_params.get("reflection_saved") == "1",
+        },
+    )
+
+
+@router.get(
+    "/client/{access_token}/data",
+    response_class=HTMLResponse,
+)
+def client_data_page(request: Request, access_token: str):
     client = get_client_by_token(access_token)
     if not client:
         raise HTTPException(status_code=404, detail="Client access link not found")
@@ -216,6 +288,8 @@ def client_home(request: Request, access_token: str):
             "request": request,
             "client": client,
             "access_token": access_token,
+            "active_tab": "data",
+            "portal_week_number": current_week_number,
             "today": today,
             "selected_date": selected_date,
             "selected_state": selected_state,
@@ -303,11 +377,70 @@ def client_workouts_page(
             "request": request,
             "client": client,
             "access_token": access_token,
+            "active_tab": "workouts",
+            "portal_week_number": get_week_completion(
+                client["id"], on_date=today
+            )["week_number"],
             "workouts": workouts,
             "selected_workout": selected_workout,
             "selected_assignment_id": selected_assignment_id,
             "today": today,
             "saved": request.query_params.get("saved") == "1",
+        },
+    )
+
+
+@router.get(
+    "/client/{access_token}/progress",
+    response_class=HTMLResponse,
+)
+def client_progress_page(request: Request, access_token: str):
+    client = get_client_by_token(access_token)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client access link not found")
+
+    try:
+        client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
+    except Exception:
+        client_tz = ZoneInfo("Asia/Kolkata")
+    today = datetime.now(client_tz).date()
+
+    week_completion = get_week_completion(client["id"], on_date=today)
+    journey = get_client_progress_journey(
+        client["id"],
+        client.get("start_date"),
+        today,
+        weeks=12,
+    )
+    coaching_history = get_client_coaching_history(
+        client["id"],
+        limit=24,
+    )
+
+    current = (
+        journey["weeks"][-1]
+        if journey.get("weeks")
+        else None
+    )
+    previous = (
+        journey["weeks"][-2]
+        if len(journey.get("weeks") or []) >= 2
+        else None
+    )
+
+    return templates.TemplateResponse(
+        "client/progress.html",
+        {
+            "request": request,
+            "client": client,
+            "access_token": access_token,
+            "active_tab": "progress",
+            "portal_week_number": week_completion["week_number"],
+            "today": today,
+            "journey": journey,
+            "current_progress": current,
+            "previous_progress": previous,
+            "coaching_history": coaching_history,
         },
     )
 
@@ -530,7 +663,7 @@ def save_client_weekly_reflection(
     )
 
     return RedirectResponse(
-        f"/client/{access_token}?reflection_saved=1",
+        f"/client/{access_token}?reflection_saved=1#weekly-reflection",
         status_code=303,
     )
 
@@ -607,7 +740,7 @@ def save_client_day(
         )
 
     return RedirectResponse(
-        f"/client/{access_token}?saved=1&week={selected_week_number}&day={selected_date.isoformat()}",
+        f"/client/{access_token}/data?saved=1&week={selected_week_number}&day={selected_date.isoformat()}",
         status_code=303,
     )
 
@@ -652,18 +785,18 @@ def save_client_measurements(
         )
     except (ValueError, TypeError):
         return RedirectResponse(
-            f"/client/{access_token}?measurement_error=1",
+            f"/client/{access_token}/data?measurement_error=1",
             status_code=303,
         )
 
     if not saved:
         return RedirectResponse(
-            f"/client/{access_token}?measurement_error=already_saved",
+            f"/client/{access_token}/data?measurement_error=already_saved",
             status_code=303,
         )
 
     return RedirectResponse(
-        f"/client/{access_token}?measurement_saved=1",
+        f"/client/{access_token}/data?measurement_saved=1",
         status_code=303,
     )
 

@@ -1,5 +1,5 @@
 {% extends "client/base.html" %}
-{% block title %}My Check-in | NourisHer{% endblock %}
+{% block title %}My Data | NourisHer{% endblock %}
 
 {% block content %}
 <style>
@@ -611,31 +611,31 @@
 .cp-reflection-readonly p{margin:5px 0 0;font-size:14px}
 @media(max-width:700px){.cp-reflection-grid,.cp-reflection-readonly{grid-template-columns:1fr}}
 
+
+.cp-data-intro{
+  display:flex;justify-content:space-between;gap:18px;align-items:flex-end;
+  width:min(1180px,calc(100% - 34px));margin:14px auto 0;padding:18px 20px;
+  border:1px solid #e7dfea;border-radius:16px;background:#fff
+}
+.cp-data-intro h1{margin:0;font-size:28px;letter-spacing:-.03em}
+.cp-data-intro p:not(.cp-kicker){margin:5px 0 0;color:#756f79;font-size:13px}
+.cp-data-intro>span{color:#5b0e91;font-size:12px;font-weight:850;white-space:nowrap}
+@media(max-width:700px){.cp-data-intro{display:block}.cp-data-intro>span{display:block;margin-top:9px}}
 </style>
 
 
 <section class="cp">
-  <header class="cp-hero">
-    <div>
-      <p class="cp-eyebrow">NourisHer · Week {{ week_completion.week_number }}</p>
-      <h1>Hi {{ client.name.split(" ")[0] }} 👋</h1>
-      <p class="cp-sub">
-        {{ today.strftime("%d %b %Y") }}
-        · Update the current week directly in your coaching grid.
-        {% if client.timezone %}<span class="cp-date-note">Your coaching day follows {{ client.timezone }}.</span>{% endif %}
-      </p>
-    </div>
-    <aside class="cp-consistency">
-      <span>You’re building consistency</span>
-      <strong>{{ week_completion.checkins_completed }} of 7</strong>
-      <small>daily check-ins completed this coaching week</small>
-    </aside>
-  </header>
+  {% set active_workout_count = assigned_workouts|selectattr("status","ne","completed")|list|length %}
+{% include "client/_portal_nav.html" %}
+<div class="cp-data-intro">
+  <div>
+    <p class="cp-kicker">MY DATA</p>
+    <h1>Track your week</h1>
+    <p>Update the current coaching week here. Previous weeks stay visible and read-only.</p>
+  </div>
+  <span>Week {{ week_completion.week_number }} · {{ week_completion.week_start.strftime("%d %b") }}–{{ week_completion.week_end.strftime("%d %b") }}</span>
+</div>
 
-<nav class="cp-client-tabs" aria-label="Client portal sections">
-  <a class="cp-client-tab active" href="/client/{{ access_token }}">My Data</a>
-  <a class="cp-client-tab" href="/client/{{ access_token }}/workouts">Workouts{% if assigned_workouts %}<span>{{ assigned_workouts|length }}</span>{% endif %}</a>
-</nav>
 
 
   {% if saved %}
@@ -921,65 +921,7 @@
 
 
 
-    <section class="cp-card cp-weekly-reflection">
-      <div class="cp-reflection-head">
-        <div>
-          <p class="cp-eyebrow">WEEKLY REFLECTION</p>
-          <h2>Your week, in your words</h2>
-          <p>This gives Sushma context beyond the numbers before your coaching conversation.</p>
-        </div>
-        {% if weekly_reflection %}<span class="cp-reflection-status">Saved</span>{% endif %}
-      </div>
-
-      {% if coach_weekly_feedback and coach_weekly_feedback.client_feedback %}
-      <div class="cp-coach-feedback">
-        <span>FROM SUSHMA</span>
-        <strong>Sushma's feedback for this week</strong>
-        <p>{{ coach_weekly_feedback.client_feedback }}</p>
-      </div>
-      {% endif %}
-
-      {% if week_view.is_current %}
-      <form method="post" action="/client/{{ access_token }}/weekly-reflection">
-        <input type="hidden" name="week_start" value="{{ week_view.week_start }}">
-        <div class="cp-reflection-grid">
-          <label>
-            <span>What went well this week?</span>
-            <textarea name="wins" placeholder="Your biggest win">{{ weekly_reflection.wins if weekly_reflection else "" }}</textarea>
-          </label>
-          <label>
-            <span>What felt difficult?</span>
-            <textarea name="challenge" placeholder="Your biggest challenge">{{ weekly_reflection.challenge if weekly_reflection else "" }}</textarea>
-          </label>
-          <label>
-            <span>Energy this week</span>
-            <select name="energy_score">
-              <option value="">Choose 1–5</option>
-              {% for n in range(1,6) %}
-              <option value="{{ n }}" {% if weekly_reflection and weekly_reflection.energy_score == n %}selected{% endif %}>{{ n }} / 5</option>
-              {% endfor %}
-            </select>
-          </label>
-          <label>
-            <span>What would you like Sushma's help with?</span>
-            <textarea name="help_needed" placeholder="Anything you want to discuss">{{ weekly_reflection.help_needed if weekly_reflection else "" }}</textarea>
-          </label>
-        </div>
-        <button class="cp-reflection-save" type="submit">
-          {% if weekly_reflection %}Update weekly reflection{% else %}Save weekly reflection{% endif %}
-        </button>
-      </form>
-      {% elif weekly_reflection %}
-      <div class="cp-reflection-readonly">
-        <div><span>Win</span><p>{{ weekly_reflection.wins or "—" }}</p></div>
-        <div><span>Challenge</span><p>{{ weekly_reflection.challenge or "—" }}</p></div>
-        <div><span>Energy</span><p>{{ weekly_reflection.energy_score or "—" }}/5</p></div>
-        <div><span>Help requested</span><p>{{ weekly_reflection.help_needed or "—" }}</p></div>
-      </div>
-      {% else %}
-      <div class="cp-section-empty">No weekly reflection was entered for this week.</div>
-      {% endif %}
-    </section>
+    
 
   </div>
 

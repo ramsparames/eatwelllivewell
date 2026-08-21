@@ -1,0 +1,149 @@
+{% extends "client/base.html" %}
+{% block title %}Home | NourisHer{% endblock %}
+{% block content %}
+{% set active_workout_count = active_workouts|length %}
+{% include "client/_portal_nav.html" %}
+<style>
+.ph,.ph *{box-sizing:border-box}
+.ph{
+  --purple:#5b0e91;--purple2:#8128aa;--ink:#28232c;--muted:#756f79;
+  --line:#e7dfea;--soft:#faf7fb;--green:#2e7551;--gold:#b98727;
+  width:min(1180px,calc(100% - 34px));margin:14px auto 36px;color:var(--ink)
+}
+.ph-hero{
+  display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:18px;
+  padding:28px;border-radius:22px;background:linear-gradient(120deg,#4d0879,#641095 58%,#832caf);
+  color:#fff;box-shadow:0 14px 34px rgba(74,16,111,.12)
+}
+.ph-eyebrow{margin:0 0 7px;color:#efd37d;font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+.ph-hero h1{margin:0;font-size:38px;line-height:1.05;letter-spacing:-.035em}
+.ph-hero p{margin:8px 0 0;color:rgba(255,255,255,.79);font-size:14px;line-height:1.5}
+.ph-focus{padding:17px;border:1px solid rgba(255,255,255,.18);border-radius:16px;background:rgba(255,255,255,.1)}
+.ph-focus span{display:block;color:#f1d889;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.ph-focus strong{display:block;margin-top:7px;font-size:16px;line-height:1.45}
+.ph-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.ph-kpi{padding:15px;border:1px solid var(--line);border-radius:15px;background:#fff}
+.ph-kpi span{display:block;color:var(--muted);font-size:11px;font-weight:800}
+.ph-kpi strong{display:block;margin-top:6px;color:var(--purple);font-size:27px;line-height:1}
+.ph-kpi small{display:block;margin-top:5px;color:var(--muted);font-size:11px}
+.ph-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);gap:12px;margin-top:12px}
+.ph-card{padding:20px;border:1px solid var(--line);border-radius:17px;background:#fff;box-shadow:0 4px 16px rgba(48,27,59,.035)}
+.ph-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:13px}
+.ph-head h2{margin:0;font-size:21px}.ph-head p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.ph-link{color:var(--purple);text-decoration:none;font-size:12px;font-weight:850}
+.ph-feedback{padding:16px;border-radius:13px;background:#f7effa}
+.ph-feedback .from{display:block;color:var(--purple);font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.ph-feedback p{margin:7px 0 0;font-size:15px;line-height:1.55}
+.ph-empty-note{padding:16px;border:1px dashed #dacfe0;border-radius:12px;color:var(--muted);font-size:13px}
+.ph-next{display:grid;gap:8px}
+.ph-next a,.ph-next .row{
+  display:flex;justify-content:space-between;gap:12px;align-items:center;
+  padding:12px;border:1px solid #eee8f0;border-radius:11px;color:inherit;text-decoration:none
+}
+.ph-next strong{display:block;font-size:13px}.ph-next small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.ph-arrow{color:var(--purple);font-weight:900}
+.ph-reflection{margin-top:12px}
+.ph-reflection-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ph-reflection label span{display:block;margin-bottom:5px;color:var(--muted);font-size:11px;font-weight:800}
+.ph-reflection textarea,.ph-reflection select{
+  width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:13px
+}
+.ph-reflection textarea{min-height:76px;resize:vertical}
+.ph-save{margin-top:10px;min-height:42px;padding:0 15px;border:0;border-radius:10px;background:var(--purple);color:#fff;font-size:13px;font-weight:850;cursor:pointer}
+.ph-saved{margin-bottom:10px;padding:9px 12px;border-radius:10px;background:#edf8f0;color:#286c49;font-size:12px}
+.ph-workout{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 0;border-top:1px solid #f0ebf2}
+.ph-workout:first-child{border-top:0}.ph-workout strong{font-size:13px}.ph-workout span{color:var(--muted);font-size:11px}
+@media(max-width:900px){.ph-hero,.ph-grid{grid-template-columns:1fr}.ph-kpis{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.ph-kpis,.ph-reflection-grid{grid-template-columns:1fr 1fr}.ph-hero{padding:20px}.ph-hero h1{font-size:31px}}
+</style>
+
+<div class="ph">
+  {% if reflection_saved %}<div class="ph-saved">✓ Your weekly reflection has been saved for Sushma.</div>{% endif %}
+
+  <section class="ph-hero">
+    <div>
+      <p class="ph-eyebrow">Week {{ week_completion.week_number }} · {{ week_completion.week_start.strftime("%d %b") }}–{{ week_completion.week_end.strftime("%d %b") }}</p>
+      <h1>Hi {{ client.name.split(" ")[0] }} 👋</h1>
+      <p>Your NourisHer home keeps the important things in one place — what to focus on, what’s left this week, and Sushma’s coaching feedback.</p>
+    </div>
+    <div class="ph-focus">
+      <span>Your focus this week</span>
+      <strong>
+        {% if actions %}
+          {% for action in actions[:3] %}{{ action.action_name }}{% if not loop.last %} · {% endif %}{% endfor %}
+        {% else %}
+          Keep showing up for the habits you and Sushma agreed on.
+        {% endif %}
+      </strong>
+    </div>
+  </section>
+
+  <section class="ph-kpis">
+    <div class="ph-kpi"><span>Action consistency</span><strong>{{ summary.action_percent if summary.action_percent is not none else "—" }}{% if summary.action_percent is not none %}%{% endif %}</strong><small>{{ summary.action_completed }}/{{ summary.action_total }} completed</small></div>
+    <div class="ph-kpi"><span>Strength</span><strong>{{ summary.workouts_completed }}/{{ summary.workouts_assigned }}</strong><small>workouts this week</small></div>
+    <div class="ph-kpi"><span>Daily check-ins</span><strong>{{ week_completion.checkins_completed }}/7</strong><small>days updated</small></div>
+    <div class="ph-kpi"><span>Average steps</span><strong>{{ "{:,}".format(summary.avg_steps) if summary.avg_steps else "—" }}</strong><small>{% if summary.step_change_pct is not none %}{{ "+" if summary.step_change_pct > 0 else "" }}{{ summary.step_change_pct }}% vs last week{% else %}this week{% endif %}</small></div>
+  </section>
+
+  <div class="ph-grid">
+    <div>
+      <section class="ph-card">
+        <div class="ph-head">
+          <div><h2>A note from Sushma 💜</h2><p>Your latest coach feedback for this coaching week.</p></div>
+          <a class="ph-link" href="/client/{{ access_token }}/progress#coach-notes">Past notes →</a>
+        </div>
+        {% if coach_weekly_feedback and coach_weekly_feedback.client_feedback %}
+        <div class="ph-feedback">
+          <span class="from">From Sushma</span>
+          <p>{{ coach_weekly_feedback.client_feedback }}</p>
+        </div>
+        {% else %}
+        <div class="ph-empty-note">Sushma’s weekly feedback will appear here after she reviews your week.</div>
+        {% endif %}
+      </section>
+
+      <section class="ph-card ph-reflection" id="weekly-reflection">
+        <div class="ph-head">
+          <div><h2>Weekly reflection</h2><p>A quick reflection gives Sushma context beyond the numbers.</p></div>
+          {% if weekly_reflection %}<span style="color:var(--green);font-size:12px;font-weight:850">Saved ✓</span>{% endif %}
+        </div>
+        <form method="post" action="/client/{{ access_token }}/weekly-reflection">
+          <input type="hidden" name="week_start" value="{{ week_completion.week_start }}">
+          <div class="ph-reflection-grid">
+            <label><span>What went well?</span><textarea name="wins" placeholder="Your biggest win">{{ weekly_reflection.wins if weekly_reflection else "" }}</textarea></label>
+            <label><span>What felt difficult?</span><textarea name="challenge" placeholder="Your biggest challenge">{{ weekly_reflection.challenge if weekly_reflection else "" }}</textarea></label>
+            <label><span>Energy this week</span><select name="energy_score"><option value="">Choose 1–5</option>{% for n in range(1,6) %}<option value="{{ n }}" {% if weekly_reflection and weekly_reflection.energy_score == n %}selected{% endif %}>{{ n }} / 5</option>{% endfor %}</select></label>
+            <label><span>What would you like help with?</span><textarea name="help_needed" placeholder="Anything you want Sushma to know">{{ weekly_reflection.help_needed if weekly_reflection else "" }}</textarea></label>
+          </div>
+          <button class="ph-save" type="submit">{% if weekly_reflection %}Update reflection{% else %}Save reflection{% endif %}</button>
+        </form>
+      </section>
+    </div>
+
+    <aside>
+      <section class="ph-card">
+        <div class="ph-head"><div><h2>Your next steps</h2><p>Keep this week simple.</p></div></div>
+        <div class="ph-next">
+          <a href="/client/{{ access_token }}/data"><div><strong>Update today’s data</strong><small>Actions, steps{% if summary.latest_weight is not none %}, weight{% endif %}</small></div><span class="ph-arrow">→</span></a>
+          {% if active_workouts %}
+          <a href="/client/{{ access_token }}/workouts?workout={{ active_workouts[0].assignment_id }}"><div><strong>{{ active_workouts[0].title }}</strong><small>{{ active_workouts|length }} workout{% if active_workouts|length != 1 %}s{% endif %} remaining</small></div><span class="ph-arrow">→</span></a>
+          {% endif %}
+          <a href="#weekly-reflection"><div><strong>Weekly reflection</strong><small>{% if weekly_reflection %}Submitted — update anytime this week{% else %}Tell Sushma how the week is going{% endif %}</small></div><span class="ph-arrow">→</span></a>
+          <div class="row"><div><strong>Next coaching call</strong><small>{% if next_call and next_call.local_start_time %}{{ next_call.local_start_time.strftime("%d %b · %I:%M %p") }}{% else %}Not scheduled yet{% endif %}</small></div></div>
+        </div>
+      </section>
+
+      <section class="ph-card" style="margin-top:12px">
+        <div class="ph-head"><div><h2>Workouts</h2><p>Your active strength sessions.</p></div><a class="ph-link" href="/client/{{ access_token }}/workouts">Open →</a></div>
+        {% if active_workouts %}
+          {% for workout in active_workouts[:3] %}
+          <div class="ph-workout"><div><strong>{{ workout.title }}</strong><br><span>{{ workout.exercise_count }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}</span></div><span>{{ workout.status|replace("_"," ")|title }}</span></div>
+          {% endfor %}
+        {% else %}
+          <div class="ph-empty-note">No active workouts right now.</div>
+        {% endif %}
+      </section>
+    </aside>
+  </div>
+</div>
+{% endblock %}

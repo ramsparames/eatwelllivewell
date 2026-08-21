@@ -329,3 +329,128 @@ def get_dashboard_client_coaching_signals(
         "workouts_behind": workouts_behind,
         "reasons": reasons,
     }
+
+
+def get_client_progress_journey(
+    client_id: int,
+    client_start_date: date,
+    on_date: date,
+    weeks: int = 12,
+) -> dict:
+    """
+    Client-facing progress aligned to the client's actual NourisHer coaching
+    weeks (start-date based), not calendar Monday-Sunday weeks.
+    """
+    if not client_start_date:
+        return {"weeks": [], "weight": [], "measurements": []}
+
+    current_week_number = max(
+        1,
+        ((on_date - client_start_date).days // 7) + 1,
+    )
+    first_week_number = max(1, current_week_number - weeks + 1)
+    first_date = client_start_date + timedelta(days=(first_week_number - 1) * 7)
+
+    daily = _rows("""
+        SELECT tracked_on, steps, weight_kg
+        FROM client_daily_tracking
+        WHERE client_id = %s
+          AND tracked_on BETWEEN %s AND %s
+        ORDER BY tracked_on
+    """, (client_id, first_date, on_date))
+
+    actions = _rows("""
+        SELECT tracked_on, completed
+        FROM client_action_daily_logs
+        WHERE client_id = %s
+          AND tracked_on BETWEEN %s AND %s
+        ORDER BY tracked_on
+    """, (client_id, first_date, on_date))
+
+    workouts = _rows("""
+        SELECT workout_date
+        FROM client_workout_assignments
+        WHERE client_id = %s
+          AND status = 'completed'
+          AND workout_date BETWEEN %s AND %s
+        ORDER BY workout_date
+    """, (client_id, first_date, on_date))
+
+    measurements = _rows("""
+        SELECT measured_on, waist_cm, hip_cm, thigh_cm, chest_cm,
+               upper_arm_cm, lower_abdomen_cm
+        FROM client_measurements
+        WHERE client_id = %s
+          AND measured_on BETWEEN %s AND %s
+        ORDER BY measured_on
+    """, (client_id, first_date, on_date))
+
+    buckets = defaultdict(lambda: {
+        "steps": [],
+        "action_total": 0,
+        "action_done": 0,
+        "workouts": 0,
+        "checkins": 0,
+    })
+
+    for row in daily:
+        d = row["tracked_on"]
+        week_number = ((d - client_start_date).days // 7) + 1
+        if week_number < first_week_number:
+            continue
+        if row.get("steps") is not None:
+            buckets[week_number]["steps"].append(int(row["steps"]))
+        buckets[week_number]["checkins"] += 1
+
+    for row in actions:
+        d = row["tracked_on"]
+        week_number = ((d - client_start_date).days // 7) + 1
+        if week_number < first_week_number:
+            continue
+        buckets[week_number]["action_total"] += 1
+        if row.get("completed"):
+            buckets[week_number]["action_done"] += 1
+
+    for row in workouts:
+        d = row["workout_date"]
+        week_number = ((d - client_start_date).days // 7) + 1
+        if week_number >= first_week_number:
+            buckets[week_number]["workouts"] += 1
+
+    week_rows = []
+    for week_number in range(first_week_number, current_week_number + 1):
+        ws = client_start_date + timedelta(days=(week_number - 1) * 7)
+        we = ws + timedelta(days=6)
+        b = buckets[week_number]
+        adherence = (
+            round(b["action_done"] * 100 / b["action_total"])
+            if b["action_total"]
+            else None
+        )
+        week_rows.append({
+            "week_number": week_number,
+            "label": f"Week {week_number}",
+            "week_start": ws,
+            "week_end": we,
+            "avg_steps": round(mean(b["steps"])) if b["steps"] else None,
+            "adherence": adherence,
+            "workouts": b["workouts"],
+            "checkins": min(b["checkins"], 7),
+        })
+
+    weight = [
+        {
+            "date": row["tracked_on"],
+            "label": row["tracked_on"].strftime("%d %b"),
+            "value": float(row["weight_kg"]),
+        }
+        for row in daily
+        if row.get("weight_kg") is not None
+    ]
+
+    return {
+        "weeks": week_rows,
+        "weight": weight,
+        "measurements": measurements,
+        "current_week_number": current_week_number,
+    }

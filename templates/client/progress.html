@@ -1,0 +1,76 @@
+{% extends "client/base.html" %}
+{% block title %}Progress | NourisHer{% endblock %}
+{% block content %}
+{% include "client/_portal_nav.html" %}
+<style>
+.pg,.pg *{box-sizing:border-box}
+.pg{
+  --purple:#5b0e91;--ink:#28232c;--muted:#756f79;--line:#e7dfea;
+  --soft:#faf7fb;--green:#2f7652;
+  width:min(1180px,calc(100% - 34px));margin:14px auto 38px;color:var(--ink)
+}
+.pg-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:20px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.pg-kicker{margin:0 0 5px;color:var(--purple);font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+.pg-intro h1{margin:0;font-size:29px;letter-spacing:-.03em}.pg-intro p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.pg-compare{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.pg-stat{padding:15px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.pg-stat span{display:block;color:var(--muted);font-size:11px;font-weight:800}.pg-stat strong{display:block;margin-top:6px;color:var(--purple);font-size:26px}
+.pg-stat small{display:block;margin-top:4px;color:var(--muted);font-size:11px}
+.pg-section{margin-top:12px;padding:20px;border:1px solid var(--line);border-radius:17px;background:#fff}
+.pg-head{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:15px}.pg-head h2{margin:0;font-size:21px}.pg-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.pg-chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pg-chart{padding:15px;border:1px solid #eee8f0;border-radius:13px;background:#fcfafc}
+.pg-chart h3{margin:0 0 14px;font-size:15px}
+.pg-bars{height:170px;display:flex;align-items:flex-end;gap:7px;border-bottom:1px solid #ddd}
+.pg-bar-col{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:18px}
+.pg-bar{width:70%;min-height:3px;max-height:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#7d22a9,#5b0e91)}
+.pg-bar.workout{background:linear-gradient(180deg,#a966c5,#7d22a9)}
+.pg-bar-col span{margin:7px 0 -18px;color:var(--muted);font-size:9px;white-space:nowrap;transform:rotate(-38deg)}
+.pg-history{display:grid;gap:9px}
+.pg-note{padding:15px;border:1px solid #eee8f0;border-radius:13px;background:#fff}
+.pg-note-top{display:flex;justify-content:space-between;gap:12px}.pg-note-top strong{font-size:14px}.pg-note-top span{color:var(--muted);font-size:11px}
+.pg-coach{margin-top:10px;padding:12px;border-radius:10px;background:#f7effa}.pg-coach span{display:block;color:var(--purple);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.pg-coach p{margin:5px 0 0;font-size:13px;line-height:1.5}
+.pg-win{margin-top:8px;color:#4c4650;font-size:13px;line-height:1.45}.pg-win b{color:var(--green)}
+.pg-empty{padding:28px;border:1px dashed #dacfe0;border-radius:13px;text-align:center;color:var(--muted);font-size:13px}
+@media(max-width:900px){.pg-compare{grid-template-columns:1fr 1fr}.pg-chart-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="pg">
+  <section class="pg-intro">
+    <div><p class="pg-kicker">YOUR JOURNEY</p><h1>Progress</h1><p>Look beyond one day. These trends show the consistency you’re building over time.</p></div>
+    <span style="color:var(--purple);font-size:12px;font-weight:850">Last 12 coaching weeks</span>
+  </section>
+
+  <section class="pg-compare">
+    <div class="pg-stat"><span>Action consistency</span><strong>{{ current_progress.adherence if current_progress and current_progress.adherence is not none else "—" }}{% if current_progress and current_progress.adherence is not none %}%{% endif %}</strong><small>{% if previous_progress and previous_progress.adherence is not none and current_progress and current_progress.adherence is not none %}Last week {{ previous_progress.adherence }}%{% else %}Current week{% endif %}</small></div>
+    <div class="pg-stat"><span>Average steps</span><strong>{{ "{:,}".format(current_progress.avg_steps) if current_progress and current_progress.avg_steps else "—" }}</strong><small>{% if previous_progress and previous_progress.avg_steps %}Last week {{ "{:,}".format(previous_progress.avg_steps) }}{% else %}Current week{% endif %}</small></div>
+    <div class="pg-stat"><span>Strength workouts</span><strong>{{ current_progress.workouts if current_progress else 0 }}</strong><small>{% if previous_progress %}Last week {{ previous_progress.workouts }}{% else %}Completed this week{% endif %}</small></div>
+    <div class="pg-stat"><span>Check-ins</span><strong>{{ current_progress.checkins if current_progress else 0 }}/7</strong><small>{% if previous_progress %}Last week {{ previous_progress.checkins }}/7{% else %}This week{% endif %}</small></div>
+  </section>
+
+  <section class="pg-section">
+    <div class="pg-head"><div><h2>Consistency trends</h2><p>Your coaching weeks follow your NourisHer start date.</p></div></div>
+    {% if journey.weeks %}
+    <div class="pg-chart-grid">
+      <div class="pg-chart"><h3>Action consistency</h3><div class="pg-bars">{% for w in journey.weeks %}<div class="pg-bar-col" title="{{ w.label }} · {{ w.adherence if w.adherence is not none else 0 }}%"><div class="pg-bar" style="height:{{ w.adherence if w.adherence is not none else 2 }}%"></div><span>W{{ w.week_number }}</span></div>{% endfor %}</div></div>
+      <div class="pg-chart"><h3>Strength workouts</h3><div class="pg-bars">{% for w in journey.weeks %}<div class="pg-bar-col" title="{{ w.label }} · {{ w.workouts }} workouts"><div class="pg-bar workout" style="height:{{ [w.workouts * 25, 100]|min if w.workouts else 2 }}%"></div><span>W{{ w.week_number }}</span></div>{% endfor %}</div></div>
+    </div>
+    {% else %}<div class="pg-empty">Your progress charts will build as you start logging your weeks.</div>{% endif %}
+  </section>
+
+  <section class="pg-section" id="coach-notes">
+    <div class="pg-head"><div><h2>Wins & coach notes</h2><p>Your reflections and Sushma’s feedback stay here as part of your journey.</p></div></div>
+    {% if coaching_history %}
+    <div class="pg-history">
+      {% for item in coaching_history %}
+      <article class="pg-note">
+        <div class="pg-note-top"><strong>Week of {{ item.week_start.strftime("%d %b %Y") }}</strong>{% if item.energy_score %}<span>Energy {{ item.energy_score }}/5</span>{% endif %}</div>
+        {% if item.wins %}<div class="pg-win"><b>Your win:</b> {{ item.wins }}</div>{% endif %}
+        {% if item.client_feedback %}<div class="pg-coach"><span>From Sushma</span><p>{{ item.client_feedback }}</p></div>{% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}<div class="pg-empty">Weekly wins and Sushma’s feedback will collect here over time.</div>{% endif %}
+  </section>
+</div>
+{% endblock %}

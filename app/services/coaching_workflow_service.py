@@ -351,3 +351,30 @@ def replace_future_week_action_plan(
                   AND end_date = %s
             """, (client_id, week_start, week_end))
             return True
+
+
+def get_client_coaching_history(client_id: int, limit: int = 24) -> list[dict]:
+    """
+    Combined client-visible coaching history by week.
+    Private coach notes are intentionally excluded.
+    """
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    COALESCE(f.week_start, r.week_start) AS week_start,
+                    f.client_feedback,
+                    r.wins,
+                    r.challenge,
+                    r.energy_score,
+                    r.help_needed,
+                    r.submitted_at
+                FROM coach_weekly_feedback f
+                FULL OUTER JOIN client_weekly_reflections r
+                  ON r.client_id = f.client_id
+                 AND r.week_start = f.week_start
+                WHERE COALESCE(f.client_id, r.client_id) = %s
+                ORDER BY COALESCE(f.week_start, r.week_start) DESC
+                LIMIT %s
+            """, (client_id, limit))
+            return cursor.fetchall() or []

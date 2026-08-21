@@ -1,0 +1,58 @@
+<style>
+.nh-shell,.nh-shell *{box-sizing:border-box}
+.nh-shell{
+  --nh-purple:#5b0e91;--nh-purple-2:#7d22a9;--nh-ink:#28232c;
+  --nh-muted:#756f79;--nh-line:#e7dfea;--nh-soft:#faf7fb;
+  width:min(1180px,calc(100% - 34px));margin:18px auto 0
+}
+.nh-portal-head{
+  display:flex;justify-content:space-between;gap:22px;align-items:center;
+  padding:15px 18px;border:1px solid var(--nh-line);border-radius:16px;
+  background:rgba(255,255,255,.96);box-shadow:0 5px 18px rgba(48,27,59,.045)
+}
+.nh-brand{display:flex;align-items:center;gap:12px;min-width:0}
+.nh-mark{
+  width:38px;height:38px;display:grid;place-items:center;border-radius:12px;
+  background:linear-gradient(135deg,var(--nh-purple),var(--nh-purple-2));
+  color:#fff;font-family:Georgia,serif;font-size:20px;font-weight:800
+}
+.nh-brand-copy strong{display:block;color:var(--nh-ink);font-size:15px}
+.nh-brand-copy span{display:block;margin-top:2px;color:var(--nh-muted);font-size:11px}
+.nh-nav{display:flex;align-items:center;gap:3px;padding:4px;border-radius:12px;background:#f8f4fa}
+.nh-nav a{
+  display:inline-flex;align-items:center;justify-content:center;min-height:37px;
+  padding:0 13px;border-radius:9px;color:#6f6873;text-decoration:none;
+  font-size:13px;font-weight:800;white-space:nowrap
+}
+.nh-nav a:hover{color:var(--nh-purple);background:#fff}
+.nh-nav a.active{background:#fff;color:var(--nh-purple);box-shadow:0 2px 9px rgba(65,25,83,.08)}
+.nh-nav .nh-badge{
+  display:inline-grid;place-items:center;min-width:19px;height:19px;margin-left:6px;
+  padding:0 5px;border-radius:999px;background:#efe2f5;color:var(--nh-purple);
+  font-size:10px
+}
+@media(max-width:760px){
+  .nh-portal-head{display:block;padding:13px}
+  .nh-nav{margin-top:12px;overflow:auto;justify-content:flex-start}
+  .nh-nav a{padding:0 11px}
+}
+</style>
+<div class="nh-shell">
+  <header class="nh-portal-head">
+    <div class="nh-brand">
+      <div class="nh-mark">N</div>
+      <div class="nh-brand-copy">
+        <strong>NourisHer</strong>
+        <span>{{ client.name }}{% if portal_week_number %} · Week {{ portal_week_number }}{% endif %}</span>
+      </div>
+    </div>
+    <nav class="nh-nav" aria-label="Client portal">
+      <a class="{% if active_tab == 'home' %}active{% endif %}" href="/client/{{ access_token }}">Home</a>
+      <a class="{% if active_tab == 'data' %}active{% endif %}" href="/client/{{ access_token }}/data">My Data</a>
+      <a class="{% if active_tab == 'workouts' %}active{% endif %}" href="/client/{{ access_token }}/workouts">
+        Workouts{% if active_workout_count is defined and active_workout_count %}<span class="nh-badge">{{ active_workout_count }}</span>{% endif %}
+      </a>
+      <a class="{% if active_tab == 'progress' %}active{% endif %}" href="/client/{{ access_token }}/progress">Progress</a>
+    </nav>
+  </header>
+</div>

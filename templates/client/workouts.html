@@ -1,92 +1,5 @@
 {% extends "client/base.html" %}
-{% block title %}My Workouts | NourisHer
-<script>
-(() => {
-  const exerciseForms = [...document.querySelectorAll("[data-exercise-form]")];
-
-  function updateOverallProgress() {
-    const boxes = [...document.querySelectorAll("[data-exercise-form] [data-done]")];
-    const done = boxes.filter(box => box.checked).length;
-    const total = boxes.length;
-    const pct = total ? Math.round(done * 100 / total) : 0;
-
-    const bar = document.querySelector("[data-workout-progress-bar]");
-    const text = document.querySelector("[data-workout-progress-text]");
-    const wrap = document.querySelector("[data-workout-progress]");
-
-    if (bar) bar.style.width = pct + "%";
-    if (text) text.textContent = `${done} of ${total} sets marked done.`;
-    if (wrap) wrap.title = `${done} of ${total} sets complete`;
-  }
-
-  exerciseForms.forEach(form => {
-    const button = form.querySelector("[data-save-exercise]");
-    const state = form.querySelector("[data-save-state]");
-    if (!button) return;
-
-    button.addEventListener("click", async () => {
-      const sets = [...form.querySelectorAll("[data-set-row]")].map(row => ({
-        set_number: Number(row.dataset.setNumber),
-        weight_kg: row.querySelector("[data-weight]")?.value || null,
-        reps: row.querySelector("[data-reps]")?.value || null,
-        completed: !!row.querySelector("[data-done]")?.checked
-      }));
-
-      const payload = {
-        exercise_id: Number(form.dataset.exerciseId),
-        sets,
-        client_note: form.querySelector("[data-client-note]")?.value || ""
-      };
-
-      form.closest(".wk-ex")?.classList.add("is-saving");
-      button.disabled = true;
-      state.textContent = "Saving…";
-      state.className = "wk-save-state";
-
-      try {
-        const response = await fetch(form.dataset.saveUrl, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(payload)
-        });
-        const result = await response.json();
-
-        if (!response.ok || !result.ok) {
-          throw new Error(result.error || "Unable to save");
-        }
-
-        state.textContent = "Saved ✓";
-        state.className = "wk-save-state saved";
-        updateOverallProgress();
-
-        window.setTimeout(() => {
-          if (state.textContent === "Saved ✓") state.textContent = "";
-        }, 2500);
-      } catch (error) {
-        state.textContent = "Could not save. Try again.";
-        state.className = "wk-save-state error";
-      } finally {
-        button.disabled = false;
-        form.closest(".wk-ex")?.classList.remove("is-saving");
-      }
-    });
-
-    form.querySelectorAll("input, textarea").forEach(input => {
-      input.addEventListener("input", () => {
-        if (state.classList.contains("saved")) {
-          state.textContent = "Unsaved changes";
-          state.className = "wk-save-state";
-        }
-      });
-      input.addEventListener("change", updateOverallProgress);
-    });
-  });
-
-  updateOverallProgress();
-})();
-</script>
-
-{% endblock %}
+{% block title %}Workouts | NourisHer{% endblock %}
 {% block content %}
 <style>
 .wk,.wk *{box-sizing:border-box}
@@ -445,21 +358,24 @@
   .wk-set-bulk{grid-template-columns:70px 1fr 1fr}
   .wk-set-bulk .wk-done{grid-column:2/4}
 }
+
+.wk-page-intro{
+  display:flex;justify-content:space-between;gap:16px;align-items:flex-end;
+  margin:0 0 14px;padding:17px 19px;border:1px solid var(--line);border-radius:15px;background:#fff
+}
+.wk-page-intro h1{margin:0;font-size:27px;letter-spacing:-.03em}
+.wk-page-intro p:not(.wk-kicker){margin:5px 0 0;color:var(--muted);font-size:13px}
+.wk-page-intro>span{padding:6px 9px;border-radius:999px;background:#f3e9f8;color:var(--purple);font-size:11px;font-weight:850}
 </style>
 
 <div class="wk">
-  <div class="wk-top">
-    <div>
-      <p class="wk-kicker">NourisHer</p>
-      <h1>My workouts</h1>
-      <p>Open a workout, follow Sushma’s exercise demos, and record the weight and reps you complete.</p>
-    </div>
-  </div>
+  {% set active_workout_count = workouts|selectattr("status","ne","completed")|list|length %}
+{% include "client/_portal_nav.html" %}
+<div class="wk-page-intro">
+  <div><p class="wk-kicker">WORKOUTS</p><h1>Strength sessions</h1><p>Choose a workout on the left, follow Sushma’s demos, and log your sets on the right.</p></div>
+  <span>{{ active_workout_count }} active</span>
+</div>
 
-  <nav class="wk-tabs">
-    <a class="wk-tab" href="/client/{{ access_token }}">My Data</a>
-    <a class="wk-tab active" href="/client/{{ access_token }}/workouts">Workouts{% if workouts %}<span>{{ workouts|length }}</span>{% endif %}</a>
-  </nav>
 
   <div class="wk-shell">
     <aside class="wk-panel wk-left">
@@ -648,4 +564,89 @@
     </main>
   </div>
 </div>
+<script>
+(() => {
+  const exerciseForms = [...document.querySelectorAll("[data-exercise-form]")];
+
+  function updateOverallProgress() {
+    const boxes = [...document.querySelectorAll("[data-exercise-form] [data-done]")];
+    const done = boxes.filter(box => box.checked).length;
+    const total = boxes.length;
+    const pct = total ? Math.round(done * 100 / total) : 0;
+
+    const bar = document.querySelector("[data-workout-progress-bar]");
+    const text = document.querySelector("[data-workout-progress-text]");
+    const wrap = document.querySelector("[data-workout-progress]");
+
+    if (bar) bar.style.width = pct + "%";
+    if (text) text.textContent = `${done} of ${total} sets marked done.`;
+    if (wrap) wrap.title = `${done} of ${total} sets complete`;
+  }
+
+  exerciseForms.forEach(form => {
+    const button = form.querySelector("[data-save-exercise]");
+    const state = form.querySelector("[data-save-state]");
+    if (!button) return;
+
+    button.addEventListener("click", async () => {
+      const sets = [...form.querySelectorAll("[data-set-row]")].map(row => ({
+        set_number: Number(row.dataset.setNumber),
+        weight_kg: row.querySelector("[data-weight]")?.value || null,
+        reps: row.querySelector("[data-reps]")?.value || null,
+        completed: !!row.querySelector("[data-done]")?.checked
+      }));
+
+      const payload = {
+        exercise_id: Number(form.dataset.exerciseId),
+        sets,
+        client_note: form.querySelector("[data-client-note]")?.value || ""
+      };
+
+      form.closest(".wk-ex")?.classList.add("is-saving");
+      button.disabled = true;
+      state.textContent = "Saving…";
+      state.className = "wk-save-state";
+
+      try {
+        const response = await fetch(form.dataset.saveUrl, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || "Unable to save");
+        }
+
+        state.textContent = "Saved ✓";
+        state.className = "wk-save-state saved";
+        updateOverallProgress();
+
+        window.setTimeout(() => {
+          if (state.textContent === "Saved ✓") state.textContent = "";
+        }, 2500);
+      } catch (error) {
+        state.textContent = "Could not save. Try again.";
+        state.className = "wk-save-state error";
+      } finally {
+        button.disabled = false;
+        form.closest(".wk-ex")?.classList.remove("is-saving");
+      }
+    });
+
+    form.querySelectorAll("input, textarea").forEach(input => {
+      input.addEventListener("input", () => {
+        if (state.classList.contains("saved")) {
+          state.textContent = "Unsaved changes";
+          state.className = "wk-save-state";
+        }
+      });
+      input.addEventListener("change", updateOverallProgress);
+    });
+  });
+
+  updateOverallProgress();
+})();
+</script>
 {% endblock %}
