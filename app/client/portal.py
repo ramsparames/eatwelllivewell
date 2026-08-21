@@ -47,9 +47,7 @@ from app.services.client_portal_service import (
     save_weekly_measurements,
 )
 
-from app.services.coaching_insights_service import {
-    get_previous_exercise_performance,
-}
+from app.services.coaching_insights_service import get_previous_exercise_performance
 
 router = APIRouter()
 
