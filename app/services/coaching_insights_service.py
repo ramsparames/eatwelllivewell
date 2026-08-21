@@ -285,7 +285,7 @@ def get_dashboard_client_coaching_signals(
         FROM client_workout_assignments
         WHERE client_id = %s
           AND status <> 'removed'
-          AND assigned_on BETWEEN %s AND %s
+          AND COALESCE(planned_week_start, assigned_on) BETWEEN %s AND %s
     """, (client_id, week_start, week_end)) or {
         "assigned": 0,
         "completed": 0,

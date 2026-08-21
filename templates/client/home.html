@@ -589,6 +589,28 @@
   background:rgba(255,255,255,.18);
   color:#fff;
 }
+
+
+.cp-weekly-reflection{margin-top:18px;padding:22px}
+.cp-reflection-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}
+.cp-reflection-head h2{margin:3px 0 5px;font-size:24px}
+.cp-reflection-head p{margin:0;color:var(--muted);font-size:14px}
+.cp-reflection-status{padding:6px 10px;border-radius:999px;background:#eaf5ef;color:#31704c;font-size:12px;font-weight:850}
+.cp-reflection-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cp-reflection-grid label>span{display:block;margin-bottom:6px;font-size:13px;font-weight:800;color:var(--muted)}
+.cp-reflection-grid textarea,.cp-reflection-grid select{width:100%;min-height:46px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:14px}
+.cp-reflection-grid textarea{min-height:88px;resize:vertical}
+.cp-reflection-save{margin-top:13px;min-height:44px;padding:0 16px;border:0;border-radius:10px;background:var(--purple);color:#fff;font-size:14px;font-weight:850;cursor:pointer}
+.cp-coach-feedback{margin-bottom:16px;padding:15px 16px;border-radius:12px;background:#f7effa}
+.cp-coach-feedback span{display:block;color:var(--purple);font-size:11px;font-weight:900;letter-spacing:.08em}
+.cp-coach-feedback strong{display:block;margin-top:5px;font-size:16px}
+.cp-coach-feedback p{margin:6px 0 0;font-size:14px;line-height:1.5}
+.cp-reflection-readonly{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cp-reflection-readonly>div{padding:12px;border-radius:10px;background:#faf7fb}
+.cp-reflection-readonly span{color:var(--muted);font-size:12px;font-weight:800}
+.cp-reflection-readonly p{margin:5px 0 0;font-size:14px}
+@media(max-width:700px){.cp-reflection-grid,.cp-reflection-readonly{grid-template-columns:1fr}}
+
 </style>
 
 
@@ -897,6 +919,67 @@
       {% endif %}
     </section>
 
+
+
+    <section class="cp-card cp-weekly-reflection">
+      <div class="cp-reflection-head">
+        <div>
+          <p class="cp-eyebrow">WEEKLY REFLECTION</p>
+          <h2>Your week, in your words</h2>
+          <p>This gives Sushma context beyond the numbers before your coaching conversation.</p>
+        </div>
+        {% if weekly_reflection %}<span class="cp-reflection-status">Saved</span>{% endif %}
+      </div>
+
+      {% if coach_weekly_feedback and coach_weekly_feedback.client_feedback %}
+      <div class="cp-coach-feedback">
+        <span>FROM SUSHMA</span>
+        <strong>Sushma's feedback for this week</strong>
+        <p>{{ coach_weekly_feedback.client_feedback }}</p>
+      </div>
+      {% endif %}
+
+      {% if week_view.is_current %}
+      <form method="post" action="/client/{{ access_token }}/weekly-reflection">
+        <input type="hidden" name="week_start" value="{{ week_view.week_start }}">
+        <div class="cp-reflection-grid">
+          <label>
+            <span>What went well this week?</span>
+            <textarea name="wins" placeholder="Your biggest win">{{ weekly_reflection.wins if weekly_reflection else "" }}</textarea>
+          </label>
+          <label>
+            <span>What felt difficult?</span>
+            <textarea name="challenge" placeholder="Your biggest challenge">{{ weekly_reflection.challenge if weekly_reflection else "" }}</textarea>
+          </label>
+          <label>
+            <span>Energy this week</span>
+            <select name="energy_score">
+              <option value="">Choose 1–5</option>
+              {% for n in range(1,6) %}
+              <option value="{{ n }}" {% if weekly_reflection and weekly_reflection.energy_score == n %}selected{% endif %}>{{ n }} / 5</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>
+            <span>What would you like Sushma's help with?</span>
+            <textarea name="help_needed" placeholder="Anything you want to discuss">{{ weekly_reflection.help_needed if weekly_reflection else "" }}</textarea>
+          </label>
+        </div>
+        <button class="cp-reflection-save" type="submit">
+          {% if weekly_reflection %}Update weekly reflection{% else %}Save weekly reflection{% endif %}
+        </button>
+      </form>
+      {% elif weekly_reflection %}
+      <div class="cp-reflection-readonly">
+        <div><span>Win</span><p>{{ weekly_reflection.wins or "—" }}</p></div>
+        <div><span>Challenge</span><p>{{ weekly_reflection.challenge or "—" }}</p></div>
+        <div><span>Energy</span><p>{{ weekly_reflection.energy_score or "—" }}/5</p></div>
+        <div><span>Help requested</span><p>{{ weekly_reflection.help_needed or "—" }}</p></div>
+      </div>
+      {% else %}
+      <div class="cp-section-empty">No weekly reflection was entered for this week.</div>
+      {% endif %}
+    </section>
 
   </div>
 

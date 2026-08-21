@@ -1,5 +1,55 @@
 {% extends "coach/base.html" %}
-{% block title %}{{ client.name }} | NourisHer Coach{% endblock %}
+{% block title %}{{ client.name }} | NourisHer Coach
+<style>
+.nh-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.nh-summary-grid>div,.nh-chart-card{padding:16px;border:1px solid #eadfed;border-radius:14px;background:#fff}
+.nh-summary-grid span,.nh-win span{display:block;color:#6e6871;font-size:14px;font-weight:750}
+.nh-summary-grid strong{display:block;margin:6px 0 4px;color:#5b0e91;font-size:27px;line-height:1}
+.nh-summary-grid small{font-size:13px;color:#6e6871}
+.nh-win{margin-top:12px;padding:14px 16px;border-radius:13px;background:#f7effa}
+.nh-win strong{display:block;margin-top:5px;font-size:16px;line-height:1.45}
+.nh-chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.nh-chart-card h3{margin:0 0 14px;font-size:17px}
+.nh-bars{height:150px;display:flex;align-items:flex-end;gap:7px;border-bottom:1px solid #ddd}
+.nh-bar-col{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:18px}
+.nh-bar{width:70%;min-height:3px;max-height:100%;background:#6a0dad;border-radius:5px 5px 0 0}
+.nh-bar-col span{font-size:10px;color:#777;white-space:nowrap;transform:rotate(-35deg);margin:10px 0 -18px}
+@media(max-width:900px){.nh-summary-grid{grid-template-columns:1fr 1fr}.nh-chart-grid{grid-template-columns:1fr}}
+</style>
+
+
+<style>
+.nw-workflow-card{
+  margin-top:16px;padding:18px;border:1px solid var(--coach-border);
+  border-radius:14px;background:#fff
+}
+.nw-workflow-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
+.nw-workflow-head h3{margin:0;font-size:19px}
+.nw-reflection-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nw-reflection-grid>div{padding:13px;border-radius:11px;background:#faf7fb}
+.nw-reflection-grid span{display:block;color:var(--coach-muted);font-size:12px;font-weight:800}
+.nw-reflection-grid p{margin:5px 0 0;font-size:14px;line-height:1.45}
+.nw-workout-plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.nw-plan-workout{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--coach-border);border-radius:11px;cursor:pointer}
+.nw-plan-workout:has(input:checked){border-color:#b990c9;background:#f7effa}
+.nw-plan-workout input{margin-top:3px;accent-color:var(--coach-purple)}
+.nw-plan-workout strong{display:block;font-size:14px}
+.nw-plan-workout small{display:block;margin-top:3px;color:var(--coach-muted);font-size:12px}
+.nw-textarea{min-height:105px;padding:11px;resize:vertical}
+@media(max-width:760px){.nw-reflection-grid,.nw-workout-plan-grid{grid-template-columns:1fr}}
+</style>
+
+
+<style>
+.nw-standing-plan{
+  margin:14px 0;padding:13px 15px;border:1px solid #decbe7;
+  border-radius:11px;background:#faf5fc
+}
+.nw-standing-plan strong{display:block;color:#5b0e91;font-size:14px}
+.nw-standing-plan span{display:block;margin-top:4px;color:#6e6871;font-size:13px;line-height:1.45}
+</style>
+
+{% endblock %}
 {% block content %}
 <style>
 .nw,.nw *{box-sizing:border-box}.nw{max-width:1180px;margin:0 auto;color:var(--coach-text)}
@@ -549,7 +599,38 @@
         {% endfor %}
       </div>
 
-      <details class="nw-custom">
+      
+        <section class="nw-workflow-card">
+          <div class="nw-workflow-head">
+            <div>
+              <p class="nw-kicker" style="margin:0 0 4px">Client reflection</p>
+              <h3>What she said about this week</h3>
+            </div>
+            {% if client_weekly_reflection %}
+            <span class="nw-cell-state done">Submitted</span>
+            {% else %}
+            <span class="nw-cell-state">Not submitted</span>
+            {% endif %}
+          </div>
+          {% if client_weekly_reflection %}
+          <div class="nw-reflection-grid">
+            <div><span>Biggest win</span><p>{{ client_weekly_reflection.wins or "—" }}</p></div>
+            <div><span>Biggest challenge</span><p>{{ client_weekly_reflection.challenge or "—" }}</p></div>
+            <div><span>Energy</span><p>{{ client_weekly_reflection.energy_score or "—" }}/5</p></div>
+            <div><span>Help she wants</span><p>{{ client_weekly_reflection.help_needed or "—" }}</p></div>
+          </div>
+          {% else %}
+          <p class="nw-helper" style="margin:0">The client's weekly reflection will appear here once she submits it from her portal.</p>
+          {% endif %}
+        </section>
+
+
+          <div class="nw-standing-plan">
+            <strong>Automatic weekly carry-forward is on</strong>
+            <span>If you make no changes, the same actions and targets continue into the next coaching week. Change the selections below only when Week {{ next_week_number }} needs a different plan.</span>
+          </div>
+
+<details class="nw-custom">
         <summary>+ Add custom actions</summary>
         <p class="nw-helper" style="margin:8px 0">Add as many custom actions as needed. Leave unused rows blank.</p>
         <div class="nw-custom-list">
@@ -898,7 +979,7 @@
 
           <details class="nw-custom">
         <summary>Custom actions for next week{% if carry_forward_custom_actions %} · {{ carry_forward_custom_actions|length }} carried forward{% endif %}</summary>
-        <p class="nw-helper" style="margin:8px 0">Your active custom actions are prefilled below with the same target. Keep them, edit them, remove them with ×, or add new ones.</p>
+        <p class="nw-helper" style="margin:8px 0">These custom actions are part of the standing plan too. Keep them, edit them, remove them with ×, or add new ones for this week's exception.</p>
         <div class="nw-custom-list">
           {% for custom_index in range(custom_action_slot_count) %}
           {% set carried_custom = carry_forward_custom_actions[custom_index] if custom_index < carry_forward_custom_actions|length else none %}
@@ -946,7 +1027,54 @@
         </div>
 
         
-        <section class="nw-next-call">
+        
+        <section class="nw-workflow-card">
+          <div class="nw-workflow-head">
+            <div>
+              <p class="nw-kicker" style="margin:0 0 4px">Weekly plan builder</p>
+              <h3>Workouts for Week {{ next_week_number }}</h3>
+              <p class="nw-helper">Choose the strength sessions to publish with next week's actions.</p>
+            </div>
+          </div>
+          {% if available_workouts %}
+          <div class="nw-workout-plan-grid">
+            {% for workout in available_workouts if workout.active %}
+            <label class="nw-plan-workout">
+              <input type="checkbox" name="workout_ids" value="{{ workout.id }}">
+              <span>
+                <strong>{{ workout.title }}</strong>
+                <small>{{ workout.exercise_count or 0 }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}</small>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="nw-helper">No active workouts in the library yet.</p>
+          {% endif %}
+        </section>
+
+        <section class="nw-workflow-card">
+          <div class="nw-workflow-head">
+            <div>
+              <p class="nw-kicker" style="margin:0 0 4px">Close the coaching loop</p>
+              <h3>Sushma's feedback</h3>
+            </div>
+          </div>
+          <div class="nw-grid2">
+            <label>
+              <span class="nw-label">Feedback visible to client</span>
+              <textarea class="nw-input nw-textarea" name="weekly_client_feedback"
+                placeholder="What should she feel proud of, and what should she focus on next?">{{ coach_weekly_feedback.client_feedback if coach_weekly_feedback else "" }}</textarea>
+            </label>
+            <label>
+              <span class="nw-label">Private coach note</span>
+              <textarea class="nw-input nw-textarea" name="weekly_private_note"
+                placeholder="Only Sushma can see this.">{{ coach_weekly_feedback.private_note if coach_weekly_feedback else "" }}</textarea>
+            </label>
+          </div>
+        </section>
+
+<section class="nw-next-call">
           <div class="nw-next-call-copy">
             <p class="nw-kicker" style="margin:0 0 4px">Before you finish</p>
             <h3>Set the next coaching call</h3>

@@ -61,6 +61,10 @@ def create_workout_tables() -> None:
                 ADD COLUMN IF NOT EXISTS workout_date DATE
             """)
             cursor.execute("""
+                ALTER TABLE client_workout_assignments
+                ADD COLUMN IF NOT EXISTS planned_week_start DATE
+            """)
+            cursor.execute("""
                 CREATE INDEX IF NOT EXISTS idx_client_workouts_client
                 ON client_workout_assignments(client_id, assigned_on DESC)
             """)
@@ -184,33 +188,53 @@ def assign_workout(
     workout_id: int,
     client_ids: list[int],
     coach_note: str | None = None,
+    planned_week_start: date | None = None,
 ):
     """
-    Assign a workout without a due date. The client records the actual
-    workout_date when they complete the workout.
+    Assign a workout without a due date.
+
+    planned_week_start records the coaching week Sushma intended this workout
+    for. Older/manual assignments can leave it NULL.
     """
     created = 0
     with get_connection() as connection:
         with connection.cursor() as cursor:
             for client_id in client_ids:
-                cursor.execute("""
-                    SELECT id
-                    FROM client_workout_assignments
-                    WHERE client_id = %s
-                      AND workout_id = %s
-                      AND status IN ('assigned', 'in_progress', 'completed')
-                    ORDER BY id DESC
-                    LIMIT 1
-                """, (client_id, workout_id))
+                # Avoid duplicate active assignment of the same workout for the
+                # same planned week. If no week is supplied, retain legacy guard.
+                if planned_week_start:
+                    cursor.execute("""
+                        SELECT id
+                        FROM client_workout_assignments
+                        WHERE client_id = %s
+                          AND workout_id = %s
+                          AND planned_week_start = %s
+                          AND status <> 'removed'
+                        LIMIT 1
+                    """, (client_id, workout_id, planned_week_start))
+                else:
+                    cursor.execute("""
+                        SELECT id
+                        FROM client_workout_assignments
+                        WHERE client_id = %s
+                          AND workout_id = %s
+                          AND status IN ('assigned', 'in_progress')
+                        ORDER BY id DESC
+                        LIMIT 1
+                    """, (client_id, workout_id))
+
                 if cursor.fetchone():
                     continue
 
                 cursor.execute("""
                     INSERT INTO client_workout_assignments (
-                        client_id, workout_id, coach_note, status
+                        client_id, workout_id, coach_note,
+                        planned_week_start, status
                     )
-                    VALUES (%s, %s, %s, 'assigned')
-                """, (client_id, workout_id, coach_note))
+                    VALUES (%s, %s, %s, %s, 'assigned')
+                """, (
+                    client_id, workout_id, coach_note, planned_week_start,
+                ))
                 created += 1
     return created
 
@@ -222,6 +246,7 @@ def get_client_workouts(client_id: int):
                 SELECT
                     a.id AS assignment_id,
                     a.assigned_on,
+                    a.planned_week_start,
                     a.workout_date,
                     a.coach_note,
                     a.status,
@@ -433,6 +458,3 @@ def get_workout_assignment_progress(assignment_id: int, client_id: int):
         else 0
     )
     return assignment
-
-
-# Strength progression helper lives in coaching_insights_service.py

@@ -28,6 +28,20 @@ from app.services.phase_a_service import (
     get_client_resources,
 )
 
+from app.services.coaching_workflow_service import (
+    create_coaching_workflow_tables,
+    get_coach_weekly_feedback,
+    get_weekly_reflection,
+    save_weekly_reflection,
+    sync_strength_action_from_workout,
+    unsync_strength_action_from_workout,
+    ensure_week_actions_carried_forward,
+)
+
+from app.services.coaching_insights_service import (
+    get_previous_exercise_performance,
+)
+
 from app.services.client_portal_service import (
     create_portal_tables,
     get_action_logs_for_date,
@@ -47,8 +61,6 @@ from app.services.client_portal_service import (
     save_weekly_measurements,
 )
 
-from app.services.coaching_insights_service import get_previous_exercise_performance
-
 router = APIRouter()
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -58,6 +70,7 @@ create_portal_tables()
 create_macro_tracking_tables()
 create_workout_tables()
 create_phase_a_tables()
+create_coaching_workflow_tables()
 
 
 @router.get(
@@ -80,6 +93,14 @@ def client_home(request: Request, access_token: str):
         on_date=today,
     )
     current_week_number = current_week_completion["week_number"]
+
+    # If Sushma did not explicitly prepare this new week, continue the
+    # client's previous standing action plan automatically.
+    ensure_week_actions_carried_forward(
+        client["id"],
+        current_week_completion["week_start"],
+        current_week_completion["week_end"],
+    )
 
     requested_week = request.query_params.get("week")
     try:
@@ -179,6 +200,14 @@ def client_home(request: Request, access_token: str):
             row["macro"] = macro_history["by_date"].get(row["date"])
 
     assigned_workouts = get_client_workouts(client["id"])
+    weekly_reflection = get_weekly_reflection(
+        client["id"],
+        week_view["week_start"],
+    )
+    coach_weekly_feedback = get_coach_weekly_feedback(
+        client["id"],
+        week_view["week_start"],
+    )
 
     return templates.TemplateResponse(
         "client/home.html",
@@ -202,6 +231,9 @@ def client_home(request: Request, access_token: str):
             "next_call": get_next_client_call(client),
             "assigned_resources": get_client_resources(client["id"]),
             "assigned_workouts": assigned_workouts,
+            "weekly_reflection": weekly_reflection,
+            "coach_weekly_feedback": coach_weekly_feedback,
+            "reflection_saved": request.query_params.get("reflection_saved") == "1",
             "saved": request.query_params.get("saved") == "1",
             "measurement_saved":
                 request.query_params.get("measurement_saved") == "1",
@@ -362,6 +394,11 @@ def complete_client_workout(
         client["id"],
         actual_workout_date,
     )
+    sync_strength_action_from_workout(
+        assignment_id,
+        client["id"],
+        actual_workout_date,
+    )
     return RedirectResponse(
         f"/client/{access_token}/workouts?workout={assignment_id}",
         status_code=303,
@@ -373,9 +410,64 @@ def reopen_client_workout(access_token: str, assignment_id: int):
     client = get_client_by_token(access_token)
     if not client:
         raise HTTPException(status_code=404, detail="Client access link not found")
+    unsync_strength_action_from_workout(
+        assignment_id,
+        client["id"],
+    )
     reopen_workout(assignment_id, client["id"])
     return RedirectResponse(
         f"/client/{access_token}/workouts?workout={assignment_id}",
+        status_code=303,
+    )
+
+
+
+@router.post("/client/{access_token}/weekly-reflection")
+def save_client_weekly_reflection(
+    access_token: str,
+    week_start: str = Form(...),
+    wins: str = Form(""),
+    challenge: str = Form(""),
+    energy_score: str = Form(""),
+    help_needed: str = Form(""),
+):
+    client = get_client_by_token(access_token)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client access link not found")
+
+    try:
+        client_tz = ZoneInfo(client.get("timezone") or "Asia/Kolkata")
+    except Exception:
+        client_tz = ZoneInfo("Asia/Kolkata")
+    today = datetime.now(client_tz).date()
+
+    try:
+        selected_week_start = date.fromisoformat(week_start)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid coaching week")
+
+    current = get_week_completion(client["id"], on_date=today)
+    if selected_week_start != current["week_start"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Only the current coaching week reflection can be updated",
+        )
+
+    score = int(energy_score) if energy_score.strip() else None
+    if score is not None and score not in {1, 2, 3, 4, 5}:
+        raise HTTPException(status_code=400, detail="Energy must be between 1 and 5")
+
+    save_weekly_reflection(
+        client_id=client["id"],
+        week_start=selected_week_start,
+        wins=wins.strip() or None,
+        challenge=challenge.strip() or None,
+        energy_score=score,
+        help_needed=help_needed.strip() or None,
+    )
+
+    return RedirectResponse(
+        f"/client/{access_token}?reflection_saved=1",
         status_code=303,
     )
 

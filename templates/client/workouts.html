@@ -334,9 +334,9 @@
   .wk-head-actions{justify-content:flex-start;margin-top:12px}
 }
 
-.wk-last-time{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 2px;align-items:center}
-.wk-last-time strong{font-size:13px;color:#5b0e91}
-.wk-last-time span{padding:5px 8px;border-radius:8px;background:#f6eff9;font-size:13px;font-weight:700}
+.wk-last-time{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;align-items:center}
+.wk-last-time strong{font-size:12px;color:var(--purple)}
+.wk-last-time span{padding:5px 8px;border-radius:8px;background:#f6eff9;font-size:12px;font-weight:750}
 </style>
 
 <div class="wk">
@@ -450,14 +450,14 @@
               <div>
                 <p class="wk-kicker" style="margin-top:0">Exercise {{ loop.index }}</p>
                 <h3>{{ exercise.title }}</h3>
-            {% if exercise.previous_performance %}
-            <div class="wk-last-time">
-              <strong>Last time{% if exercise.previous_performance.date %} · {{ exercise.previous_performance.date.strftime("%d %b") }}{% endif %}</strong>
-              {% for s in exercise.previous_performance.sets %}
-                <span>Set {{ s.set_number }}: {{ s.weight_kg if s.weight_kg is not none else "—" }} kg × {{ s.reps if s.reps is not none else "—" }}</span>
-              {% endfor %}
-            </div>
-            {% endif %}
+                {% if exercise.previous_performance %}
+                <div class="wk-last-time">
+                  <strong>Last time · {{ exercise.previous_performance.date.strftime("%d %b") if exercise.previous_performance.date else "" }}</strong>
+                  {% for s in exercise.previous_performance.sets %}
+                  <span>Set {{ s.set_number }}: {{ s.weight_kg if s.weight_kg is not none else "—" }} kg × {{ s.reps if s.reps is not none else "—" }}</span>
+                  {% endfor %}
+                </div>
+                {% endif %}
 
                 <div class="wk-rx">
                   {{ exercise.sets }} sets

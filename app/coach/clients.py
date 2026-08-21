@@ -52,6 +52,15 @@ from app.services.coaching_insights_service import (
     get_client_progress_charts,
 )
 
+from app.services.coaching_workflow_service import (
+    create_coaching_workflow_tables,
+    get_coach_weekly_feedback,
+    get_weekly_reflection,
+    save_coach_weekly_feedback,
+    ensure_week_actions_carried_forward,
+    replace_future_week_action_plan,
+)
+
 from app.services.client_portal_service import (
     ensure_portal_access,
     get_portal_access,
@@ -79,6 +88,7 @@ templates = Jinja2Templates(
 create_phase_a_tables()
 create_workout_tables()
 create_macro_tracking_tables()
+create_coaching_workflow_tables()
 
 
 ACTION_LIBRARY = [{'category': 'Nutrition',
@@ -969,6 +979,13 @@ def client_profile(
     profile["current_week_start"] = week_start
     profile["current_week_end"] = week_end
 
+    if week_start and week_end:
+        ensure_week_actions_carried_forward(
+            client_id,
+            week_start,
+            week_end,
+        )
+
     # Weekly Check-in can browse the client's coaching history using the
     # exact same week boundaries as the Client Portal.
     requested_week = request.query_params.get("week")
@@ -1065,6 +1082,15 @@ def client_profile(
     progress_charts = get_client_progress_charts(
         client_id,
         weeks=12,
+    )
+
+    client_weekly_reflection = get_weekly_reflection(
+        client_id,
+        coach_week_start,
+    )
+    coach_weekly_feedback = get_coach_weekly_feedback(
+        client_id,
+        coach_week_start,
     )
 
     # Preselect every currently ACTIVE commitment for next week.
@@ -1165,6 +1191,8 @@ def client_profile(
             "coach_history_grid": coach_history_grid,
             "coaching_week_summary": coaching_week_summary,
             "progress_charts": progress_charts,
+            "client_weekly_reflection": client_weekly_reflection,
+            "coach_weekly_feedback": coach_weekly_feedback,
             "macro_settings": macro_settings,
             "macro_history": macro_history,
             "client_timeline": client_timeline,
@@ -1738,6 +1766,9 @@ def add_client_checkin(
     custom_action_keys: list[str] = Form(default=[]),
     custom_target_counts: list[str] = Form(default=[]),
     custom_target_units: list[str] = Form(default=[]),
+    workout_ids: list[int] = Form(default=[]),
+    weekly_client_feedback: str = Form(""),
+    weekly_private_note: str = Form(""),
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse("/coach/login", status_code=303)
@@ -1765,16 +1796,6 @@ def add_client_checkin(
     action_start_date = current_week_end + timedelta(days=1)
     action_end_date = action_start_date + timedelta(days=6)
 
-    existing_action_names = {
-        row.get("action_name")
-        for row in ClientService.actions(
-            client_id,
-            status="active",
-            start_date=action_start_date,
-            end_date=action_end_date,
-        )
-    }
-
     assignments = _selected_library_assignments(
         action_keys,
         action_all_keys,
@@ -1790,6 +1811,15 @@ def add_client_checkin(
         )
     )
 
+    # Sushma's saved plan is the exception to the standing plan.
+    # Rebuild this unstarted upcoming week from exactly what she selected.
+    replace_future_week_action_plan(
+        client_id,
+        action_start_date,
+        action_end_date,
+    )
+
+    existing_action_names = set()
     for assignment in assignments:
         if assignment["name"] in existing_action_names:
             continue
@@ -1801,6 +1831,22 @@ def add_client_checkin(
             checkin_id=checkin_id,
         )
         existing_action_names.add(assignment["name"])
+
+    save_coach_weekly_feedback(
+        client_id=client_id,
+        week_start=current_week_end - timedelta(days=6),
+        client_feedback=weekly_client_feedback.strip() or None,
+        private_note=weekly_private_note.strip() or None,
+        checkin_id=checkin_id,
+    )
+
+    for workout_id in workout_ids:
+        assign_workout(
+            workout_id=workout_id,
+            client_ids=[client_id],
+            coach_note=None,
+            planned_week_start=action_start_date,
+        )
 
     return RedirectResponse(
         f"/dashboard/clients/{client_id}?tab=weekly",
