@@ -483,7 +483,7 @@ def dashboard_home(request: Request):
 
     coaching_calls = (
         get_synamate_appointments_between(
-            local_start.astimezone(timezone.utc),
+            local_now.astimezone(timezone.utc),
             local_end.astimezone(timezone.utc),
             calendar_id=coaching_calendar_id,
         )
@@ -494,6 +494,8 @@ def dashboard_home(request: Request):
     for call in coaching_calls:
         item = dict(call)
         local_start_time = item["start_time"].astimezone(local_tz)
+        if local_start_time < local_now:
+            continue
         matched_client = None
         call_email = (item.get("email") or "").strip().lower()
         call_phone = normalized_phone(item.get("phone"))
@@ -528,7 +530,7 @@ def dashboard_home(request: Request):
 
     clarity_calls = (
         get_synamate_appointments_between(
-            local_start.astimezone(timezone.utc),
+            local_now.astimezone(timezone.utc),
             local_end.astimezone(timezone.utc),
             calendar_id=clarity_calendar_id,
         )
@@ -539,6 +541,8 @@ def dashboard_home(request: Request):
     for call in clarity_calls:
         item = dict(call)
         local_start_time = item["start_time"].astimezone(local_tz)
+        if local_start_time < local_now:
+            continue
         item["name"] = item.get("name") or "Clarity Call"
         item["next_call_time"] = local_start_time.strftime("%I:%M %p").lstrip("0")
         item["call_type"] = "Clarity Call · Lead"
@@ -553,7 +557,7 @@ def dashboard_home(request: Request):
 
     coaching_week_calls = (
         get_synamate_appointments_between(
-            week_start.astimezone(timezone.utc),
+            local_now.astimezone(timezone.utc),
             week_end.astimezone(timezone.utc),
             calendar_id=coaching_calendar_id,
         )
@@ -562,7 +566,7 @@ def dashboard_home(request: Request):
     )
     clarity_week_calls = (
         get_synamate_appointments_between(
-            week_start.astimezone(timezone.utc),
+            local_now.astimezone(timezone.utc),
             week_end.astimezone(timezone.utc),
             calendar_id=clarity_calendar_id,
         )
@@ -576,6 +580,8 @@ def dashboard_home(request: Request):
     for call in coaching_week_calls:
         item = dict(call)
         local_start_time = item["start_time"].astimezone(local_tz)
+        if local_start_time < local_now:
+            continue
         matched_client = None
         call_email = (item.get("email") or "").strip().lower()
         call_phone = normalized_phone(item.get("phone"))
@@ -612,6 +618,8 @@ def dashboard_home(request: Request):
     for call in clarity_week_calls:
         item = dict(call)
         local_start_time = item["start_time"].astimezone(local_tz)
+        if local_start_time < local_now:
+            continue
         item["name"] = item.get("name") or "Clarity Call"
         item["call_type"] = "Clarity Call · Lead"
         item["local_start_time"] = local_start_time
