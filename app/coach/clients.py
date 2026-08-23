@@ -827,9 +827,69 @@ def clients_page(request: Request):
             client["next_call_source"] = None
 
         ops = get_client_operations_status(client, today)
+
+        # Keep the full operations payload available to the workspace, but
+        # simplify the Clients screen status so it matches the main dashboard.
+        coaching_signals = ops.get("coaching_signals") or {}
+
         client["operations"] = ops
-        client["health_key"] = ops["health_key"]
-        client["health_label"] = ops["health_label"]
+
+        # The client list has four simple states:
+        # - setup
+        # - needs follow-up
+        # - ready for review
+        # - on track
+        #
+        # No-next-call, measurement due, or workouts behind remain useful
+        # information, but do not make the whole client row red.
+        if not client.get("start_date"):
+            client["health_key"] = "setup"
+            client["health_label"] = "Setup"
+
+        elif (
+            (ops.get("missed_daily_count") or 0) >= 2
+            or coaching_signals.get("low_adherence")
+        ):
+            client["health_key"] = "attention"
+            client["health_label"] = "Needs follow-up"
+
+        elif ops.get("weekly_review_overdue"):
+            client["health_key"] = "review"
+            client["health_label"] = "Ready for review"
+
+        else:
+            client["health_key"] = "on_track"
+            client["health_label"] = "On track"
+
+        # Build one short client-row note. This is informational and does not
+        # affect the health state.
+        client["client_status_note"] = None
+
+        if client["health_key"] == "attention":
+            if (ops.get("missed_daily_count") or 0) >= 2:
+                missed = ops.get("missed_daily_count") or 0
+                client["client_status_note"] = (
+                    f"No tracking for {missed} day"
+                    + ("s" if missed != 1 else "")
+                )
+            elif coaching_signals.get("low_adherence"):
+                action_percent = coaching_signals.get("action_percent")
+                client["client_status_note"] = (
+                    f"Action consistency {round(action_percent)}%"
+                    if action_percent is not None
+                    else "Low action consistency"
+                )
+
+        elif client["health_key"] == "review":
+            week_number = ops.get("week_number") or client.get("current_week")
+            client["client_status_note"] = (
+                f"Week {week_number} ready to review"
+                if week_number
+                else "Coaching week ready to review"
+            )
+
+        elif ops.get("no_next_call"):
+            client["client_status_note"] = "Next call not booked"
 
         # Values used by the browser-side table sorter.
         client["sort_name"] = (
@@ -870,8 +930,13 @@ def clients_page(request: Request):
     needs_attention = [
         client
         for client in active_clients
-        if client.get("health_key")
-        == "attention"
+        if client.get("health_key") == "attention"
+    ]
+
+    review_ready = [
+        client
+        for client in active_clients
+        if client.get("health_key") == "review"
     ]
 
     return templates.TemplateResponse(
@@ -884,6 +949,7 @@ def clients_page(request: Request):
             "calls_today": calls_today,
             "calls_this_week": calls_this_week,
             "needs_attention": needs_attention,
+            "review_ready": review_ready,
         },
     )
 
