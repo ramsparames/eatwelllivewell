@@ -55,6 +55,62 @@
 .ph-workout:first-child{border-top:0}.ph-workout strong{font-size:13px}.ph-workout span{color:var(--muted);font-size:11px}
 @media(max-width:900px){.ph-hero,.ph-grid{grid-template-columns:1fr}.ph-kpis{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.ph-kpis,.ph-reflection-grid{grid-template-columns:1fr 1fr}.ph-hero{padding:20px}.ph-hero h1{font-size:31px}}
+
+.ph-call-card{
+  margin-top:12px;
+  padding:16px;
+  border:1px solid #e6d8eb;
+  border-radius:14px;
+  background:linear-gradient(135deg,#fbf6fd,#fff);
+}
+.ph-call-card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+.ph-call-card .label{
+  display:block;
+  color:var(--purple);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.ph-call-card h3{margin:5px 0 4px;font-size:17px}
+.ph-call-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+.ph-call-book{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:12px;
+  min-height:42px;
+  padding:0 15px;
+  border-radius:10px;
+  background:var(--purple);
+  color:#fff;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:850;
+}
+.ph-call-book:hover{filter:brightness(.96)}
+.ph-call-confirmed{
+  display:inline-flex;
+  align-items:center;
+  flex:none;
+  padding:6px 9px;
+  border-radius:999px;
+  background:#edf8f0;
+  color:#286c49;
+  font-size:11px;
+  font-weight:850;
+}
+.ph-call-note{
+  display:block;
+  margin-top:8px;
+  color:var(--muted);
+  font-size:10px;
+}
 </style>
 
 <div class="ph">
@@ -129,8 +185,42 @@
           <a href="/client/{{ access_token }}/workouts?workout={{ active_workouts[0].assignment_id }}"><div><strong>{{ active_workouts[0].title }}</strong><small>{{ active_workouts|length }} workout{% if active_workouts|length != 1 %}s{% endif %} remaining</small></div><span class="ph-arrow">→</span></a>
           {% endif %}
           <a href="#weekly-reflection"><div><strong>Weekly reflection</strong><small>{% if weekly_reflection %}Submitted — update anytime this week{% else %}Tell Sushma how the week is going{% endif %}</small></div><span class="ph-arrow">→</span></a>
-          <div class="row"><div><strong>Next coaching call</strong><small>{% if next_call and next_call.local_start_time %}{{ next_call.local_start_time.strftime("%d %b · %I:%M %p") }}{% else %}Not scheduled yet{% endif %}</small></div></div>
+
         </div>
+      </section>
+
+      <section class="ph-call-card">
+        <div class="ph-call-card-top">
+          <div>
+            <span class="label">COACHING CALL</span>
+            {% if next_call and next_call.local_start_time %}
+              <h3>Your next call is booked</h3>
+              <p>{{ next_call.local_start_time.strftime("%A, %d %B · %I:%M %p") }}</p>
+            {% elif coaching_call_booking_available %}
+              <h3>Book your next call with Sushma</h3>
+              <p>Choose a convenient time for your next coaching session.</p>
+            {% elif coaching_call_url %}
+              <h3>Book your next call with Sushma</h3>
+              <p>Use the booking link below to choose your next coaching session.</p>
+            {% else %}
+              <h3>Next coaching call</h3>
+              <p>Sushma will share the next booking option with you.</p>
+            {% endif %}
+          </div>
+          {% if next_call and next_call.local_start_time %}
+            <span class="ph-call-confirmed">Booked ✓</span>
+          {% endif %}
+        </div>
+
+        {% if coaching_call_booking_available %}
+          <a
+            class="ph-call-book"
+            href="{{ coaching_call_url }}"
+            target="_blank"
+            rel="noopener"
+          >Book a call with Sushma →</a>
+          <small class="ph-call-note">The booking page opens securely in a new tab.</small>
+        {% endif %}
       </section>
 
       <section class="ph-card" style="margin-top:12px">

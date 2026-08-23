@@ -1,3 +1,4 @@
+import os
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -122,6 +123,8 @@ def client_portal_home(request: Request, access_token: str):
         client["id"],
         week_completion["week_start"],
     )
+    next_call = get_next_client_call(client)
+    coaching_call_url = os.getenv("SYNAMATE_COACHING_CALL_URL", "").strip() or None
 
     return templates.TemplateResponse(
         "client/portal_home.html",
@@ -139,7 +142,11 @@ def client_portal_home(request: Request, access_token: str):
             "all_workouts": workouts,
             "weekly_reflection": current_reflection,
             "coach_weekly_feedback": current_feedback,
-            "next_call": get_next_client_call(client),
+            "next_call": next_call,
+            "coaching_call_url": coaching_call_url,
+            "coaching_call_booking_available": bool(
+                coaching_call_url and not next_call
+            ),
             "reflection_saved":
                 request.query_params.get("reflection_saved") == "1",
         },
