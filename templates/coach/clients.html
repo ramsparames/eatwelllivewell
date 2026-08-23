@@ -68,6 +68,11 @@
 .client-row[hidden],[data-client-row][hidden],.client-no-results[hidden],[data-client-empty][hidden]{display:none!important}
 .client-row.is-filter-hidden{display:none!important}
 
+
+.add-btn:disabled{
+  opacity:.62;
+  cursor:wait;
+}
 </style>
 
 <style>
@@ -167,6 +172,14 @@
 (() => {
   const panel=document.querySelector("[data-add-panel]");
   document.querySelector("[data-add-toggle]")?.addEventListener("click",()=>{panel.hidden=false;panel.scrollIntoView({behavior:"smooth",block:"start"});});
+
+  const addForm = panel?.querySelector("form.add-form");
+  addForm?.addEventListener("submit", () => {
+    const submit = addForm.querySelector('button[type="submit"]');
+    if (!submit || submit.disabled) return;
+    submit.disabled = true;
+    submit.textContent = "Adding client…";
+  });
   document.querySelector("[data-add-close]")?.addEventListener("click",()=>panel.hidden=true);
 
   const rows=[...document.querySelectorAll("[data-client-row]")];
