@@ -1,420 +1,228 @@
 {% extends "coach/base.html" %}
-{% block title %}Coach Dashboard | Eat Well Live Well<style>
-.cd-section-help{margin:4px 0 0;color:var(--coach-muted);font-size:12px}
-.cd-signal-groups{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
-.cd-signal-group{padding:14px;border:1px solid #eee8f0;border-radius:15px;background:#fcfafc}
-.cd-signal-group.coaching{background:#fbf6fd;border-color:#e4d4ea}
-.cd-signal-label{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
-.cd-signal-label span{color:var(--coach-purple);font-size:10px;font-weight:900;letter-spacing:.12em}
-.cd-signal-label small{color:var(--coach-muted);font-size:10px}
-.cd-signal-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.cd-signal-cards .cd-op-mini{min-height:92px;padding:14px 10px;background:#fff}
-.cd-signal-cards .cd-op-mini b{font-size:28px}
-@media(max-width:850px){.cd-signal-groups{grid-template-columns:1fr}}
-@media(max-width:560px){.cd-signal-cards{grid-template-columns:1fr 1fr}}
-</style>
-{% endblock %}
+{% block title %}Coach Dashboard | Eat Well Live Well{% endblock %}
 
 {% block content %}
 <style>
-.cd,.cd *{box-sizing:border-box}
-.cd{max-width:1180px;margin:0 auto;display:grid;gap:15px}
-.cd-hero{display:flex;justify-content:space-between;align-items:end;gap:20px;padding:2px 0 3px}
-.cd-eyebrow{margin:0 0 5px;color:var(--coach-purple);font-size:12px;font-weight:850;letter-spacing:.11em;text-transform:uppercase}
-.cd-hero h1{margin:0;font-size:36px;line-height:1.05;letter-spacing:-.04em}
-.cd-hero p{margin:7px 0 0;color:var(--coach-muted);font-size:14px}
-.cd-date{padding:8px 11px;border:1px solid var(--coach-border);border-radius:999px;background:#fff;color:var(--coach-muted);font-size:12px;font-weight:750;white-space:nowrap}
+.sd,.sd *{box-sizing:border-box}
+.sd{max-width:1180px;margin:0 auto;display:grid;gap:14px}
+.sd-hero{display:flex;justify-content:space-between;align-items:end;gap:18px;padding:2px 0 3px}
+.sd-eyebrow{margin:0 0 5px;color:var(--coach-purple);font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.sd-hero h1{margin:0;font-size:34px;line-height:1.05;letter-spacing:-.035em}
+.sd-hero p{margin:6px 0 0;color:var(--coach-muted);font-size:13px}
+.sd-date{padding:8px 11px;border:1px solid var(--coach-border);border-radius:999px;background:#fff;color:var(--coach-muted);font-size:11px;font-weight:800;white-space:nowrap}
 
-.cd-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.cd-kpi{min-height:108px;padding:16px;border:1px solid var(--coach-border);border-radius:15px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035);text-decoration:none;color:inherit;display:block;transition:.15s ease}.cd-kpi:hover{transform:translateY(-1px);border-color:#d5bedf;box-shadow:0 8px 22px rgba(43,26,52,.07)}
-.cd-kpi-label{display:block;color:var(--coach-muted);font-size:12px;font-weight:750}
-.cd-kpi strong{display:block;margin:7px 0 3px;color:var(--coach-purple);font-size:31px;line-height:1;letter-spacing:-.04em}
-.cd-kpi small{color:var(--coach-muted);font-size:11px}.cd-kpi-hint{float:right;color:var(--coach-purple);font-size:13px;font-weight:900}
+.sd-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.sd-kpi{padding:15px;border:1px solid var(--coach-border);border-radius:14px;background:#fff;text-decoration:none;color:inherit}
+.sd-kpi span{display:block;color:var(--coach-muted);font-size:11px;font-weight:800}
+.sd-kpi strong{display:block;margin-top:7px;color:var(--coach-purple);font-size:29px;line-height:1}
+.sd-kpi small{display:block;margin-top:5px;color:var(--coach-muted);font-size:10px}
 
-.cd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-.cd-lower{display:grid;grid-template-columns:1.25fr .75fr;gap:13px}
-.cd-panel{padding:18px;border:1px solid var(--coach-border);border-radius:16px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035)}
-.cd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:13px}
-.cd-head .over{display:block;margin-bottom:3px;color:var(--coach-purple);font-size:11px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
-.cd-head h2{margin:0;font-size:21px;letter-spacing:-.025em}
-.cd-head a{color:var(--coach-purple);text-decoration:none;font-size:12px;font-weight:800;white-space:nowrap}
+.sd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.sd-panel{padding:18px;border:1px solid var(--coach-border);border-radius:16px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035)}
+.sd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.sd-head .over{display:block;margin-bottom:3px;color:var(--coach-purple);font-size:10px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}
+.sd-head h2{margin:0;font-size:20px}
+.sd-head p{margin:4px 0 0;color:var(--coach-muted);font-size:11px}
+.sd-head a{color:var(--coach-purple);text-decoration:none;font-size:11px;font-weight:850;white-space:nowrap}
 
-.cd-empty{min-height:105px;display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #eee8f0;border-radius:12px;background:#fcfafc}
-.cd-icon{width:38px;height:38px;display:grid;place-items:center;flex:none;border-radius:12px;background:#f2e8f7;color:var(--coach-purple);font-size:17px;font-weight:900}
-.cd-empty strong{display:block;font-size:14px}
-.cd-empty p{margin:3px 0 0;color:var(--coach-muted);font-size:12px}
+.sd-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid #f0ebf1;text-decoration:none;color:inherit}
+.sd-row:first-child{border-top:0;padding-top:0}
+.sd-row strong{display:block;font-size:13px}
+.sd-row span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px;line-height:1.4}
+.sd-row:hover{background:#fdfafd}
+.sd-arrow{color:var(--coach-purple)!important;font-size:17px!important;font-weight:900}
 
-.cd-list{display:grid;gap:7px}.cd-week-list{display:grid;grid-template-columns:1fr 1fr;gap:7px}.cd-week-call{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;background:#fff}.cd-week-call:hover{border-color:#d5bedf;background:#fdfafd}.cd-week-call strong{display:block;font-size:12px}.cd-week-call span{display:block;margin-top:2px;color:var(--coach-muted);font-size:10px}
-.cd-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;background:#fff}
-.cd-item:hover{border-color:#d5bedf;background:#fdfafd}
-.cd-item strong{display:block;font-size:13px}
-.cd-item span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
-.cd-arrow{color:var(--coach-purple)!important;font-size:18px!important;line-height:1}
+.sd-reasons{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.sd-reason{padding:4px 7px;border-radius:999px;background:#fff1ee;color:#9a4639;font-size:9px!important;font-weight:800}
 
-.cd-attn{display:grid;grid-template-columns:9px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid #eee8f0}
-.cd-attn:first-child{padding-top:0;border-top:0}
-.cd-dot{width:8px;height:8px;border-radius:50%;background:var(--coach-purple)}
-.cd-dot.gold{background:#c68d1f}
-.cd-attn strong{display:block;font-size:13px}
-.cd-attn span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
+.sd-empty{display:flex;gap:11px;align-items:center;min-height:84px;padding:12px;border:1px solid #eee8f0;border-radius:12px;background:#fcfafc}
+.sd-empty-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#f1e7f5;color:var(--coach-purple);font-weight:900}
+.sd-empty strong{display:block;font-size:13px}
+.sd-empty p{margin:3px 0 0;color:var(--coach-muted);font-size:10px}
 
-.cd-client{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;background:#fff}
-.cd-client strong{display:block;font-size:13px}
-.cd-client span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
-.cd-week{white-space:nowrap;color:var(--coach-muted);font-size:11px}
+.sd-review-badge{padding:5px 8px;border-radius:999px;background:#fff7e8;color:#8a6418;font-size:9px;font-weight:850;white-space:nowrap}
+.sd-booked{padding:5px 8px;border-radius:999px;background:#edf8f0;color:#286c49;font-size:9px;font-weight:850;white-space:nowrap}
 
-.cd-quick{display:grid;gap:8px}
-.cd-quick a{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:42px;padding:0 12px;border-radius:10px;background:#f6eff9;color:var(--coach-purple);text-decoration:none;font-size:12px;font-weight:800}
+.sd-schedules{display:grid;grid-template-columns:.85fr 1.15fr;gap:13px}
+.sd-week-list{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.sd-call{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;color:inherit;background:#fff}
+.sd-call:hover{background:#fdfafd}
+.sd-call strong{display:block;font-size:12px}
+.sd-call span{display:block;margin-top:2px;color:var(--coach-muted);font-size:10px}
+
+.sd-note{padding:10px 12px;border:1px solid #eee8f0;border-radius:11px;background:#fcfafc;color:var(--coach-muted);font-size:10px;line-height:1.45}
 
 @media(max-width:850px){
-  .cd-kpis{grid-template-columns:1fr 1fr}
-  .cd-grid,.cd-lower{grid-template-columns:1fr}.cd-week-list{grid-template-columns:1fr}
+  .sd-kpis{grid-template-columns:1fr 1fr}
+  .sd-grid,.sd-schedules{grid-template-columns:1fr}
+  .sd-week-list{grid-template-columns:1fr}
 }
-@media(max-width:520px){
-  .cd-hero{display:block}
-  .cd-date{display:inline-block;margin-top:10px}
-  .cd-kpis{grid-template-columns:1fr 1fr}
-  .cd-kpi{min-height:94px;padding:13px}
-  .cd-client{grid-template-columns:1fr auto}
-  .cd-week{display:none}
-}
-
-.cd-attn-client{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:11px;align-items:start;padding:11px 0;border-top:1px solid #f0ebf1}
-.cd-attn-client:first-child{border-top:0;padding-top:0}
-.cd-attn-client strong{display:block;font-size:12px}.cd-attn-client .meta{display:block;margin-top:2px;color:var(--coach-muted);font-size:10px}
-.cd-reasons{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.cd-reason{padding:4px 7px;border-radius:999px;background:#f8f2fa;color:#6c377c;font-size:9px;font-weight:750}
-.cd-ops-summary{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:12px}.cd-op-mini{padding:12px 9px;border:1px solid #eee8f0;border-radius:11px;background:#fcfafc;text-align:center;text-decoration:none;color:inherit;transition:.15s ease}.cd-op-mini:hover{border-color:#cfb7db;background:#faf5fc;transform:translateY(-1px)}.cd-op-mini b{display:block;font-size:22px;line-height:1;color:var(--coach-purple)}.cd-op-mini span{display:block;margin-top:5px;color:var(--coach-muted);font-size:10px;font-weight:750;line-height:1.2}
-
-
-.cd-op-mini{cursor:pointer}
-.cd-op-mini.active{border-color:#b990c9;background:#f6edf9;box-shadow:0 6px 16px rgba(91,14,145,.08)}
-.cd-attn-list{display:grid}
-.cd-attn-client.is-hidden{display:none}
-.cd-ops-none{display:none;padding:15px 5px 4px;text-align:center;color:var(--coach-muted);font-size:10px}
-.cd-ops-none.show{display:block}
-.cd-ops-reset{border:0;background:transparent;color:var(--coach-purple);font-size:10px;font-weight:800;cursor:pointer;text-decoration:none}
-
-.cd-op-coaching{background:#fbf6fd}
-.cd-op-coaching b{color:var(--coach-purple)}
-@media(max-width:1150px){
-  .cd-ops-summary{grid-template-columns:repeat(3,1fr)}
-}
-@media(max-width:620px){
-  .cd-ops-summary{grid-template-columns:repeat(2,1fr)}
-}
-
-.cd-attention-wrap{margin-top:18px}
-.cd-attention-wrap .cd-panel{width:100%}
-.cd-attention-wrap .cd-head h2{font-size:28px}
-.cd-attention-wrap .cd-ops-summary{
-  grid-template-columns:repeat(6,minmax(150px,1fr));
-  gap:10px;
-  margin-bottom:18px
-}
-.cd-attention-wrap .cd-op-mini{
-  min-height:108px;
-  padding:18px 12px;
-  border-radius:14px
-}
-.cd-attention-wrap .cd-op-mini b{
-  font-size:30px
-}
-.cd-attention-wrap .cd-op-mini span{
-  margin-top:8px;
-  font-size:12px
-}
-.cd-attention-wrap .cd-attn-client{
-  padding:16px 0;
-  gap:14px
-}
-.cd-attention-wrap .cd-attn-client strong{
-  font-size:15px
-}
-.cd-attention-wrap .cd-attn-client .meta{
-  font-size:12px
-}
-.cd-attention-wrap .cd-reason{
-  padding:6px 9px;
-  font-size:11px
-}
-.cd-schedule-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:18px;
-  margin-top:18px
-}
-.cd-schedule-grid .cd-panel{
-  min-height:100%
-}
-@media(max-width:1150px){
-  .cd-attention-wrap .cd-ops-summary{
-    grid-template-columns:repeat(3,1fr)
-  }
-}
-@media(max-width:850px){
-  .cd-schedule-grid{grid-template-columns:1fr}
-}
-@media(max-width:620px){
-  .cd-attention-wrap .cd-ops-summary{
-    grid-template-columns:repeat(2,1fr)
-  }
-}
-
-
-.cd-section-help{margin:4px 0 0;color:var(--coach-muted);font-size:12px}
-.cd-signal-groups{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
-.cd-signal-group{padding:15px;border:1px solid #eee8f0;border-radius:15px;background:#fcfafc}
-.cd-signal-group.coaching{background:#fbf6fd;border-color:#e4d4ea}
-.cd-signal-label{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:11px}
-.cd-signal-label span{color:var(--coach-purple);font-size:11px;line-height:1;font-weight:900;letter-spacing:.12em}
-.cd-signal-label small{color:var(--coach-muted);font-size:11px}
-.cd-signal-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
-.cd-signal-cards .cd-op-mini{min-height:98px;padding:15px 10px;background:#fff}
-.cd-signal-cards .cd-op-mini b{font-size:29px}
-.cd-signal-cards .cd-op-mini span{font-size:11px}
-@media(max-width:850px){.cd-signal-groups{grid-template-columns:1fr}}
-@media(max-width:560px){.cd-signal-cards{grid-template-columns:1fr 1fr}}
-
 </style>
 
-{% set without_next_call = clients_without_next_call if clients_without_next_call is defined else [] %}
-
-<div class="cd">
-  <header class="cd-hero">
+<div class="sd">
+  <header class="sd-hero">
     <div>
-      
-      <p class="cd-eyebrow">OVERVIEW</p><h1>Coach Dashboard</h1>
-      <p>Clients, leads, coaching priorities and schedule — all in one place.</p>
+      <p class="sd-eyebrow">OVERVIEW</p>
+      <h1>Coach Dashboard</h1>
+      <p>See what needs you today, then move on with your day.</p>
     </div>
-    <div class="cd-date" data-today-date>Today</div>
+    <div class="sd-date">{{ today.strftime('%A, %d %B') if today is defined else 'Today' }}</div>
   </header>
 
-  {% if synamate_calendar_configured is defined and not synamate_calendar_configured %}
-  <div style="padding:10px 13px;border:1px solid #e7d7b3;border-radius:11px;background:#fffaf0;color:#7d6126;font-size:11px">
-    Waiting to identify one or more Synamate calendars from webhook activity.
-    <a href="/dashboard/synamate-calendars" style="color:inherit;font-weight:800">View calendar detection →</a>
-  </div>
-  {% endif %}
-
-  <section class="cd-kpis">
-    <a class="cd-kpi" href="#todays-schedule">
-      <span class="cd-kpi-label">Calls today <span class="cd-kpi-hint">↓</span></span>
-      <strong>{{ calls_today|length if calls_today is defined else 0 }}</strong>
-      <small>Leads + coaching clients</small>
+  <section class="sd-kpis">
+    <a class="sd-kpi" href="#today-schedule">
+      <span>Calls today</span>
+      <strong>{{ calls_today|length }}</strong>
+      <small>Upcoming today</small>
     </a>
-    <a class="cd-kpi" href="/dashboard/clients">
-      <span class="cd-kpi-label">Active clients <span class="cd-kpi-hint">→</span></span>
-      <strong>{{ active_clients|length if active_clients is defined else 0 }}</strong>
-      <small>View all coaching clients</small>
+    <a class="sd-kpi" href="#follow-up">
+      <span>Needs follow-up</span>
+      <strong>{{ follow_up_clients|length }}</strong>
+      <small>Clients who may need a nudge</small>
     </a>
-    <a class="cd-kpi" href="/dashboard/leads">
-      <span class="cd-kpi-label">New leads <span class="cd-kpi-hint">→</span></span>
-      <strong>{{ new_leads if new_leads is defined else 0 }}</strong>
-      <small>Review leads</small>
+    <a class="sd-kpi" href="#reviews">
+      <span>Ready for review</span>
+      <strong>{{ review_ready_clients|length }}</strong>
+      <small>Coaching weeks waiting</small>
     </a>
-    <a class="cd-kpi" href="#weekly-schedule">
-      <span class="cd-kpi-label">Calls this week <span class="cd-kpi-hint">↓</span></span>
-      <strong>{{ calls_this_week|length if calls_this_week is defined else 0 }}</strong>
-      <small>See this week’s schedule</small>
+    <a class="sd-kpi" href="/dashboard/leads">
+      <span>New leads</span>
+      <strong>{{ new_leads }}</strong>
+      <small>Open lead pipeline</small>
     </a>
   </section>
 
-  
-  <section class="cd-attention-wrap">
-    <article class="cd-panel">
-      <div class="cd-head">
-        <div><span class="over">Priority</span><h2>Needs attention</h2><p class="cd-section-help">Coaching signals first, then operational follow-ups.</p></div>
-        <button class="cd-ops-reset" type="button" data-ops-filter="all">Show all</button>
-      </div>
-
-      <div class="cd-signal-groups">
-        <section class="cd-signal-group coaching">
-          <div class="cd-signal-label"><span>COACHING</span><small>Who may need support</small></div>
-          <div class="cd-signal-cards">
-            <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="adherence"><b>{{ operations_counts.low_adherence or 0 }}</b><span>Low adherence</span></button>
-            <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="workout"><b>{{ operations_counts.workouts_behind or 0 }}</b><span>Workouts behind</span></button>
-            <button class="cd-op-mini cd-op-coaching" type="button" data-ops-filter="missed"><b>{{ operations_counts.missed_daily or 0 }}</b><span>Missed updates</span></button>
-          </div>
-        </section>
-        <section class="cd-signal-group operations">
-          <div class="cd-signal-label"><span>OPERATIONS</span><small>What needs follow-up</small></div>
-          <div class="cd-signal-cards">
-            <button class="cd-op-mini" type="button" data-ops-filter="measurement"><b>{{ operations_counts.measurement_due or 0 }}</b><span>Measurements due</span></button>
-            <button class="cd-op-mini" type="button" data-ops-filter="review"><b>{{ operations_counts.weekly_review_overdue or 0 }}</b><span>Reviews overdue</span></button>
-            <button class="cd-op-mini" type="button" data-ops-filter="call"><b>{{ operations_counts.no_next_call or 0 }}</b><span>No next call</span></button>
-          </div>
-        </section>
-      </div>
-
-      {% if needs_attention_clients %}
-      <div class="cd-attn-list" data-ops-list>
-        {% for client in needs_attention_clients %}
-        <div class="cd-attn-client"
-             data-missed="{{ '1' if client.operations.missed_daily_count >= 2 else '0' }}"
-             data-measurement="{{ '1' if client.operations.measurement_due else '0' }}"
-             data-review="{{ '1' if client.operations.weekly_review_overdue else '0' }}"
-             data-call="{{ '1' if client.operations.no_next_call else '0' }}"
-             data-adherence="{{ '1' if client.operations.coaching_signals.low_adherence else '0' }}"
-             data-workout="{{ '1' if client.operations.coaching_signals.workouts_behind else '0' }}">
-          <span class="cd-dot {% if client.operations.weekly_review_overdue %}{% else %}gold{% endif %}"></span>
-          <div>
-            <strong>{{ client.name }}</strong>
-            <span class="meta">{% if client.operations.week_number %}Week {{ client.operations.week_number }}{% else %}Setup{% endif %}</span>
-            <div class="cd-reasons">
-              {% for reason in client.operations.reasons %}
-              <span class="cd-reason">{{ reason }}</span>
-              {% endfor %}
-            </div>
-          </div>
-          <a class="cd-arrow" href="/dashboard/clients/{{ client.id }}?tab=weekly">→</a>
-        </div>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="cd-empty">
-        <div class="cd-icon">✓</div>
-        <div><strong>Clients are up to date</strong><p>No coaching operations need attention right now.</p></div>
-      </div>
-      {% endif %}
-
-      {% if new_leads %}
-      <div class="cd-attn" style="margin-top:10px">
-        <span class="cd-dot"></span>
-        <div><strong>{{ new_leads }} new lead{% if new_leads != 1 %}s{% endif %}</strong><span>Review assessments and applications.</span></div>
-        <a class="cd-arrow" href="/dashboard/leads">→</a>
-      </div>
-      {% endif %}
-    </article>
-  </section>
-
-  <section class="cd-schedule-grid">
-    <article class="cd-panel" id="todays-schedule">
-      <div class="cd-head">
-        <div><span class="over">Schedule</span><h2>Today's schedule</h2></div>
-      </div>
-
-      {% if calls_today is defined and calls_today %}
-      <div class="cd-list">
-        {% for call in calls_today %}
-        <a class="cd-item" href="{{ call.href or '/dashboard' }}">
-          <div>
-            <strong>{{ call.name }}</strong>
-            <span>{{ call.next_call_time or "Time not set" }} · {{ call.call_type or "Coaching call" }}</span>
-          </div>
-          <span class="cd-arrow">→</span>
-        </a>
-        {% endfor %}
-        <div class="cd-ops-none" data-ops-none>No clients in this category.</div>
-      </div>
-      {% else %}
-      <div class="cd-empty">
-        <div class="cd-icon">✓</div>
-        <div><strong>No calls today</strong><p>No clarity or coaching calls scheduled.</p></div>
-      </div>
-      {% endif %}
-    </article>
-    <article class="cd-panel" id="weekly-schedule">
-    <div class="cd-head">
-      <div><span class="over">Week</span><h2>This week’s schedule</h2></div>
-      <a href="#todays-schedule">Today ←</a>
-    </div>
-
-    {% if calls_this_week is defined and calls_this_week %}
-    <div class="cd-week-list">
-      {% for call in calls_this_week %}
-      <a class="cd-week-call" href="{{ call.href or '/dashboard' }}">
+  <section class="sd-grid">
+    <article class="sd-panel" id="follow-up">
+      <div class="sd-head">
         <div>
-          <strong>{{ call.name }}</strong>
-          <span>{{ call.date_label }} · {{ call.time_label }} · {{ call.call_type }}</span>
+          <span class="over">TODAY</span>
+          <h2>Needs follow-up</h2>
+          <p>Only meaningful engagement signals.</p>
         </div>
-        <span class="cd-arrow">→</span>
-      </a>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="cd-empty">
-      <div class="cd-icon">✓</div>
-      <div><strong>No calls scheduled this week</strong><p>Clarity and coaching calls will appear here after Synamate syncs them.</p></div>
-    </div>
-    {% endif %}
-  </article>
-  </section>
-
-
-
-  <section class="cd-lower">
-    <article class="cd-panel">
-      <div class="cd-head">
-        <div><span class="over">Clients</span><h2>Recent clients</h2></div>
         <a href="/dashboard/clients">All clients →</a>
       </div>
 
-      {% if active_clients is defined and active_clients %}
-      <div class="cd-list">
-        {% for client in active_clients[:5] %}
-        <a class="cd-client" href="/dashboard/clients/{{ client.id }}">
-          <div><strong>{{ client.name }}</strong><span>{{ client.program or "Coaching" }}</span></div>
-          <div class="cd-week">{% if client.current_week %}Week {{ client.current_week }}{% else %}Setup{% endif %}</div>
-          <span class="cd-arrow">→</span>
+      {% if follow_up_clients %}
+        {% for client in follow_up_clients %}
+        <a class="sd-row" href="/dashboard/clients/{{ client.id }}">
+          <div>
+            <strong>{{ client.name }}</strong>
+            <div class="sd-reasons">
+              {% for reason in client.dashboard_follow_up_reasons %}
+              <span class="sd-reason">{{ reason }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <span class="sd-arrow">›</span>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="sd-empty">
+          <div class="sd-empty-icon">✓</div>
+          <div>
+            <strong>No client follow-ups right now</strong>
+            <p>Nothing meaningful needs Sushma's intervention.</p>
+          </div>
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="sd-panel" id="reviews">
+      <div class="sd-head">
+        <div>
+          <span class="over">COACHING</span>
+          <h2>Ready for review</h2>
+          <p>Finished coaching weeks waiting for review.</p>
+        </div>
+      </div>
+
+      {% if review_ready_clients %}
+        {% for client in review_ready_clients %}
+        <a class="sd-row" href="/dashboard/clients/{{ client.id }}?tab=weekly">
+          <div>
+            <strong>{{ client.name }}</strong>
+            <span>Week {{ client.current_week or '—' }} · ready to review</span>
+          </div>
+          <span class="sd-review-badge">Review</span>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="sd-empty">
+          <div class="sd-empty-icon">✓</div>
+          <div>
+            <strong>No reviews waiting</strong>
+            <p>You're caught up on weekly coaching reviews.</p>
+          </div>
+        </div>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="sd-schedules">
+    <article class="sd-panel" id="today-schedule">
+      <div class="sd-head">
+        <div>
+          <span class="over">SCHEDULE</span>
+          <h2>Today</h2>
+          <p>Only calls still ahead today.</p>
+        </div>
+      </div>
+
+      {% if calls_today %}
+        {% for call in calls_today %}
+        <a class="sd-row" href="{{ call.href or '/dashboard' }}">
+          <div>
+            <strong>{{ call.name or call.title or 'Call' }}</strong>
+            <span>{{ call.local_start_time.strftime('%I:%M %p') if call.local_start_time else '' }}{% if call.kind %} · {{ call.kind }}{% endif %}</span>
+          </div>
+          <span class="sd-booked">Booked</span>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="sd-empty">
+          <div class="sd-empty-icon">☀</div>
+          <div><strong>No more calls today</strong><p>Your remaining day is clear.</p></div>
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="sd-panel" id="week-schedule">
+      <div class="sd-head">
+        <div>
+          <span class="over">SCHEDULE</span>
+          <h2>This week</h2>
+          <p>Remaining upcoming calls through Sunday.</p>
+        </div>
+      </div>
+
+      {% if calls_this_week %}
+      <div class="sd-week-list">
+        {% for call in calls_this_week %}
+        <a class="sd-call" href="{{ call.href or '/dashboard' }}">
+          <div>
+            <strong>{{ call.name or call.title or 'Call' }}</strong>
+            <span>{{ call.local_start_time.strftime('%a, %d %b · %I:%M %p') if call.local_start_time else '' }}{% if call.kind %} · {{ call.kind }}{% endif %}</span>
+          </div>
+          <span class="sd-arrow">›</span>
         </a>
         {% endfor %}
       </div>
       {% else %}
-      <div class="cd-empty">
-        <div class="cd-icon">♡</div>
-        <div><strong>No active clients yet</strong><p>Add a client to begin coaching.</p></div>
-      </div>
+        <div class="sd-empty">
+          <div class="sd-empty-icon">✓</div>
+          <div><strong>No remaining calls this week</strong><p>Nothing else is scheduled.</p></div>
+        </div>
       {% endif %}
     </article>
-
-    <article class="cd-panel">
-      <div class="cd-head"><div><span class="over">Quick access</span><h2>Jump back in</h2></div></div>
-      <div class="cd-quick">
-        <a href="/dashboard/clients"><span>Manage clients</span><span>→</span></a>
-        <a href="/dashboard/leads"><span>Review leads</span><span>→</span></a>
-        <a href="/" target="_blank" rel="noopener"><span>View website</span><span>↗</span></a>
-      </div>
-    </article>
   </section>
+
+  {% if clients_without_next_call %}
+  <div class="sd-note">
+    <strong>{{ clients_without_next_call|length }} client{% if clients_without_next_call|length != 1 %}s{% endif %}</strong>
+    currently have no next coaching call booked. This is informational only.
+    <a href="/dashboard/clients">View clients →</a>
+  </div>
+  {% endif %}
 </div>
-
-<script>
-(() => {
-  const filterButtons = [...document.querySelectorAll("[data-ops-filter]")];
-  const rows = [...document.querySelectorAll("[data-ops-list] .cd-attn-client")];
-  const none = document.querySelector("[data-ops-none]");
-
-  function filterOperations(filter) {
-    let visible = 0;
-    rows.forEach(row => {
-      const show = filter === "all" || row.dataset[filter] === "1";
-      row.classList.toggle("is-hidden", !show);
-      if (show) visible += 1;
-    });
-
-    filterButtons.forEach(button => {
-      button.classList.toggle(
-        "active",
-        button.dataset.opsFilter === filter && filter !== "all"
-      );
-    });
-
-    if (none) none.classList.toggle("show", rows.length > 0 && visible === 0);
-  }
-
-  filterButtons.forEach(button => {
-    button.addEventListener("click", () => filterOperations(button.dataset.opsFilter));
-  });
-
-  const el = document.querySelector("[data-today-date]");
-  if (!el) return;
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-  }).formatToParts(new Date());
-  const get = type => parts.find(p => p.type === type)?.value || "";
-  el.textContent = `${get("day")} ${get("month")} ${get("year")}`;
-})();
-</script>
 {% endblock %}

@@ -632,25 +632,13 @@ def dashboard_home(request: Request):
         key=lambda item: item.get("local_start_time") or local_now
     )
 
-    # Production operations status: one rule set for dashboard + client list.
-    needs_attention_clients = []
+    # Simplified dashboard triage:
+    # show only items that imply a clear next action for Sushma.
+    follow_up_clients = []
+    review_ready_clients = []
     clients_without_next_call = []
-    missed_update_clients = []
-    measurement_due_clients = []
-    review_overdue_clients = []
-    no_next_call_clients = []
-    operations_counts = {
-        "missed_daily": 0,
-        "measurement_due": 0,
-        "weekly_review_overdue": 0,
-        "no_next_call": 0,
-        "low_adherence": 0,
-        "workouts_behind": 0,
-    }
 
     for client in active_clients:
-        # Existing operational alerts: missed updates, measurements,
-        # overdue review and no next call.
         ops = dict(
             get_client_operations_status(
                 client,
@@ -659,8 +647,6 @@ def dashboard_home(request: Request):
         )
         ops["reasons"] = list(ops.get("reasons") or [])
 
-        # Add coaching intelligence using this client's own coaching-week
-        # boundaries, not calendar Monday-Sunday weeks.
         coaching_signals = {
             "action_percent": None,
             "low_adherence": False,
@@ -679,51 +665,52 @@ def dashboard_home(request: Request):
             )
 
         ops["coaching_signals"] = coaching_signals
+        client["operations"] = ops
+        client["current_week"] = ops.get("week_number")
+        client["has_synced_next_call"] = not ops.get("no_next_call", False)
 
-        for reason in coaching_signals.get("reasons") or []:
-            if reason not in ops["reasons"]:
-                ops["reasons"].append(reason)
+        # Needs follow-up is intentionally narrow:
+        # missed tracking or low adherence only.
+        follow_up_reasons = []
+
+        if (ops.get("missed_daily_count") or 0) >= 2:
+            missed = ops.get("missed_daily_count") or 0
+            follow_up_reasons.append(
+                f"No tracking for {missed} day"
+                + ("s" if missed != 1 else "")
+            )
 
         if coaching_signals.get("low_adherence"):
-            operations_counts["low_adherence"] += 1
+            action_percent = coaching_signals.get("action_percent")
+            if action_percent is None:
+                follow_up_reasons.append("Low action consistency")
+            else:
+                follow_up_reasons.append(
+                    f"Action consistency {round(action_percent)}%"
+                )
 
-        if coaching_signals.get("workouts_behind"):
-            operations_counts["workouts_behind"] += 1
+        if follow_up_reasons:
+            client["dashboard_follow_up_reasons"] = follow_up_reasons
+            follow_up_clients.append(client)
 
-        # Coaching signals should bring a client into the SAME Needs attention
-        # list even if operational housekeeping is otherwise up to date.
-        if (
-            coaching_signals.get("low_adherence")
-            or coaching_signals.get("workouts_behind")
-        ):
-            ops["health_key"] = "attention"
-            ops["health_label"] = "Needs attention"
+        # Keep existing backend rule, but present it as "Ready for review".
+        if ops.get("weekly_review_overdue"):
+            review_ready_clients.append(client)
 
-        ops["attention_count"] = len(ops["reasons"])
-
-        client["operations"] = ops
-        client["current_week"] = ops["week_number"]
-        client["has_synced_next_call"] = not ops["no_next_call"]
-
-        if ops["no_next_call"]:
+        # No-next-call is informational only.
+        if ops.get("no_next_call"):
             clients_without_next_call.append(client)
-            no_next_call_clients.append(client)
-            operations_counts["no_next_call"] += 1
-        if ops["missed_daily_count"] >= 2:
-            missed_update_clients.append(client)
-            operations_counts["missed_daily"] += 1
-        if ops["measurement_due"]:
-            measurement_due_clients.append(client)
-            operations_counts["measurement_due"] += 1
-        if ops["weekly_review_overdue"]:
-            review_overdue_clients.append(client)
-            operations_counts["weekly_review_overdue"] += 1
-        if ops["health_key"] == "attention":
-            needs_attention_clients.append(client)
 
-    needs_attention_clients.sort(
+    follow_up_clients.sort(
         key=lambda client: (
-            -client["operations"]["attention_count"],
+            -(client["operations"].get("missed_daily_count") or 0),
+            client.get("name") or "",
+        )
+    )
+
+    review_ready_clients.sort(
+        key=lambda client: (
+            client["operations"].get("week_end") or local_now.date(),
             client.get("name") or "",
         )
     )
@@ -746,12 +733,8 @@ def dashboard_home(request: Request):
             "request": request,
             "active_clients": active_clients,
             "clients_without_next_call": clients_without_next_call,
-            "needs_attention_clients": needs_attention_clients,
-            "operations_counts": operations_counts,
-            "missed_update_clients": missed_update_clients,
-            "measurement_due_clients": measurement_due_clients,
-            "review_overdue_clients": review_overdue_clients,
-            "no_next_call_clients": no_next_call_clients,
+            "follow_up_clients": follow_up_clients,
+            "review_ready_clients": review_ready_clients,
             "calls_today": calls_today,
             "calls_this_week": calls_this_week,
             "new_leads": new_leads,
