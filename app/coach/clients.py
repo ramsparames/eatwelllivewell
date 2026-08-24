@@ -784,6 +784,10 @@ def clients_page(request: Request):
     calls_today = ClientService.calls_today()
     calls_this_week = ClientService.calls_this_week()
 
+    latest_nudges = get_latest_client_nudges(
+        [client["id"] for client in clients]
+    )
+
     today = date.today()
 
     for client in clients:
@@ -950,9 +954,6 @@ def clients_page(request: Request):
         for client in clients
         if client.get("status") == "active"
     ]
-    latest_nudges = get_latest_client_nudges(
-        [client["id"] for client in active_clients]
-    )
 
 
     needs_attention = [
