@@ -6,32 +6,44 @@
 </style>
 
 
-<div class="client-nudge-modal" data-client-nudge-modal hidden>
-  <div class="client-nudge-dialog">
-    <h3 data-client-nudge-title>Message client</h3>
-    <form method="post" target="_blank" data-client-nudge-form>
-      <label>Reason</label>
-      <select name="reason" data-client-nudge-reason>
-        <option value="missed_tracking">Missed check-ins</option>
-        <option value="low_adherence">Actions need attention</option>
-        <option value="workout">Workout reminder</option>
-        <option value="reflection">Weekly reflection</option>
-        <option value="custom">Custom check-in</option>
-      </select>
-      <label>Message</label>
-      <textarea name="message" data-client-nudge-message required></textarea>
-      <div class="client-nudge-actions">
-        <button class="secondary" type="button" data-client-nudge-copy>Copy message</button>
-        <button class="secondary" type="button" data-client-nudge-close>Cancel</button>
-        <button class="primary" type="submit">Open WhatsApp →</button>
-      </div>
-    </form>
+
+
+
+<div class="nudge-sheet-backdrop" data-client-nudge-backdrop hidden></div>
+
+<aside class="nudge-sheet" data-client-nudge-sheet hidden aria-label="Gentle nudge">
+  <div class="nudge-sheet-head">
+    <div>
+      <p class="eyebrow">GENTLE NUDGE</p>
+      <h3 data-client-nudge-title>Message client</h3>
+    </div>
+    <button class="nudge-sheet-close" type="button" data-client-nudge-close>×</button>
   </div>
-</div>
+
+  <form method="post" target="_blank" data-client-nudge-form>
+    <label>Reason</label>
+    <select name="reason" data-client-nudge-reason>
+      <option value="missed_tracking">Missed check-ins</option>
+      <option value="low_adherence">Actions need attention</option>
+      <option value="workout">Workout reminder</option>
+      <option value="reflection">Weekly reflection</option>
+      <option value="custom">Custom check-in</option>
+    </select>
+
+    <label>Message</label>
+    <textarea name="message" data-client-nudge-message required></textarea>
+
+    <div class="nudge-sheet-actions">
+      <button class="nudge-copy" type="button" data-client-nudge-copy>Copy message</button>
+      <button class="nudge-open" type="submit">Open WhatsApp →</button>
+    </div>
+  </form>
+</aside>
 
 <script>
-(() => {
-  const modal = document.querySelector("[data-client-nudge-modal]");
+document.addEventListener("DOMContentLoaded", function () {
+  const sheet = document.querySelector("[data-client-nudge-sheet]");
+  const backdrop = document.querySelector("[data-client-nudge-backdrop]");
   const form = document.querySelector("[data-client-nudge-form]");
   const reason = document.querySelector("[data-client-nudge-reason]");
   const message = document.querySelector("[data-client-nudge-message]");
@@ -46,38 +58,56 @@
     custom: n => `Hi ${n} 😊 Just checking in with you. 💜 — Sushma`
   };
 
-  function closeModal(){ modal.hidden = true; }
+  function openSheet(btn){
+    const fullName = btn.dataset.clientName || "Client";
+    firstName = fullName.split(" ")[0];
+    title.textContent = `Message ${fullName}`;
+    form.action = `/dashboard/clients/${btn.dataset.clientId}/nudge`;
+    reason.value = btn.dataset.reason || "custom";
+    message.value = btn.dataset.message || templates[reason.value](firstName);
+    sheet.hidden = false;
+    backdrop.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
 
-  document.querySelectorAll("[data-client-nudge-open]").forEach(btn => {
-    btn.addEventListener("click", event => {
+  function closeSheet(){
+    sheet.hidden = true;
+    backdrop.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  document.addEventListener("click", function(event){
+    const trigger = event.target.closest("[data-client-nudge-trigger]");
+    if(trigger){
       event.preventDefault();
       event.stopPropagation();
-
-      const fullName = btn.dataset.clientName || "Client";
-      firstName = fullName.split(" ")[0];
-      title.textContent = `Message ${fullName}`;
-      form.action = `/dashboard/clients/${btn.dataset.clientId}/nudge`;
-      reason.value = btn.dataset.reason || "custom";
-      message.value = btn.dataset.message || templates[reason.value](firstName);
-      modal.hidden = false;
-    });
+      openSheet(trigger);
+      return;
+    }
+    if(event.target.matches("[data-client-nudge-close]") || event.target === backdrop){
+      closeSheet();
+    }
   });
 
-  reason?.addEventListener("change", () => {
+  reason?.addEventListener("change", function(){
     message.value = templates[reason.value](firstName);
   });
 
-  document.querySelector("[data-client-nudge-copy]")?.addEventListener("click", async () => {
-    await navigator.clipboard.writeText(message.value);
+  document.querySelector("[data-client-nudge-copy]")?.addEventListener("click", async function(){
+    try{
+      await navigator.clipboard.writeText(message.value);
+      this.textContent = "Copied ✓";
+      setTimeout(() => this.textContent = "Copy message", 1200);
+    }catch{
+      message.select();
+      document.execCommand("copy");
+    }
   });
 
-  document.querySelectorAll("[data-client-nudge-close]").forEach(btn => btn.addEventListener("click", closeModal));
-  modal?.addEventListener("click", event => { if(event.target === modal) closeModal(); });
-
-  form?.addEventListener("submit", () => {
-    setTimeout(() => window.location.reload(), 800);
+  form?.addEventListener("submit", function(){
+    setTimeout(() => window.location.reload(), 900);
   });
-})();
+});
 </script>
 
 {% endblock %}
@@ -213,6 +243,145 @@
   font-weight:900!important;
   cursor:pointer!important;
 }
+
+.client-nudge-link{
+  display:block;
+  margin-top:6px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--coach-purple);
+  font:inherit;
+  font-size:9px;
+  font-weight:850;
+  cursor:pointer;
+}
+.client-nudge-link:hover{text-decoration:underline}
+
+.sd-nudge-link{
+  margin-top:9px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--coach-purple);
+  font:inherit;
+  font-size:10px;
+  font-weight:850;
+  cursor:pointer;
+}
+.sd-nudge-link:hover{text-decoration:underline}
+.sd-nudge-status{
+  margin-top:9px;
+  color:#2f6f4e;
+  font-size:9px;
+  font-weight:800;
+}
+.sd-nudge-muted{
+  margin-top:9px;
+  color:var(--coach-muted);
+  font-size:9px;
+}
+.nudge-sheet-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:1500;
+  background:rgba(28,18,32,.22);
+}
+.nudge-sheet-backdrop[hidden]{display:none}
+.nudge-sheet{
+  position:fixed;
+  top:0;
+  right:0;
+  z-index:1501;
+  width:min(430px,92vw);
+  height:100vh;
+  padding:24px;
+  overflow:auto;
+  background:#fff;
+  box-shadow:-18px 0 50px rgba(41,23,49,.16);
+  transform:translateX(0);
+}
+.nudge-sheet[hidden]{display:none}
+.nudge-sheet-head{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+  margin-bottom:22px;
+}
+.nudge-sheet-head .eyebrow{
+  margin:0 0 5px;
+  color:var(--coach-purple);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.nudge-sheet-head h3{margin:0;font-size:24px}
+.nudge-sheet-close{
+  border:0;
+  background:transparent;
+  color:var(--coach-muted);
+  font-size:24px;
+  cursor:pointer;
+}
+.nudge-sheet label{
+  display:block;
+  margin:14px 0 6px;
+  color:var(--coach-muted);
+  font-size:10px;
+  font-weight:850;
+}
+.nudge-sheet select,
+.nudge-sheet textarea{
+  width:100%;
+  border:1px solid var(--coach-border);
+  border-radius:11px;
+  background:#fff;
+  color:var(--coach-text);
+  font:inherit;
+  font-size:12px;
+}
+.nudge-sheet select{height:42px;padding:0 10px}
+.nudge-sheet textarea{
+  min-height:190px;
+  padding:12px;
+  resize:vertical;
+  line-height:1.55;
+}
+.nudge-sheet-note{
+  margin-top:10px;
+  padding:10px 11px;
+  border-radius:10px;
+  background:#faf7fb;
+  color:var(--coach-muted);
+  font-size:9px;
+  line-height:1.5;
+}
+.nudge-sheet-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:16px;
+}
+.nudge-sheet-actions button{
+  min-height:38px;
+  padding:0 12px;
+  border-radius:9px;
+  font:inherit;
+  font-size:11px;
+  font-weight:850;
+  cursor:pointer;
+}
+.nudge-copy{
+  border:1px solid var(--coach-border);
+  background:#fff;
+  color:var(--coach-text);
+}
+.nudge-open{
+  border:0;
+  background:var(--coach-purple);
+  color:#fff;
+}
 </style>
 
 <style>
@@ -309,15 +478,15 @@
               <span class="client-nudged">Nudged recently ✓</span>
             {% elif client.phone %}
               <button
-                class="client-nudge-btn"
+                class="client-nudge-link"
                 type="button"
-                data-client-nudge-open
+                data-client-nudge-trigger
                 data-client-id="{{ client.id }}"
                 data-client-name="{{ client.name|e }}"
                 data-reason="{{ client.suggested_nudge_reason|e }}"
                 data-message="{{ client.suggested_nudge_message|e }}"
-                onclick="event.preventDefault(); event.stopPropagation();"
-              >Nudge</button>
+                onclick="event.preventDefault();event.stopPropagation();"
+              >Send nudge →</button>
             {% endif %}
           {% endif %}
         </div>

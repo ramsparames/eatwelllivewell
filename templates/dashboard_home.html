@@ -1,120 +1,110 @@
 {% extends "coach/base.html" %}
 {% block title %}Coach Dashboard | Eat Well Live Well
-<div class="sd-modal-backdrop" data-nudge-modal hidden>
-  <div class="sd-modal" role="dialog" aria-modal="true" aria-labelledby="nudge-title">
-    <div class="sd-modal-head">
-      <div>
-        <span class="over">GENTLE NUDGE</span>
-        <h3 id="nudge-title">Message client</h3>
-      </div>
-      <button class="sd-modal-close" type="button" data-nudge-close>×</button>
+
+
+
+<div class="nudge-sheet-backdrop" data-nudge-backdrop hidden></div>
+
+<aside class="nudge-sheet" data-nudge-sheet hidden aria-label="Gentle nudge">
+  <div class="nudge-sheet-head">
+    <div>
+      <p class="eyebrow">GENTLE NUDGE</p>
+      <h3 data-nudge-title>Message client</h3>
+    </div>
+    <button class="nudge-sheet-close" type="button" data-nudge-close>×</button>
+  </div>
+
+  <form method="post" target="_blank" data-nudge-form>
+    <label>Reason</label>
+    <select name="reason" data-nudge-reason>
+      <option value="missed_tracking">Missed check-ins</option>
+      <option value="low_adherence">Actions need attention</option>
+      <option value="workout">Workout reminder</option>
+      <option value="reflection">Weekly reflection</option>
+      <option value="custom">Custom check-in</option>
+    </select>
+
+    <label>Message</label>
+    <textarea name="message" data-nudge-message required></textarea>
+
+    <div class="nudge-sheet-note">
+      This opens WhatsApp with the message filled in. Sushma still reviews it and presses Send herself.
     </div>
 
-    <form method="post" target="_blank" data-nudge-form>
-      <label for="nudge-reason">Reason</label>
-      <select id="nudge-reason" name="reason" data-nudge-reason>
-        <option value="missed_tracking">Missed check-ins</option>
-        <option value="low_adherence">Actions need attention</option>
-        <option value="workout">Workout reminder</option>
-        <option value="reflection">Weekly reflection</option>
-        <option value="custom">Custom check-in</option>
-      </select>
-
-      <label for="nudge-message">Message</label>
-      <textarea id="nudge-message" name="message" data-nudge-message required></textarea>
-
-      <p class="sd-modal-note">
-        This opens WhatsApp with the message filled in. Sushma still reviews it
-        and presses Send herself. NourisHer records that the nudge workflow was
-        initiated and suppresses another dashboard nudge for 48 hours.
-      </p>
-
-      <div class="sd-modal-actions">
-        <button class="sd-modal-secondary" type="button" data-copy-nudge>Copy message</button>
-        <button class="sd-modal-secondary" type="button" data-nudge-close>Cancel</button>
-        <button class="sd-modal-primary" type="submit">Open WhatsApp →</button>
-      </div>
-    </form>
-  </div>
-</div>
+    <div class="nudge-sheet-actions">
+      <button class="nudge-copy" type="button" data-nudge-copy>Copy message</button>
+      <button class="nudge-open" type="submit">Open WhatsApp →</button>
+    </div>
+  </form>
+</aside>
 
 <script>
-(() => {
-  const modal = document.querySelector("[data-nudge-modal]");
+document.addEventListener("DOMContentLoaded", function () {
+  const sheet = document.querySelector("[data-nudge-sheet]");
+  const backdrop = document.querySelector("[data-nudge-backdrop]");
   const form = document.querySelector("[data-nudge-form]");
   const reason = document.querySelector("[data-nudge-reason]");
   const message = document.querySelector("[data-nudge-message]");
-  const title = document.getElementById("nudge-title");
-  let current = null;
+  const title = document.querySelector("[data-nudge-title]");
+  let firstName = "there";
 
   const templates = {
-    missed_tracking: name =>
-      `Hi ${name} 😊 Just a gentle reminder to update your NourisHer tracker when you get a chance today. It helps me understand how your week is going and support you better. 💜 — Sushma`,
-    low_adherence: name =>
-      `Hi ${name} 😊 Just checking in. I noticed this week has been a little harder to stay consistent with the actions we planned. No pressure — when you get a moment, update your tracker and we can work with what is realistic for you this week. 💜 — Sushma`,
-    workout: name =>
-      `Hi ${name} 😊 A gentle reminder about your strength workout when you get a chance. Even getting one session done is a useful win — record it in NourisHer once completed. 💜 — Sushma`,
-    reflection: name =>
-      `Hi ${name} 😊 When you get a moment, please complete your weekly NourisHer reflection. It helps me review your week and plan the right focus with you. 💜 — Sushma`,
-    custom: name =>
-      `Hi ${name} 😊 Just checking in with you. 💜 — Sushma`
+    missed_tracking: n => `Hi ${n} 😊 Just a gentle reminder to update your NourisHer tracker when you get a chance today. It helps me understand how your week is going and support you better. 💜 — Sushma`,
+    low_adherence: n => `Hi ${n} 😊 Just checking in. I noticed this week has been a little harder to stay consistent with the actions we planned. No pressure — when you get a moment, update your tracker and we can work with what is realistic for you this week. 💜 — Sushma`,
+    workout: n => `Hi ${n} 😊 A gentle reminder about your strength workout when you get a chance. Even getting one session done is a useful win — record it in NourisHer once completed. 💜 — Sushma`,
+    reflection: n => `Hi ${n} 😊 When you get a moment, please complete your weekly NourisHer reflection. It helps me review your week and plan the right focus with you. 💜 — Sushma`,
+    custom: n => `Hi ${n} 😊 Just checking in with you. 💜 — Sushma`
   };
 
-  const close = () => {
-    modal.hidden = true;
-    current = null;
-  };
+  function openSheet(btn){
+    const fullName = btn.dataset.clientName || "Client";
+    firstName = fullName.split(" ")[0];
+    title.textContent = `Message ${fullName}`;
+    form.action = `/dashboard/clients/${btn.dataset.clientId}/nudge`;
+    reason.value = btn.dataset.reason || "custom";
+    message.value = btn.dataset.message || templates[reason.value](firstName);
+    sheet.hidden = false;
+    backdrop.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
 
-  document.querySelectorAll("[data-nudge-open]").forEach(button => {
-    button.addEventListener("click", () => {
-      current = {
-        id: button.dataset.clientId,
-        name: (button.dataset.clientName || "there").split(" ")[0]
-      };
+  function closeSheet(){
+    sheet.hidden = true;
+    backdrop.hidden = true;
+    document.body.style.overflow = "";
+  }
 
-      title.textContent = `Message ${button.dataset.clientName}`;
-      form.action = `/dashboard/clients/${current.id}/nudge`;
-      reason.value = button.dataset.reason || "custom";
-      message.value =
-        button.dataset.message ||
-        templates[reason.value](current.name);
-
-      modal.hidden = false;
-      message.focus();
-    });
+  document.addEventListener("click", function(event){
+    const trigger = event.target.closest("[data-nudge-trigger]");
+    if(trigger){
+      event.preventDefault();
+      openSheet(trigger);
+      return;
+    }
+    if(event.target.matches("[data-nudge-close]") || event.target === backdrop){
+      closeSheet();
+    }
   });
 
-  reason?.addEventListener("change", () => {
-    if (!current) return;
-    message.value = templates[reason.value](current.name);
+  reason?.addEventListener("change", function(){
+    message.value = templates[reason.value](firstName);
   });
 
-  document.querySelectorAll("[data-nudge-close]").forEach(button => {
-    button.addEventListener("click", close);
-  });
-
-  modal?.addEventListener("click", event => {
-    if (event.target === modal) close();
-  });
-
-  document.querySelector("[data-copy-nudge]")?.addEventListener("click", async event => {
-    try {
+  document.querySelector("[data-nudge-copy]")?.addEventListener("click", async function(){
+    try{
       await navigator.clipboard.writeText(message.value);
-      const button = event.currentTarget;
-      const oldText = button.textContent;
-      button.textContent = "Copied ✓";
-      setTimeout(() => button.textContent = oldText, 1200);
-    } catch {
+      this.textContent = "Copied ✓";
+      setTimeout(() => this.textContent = "Copy message", 1200);
+    }catch{
       message.select();
       document.execCommand("copy");
     }
   });
 
-  form?.addEventListener("submit", () => {
-    close();
-    setTimeout(() => window.location.reload(), 500);
+  form?.addEventListener("submit", function(){
+    setTimeout(() => window.location.reload(), 900);
   });
-})();
+});
 </script>
 
 {% endblock %}
@@ -301,6 +291,131 @@
   font-size:22px!important;
   font-weight:900!important;
 }
+
+.sd-nudge-link{
+  margin-top:9px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--coach-purple);
+  font:inherit;
+  font-size:10px;
+  font-weight:850;
+  cursor:pointer;
+}
+.sd-nudge-link:hover{text-decoration:underline}
+.sd-nudge-status{
+  margin-top:9px;
+  color:#2f6f4e;
+  font-size:9px;
+  font-weight:800;
+}
+.sd-nudge-muted{
+  margin-top:9px;
+  color:var(--coach-muted);
+  font-size:9px;
+}
+.nudge-sheet-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:1500;
+  background:rgba(28,18,32,.22);
+}
+.nudge-sheet-backdrop[hidden]{display:none}
+.nudge-sheet{
+  position:fixed;
+  top:0;
+  right:0;
+  z-index:1501;
+  width:min(430px,92vw);
+  height:100vh;
+  padding:24px;
+  overflow:auto;
+  background:#fff;
+  box-shadow:-18px 0 50px rgba(41,23,49,.16);
+  transform:translateX(0);
+}
+.nudge-sheet[hidden]{display:none}
+.nudge-sheet-head{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+  margin-bottom:22px;
+}
+.nudge-sheet-head .eyebrow{
+  margin:0 0 5px;
+  color:var(--coach-purple);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.nudge-sheet-head h3{margin:0;font-size:24px}
+.nudge-sheet-close{
+  border:0;
+  background:transparent;
+  color:var(--coach-muted);
+  font-size:24px;
+  cursor:pointer;
+}
+.nudge-sheet label{
+  display:block;
+  margin:14px 0 6px;
+  color:var(--coach-muted);
+  font-size:10px;
+  font-weight:850;
+}
+.nudge-sheet select,
+.nudge-sheet textarea{
+  width:100%;
+  border:1px solid var(--coach-border);
+  border-radius:11px;
+  background:#fff;
+  color:var(--coach-text);
+  font:inherit;
+  font-size:12px;
+}
+.nudge-sheet select{height:42px;padding:0 10px}
+.nudge-sheet textarea{
+  min-height:190px;
+  padding:12px;
+  resize:vertical;
+  line-height:1.55;
+}
+.nudge-sheet-note{
+  margin-top:10px;
+  padding:10px 11px;
+  border-radius:10px;
+  background:#faf7fb;
+  color:var(--coach-muted);
+  font-size:9px;
+  line-height:1.5;
+}
+.nudge-sheet-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:16px;
+}
+.nudge-sheet-actions button{
+  min-height:38px;
+  padding:0 12px;
+  border-radius:9px;
+  font:inherit;
+  font-size:11px;
+  font-weight:850;
+  cursor:pointer;
+}
+.nudge-copy{
+  border:1px solid var(--coach-border);
+  background:#fff;
+  color:var(--coach-text);
+}
+.nudge-open{
+  border:0;
+  background:var(--coach-purple);
+  color:#fff;
+}
 </style>
 
 <div class="sd">
@@ -361,23 +476,21 @@
               {% endfor %}
             </div>
 
-            <div class="sd-follow-actions">
-              {% if client.nudge_recent %}
-                <span class="sd-nudged">Nudged recently ✓</span>
-              {% elif client.phone %}
-                <button
-                  type="button"
-                  class="sd-nudge-btn"
-                  data-nudge-open
-                  data-client-id="{{ client.id }}"
-                  data-client-name="{{ client.name|e }}"
-                  data-reason="{{ client.suggested_nudge_reason|e }}"
-                  data-message="{{ client.suggested_nudge_message|e }}"
-                >Nudge</button>
-              {% else %}
-                <span class="sd-no-phone">No phone number</span>
-              {% endif %}
-            </div>
+            {% if client.nudge_recent %}
+              <div class="sd-nudge-status">Nudged recently ✓</div>
+            {% elif client.phone %}
+              <button
+                type="button"
+                class="sd-nudge-link"
+                data-nudge-trigger
+                data-client-id="{{ client.id }}"
+                data-client-name="{{ client.name|e }}"
+                data-reason="{{ client.suggested_nudge_reason|e }}"
+                data-message="{{ client.suggested_nudge_message|e }}"
+              >Send nudge →</button>
+            {% else %}
+              <div class="sd-nudge-muted">No phone number</div>
+            {% endif %}
           </div>
 
           <a class="sd-follow-open" href="/dashboard/clients/{{ client.id }}">→</a>
