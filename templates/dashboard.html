@@ -217,6 +217,41 @@
 }
 .sd-modal-secondary{border:1px solid var(--coach-border);background:#fff;color:var(--coach-text)}
 .sd-modal-primary{border:0;background:var(--coach-purple);color:#fff}
+
+.sd-follow-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 28px;
+  gap:12px;
+  align-items:center;
+  padding:14px 0;
+  border-top:1px solid #eee8f0;
+}
+.sd-follow-row:first-of-type{border-top:0}
+.sd-follow-main{min-width:0}
+.sd-follow-name{display:inline-block;color:var(--coach-text);text-decoration:none;font-size:14px;font-weight:850}
+.sd-follow-open{display:grid;place-items:center;color:var(--coach-purple);text-decoration:none;font-size:21px;font-weight:900}
+.sd-nudge-btn{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  margin-top:9px;
+  min-height:33px;
+  padding:0 12px;
+  border:0;
+  border-radius:9px;
+  background:var(--coach-purple)!important;
+  color:#fff!important;
+  font:inherit;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+  visibility:visible!important;
+  opacity:1!important;
+}
+.sd-nudge-state{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px}
+.sd-nudged{padding:6px 9px;border-radius:999px;background:#edf8f0;color:#286c49;font-size:9px;font-weight:850}
+.sd-nudge-state small{color:var(--coach-muted);font-size:9px}
+.sd-no-phone{display:inline-block;margin-top:9px;color:var(--coach-muted);font-size:9px}
 </style>
 
 <div class="sd">
@@ -265,46 +300,39 @@
 
       {% if follow_up_clients %}
         {% for client in follow_up_clients %}
-        <div class="sd-row">
-          <div>
-            <a href="/dashboard/clients/{{ client.id }}" style="color:inherit;text-decoration:none">
-              <strong>{{ client.name }}</strong>
-            </a>
+        <div class="sd-follow-row">
+          <div class="sd-follow-main">
+            <a class="sd-follow-name" href="/dashboard/clients/{{ client.id }}">{{ client.name }}</a>
+
             <div class="sd-reasons">
               {% for reason in client.dashboard_follow_up_reasons %}
               <span class="sd-reason">{{ reason }}</span>
               {% endfor %}
             </div>
 
-            <div class="sd-follow-actions">
-              {% if client.nudge_recent %}
-                <button class="sd-nudge-btn" type="button" disabled>Nudged recently ✓</button>
+            {% if client.nudge_recent %}
+              <div class="sd-nudge-state">
+                <span class="sd-nudged">Nudged recently ✓</span>
                 {% if client.last_nudge and client.last_nudge.created_at %}
-                <span class="sd-nudge-meta">
-                  {{ client.last_nudge.created_at.astimezone().strftime("%d %b · %I:%M %p") }}
-                </span>
+                <small>Last nudge recorded {{ client.last_nudge.created_at.strftime("%d %b · %I:%M %p") }}</small>
                 {% endif %}
-              {% elif client.phone %}
-                <button
-                  class="sd-nudge-btn"
-                  type="button"
-                  data-nudge-open
-                  data-client-id="{{ client.id }}"
-                  data-client-name="{{ client.name }}"
-                  data-reason="{{ client.suggested_nudge_reason }}"
-                  data-message="{{ client.suggested_nudge_message }}"
-                >Nudge</button>
-                {% if client.last_nudge and client.last_nudge.created_at %}
-                <span class="sd-nudge-meta">
-                  Last nudged {{ client.last_nudge.created_at.astimezone().strftime("%d %b") }}
-                </span>
-                {% endif %}
-              {% else %}
-                <button class="sd-nudge-btn" type="button" disabled>No phone number</button>
-              {% endif %}
-            </div>
+              </div>
+            {% elif client.phone %}
+              <button
+                class="sd-nudge-btn"
+                type="button"
+                data-nudge-open
+                data-client-id="{{ client.id }}"
+                data-client-name="{{ client.name|e }}"
+                data-reason="{{ client.suggested_nudge_reason|e }}"
+                data-message="{{ client.suggested_nudge_message|e }}"
+              >Nudge</button>
+            {% else %}
+              <span class="sd-no-phone">No phone number</span>
+            {% endif %}
           </div>
-          <a class="sd-arrow" href="/dashboard/clients/{{ client.id }}">›</a>
+
+          <a class="sd-follow-open" href="/dashboard/clients/{{ client.id }}">→</a>
         </div>
         {% endfor %}
       {% else %}

@@ -5,6 +5,81 @@
 .client-row[hidden], [data-client-row][hidden], .client-no-results[hidden]{display:none!important}
 </style>
 
+
+<div class="client-nudge-modal" data-client-nudge-modal hidden>
+  <div class="client-nudge-dialog">
+    <h3 data-client-nudge-title>Message client</h3>
+    <form method="post" target="_blank" data-client-nudge-form>
+      <label>Reason</label>
+      <select name="reason" data-client-nudge-reason>
+        <option value="missed_tracking">Missed check-ins</option>
+        <option value="low_adherence">Actions need attention</option>
+        <option value="workout">Workout reminder</option>
+        <option value="reflection">Weekly reflection</option>
+        <option value="custom">Custom check-in</option>
+      </select>
+      <label>Message</label>
+      <textarea name="message" data-client-nudge-message required></textarea>
+      <div class="client-nudge-actions">
+        <button class="secondary" type="button" data-client-nudge-copy>Copy message</button>
+        <button class="secondary" type="button" data-client-nudge-close>Cancel</button>
+        <button class="primary" type="submit">Open WhatsApp →</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(() => {
+  const modal = document.querySelector("[data-client-nudge-modal]");
+  const form = document.querySelector("[data-client-nudge-form]");
+  const reason = document.querySelector("[data-client-nudge-reason]");
+  const message = document.querySelector("[data-client-nudge-message]");
+  const title = document.querySelector("[data-client-nudge-title]");
+  let firstName = "there";
+
+  const templates = {
+    missed_tracking: n => `Hi ${n} 😊 Just a gentle reminder to update your NourisHer tracker when you get a chance today. It helps me understand how your week is going and support you better. 💜 — Sushma`,
+    low_adherence: n => `Hi ${n} 😊 Just checking in. I noticed this week has been a little harder to stay consistent with the actions we planned. No pressure — when you get a moment, update your tracker and we can work with what is realistic for you this week. 💜 — Sushma`,
+    workout: n => `Hi ${n} 😊 A gentle reminder about your strength workout when you get a chance. Even getting one session done is a useful win — record it in NourisHer once completed. 💜 — Sushma`,
+    reflection: n => `Hi ${n} 😊 When you get a moment, please complete your weekly NourisHer reflection. It helps me review your week and plan the right focus with you. 💜 — Sushma`,
+    custom: n => `Hi ${n} 😊 Just checking in with you. 💜 — Sushma`
+  };
+
+  function closeModal(){ modal.hidden = true; }
+
+  document.querySelectorAll("[data-client-nudge-open]").forEach(btn => {
+    btn.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const fullName = btn.dataset.clientName || "Client";
+      firstName = fullName.split(" ")[0];
+      title.textContent = `Message ${fullName}`;
+      form.action = `/dashboard/clients/${btn.dataset.clientId}/nudge`;
+      reason.value = btn.dataset.reason || "custom";
+      message.value = btn.dataset.message || templates[reason.value](firstName);
+      modal.hidden = false;
+    });
+  });
+
+  reason?.addEventListener("change", () => {
+    message.value = templates[reason.value](firstName);
+  });
+
+  document.querySelector("[data-client-nudge-copy]")?.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(message.value);
+  });
+
+  document.querySelectorAll("[data-client-nudge-close]").forEach(btn => btn.addEventListener("click", closeModal));
+  modal?.addEventListener("click", event => { if(event.target === modal) closeModal(); });
+
+  form?.addEventListener("submit", () => {
+    setTimeout(() => window.location.reload(), 800);
+  });
+})();
+</script>
+
 {% endblock %}
 
 {% block content %}
@@ -73,6 +148,55 @@
   opacity:.62;
   cursor:wait;
 }
+
+.client-nudge-btn{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  margin-top:6px;
+  min-height:29px;
+  padding:0 9px;
+  border:0;
+  border-radius:8px;
+  background:var(--coach-purple)!important;
+  color:#fff!important;
+  font:inherit;
+  font-size:9px;
+  font-weight:900;
+  cursor:pointer;
+  visibility:visible!important;
+}
+.client-nudged{
+  display:inline-block;
+  margin-top:6px;
+  padding:5px 7px;
+  border-radius:999px;
+  background:#edf8f0;
+  color:#286c49;
+  font-size:8px;
+  font-weight:850;
+}
+.client-nudge-modal{
+  position:fixed;inset:0;z-index:1200;display:grid;place-items:center;
+  padding:20px;background:rgba(31,20,35,.38)
+}
+.client-nudge-modal[hidden]{display:none}
+.client-nudge-dialog{
+  width:min(560px,100%);padding:20px;border-radius:16px;background:#fff;
+  box-shadow:0 20px 70px rgba(35,20,43,.24)
+}
+.client-nudge-dialog h3{margin:0 0 12px;font-size:20px}
+.client-nudge-dialog label{display:block;margin:12px 0 5px;color:var(--coach-muted);font-size:10px;font-weight:850}
+.client-nudge-dialog select,.client-nudge-dialog textarea{
+  width:100%;border:1px solid var(--coach-border);border-radius:10px;
+  background:#fff;color:var(--coach-text);font:inherit;font-size:12px
+}
+.client-nudge-dialog select{height:40px;padding:0 10px}
+.client-nudge-dialog textarea{min-height:145px;padding:11px;resize:vertical}
+.client-nudge-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}
+.client-nudge-actions button{min-height:38px;padding:0 12px;border-radius:9px;font:inherit;font-size:11px;font-weight:850;cursor:pointer}
+.client-nudge-actions .primary{border:0;background:var(--coach-purple);color:#fff}
+.client-nudge-actions .secondary{border:1px solid var(--coach-border);background:#fff;color:var(--coach-text)}
 </style>
 
 <style>
@@ -160,7 +284,27 @@
           {% else %}<span>Open workspace for coaching summary</span>{% endif %}
         </div>
         <div class="client-next"><span>Next call</span><strong>{% if client.next_call_date %}{{ client.next_call_date.strftime("%d %b") }}{% else %}Not scheduled{% endif %}</strong></div>
-        <div class="client-status"><span class="health health-{{ client.health_key or 'active' }}">{{ client.health_label or (client.status or "active")|title }}</span>{% if client.client_status_note %}<small>{{ client.client_status_note }}</small>{% endif %}</div>
+        <div class="client-status">
+          <span class="health health-{{ client.health_key or 'active' }}">{{ client.health_label or (client.status or "active")|title }}</span>
+          {% if client.client_status_note %}<small>{{ client.client_status_note }}</small>{% endif %}
+
+          {% if client.health_key == "attention" %}
+            {% if client.nudge_recent %}
+              <span class="client-nudged">Nudged recently ✓</span>
+            {% elif client.phone %}
+              <button
+                class="client-nudge-btn"
+                type="button"
+                data-client-nudge-open
+                data-client-id="{{ client.id }}"
+                data-client-name="{{ client.name|e }}"
+                data-reason="{{ client.suggested_nudge_reason|e }}"
+                data-message="{{ client.suggested_nudge_message|e }}"
+                onclick="event.preventDefault(); event.stopPropagation();"
+              >Nudge</button>
+            {% endif %}
+          {% endif %}
+        </div>
         <span class="client-open">→</span>
       </a>
       {% endfor %}

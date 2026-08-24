@@ -65,6 +65,12 @@ from app.services.client_portal_service import (
 )
 
 
+from app.services.client_nudge_service import (
+    default_nudge_message,
+    get_latest_client_nudges,
+    nudge_is_recent,
+)
+
 router = APIRouter()
 
 # Client-facing routes live in app/client/portal.py.
@@ -891,6 +897,24 @@ def clients_page(request: Request):
         elif ops.get("no_next_call"):
             client["client_status_note"] = "Next call not booked"
 
+        if client.get("health_key") == "attention":
+            last_nudge = latest_nudges.get(client["id"])
+            client["last_nudge"] = last_nudge
+            client["nudge_recent"] = nudge_is_recent(last_nudge)
+
+            if (ops.get("missed_daily_count") or 0) >= 2:
+                suggested_reason = "missed_tracking"
+            elif coaching_signals.get("low_adherence"):
+                suggested_reason = "low_adherence"
+            else:
+                suggested_reason = "custom"
+
+            client["suggested_nudge_reason"] = suggested_reason
+            client["suggested_nudge_message"] = default_nudge_message(
+                client_name=client.get("name"),
+                reason=suggested_reason,
+            )
+
         # Values used by the browser-side table sorter.
         client["sort_name"] = (
             client.get("name")
@@ -926,6 +950,10 @@ def clients_page(request: Request):
         for client in clients
         if client.get("status") == "active"
     ]
+    latest_nudges = get_latest_client_nudges(
+        [client["id"] for client in active_clients]
+    )
+
 
     needs_attention = [
         client
