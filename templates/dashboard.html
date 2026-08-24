@@ -1,123 +1,5 @@
 {% extends "coach/base.html" %}
-{% block title %}Coach Dashboard | Eat Well Live Well
-<div class="sd-modal-backdrop" data-nudge-modal hidden>
-  <div class="sd-modal" role="dialog" aria-modal="true" aria-labelledby="nudge-title">
-    <div class="sd-modal-head">
-      <div>
-        <span class="over">GENTLE NUDGE</span>
-        <h3 id="nudge-title">Message client</h3>
-      </div>
-      <button class="sd-modal-close" type="button" data-nudge-close>×</button>
-    </div>
-
-    <form method="post" target="_blank" data-nudge-form>
-      <label for="nudge-reason">Reason</label>
-      <select id="nudge-reason" name="reason" data-nudge-reason>
-        <option value="missed_tracking">Missed check-ins</option>
-        <option value="low_adherence">Actions need attention</option>
-        <option value="workout">Workout reminder</option>
-        <option value="reflection">Weekly reflection</option>
-        <option value="custom">Custom check-in</option>
-      </select>
-
-      <label for="nudge-message">Message</label>
-      <textarea id="nudge-message" name="message" data-nudge-message required></textarea>
-
-      <p class="sd-modal-note">
-        This opens WhatsApp with the message filled in. Sushma still reviews it
-        and presses Send herself. NourisHer records that the nudge workflow was
-        initiated and suppresses another dashboard nudge for 48 hours.
-      </p>
-
-      <div class="sd-modal-actions">
-        <button class="sd-modal-secondary" type="button" data-copy-nudge>Copy message</button>
-        <button class="sd-modal-secondary" type="button" data-nudge-close>Cancel</button>
-        <button class="sd-modal-primary" type="submit">Open WhatsApp →</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script>
-(() => {
-  const modal = document.querySelector("[data-nudge-modal]");
-  const form = document.querySelector("[data-nudge-form]");
-  const reason = document.querySelector("[data-nudge-reason]");
-  const message = document.querySelector("[data-nudge-message]");
-  const title = document.getElementById("nudge-title");
-  let current = null;
-
-  const templates = {
-    missed_tracking: name =>
-      `Hi ${name} 😊 Just a gentle reminder to update your NourisHer tracker when you get a chance today. It helps me understand how your week is going and support you better. 💜 — Sushma`,
-    low_adherence: name =>
-      `Hi ${name} 😊 Just checking in. I noticed this week has been a little harder to stay consistent with the actions we planned. No pressure — when you get a moment, update your tracker and we can work with what is realistic for you this week. 💜 — Sushma`,
-    workout: name =>
-      `Hi ${name} 😊 A gentle reminder about your strength workout when you get a chance. Even getting one session done is a useful win — record it in NourisHer once completed. 💜 — Sushma`,
-    reflection: name =>
-      `Hi ${name} 😊 When you get a moment, please complete your weekly NourisHer reflection. It helps me review your week and plan the right focus with you. 💜 — Sushma`,
-    custom: name =>
-      `Hi ${name} 😊 Just checking in with you. 💜 — Sushma`
-  };
-
-  const close = () => {
-    modal.hidden = true;
-    current = null;
-  };
-
-  document.querySelectorAll("[data-nudge-open]").forEach(button => {
-    button.addEventListener("click", () => {
-      current = {
-        id: button.dataset.clientId,
-        name: (button.dataset.clientName || "there").split(" ")[0]
-      };
-
-      title.textContent = `Message ${button.dataset.clientName}`;
-      form.action = `/dashboard/clients/${current.id}/nudge`;
-      reason.value = button.dataset.reason || "custom";
-      message.value =
-        button.dataset.message ||
-        templates[reason.value](current.name);
-
-      modal.hidden = false;
-      message.focus();
-    });
-  });
-
-  reason?.addEventListener("change", () => {
-    if (!current) return;
-    message.value = templates[reason.value](current.name);
-  });
-
-  document.querySelectorAll("[data-nudge-close]").forEach(button => {
-    button.addEventListener("click", close);
-  });
-
-  modal?.addEventListener("click", event => {
-    if (event.target === modal) close();
-  });
-
-  document.querySelector("[data-copy-nudge]")?.addEventListener("click", async event => {
-    try {
-      await navigator.clipboard.writeText(message.value);
-      const button = event.currentTarget;
-      const oldText = button.textContent;
-      button.textContent = "Copied ✓";
-      setTimeout(() => button.textContent = oldText, 1200);
-    } catch {
-      message.select();
-      document.execCommand("copy");
-    }
-  });
-
-  form?.addEventListener("submit", () => {
-    close();
-    setTimeout(() => window.location.reload(), 500);
-  });
-})();
-</script>
-
-{% endblock %}
+{% block title %}Coach Dashboard | Eat Well Live Well{% endblock %}
 
 {% block content %}
 <style>
@@ -252,6 +134,99 @@
 .sd-nudged{padding:6px 9px;border-radius:999px;background:#edf8f0;color:#286c49;font-size:9px;font-weight:850}
 .sd-nudge-state small{color:var(--coach-muted);font-size:9px}
 .sd-no-phone{display:inline-block;margin-top:9px;color:var(--coach-muted);font-size:9px}
+
+.sd-follow-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 32px!important;
+  gap:12px!important;
+  align-items:center!important;
+  padding:14px 0!important;
+  border-top:1px solid #eee8f0!important;
+}
+.sd-follow-row:first-of-type{border-top:0!important}
+.sd-follow-actions{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  margin-top:10px!important;
+}
+.sd-nudge-btn{
+  display:inline-flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:static!important;
+  min-width:74px!important;
+  min-height:34px!important;
+  padding:0 13px!important;
+  border:0!important;
+  border-radius:9px!important;
+  background:#5b0e91!important;
+  color:#fff!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  cursor:pointer!important;
+}
+.sd-nudged{
+  display:inline-flex!important;
+  padding:6px 9px!important;
+  border-radius:999px!important;
+  background:#edf8f0!important;
+  color:#286c49!important;
+  font-size:9px!important;
+  font-weight:850!important;
+}
+.sd-follow-open{
+  display:grid!important;
+  place-items:center!important;
+  color:#5b0e91!important;
+  text-decoration:none!important;
+  font-size:22px!important;
+  font-weight:900!important;
+}
+
+.sd-follow-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 28px;
+  gap:12px;
+  align-items:center;
+  padding:14px 0;
+  border-top:1px solid #eee8f0;
+}
+.sd-follow-row:first-of-type{border-top:0}
+.sd-follow-name{
+  color:var(--coach-text);
+  text-decoration:none;
+  font-size:14px;
+  font-weight:850;
+}
+.sd-nudge-link{
+  display:inline-block;
+  margin-top:9px;
+  color:var(--coach-purple);
+  text-decoration:none;
+  font-size:10px;
+  font-weight:850;
+}
+.sd-nudge-link:hover{text-decoration:underline}
+.sd-nudge-status{
+  margin-top:9px;
+  color:#2f6f4e;
+  font-size:9px;
+  font-weight:800;
+}
+.sd-nudge-muted{
+  margin-top:9px;
+  color:var(--coach-muted);
+  font-size:9px;
+}
+.sd-follow-open{
+  display:grid;
+  place-items:center;
+  color:var(--coach-purple);
+  text-decoration:none;
+  font-size:21px;
+  font-weight:900;
+}
 </style>
 
 <div class="sd">
@@ -301,34 +276,26 @@
       {% if follow_up_clients %}
         {% for client in follow_up_clients %}
         <div class="sd-follow-row">
-          <div class="sd-follow-main">
-            <a class="sd-follow-name" href="/dashboard/clients/{{ client.id }}">{{ client.name }}</a>
+          <div>
+            <a class="sd-follow-name" href="/dashboard/clients/{{ client.id }}">
+              {{ client.name }}
+            </a>
 
             <div class="sd-reasons">
-              {% for reason in client.dashboard_follow_up_reasons %}
-              <span class="sd-reason">{{ reason }}</span>
+              {% for follow_reason in client.dashboard_follow_up_reasons %}
+              <span class="sd-reason">{{ follow_reason }}</span>
               {% endfor %}
             </div>
 
             {% if client.nudge_recent %}
-              <div class="sd-nudge-state">
-                <span class="sd-nudged">Nudged recently ✓</span>
-                {% if client.last_nudge and client.last_nudge.created_at %}
-                <small>Last nudge recorded {{ client.last_nudge.created_at.strftime("%d %b · %I:%M %p") }}</small>
-                {% endif %}
-              </div>
+              <div class="sd-nudge-status">Nudged recently ✓</div>
             {% elif client.phone %}
-              <button
-                class="sd-nudge-btn"
-                type="button"
-                data-nudge-open
-                data-client-id="{{ client.id }}"
-                data-client-name="{{ client.name|e }}"
-                data-reason="{{ client.suggested_nudge_reason|e }}"
-                data-message="{{ client.suggested_nudge_message|e }}"
-              >Nudge</button>
+              <a
+                class="sd-nudge-link"
+                href="/dashboard/clients/{{ client.id }}/nudge?reason={{ client.suggested_nudge_reason }}&source=dashboard"
+              >Send nudge →</a>
             {% else %}
-              <span class="sd-no-phone">No phone number</span>
+              <div class="sd-nudge-muted">No phone number</div>
             {% endif %}
           </div>
 

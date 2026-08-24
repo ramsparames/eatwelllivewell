@@ -776,6 +776,74 @@ def dashboard_home(request: Request):
 
 
 
+
+@router.get(
+    "/dashboard/clients/{client_id}/nudge",
+    response_class=HTMLResponse,
+)
+def client_nudge_preview(
+    request: Request,
+    client_id: int,
+    reason: str = "missed_tracking",
+    source: str = "dashboard",
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    if templates is None:
+        raise RuntimeError("Templates are not configured")
+
+    client = next(
+        (
+            dict(item)
+            for item in ClientService.dashboard_clients()
+            if item.get("id") == client_id
+        ),
+        None,
+    )
+
+    if not client:
+        raise HTTPException(
+            status_code=404,
+            detail="Client not found",
+        )
+
+    allowed_reasons = {
+        "missed_tracking",
+        "low_adherence",
+        "workout",
+        "reflection",
+        "custom",
+    }
+    if reason not in allowed_reasons:
+        reason = "custom"
+
+    latest = get_latest_client_nudges([client_id]).get(client_id)
+
+    return templates.TemplateResponse(
+        "coach/nudge_client.html",
+        {
+            "request": request,
+            "active_nav": "clients",
+            "client": client,
+            "reason": reason,
+            "message": default_nudge_message(
+                client_name=client.get("name"),
+                reason=reason,
+            ),
+            "last_nudge": latest,
+            "source": (
+                "clients"
+                if source == "clients"
+                else "dashboard"
+            ),
+        },
+    )
+
+
 @router.post("/dashboard/clients/{client_id}/nudge")
 def send_client_nudge(
     request: Request,
