@@ -1,205 +1,418 @@
 {% extends "coach/base.html" %}
-{% block title %}NourisHer Coach Dashboard{% endblock %}
-
-{% block content %}
-<style>
-.cd,.cd *{box-sizing:border-box}
-.cd{max-width:1080px;margin:0 auto;display:grid;gap:15px}
-.cd-hero{display:flex;justify-content:space-between;align-items:end;gap:20px;padding:2px 0 3px}
-.cd-eyebrow{margin:0 0 5px;color:var(--coach-purple);font-size:12px;font-weight:850;letter-spacing:.11em;text-transform:uppercase}
-.cd-hero h1{margin:0;font-size:36px;line-height:1.05;letter-spacing:-.04em}
-.cd-hero p{margin:7px 0 0;color:var(--coach-muted);font-size:14px}
-.cd-date{padding:8px 11px;border:1px solid var(--coach-border);border-radius:999px;background:#fff;color:var(--coach-muted);font-size:12px;font-weight:750;white-space:nowrap}
-
-.cd-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.cd-kpi{min-height:108px;padding:16px;border:1px solid var(--coach-border);border-radius:15px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035)}
-.cd-kpi-label{display:block;color:var(--coach-muted);font-size:12px;font-weight:750}
-.cd-kpi strong{display:block;margin:7px 0 3px;color:var(--coach-purple);font-size:31px;line-height:1;letter-spacing:-.04em}
-.cd-kpi small{color:var(--coach-muted);font-size:11px}
-
-.cd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-.cd-lower{display:grid;grid-template-columns:1.25fr .75fr;gap:13px}
-.cd-panel{padding:18px;border:1px solid var(--coach-border);border-radius:16px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035)}
-.cd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:13px}
-.cd-head .over{display:block;margin-bottom:3px;color:var(--coach-purple);font-size:11px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
-.cd-head h2{margin:0;font-size:21px;letter-spacing:-.025em}
-.cd-head a{color:var(--coach-purple);text-decoration:none;font-size:12px;font-weight:800;white-space:nowrap}
-
-.cd-empty{min-height:105px;display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #eee8f0;border-radius:12px;background:#fcfafc}
-.cd-icon{width:38px;height:38px;display:grid;place-items:center;flex:none;border-radius:12px;background:#f2e8f7;color:var(--coach-purple);font-size:17px;font-weight:900}
-.cd-empty strong{display:block;font-size:14px}
-.cd-empty p{margin:3px 0 0;color:var(--coach-muted);font-size:12px}
-
-.cd-list{display:grid;gap:7px}
-.cd-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;background:#fff}
-.cd-item:hover{border-color:#d5bedf;background:#fdfafd}
-.cd-item strong{display:block;font-size:13px}
-.cd-item span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
-.cd-arrow{color:var(--coach-purple)!important;font-size:18px!important;line-height:1}
-
-.cd-attn{display:grid;grid-template-columns:9px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid #eee8f0}
-.cd-attn:first-child{padding-top:0;border-top:0}
-.cd-dot{width:8px;height:8px;border-radius:50%;background:var(--coach-purple)}
-.cd-dot.gold{background:#c68d1f}
-.cd-attn strong{display:block;font-size:13px}
-.cd-attn span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
-
-.cd-client{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;background:#fff}
-.cd-client strong{display:block;font-size:13px}
-.cd-client span{display:block;margin-top:2px;color:var(--coach-muted);font-size:11px}
-.cd-week{white-space:nowrap;color:var(--coach-muted);font-size:11px}
-
-.cd-quick{display:grid;gap:8px}
-.cd-quick a{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:42px;padding:0 12px;border-radius:10px;background:#f6eff9;color:var(--coach-purple);text-decoration:none;font-size:12px;font-weight:800}
-
-@media(max-width:850px){
-  .cd-kpis{grid-template-columns:1fr 1fr}
-  .cd-grid,.cd-lower{grid-template-columns:1fr}
-}
-@media(max-width:520px){
-  .cd-hero{display:block}
-  .cd-date{display:inline-block;margin-top:10px}
-  .cd-kpis{grid-template-columns:1fr 1fr}
-  .cd-kpi{min-height:94px;padding:13px}
-  .cd-client{grid-template-columns:1fr auto}
-  .cd-week{display:none}
-}
-</style>
-
-{% set without_next_call = active_clients | rejectattr("next_call_date") | list %}
-
-<div class="cd">
-  <header class="cd-hero">
-    <div>
-      <p class="cd-eyebrow">NourisHer</p>
-      <h1>NourisHer Coach Dashboard</h1>
-      <p>Calls, follow-ups and clients who need your attention.</p>
-    </div>
-    <div class="cd-date" data-today-date>Today</div>
-  </header>
-
-  <section class="cd-kpis">
-    <article class="cd-kpi">
-      <span class="cd-kpi-label">Calls today</span>
-      <strong>{{ calls_today|length if calls_today is defined else 0 }}</strong>
-      <small>Your coaching schedule</small>
-    </article>
-    <article class="cd-kpi">
-      <span class="cd-kpi-label">Active clients</span>
-      <strong>{{ active_clients|length if active_clients is defined else 0 }}</strong>
-      <small>Currently in coaching</small>
-    </article>
-    <article class="cd-kpi">
-      <span class="cd-kpi-label">New leads</span>
-      <strong>{{ new_leads if new_leads is defined else 0 }}</strong>
-      <small>Waiting for review</small>
-    </article>
-    <article class="cd-kpi">
-      <span class="cd-kpi-label">Calls this week</span>
-      <strong>{{ calls_this_week|length if calls_this_week is defined else 0 }}</strong>
-      <small>Scheduled this week</small>
-    </article>
-  </section>
-
-  <section class="cd-grid">
-    <article class="cd-panel">
-      <div class="cd-head">
-        <div><span class="over">Schedule</span><h2>Today's calls</h2></div>
-        <a href="/dashboard/clients">View clients →</a>
-      </div>
-
-      {% if calls_today is defined and calls_today %}
-      <div class="cd-list">
-        {% for call in calls_today %}
-        <a class="cd-item" href="/dashboard/clients/{{ call.id }}">
-          <div>
-            <strong>{{ call.name }}</strong>
-            <span>{{ call.next_call_time or "Time not set" }}</span>
-          </div>
-          <span class="cd-arrow">→</span>
-        </a>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="cd-empty">
-        <div class="cd-icon">✓</div>
-        <div><strong>No coaching calls today</strong><p>Your schedule is clear.</p></div>
-      </div>
-      {% endif %}
-    </article>
-
-    <article class="cd-panel">
-      <div class="cd-head"><div><span class="over">Action</span><h2>Needs attention</h2></div></div>
-
+{% block title %}Coach Dashboard | Eat Well Live Well
+<div class="sd-modal-backdrop" data-nudge-modal hidden>
+  <div class="sd-modal" role="dialog" aria-modal="true" aria-labelledby="nudge-title">
+    <div class="sd-modal-head">
       <div>
-        <div class="cd-attn">
-          <span class="cd-dot gold"></span>
-          <div>
-            <strong>{{ without_next_call|length }} client{% if without_next_call|length != 1 %}s{% endif %} without a next call</strong>
-            <span>Schedule the next coaching conversation.</span>
-          </div>
-          <a class="cd-arrow" href="/dashboard/clients">→</a>
-        </div>
+        <span class="over">GENTLE NUDGE</span>
+        <h3 id="nudge-title">Message client</h3>
+      </div>
+      <button class="sd-modal-close" type="button" data-nudge-close>×</button>
+    </div>
 
-        <div class="cd-attn">
-          <span class="cd-dot"></span>
-          <div>
-            <strong>{{ new_leads if new_leads is defined else 0 }} new lead{% if (new_leads if new_leads is defined else 0) != 1 %}s{% endif %}</strong>
-            <span>Review new assessments and applications.</span>
-          </div>
-          <a class="cd-arrow" href="/dashboard/leads">→</a>
-        </div>
-      </div>
-    </article>
-  </section>
+    <form method="post" target="_blank" data-nudge-form>
+      <label for="nudge-reason">Reason</label>
+      <select id="nudge-reason" name="reason" data-nudge-reason>
+        <option value="missed_tracking">Missed check-ins</option>
+        <option value="low_adherence">Actions need attention</option>
+        <option value="workout">Workout reminder</option>
+        <option value="reflection">Weekly reflection</option>
+        <option value="custom">Custom check-in</option>
+      </select>
 
-  <section class="cd-lower">
-    <article class="cd-panel">
-      <div class="cd-head">
-        <div><span class="over">Clients</span><h2>Recent clients</h2></div>
-        <a href="/dashboard/clients">All clients →</a>
-      </div>
+      <label for="nudge-message">Message</label>
+      <textarea id="nudge-message" name="message" data-nudge-message required></textarea>
 
-      {% if active_clients is defined and active_clients %}
-      <div class="cd-list">
-        {% for client in active_clients[:5] %}
-        <a class="cd-client" href="/dashboard/clients/{{ client.id }}">
-          <div><strong>{{ client.name }}</strong><span>{{ client.program or "Coaching" }}</span></div>
-          <div class="cd-week">{% if client.current_week %}Week {{ client.current_week }}{% else %}Setup{% endif %}</div>
-          <span class="cd-arrow">→</span>
-        </a>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="cd-empty">
-        <div class="cd-icon">♡</div>
-        <div><strong>No active clients yet</strong><p>Add a client to begin coaching.</p></div>
-      </div>
-      {% endif %}
-    </article>
+      <p class="sd-modal-note">
+        This opens WhatsApp with the message filled in. Sushma still reviews it
+        and presses Send herself. NourisHer records that the nudge workflow was
+        initiated and suppresses another dashboard nudge for 48 hours.
+      </p>
 
-    <article class="cd-panel">
-      <div class="cd-head"><div><span class="over">Quick access</span><h2>Jump back in</h2></div></div>
-      <div class="cd-quick">
-        <a href="/dashboard/clients"><span>Manage clients</span><span>→</span></a>
-        <a href="/dashboard/leads"><span>Review leads</span><span>→</span></a>
-        <a href="/" target="_blank" rel="noopener"><span>View website</span><span>↗</span></a>
+      <div class="sd-modal-actions">
+        <button class="sd-modal-secondary" type="button" data-copy-nudge>Copy message</button>
+        <button class="sd-modal-secondary" type="button" data-nudge-close>Cancel</button>
+        <button class="sd-modal-primary" type="submit">Open WhatsApp →</button>
       </div>
-    </article>
-  </section>
+    </form>
+  </div>
 </div>
 
 <script>
 (() => {
-  const el = document.querySelector("[data-today-date]");
-  if (!el) return;
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-  }).formatToParts(new Date());
-  const get = type => parts.find(p => p.type === type)?.value || "";
-  el.textContent = `${get("day")} ${get("month")} ${get("year")}`;
+  const modal = document.querySelector("[data-nudge-modal]");
+  const form = document.querySelector("[data-nudge-form]");
+  const reason = document.querySelector("[data-nudge-reason]");
+  const message = document.querySelector("[data-nudge-message]");
+  const title = document.getElementById("nudge-title");
+  let current = null;
+
+  const templates = {
+    missed_tracking: name =>
+      `Hi ${name} 😊 Just a gentle reminder to update your NourisHer tracker when you get a chance today. It helps me understand how your week is going and support you better. 💜 — Sushma`,
+    low_adherence: name =>
+      `Hi ${name} 😊 Just checking in. I noticed this week has been a little harder to stay consistent with the actions we planned. No pressure — when you get a moment, update your tracker and we can work with what is realistic for you this week. 💜 — Sushma`,
+    workout: name =>
+      `Hi ${name} 😊 A gentle reminder about your strength workout when you get a chance. Even getting one session done is a useful win — record it in NourisHer once completed. 💜 — Sushma`,
+    reflection: name =>
+      `Hi ${name} 😊 When you get a moment, please complete your weekly NourisHer reflection. It helps me review your week and plan the right focus with you. 💜 — Sushma`,
+    custom: name =>
+      `Hi ${name} 😊 Just checking in with you. 💜 — Sushma`
+  };
+
+  const close = () => {
+    modal.hidden = true;
+    current = null;
+  };
+
+  document.querySelectorAll("[data-nudge-open]").forEach(button => {
+    button.addEventListener("click", () => {
+      current = {
+        id: button.dataset.clientId,
+        name: (button.dataset.clientName || "there").split(" ")[0]
+      };
+
+      title.textContent = `Message ${button.dataset.clientName}`;
+      form.action = `/dashboard/clients/${current.id}/nudge`;
+      reason.value = button.dataset.reason || "custom";
+      message.value =
+        button.dataset.message ||
+        templates[reason.value](current.name);
+
+      modal.hidden = false;
+      message.focus();
+    });
+  });
+
+  reason?.addEventListener("change", () => {
+    if (!current) return;
+    message.value = templates[reason.value](current.name);
+  });
+
+  document.querySelectorAll("[data-nudge-close]").forEach(button => {
+    button.addEventListener("click", close);
+  });
+
+  modal?.addEventListener("click", event => {
+    if (event.target === modal) close();
+  });
+
+  document.querySelector("[data-copy-nudge]")?.addEventListener("click", async event => {
+    try {
+      await navigator.clipboard.writeText(message.value);
+      const button = event.currentTarget;
+      const oldText = button.textContent;
+      button.textContent = "Copied ✓";
+      setTimeout(() => button.textContent = oldText, 1200);
+    } catch {
+      message.select();
+      document.execCommand("copy");
+    }
+  });
+
+  form?.addEventListener("submit", () => {
+    close();
+    setTimeout(() => window.location.reload(), 500);
+  });
 })();
 </script>
+
+{% endblock %}
+
+{% block content %}
+<style>
+.sd,.sd *{box-sizing:border-box}
+.sd{max-width:1180px;margin:0 auto;display:grid;gap:14px}
+.sd-hero{display:flex;justify-content:space-between;align-items:end;gap:18px;padding:2px 0 3px}
+.sd-eyebrow{margin:0 0 5px;color:var(--coach-purple);font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.sd-hero h1{margin:0;font-size:34px;line-height:1.05;letter-spacing:-.035em}
+.sd-hero p{margin:6px 0 0;color:var(--coach-muted);font-size:13px}
+.sd-date{padding:8px 11px;border:1px solid var(--coach-border);border-radius:999px;background:#fff;color:var(--coach-muted);font-size:11px;font-weight:800;white-space:nowrap}
+
+.sd-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.sd-kpi{padding:15px;border:1px solid var(--coach-border);border-radius:14px;background:#fff;text-decoration:none;color:inherit}
+.sd-kpi span{display:block;color:var(--coach-muted);font-size:11px;font-weight:800}
+.sd-kpi strong{display:block;margin-top:7px;color:var(--coach-purple);font-size:29px;line-height:1}
+.sd-kpi small{display:block;margin-top:5px;color:var(--coach-muted);font-size:10px}
+
+.sd-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.sd-panel{padding:18px;border:1px solid var(--coach-border);border-radius:16px;background:#fff;box-shadow:0 4px 15px rgba(43,26,52,.035)}
+.sd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.sd-head .over{display:block;margin-bottom:3px;color:var(--coach-purple);font-size:10px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}
+.sd-head h2{margin:0;font-size:20px}
+.sd-head p{margin:4px 0 0;color:var(--coach-muted);font-size:11px}
+.sd-head a{color:var(--coach-purple);text-decoration:none;font-size:11px;font-weight:850;white-space:nowrap}
+
+.sd-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid #f0ebf1;text-decoration:none;color:inherit}
+.sd-row:first-child{border-top:0;padding-top:0}
+.sd-row strong{display:block;font-size:13px}
+.sd-row span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px;line-height:1.4}
+.sd-row:hover{background:#fdfafd}
+.sd-arrow{color:var(--coach-purple)!important;font-size:17px!important;font-weight:900}
+
+.sd-reasons{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.sd-reason{padding:4px 7px;border-radius:999px;background:#fff1ee;color:#9a4639;font-size:9px!important;font-weight:800}
+
+.sd-empty{display:flex;gap:11px;align-items:center;min-height:84px;padding:12px;border:1px solid #eee8f0;border-radius:12px;background:#fcfafc}
+.sd-empty-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#f1e7f5;color:var(--coach-purple);font-weight:900}
+.sd-empty strong{display:block;font-size:13px}
+.sd-empty p{margin:3px 0 0;color:var(--coach-muted);font-size:10px}
+
+.sd-review-badge{padding:5px 8px;border-radius:999px;background:#fff7e8;color:#8a6418;font-size:9px;font-weight:850;white-space:nowrap}
+.sd-booked{padding:5px 8px;border-radius:999px;background:#edf8f0;color:#286c49;font-size:9px;font-weight:850;white-space:nowrap}
+
+.sd-schedules{display:grid;grid-template-columns:.85fr 1.15fr;gap:13px}
+.sd-week-list{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.sd-call{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid #eee8f0;border-radius:11px;text-decoration:none;color:inherit;background:#fff}
+.sd-call:hover{background:#fdfafd}
+.sd-call strong{display:block;font-size:12px}
+.sd-call span{display:block;margin-top:2px;color:var(--coach-muted);font-size:10px}
+
+.sd-note{padding:10px 12px;border:1px solid #eee8f0;border-radius:11px;background:#fcfafc;color:var(--coach-muted);font-size:10px;line-height:1.45}
+
+@media(max-width:850px){
+  .sd-kpis{grid-template-columns:1fr 1fr}
+  .sd-grid,.sd-schedules{grid-template-columns:1fr}
+  .sd-week-list{grid-template-columns:1fr}
+}
+
+.sd-follow-actions{display:flex;align-items:center;gap:7px;margin-top:8px}
+.sd-nudge-btn{
+  min-height:30px;padding:0 10px;border:0;border-radius:8px;
+  background:var(--coach-purple);color:#fff;font:inherit;font-size:10px;
+  font-weight:850;cursor:pointer
+}
+.sd-nudge-btn:hover{filter:brightness(.96)}
+.sd-nudge-btn:disabled{
+  background:#eee8f0;color:#817883;cursor:not-allowed;filter:none
+}
+.sd-nudge-meta{color:var(--coach-muted);font-size:9px}
+.sd-modal-backdrop{
+  position:fixed;inset:0;z-index:1000;display:grid;place-items:center;
+  padding:20px;background:rgba(31,20,35,.38)
+}
+.sd-modal-backdrop[hidden]{display:none}
+.sd-modal{
+  width:min(560px,100%);padding:20px;border-radius:16px;background:#fff;
+  box-shadow:0 20px 70px rgba(35,20,43,.24)
+}
+.sd-modal-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.sd-modal-head .over{display:block;color:var(--coach-purple);font-size:10px;font-weight:900;letter-spacing:.11em}
+.sd-modal-head h3{margin:3px 0 0;font-size:21px}
+.sd-modal-close{border:0;background:transparent;color:var(--coach-muted);font-size:24px;cursor:pointer}
+.sd-modal label{display:block;margin:14px 0 5px;color:var(--coach-muted);font-size:10px;font-weight:850}
+.sd-modal select,.sd-modal textarea{
+  width:100%;border:1px solid var(--coach-border);border-radius:10px;
+  background:#fff;color:var(--coach-text);font:inherit;font-size:12px
+}
+.sd-modal select{height:40px;padding:0 10px}
+.sd-modal textarea{min-height:145px;padding:11px;resize:vertical;line-height:1.5}
+.sd-modal-note{
+  margin:9px 0 0;padding:9px 10px;border-radius:9px;background:#faf7fb;
+  color:var(--coach-muted);font-size:9px;line-height:1.45
+}
+.sd-modal-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}
+.sd-modal-secondary,.sd-modal-primary{
+  min-height:38px;padding:0 12px;border-radius:9px;font:inherit;font-size:11px;font-weight:850;cursor:pointer
+}
+.sd-modal-secondary{border:1px solid var(--coach-border);background:#fff;color:var(--coach-text)}
+.sd-modal-primary{border:0;background:var(--coach-purple);color:#fff}
+</style>
+
+<div class="sd">
+  <header class="sd-hero">
+    <div>
+      <p class="sd-eyebrow">OVERVIEW</p>
+      <h1>Coach Dashboard</h1>
+      <p>See what needs you today, then move on with your day.</p>
+    </div>
+    <div class="sd-date">{{ today.strftime('%A, %d %B') if today is defined else 'Today' }}</div>
+  </header>
+
+  <section class="sd-kpis">
+    <a class="sd-kpi" href="#today-schedule">
+      <span>Calls today</span>
+      <strong>{{ calls_today|length }}</strong>
+      <small>Upcoming today</small>
+    </a>
+    <a class="sd-kpi" href="#follow-up">
+      <span>Needs follow-up</span>
+      <strong>{{ follow_up_clients|length }}</strong>
+      <small>Clients who may need a nudge</small>
+    </a>
+    <a class="sd-kpi" href="#reviews">
+      <span>Ready for review</span>
+      <strong>{{ review_ready_clients|length }}</strong>
+      <small>Coaching weeks waiting</small>
+    </a>
+    <a class="sd-kpi" href="/dashboard/leads">
+      <span>New leads</span>
+      <strong>{{ new_leads }}</strong>
+      <small>Open lead pipeline</small>
+    </a>
+  </section>
+
+  <section class="sd-grid">
+    <article class="sd-panel" id="follow-up">
+      <div class="sd-head">
+        <div>
+          <span class="over">TODAY</span>
+          <h2>Needs follow-up</h2>
+          <p>Only meaningful engagement signals.</p>
+        </div>
+        <a href="/dashboard/clients">All clients →</a>
+      </div>
+
+      {% if follow_up_clients %}
+        {% for client in follow_up_clients %}
+        <div class="sd-row">
+          <div>
+            <a href="/dashboard/clients/{{ client.id }}" style="color:inherit;text-decoration:none">
+              <strong>{{ client.name }}</strong>
+            </a>
+            <div class="sd-reasons">
+              {% for reason in client.dashboard_follow_up_reasons %}
+              <span class="sd-reason">{{ reason }}</span>
+              {% endfor %}
+            </div>
+
+            <div class="sd-follow-actions">
+              {% if client.nudge_recent %}
+                <button class="sd-nudge-btn" type="button" disabled>Nudged recently ✓</button>
+                {% if client.last_nudge and client.last_nudge.created_at %}
+                <span class="sd-nudge-meta">
+                  {{ client.last_nudge.created_at.astimezone().strftime("%d %b · %I:%M %p") }}
+                </span>
+                {% endif %}
+              {% elif client.phone %}
+                <button
+                  class="sd-nudge-btn"
+                  type="button"
+                  data-nudge-open
+                  data-client-id="{{ client.id }}"
+                  data-client-name="{{ client.name }}"
+                  data-reason="{{ client.suggested_nudge_reason }}"
+                  data-message="{{ client.suggested_nudge_message }}"
+                >Nudge</button>
+                {% if client.last_nudge and client.last_nudge.created_at %}
+                <span class="sd-nudge-meta">
+                  Last nudged {{ client.last_nudge.created_at.astimezone().strftime("%d %b") }}
+                </span>
+                {% endif %}
+              {% else %}
+                <button class="sd-nudge-btn" type="button" disabled>No phone number</button>
+              {% endif %}
+            </div>
+          </div>
+          <a class="sd-arrow" href="/dashboard/clients/{{ client.id }}">›</a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="sd-empty">
+          <div class="sd-empty-icon">✓</div>
+          <div>
+            <strong>No client follow-ups right now</strong>
+            <p>Nothing meaningful needs Sushma's intervention.</p>
+          </div>
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="sd-panel" id="reviews">
+      <div class="sd-head">
+        <div>
+          <span class="over">COACHING</span>
+          <h2>Ready for review</h2>
+          <p>Finished coaching weeks waiting for review.</p>
+        </div>
+      </div>
+
+      {% if review_ready_clients %}
+        {% for client in review_ready_clients %}
+        <a class="sd-row" href="/dashboard/clients/{{ client.id }}?tab=weekly">
+          <div>
+            <strong>{{ client.name }}</strong>
+            <span>Week {{ client.current_week or '—' }} · ready to review</span>
+          </div>
+          <span class="sd-review-badge">Review</span>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="sd-empty">
+          <div class="sd-empty-icon">✓</div>
+          <div>
+            <strong>No reviews waiting</strong>
+            <p>You're caught up on weekly coaching reviews.</p>
+          </div>
+        </div>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="sd-schedules">
+    <article class="sd-panel" id="today-schedule">
+      <div class="sd-head">
+        <div>
+          <span class="over">SCHEDULE</span>
+          <h2>Today</h2>
+          <p>Only calls still ahead today.</p>
+        </div>
+      </div>
+
+      {% if calls_today %}
+        {% for call in calls_today %}
+        <a class="sd-row" href="{{ call.href or '/dashboard' }}">
+          <div>
+            <strong>{{ call.name or call.title or 'Call' }}</strong>
+            <span>{{ call.local_start_time.strftime('%I:%M %p') if call.local_start_time else '' }}{% if call.kind %} · {{ call.kind }}{% endif %}</span>
+          </div>
+          <span class="sd-booked">Booked</span>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="sd-empty">
+          <div class="sd-empty-icon">☀</div>
+          <div><strong>No more calls today</strong><p>Your remaining day is clear.</p></div>
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="sd-panel" id="week-schedule">
+      <div class="sd-head">
+        <div>
+          <span class="over">SCHEDULE</span>
+          <h2>This week</h2>
+          <p>Remaining upcoming calls through Sunday.</p>
+        </div>
+      </div>
+
+      {% if calls_this_week %}
+      <div class="sd-week-list">
+        {% for call in calls_this_week %}
+        <a class="sd-call" href="{{ call.href or '/dashboard' }}">
+          <div>
+            <strong>{{ call.name or call.title or 'Call' }}</strong>
+            <span>{{ call.local_start_time.strftime('%a, %d %b · %I:%M %p') if call.local_start_time else '' }}{% if call.kind %} · {{ call.kind }}{% endif %}</span>
+          </div>
+          <span class="sd-arrow">›</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+        <div class="sd-empty">
+          <div class="sd-empty-icon">✓</div>
+          <div><strong>No remaining calls this week</strong><p>Nothing else is scheduled.</p></div>
+        </div>
+      {% endif %}
+    </article>
+  </section>
+
+  {% if clients_without_next_call %}
+  <div class="sd-note">
+    <strong>{{ clients_without_next_call|length }} client{% if clients_without_next_call|length != 1 %}s{% endif %}</strong>
+    currently have no next coaching call booked. This is informational only.
+    <a href="/dashboard/clients">View clients →</a>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

@@ -19,6 +19,13 @@ from app.database import (
 from app.services.client_service import ClientService
 from app.services.client_portal_service import get_client_operations_status
 from app.services.coaching_insights_service import get_dashboard_client_coaching_signals
+from app.services.client_nudge_service import (
+    default_nudge_message,
+    get_latest_client_nudges,
+    nudge_is_recent,
+    record_client_nudge,
+    whatsapp_prefilled_url,
+)
 from fastapi import Form
 
 router = APIRouter()
@@ -634,6 +641,10 @@ def dashboard_home(request: Request):
 
     # Simplified dashboard triage:
     # show only items that imply a clear next action for Sushma.
+    latest_nudges = get_latest_client_nudges(
+        [client["id"] for client in active_clients]
+    )
+
     follow_up_clients = []
     review_ready_clients = []
     clients_without_next_call = []
@@ -691,6 +702,24 @@ def dashboard_home(request: Request):
 
         if follow_up_reasons:
             client["dashboard_follow_up_reasons"] = follow_up_reasons
+
+            last_nudge = latest_nudges.get(client["id"])
+            client["last_nudge"] = last_nudge
+            client["nudge_recent"] = nudge_is_recent(last_nudge)
+
+            if (ops.get("missed_daily_count") or 0) >= 2:
+                suggested_reason = "missed_tracking"
+            elif coaching_signals.get("low_adherence"):
+                suggested_reason = "low_adherence"
+            else:
+                suggested_reason = "custom"
+
+            client["suggested_nudge_reason"] = suggested_reason
+            client["suggested_nudge_message"] = default_nudge_message(
+                client_name=client.get("name"),
+                reason=suggested_reason,
+            )
+
             follow_up_clients.append(client)
 
         # Keep existing backend rule, but present it as "Ready for review".
@@ -743,6 +772,61 @@ def dashboard_home(request: Request):
                 clarity_calendar_id and coaching_calendar_id
             ),
         },
+    )
+
+
+
+@router.post("/dashboard/clients/{client_id}/nudge")
+def send_client_nudge(
+    request: Request,
+    client_id: int,
+    reason: str = Form("custom"),
+    message: str = Form(...),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    client = next(
+        (
+            dict(item)
+            for item in ClientService.dashboard_clients()
+            if item.get("id") == client_id
+        ),
+        None,
+    )
+
+    if not client:
+        raise HTTPException(
+            status_code=404,
+            detail="Client not found",
+        )
+
+    clean_message = message.strip()
+    if not clean_message:
+        clean_message = default_nudge_message(
+            client_name=client.get("name"),
+            reason=reason,
+        )
+
+    whatsapp_url = whatsapp_prefilled_url(
+        phone=client.get("phone"),
+        message=clean_message,
+    )
+
+    # This records that Sushma initiated the dashboard nudge workflow.
+    # WhatsApp itself does not tell this app whether she ultimately pressed Send.
+    record_client_nudge(
+        client_id=client_id,
+        reason=reason,
+        message=clean_message,
+    )
+
+    return RedirectResponse(
+        whatsapp_url,
+        status_code=303,
     )
 
 
