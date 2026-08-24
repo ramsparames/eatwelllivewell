@@ -66,7 +66,6 @@ from app.services.client_portal_service import (
 
 
 from app.services.client_nudge_service import (
-    default_nudge_message,
     get_latest_client_nudges,
     nudge_is_recent,
 )
@@ -783,10 +782,7 @@ def clients_page(request: Request):
     clients = ClientService.dashboard_clients()
     calls_today = ClientService.calls_today()
     calls_this_week = ClientService.calls_this_week()
-
-    latest_nudges = get_latest_client_nudges(
-        [client["id"] for client in clients]
-    )
+    latest_nudges = get_latest_client_nudges([client["id"] for client in clients])
 
     today = date.today()
 
@@ -905,18 +901,10 @@ def clients_page(request: Request):
             last_nudge = latest_nudges.get(client["id"])
             client["last_nudge"] = last_nudge
             client["nudge_recent"] = nudge_is_recent(last_nudge)
-
-            if (ops.get("missed_daily_count") or 0) >= 2:
-                suggested_reason = "missed_tracking"
-            elif coaching_signals.get("low_adherence"):
-                suggested_reason = "low_adherence"
-            else:
-                suggested_reason = "custom"
-
-            client["suggested_nudge_reason"] = suggested_reason
-            client["suggested_nudge_message"] = default_nudge_message(
-                client_name=client.get("name"),
-                reason=suggested_reason,
+            client["suggested_nudge_reason"] = (
+                "missed_tracking"
+                if (ops.get("missed_daily_count") or 0) >= 2
+                else "low_adherence"
             )
 
         # Values used by the browser-side table sorter.
@@ -954,7 +942,6 @@ def clients_page(request: Request):
         for client in clients
         if client.get("status") == "active"
     ]
-
 
     needs_attention = [
         client

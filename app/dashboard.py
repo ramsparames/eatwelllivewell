@@ -644,7 +644,6 @@ def dashboard_home(request: Request):
     latest_nudges = get_latest_client_nudges(
         [client["id"] for client in active_clients]
     )
-
     follow_up_clients = []
     review_ready_clients = []
     clients_without_next_call = []
@@ -702,24 +701,15 @@ def dashboard_home(request: Request):
 
         if follow_up_reasons:
             client["dashboard_follow_up_reasons"] = follow_up_reasons
-
             last_nudge = latest_nudges.get(client["id"])
             client["last_nudge"] = last_nudge
             client["nudge_recent"] = nudge_is_recent(last_nudge)
-
-            if (ops.get("missed_daily_count") or 0) >= 2:
-                suggested_reason = "missed_tracking"
-            elif coaching_signals.get("low_adherence"):
-                suggested_reason = "low_adherence"
-            else:
-                suggested_reason = "custom"
-
-            client["suggested_nudge_reason"] = suggested_reason
-            client["suggested_nudge_message"] = default_nudge_message(
-                client_name=client.get("name"),
-                reason=suggested_reason,
+            suggested_reason = (
+                "missed_tracking"
+                if (ops.get("missed_daily_count") or 0) >= 2
+                else "low_adherence"
             )
-
+            client["suggested_nudge_reason"] = suggested_reason
             follow_up_clients.append(client)
 
         # Keep existing backend rule, but present it as "Ready for review".
@@ -776,11 +766,7 @@ def dashboard_home(request: Request):
 
 
 
-
-@router.get(
-    "/dashboard/clients/{client_id}/nudge",
-    response_class=HTMLResponse,
-)
+@router.get("/dashboard/clients/{client_id}/nudge", response_class=HTMLResponse)
 def client_nudge_preview(
     request: Request,
     client_id: int,
@@ -788,61 +774,25 @@ def client_nudge_preview(
     source: str = "dashboard",
 ):
     if not coach_is_logged_in(request):
-        return RedirectResponse(
-            "/coach/login",
-            status_code=303,
-        )
-
-    if templates is None:
-        raise RuntimeError("Templates are not configured")
-
-    client = next(
-        (
-            dict(item)
-            for item in ClientService.dashboard_clients()
-            if item.get("id") == client_id
-        ),
-        None,
-    )
-
+        return RedirectResponse("/coach/login", status_code=303)
+    client = next((dict(x) for x in ClientService.dashboard_clients() if x.get("id")==client_id), None)
     if not client:
-        raise HTTPException(
-            status_code=404,
-            detail="Client not found",
-        )
-
-    allowed_reasons = {
-        "missed_tracking",
-        "low_adherence",
-        "workout",
-        "reflection",
-        "custom",
-    }
-    if reason not in allowed_reasons:
-        reason = "custom"
-
+        raise HTTPException(status_code=404, detail="Client not found")
+    if reason not in {"missed_tracking","low_adherence","workout","reflection","custom"}:
+        reason="custom"
     latest = get_latest_client_nudges([client_id]).get(client_id)
-
     return templates.TemplateResponse(
         "coach/nudge_client.html",
         {
-            "request": request,
-            "active_nav": "clients",
-            "client": client,
-            "reason": reason,
-            "message": default_nudge_message(
-                client_name=client.get("name"),
-                reason=reason,
-            ),
-            "last_nudge": latest,
-            "source": (
-                "clients"
-                if source == "clients"
-                else "dashboard"
-            ),
+            "request":request,
+            "active_nav":"clients",
+            "client":client,
+            "reason":reason,
+            "message":default_nudge_message(client_name=client.get("name"), reason=reason),
+            "last_nudge":latest,
+            "source":"clients" if source=="clients" else "dashboard",
         },
     )
-
 
 @router.post("/dashboard/clients/{client_id}/nudge")
 def send_client_nudge(
@@ -852,51 +802,16 @@ def send_client_nudge(
     message: str = Form(...),
 ):
     if not coach_is_logged_in(request):
-        return RedirectResponse(
-            "/coach/login",
-            status_code=303,
-        )
-
-    client = next(
-        (
-            dict(item)
-            for item in ClientService.dashboard_clients()
-            if item.get("id") == client_id
-        ),
-        None,
-    )
-
+        return RedirectResponse("/coach/login", status_code=303)
+    client = next((dict(x) for x in ClientService.dashboard_clients() if x.get("id")==client_id), None)
     if not client:
-        raise HTTPException(
-            status_code=404,
-            detail="Client not found",
-        )
-
-    clean_message = message.strip()
-    if not clean_message:
-        clean_message = default_nudge_message(
-            client_name=client.get("name"),
-            reason=reason,
-        )
-
-    whatsapp_url = whatsapp_prefilled_url(
-        phone=client.get("phone"),
-        message=clean_message,
-    )
-
-    # This records that Sushma initiated the dashboard nudge workflow.
-    # WhatsApp itself does not tell this app whether she ultimately pressed Send.
-    record_client_nudge(
-        client_id=client_id,
-        reason=reason,
-        message=clean_message,
-    )
-
+        raise HTTPException(status_code=404, detail="Client not found")
+    clean_message = message.strip() or default_nudge_message(client_name=client.get("name"), reason=reason)
+    record_client_nudge(client_id=client_id, reason=reason, message=clean_message)
     return RedirectResponse(
-        whatsapp_url,
+        whatsapp_prefilled_url(phone=client.get("phone"), message=clean_message),
         status_code=303,
     )
-
 
 @router.get("/dashboard/synamate-calendars", response_class=HTMLResponse)
 def synamate_calendar_diagnostic(request: Request):
