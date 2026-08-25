@@ -19,13 +19,6 @@ from app.database import (
 from app.services.client_service import ClientService
 from app.services.client_portal_service import get_client_operations_status
 from app.services.coaching_insights_service import get_dashboard_client_coaching_signals
-from app.services.client_nudge_service import (
-    default_nudge_message,
-    get_latest_client_nudges,
-    nudge_is_recent,
-    record_client_nudge,
-    whatsapp_prefilled_url,
-)
 from fastapi import Form
 
 router = APIRouter()
@@ -490,7 +483,7 @@ def dashboard_home(request: Request):
 
     coaching_calls = (
         get_synamate_appointments_between(
-            local_now.astimezone(timezone.utc),
+            local_start.astimezone(timezone.utc),
             local_end.astimezone(timezone.utc),
             calendar_id=coaching_calendar_id,
         )
@@ -501,8 +494,6 @@ def dashboard_home(request: Request):
     for call in coaching_calls:
         item = dict(call)
         local_start_time = item["start_time"].astimezone(local_tz)
-        if local_start_time < local_now:
-            continue
         matched_client = None
         call_email = (item.get("email") or "").strip().lower()
         call_phone = normalized_phone(item.get("phone"))
@@ -537,7 +528,7 @@ def dashboard_home(request: Request):
 
     clarity_calls = (
         get_synamate_appointments_between(
-            local_now.astimezone(timezone.utc),
+            local_start.astimezone(timezone.utc),
             local_end.astimezone(timezone.utc),
             calendar_id=clarity_calendar_id,
         )
@@ -548,8 +539,6 @@ def dashboard_home(request: Request):
     for call in clarity_calls:
         item = dict(call)
         local_start_time = item["start_time"].astimezone(local_tz)
-        if local_start_time < local_now:
-            continue
         item["name"] = item.get("name") or "Clarity Call"
         item["next_call_time"] = local_start_time.strftime("%I:%M %p").lstrip("0")
         item["call_type"] = "Clarity Call · Lead"
@@ -564,7 +553,7 @@ def dashboard_home(request: Request):
 
     coaching_week_calls = (
         get_synamate_appointments_between(
-            local_now.astimezone(timezone.utc),
+            week_start.astimezone(timezone.utc),
             week_end.astimezone(timezone.utc),
             calendar_id=coaching_calendar_id,
         )
@@ -573,7 +562,7 @@ def dashboard_home(request: Request):
     )
     clarity_week_calls = (
         get_synamate_appointments_between(
-            local_now.astimezone(timezone.utc),
+            week_start.astimezone(timezone.utc),
             week_end.astimezone(timezone.utc),
             calendar_id=clarity_calendar_id,
         )
@@ -587,8 +576,6 @@ def dashboard_home(request: Request):
     for call in coaching_week_calls:
         item = dict(call)
         local_start_time = item["start_time"].astimezone(local_tz)
-        if local_start_time < local_now:
-            continue
         matched_client = None
         call_email = (item.get("email") or "").strip().lower()
         call_phone = normalized_phone(item.get("phone"))
@@ -625,8 +612,6 @@ def dashboard_home(request: Request):
     for call in clarity_week_calls:
         item = dict(call)
         local_start_time = item["start_time"].astimezone(local_tz)
-        if local_start_time < local_now:
-            continue
         item["name"] = item.get("name") or "Clarity Call"
         item["call_type"] = "Clarity Call · Lead"
         item["local_start_time"] = local_start_time
@@ -639,16 +624,37 @@ def dashboard_home(request: Request):
         key=lambda item: item.get("local_start_time") or local_now
     )
 
-    # Simplified dashboard triage:
-    # show only items that imply a clear next action for Sushma.
-    latest_nudges = get_latest_client_nudges(
-        [client["id"] for client in active_clients]
-    )
-    follow_up_clients = []
-    review_ready_clients = []
+    # One schedule for the dashboard: upcoming calls from now through Sunday.
+    # Today's calls stay in the same chronological list and are highlighted
+    # visually by the template rather than duplicated in a separate card.
+    schedule_calls = []
+    for item in calls_this_week:
+        starts_at = item.get("local_start_time")
+        if starts_at and starts_at >= local_now:
+            item = dict(item)
+            item["is_today"] = starts_at.date() == local_now.date()
+            item["schedule_day"] = starts_at.date()
+            schedule_calls.append(item)
+
+    # Production operations status: one rule set for dashboard + client list.
+    needs_attention_clients = []
     clients_without_next_call = []
+    missed_update_clients = []
+    measurement_due_clients = []
+    review_overdue_clients = []
+    no_next_call_clients = []
+    operations_counts = {
+        "missed_daily": 0,
+        "measurement_due": 0,
+        "weekly_review_overdue": 0,
+        "no_next_call": 0,
+        "low_adherence": 0,
+        "workouts_behind": 0,
+    }
 
     for client in active_clients:
+        # Existing operational alerts: missed updates, measurements,
+        # overdue review and no next call.
         ops = dict(
             get_client_operations_status(
                 client,
@@ -657,6 +663,8 @@ def dashboard_home(request: Request):
         )
         ops["reasons"] = list(ops.get("reasons") or [])
 
+        # Add coaching intelligence using this client's own coaching-week
+        # boundaries, not calendar Monday-Sunday weeks.
         coaching_signals = {
             "action_percent": None,
             "low_adherence": False,
@@ -675,61 +683,51 @@ def dashboard_home(request: Request):
             )
 
         ops["coaching_signals"] = coaching_signals
-        client["operations"] = ops
-        client["current_week"] = ops.get("week_number")
-        client["has_synced_next_call"] = not ops.get("no_next_call", False)
 
-        # Needs follow-up is intentionally narrow:
-        # missed tracking or low adherence only.
-        follow_up_reasons = []
-
-        if (ops.get("missed_daily_count") or 0) >= 2:
-            missed = ops.get("missed_daily_count") or 0
-            follow_up_reasons.append(
-                f"No tracking for {missed} day"
-                + ("s" if missed != 1 else "")
-            )
+        for reason in coaching_signals.get("reasons") or []:
+            if reason not in ops["reasons"]:
+                ops["reasons"].append(reason)
 
         if coaching_signals.get("low_adherence"):
-            action_percent = coaching_signals.get("action_percent")
-            if action_percent is None:
-                follow_up_reasons.append("Low action consistency")
-            else:
-                follow_up_reasons.append(
-                    f"Action consistency {round(action_percent)}%"
-                )
+            operations_counts["low_adherence"] += 1
 
-        if follow_up_reasons:
-            client["dashboard_follow_up_reasons"] = follow_up_reasons
-            last_nudge = latest_nudges.get(client["id"])
-            client["last_nudge"] = last_nudge
-            client["nudge_recent"] = nudge_is_recent(last_nudge)
-            suggested_reason = (
-                "missed_tracking"
-                if (ops.get("missed_daily_count") or 0) >= 2
-                else "low_adherence"
-            )
-            client["suggested_nudge_reason"] = suggested_reason
-            follow_up_clients.append(client)
+        if coaching_signals.get("workouts_behind"):
+            operations_counts["workouts_behind"] += 1
 
-        # Keep existing backend rule, but present it as "Ready for review".
-        if ops.get("weekly_review_overdue"):
-            review_ready_clients.append(client)
+        # Coaching signals should bring a client into the SAME Needs attention
+        # list even if operational housekeeping is otherwise up to date.
+        if (
+            coaching_signals.get("low_adherence")
+            or coaching_signals.get("workouts_behind")
+        ):
+            ops["health_key"] = "attention"
+            ops["health_label"] = "Needs attention"
 
-        # No-next-call is informational only.
-        if ops.get("no_next_call"):
+        ops["attention_count"] = len(ops["reasons"])
+
+        client["operations"] = ops
+        client["current_week"] = ops["week_number"]
+        client["has_synced_next_call"] = not ops["no_next_call"]
+
+        if ops["no_next_call"]:
             clients_without_next_call.append(client)
+            no_next_call_clients.append(client)
+            operations_counts["no_next_call"] += 1
+        if ops["missed_daily_count"] >= 2:
+            missed_update_clients.append(client)
+            operations_counts["missed_daily"] += 1
+        if ops["measurement_due"]:
+            measurement_due_clients.append(client)
+            operations_counts["measurement_due"] += 1
+        if ops["weekly_review_overdue"]:
+            review_overdue_clients.append(client)
+            operations_counts["weekly_review_overdue"] += 1
+        if ops["health_key"] == "attention":
+            needs_attention_clients.append(client)
 
-    follow_up_clients.sort(
+    needs_attention_clients.sort(
         key=lambda client: (
-            -(client["operations"].get("missed_daily_count") or 0),
-            client.get("name") or "",
-        )
-    )
-
-    review_ready_clients.sort(
-        key=lambda client: (
-            client["operations"].get("week_end") or local_now.date(),
+            -client["operations"]["attention_count"],
             client.get("name") or "",
         )
     )
@@ -752,10 +750,15 @@ def dashboard_home(request: Request):
             "request": request,
             "active_clients": active_clients,
             "clients_without_next_call": clients_without_next_call,
-            "follow_up_clients": follow_up_clients,
-            "review_ready_clients": review_ready_clients,
+            "needs_attention_clients": needs_attention_clients,
+            "operations_counts": operations_counts,
+            "missed_update_clients": missed_update_clients,
+            "measurement_due_clients": measurement_due_clients,
+            "review_overdue_clients": review_overdue_clients,
+            "no_next_call_clients": no_next_call_clients,
             "calls_today": calls_today,
             "calls_this_week": calls_this_week,
+            "schedule_calls": schedule_calls,
             "new_leads": new_leads,
             "today": local_now.date(),
             "synamate_calendar_configured": bool(
@@ -764,54 +767,6 @@ def dashboard_home(request: Request):
         },
     )
 
-
-
-@router.get("/dashboard/clients/{client_id}/nudge", response_class=HTMLResponse)
-def client_nudge_preview(
-    request: Request,
-    client_id: int,
-    reason: str = "missed_tracking",
-    source: str = "dashboard",
-):
-    if not coach_is_logged_in(request):
-        return RedirectResponse("/coach/login", status_code=303)
-    client = next((dict(x) for x in ClientService.dashboard_clients() if x.get("id")==client_id), None)
-    if not client:
-        raise HTTPException(status_code=404, detail="Client not found")
-    if reason not in {"missed_tracking","low_adherence","workout","reflection","custom"}:
-        reason="custom"
-    latest = get_latest_client_nudges([client_id]).get(client_id)
-    return templates.TemplateResponse(
-        "coach/nudge_client.html",
-        {
-            "request":request,
-            "active_nav":"clients",
-            "client":client,
-            "reason":reason,
-            "message":default_nudge_message(client_name=client.get("name"), reason=reason),
-            "last_nudge":latest,
-            "source":"clients" if source=="clients" else "dashboard",
-        },
-    )
-
-@router.post("/dashboard/clients/{client_id}/nudge")
-def send_client_nudge(
-    request: Request,
-    client_id: int,
-    reason: str = Form("custom"),
-    message: str = Form(...),
-):
-    if not coach_is_logged_in(request):
-        return RedirectResponse("/coach/login", status_code=303)
-    client = next((dict(x) for x in ClientService.dashboard_clients() if x.get("id")==client_id), None)
-    if not client:
-        raise HTTPException(status_code=404, detail="Client not found")
-    clean_message = message.strip() or default_nudge_message(client_name=client.get("name"), reason=reason)
-    record_client_nudge(client_id=client_id, reason=reason, message=clean_message)
-    return RedirectResponse(
-        whatsapp_prefilled_url(phone=client.get("phone"), message=clean_message),
-        status_code=303,
-    )
 
 @router.get("/dashboard/synamate-calendars", response_class=HTMLResponse)
 def synamate_calendar_diagnostic(request: Request):

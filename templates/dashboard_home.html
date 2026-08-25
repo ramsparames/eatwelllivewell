@@ -57,7 +57,26 @@
   .sd-grid,.sd-schedules{grid-template-columns:1fr}
   .sd-week-list{grid-template-columns:1fr}
 }
-.sd-follow-row{display:grid;grid-template-columns:minmax(0,1fr) 28px;gap:12px;align-items:center;padding:14px 0;border-top:1px solid #eee8f0}.sd-follow-name{color:inherit;text-decoration:none;font-size:14px;font-weight:850}.sd-nudge-link{display:inline-block;margin-top:9px;color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850}.sd-nudge-link:hover{text-decoration:underline}.sd-nudge-status{margin-top:9px;color:#2f6f4e;font-size:9px;font-weight:800}.sd-follow-open{text-decoration:none;color:var(--coach-purple);font-size:21px;font-weight:900}.sd-call-workflow-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid #f0ebf1}.sd-call-workflow-row:first-child{border-top:0}.sd-call-main{display:block;color:inherit;text-decoration:none}.sd-call-main strong{display:block;font-size:12px}.sd-call-main span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px}.sd-call-main .sd-call-time{color:#594d5e;font-weight:750}.sd-prepare-link{color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850;white-space:nowrap}.sd-prepare-link:hover{text-decoration:underline}.sd-call-workflow-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid #eee8f0;border-radius:11px;background:#fff}</style>
+.sd-follow-row{display:grid;grid-template-columns:minmax(0,1fr) 28px;gap:12px;align-items:center;padding:14px 0;border-top:1px solid #eee8f0}.sd-follow-name{color:inherit;text-decoration:none;font-size:14px;font-weight:850}.sd-nudge-link{display:inline-block;margin-top:9px;color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850}.sd-nudge-link:hover{text-decoration:underline}.sd-nudge-status{margin-top:9px;color:#2f6f4e;font-size:9px;font-weight:800}.sd-follow-open{text-decoration:none;color:var(--coach-purple);font-size:21px;font-weight:900}.sd-call-workflow-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid #f0ebf1}.sd-call-workflow-row:first-child{border-top:0}.sd-call-main{display:block;color:inherit;text-decoration:none}.sd-call-main strong{display:block;font-size:12px}.sd-call-main span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px}.sd-prepare-link{color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850;white-space:nowrap}.sd-prepare-link:hover{text-decoration:underline}.sd-call-workflow-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid #eee8f0;border-radius:11px;background:#fff}
+.sd-schedule-panel{margin-top:13px}
+.sd-schedule-list{display:grid;gap:13px;margin-top:4px}
+.sd-schedule-day{border:1px solid #eee8f0;border-radius:13px;overflow:hidden;background:#fff}
+.sd-schedule-day.today{border-color:#d9bce8;background:#fcf8fe;box-shadow:0 0 0 2px rgba(91,14,145,.035)}
+.sd-schedule-day-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:#faf8fb;border-bottom:1px solid #eee8f0}
+.sd-schedule-day.today .sd-schedule-day-head{background:#f3e8f8}
+.sd-schedule-day-head strong{font-size:11px;letter-spacing:.035em;text-transform:uppercase}
+.sd-today-pill{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:var(--coach-purple);color:#fff;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.sd-schedule-row{display:grid;grid-template-columns:82px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border-top:1px solid #f1edf2}
+.sd-schedule-row:first-child{border-top:0}
+.sd-schedule-day.today .sd-schedule-row{background:rgba(91,14,145,.018)}
+.sd-schedule-time{font-size:12px;font-weight:900;color:var(--coach-purple);white-space:nowrap}
+.sd-schedule-main{display:block;color:inherit;text-decoration:none;min-width:0}
+.sd-schedule-main strong{display:block;font-size:13px}
+.sd-schedule-main span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px}
+.sd-schedule-status{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;background:#f1edf3;color:#685f6d;font-size:8px;font-weight:900}
+.sd-schedule-day.today .sd-schedule-status{background:#eadcf1;color:var(--coach-purple)}
+@media(max-width:620px){.sd-schedule-row{grid-template-columns:65px minmax(0,1fr);gap:9px}.sd-schedule-status{display:none}}
+</style>
 
 <div class="sd">
   <header class="sd-hero">
@@ -70,7 +89,7 @@
   </header>
 
   <section class="sd-kpis">
-    <a class="sd-kpi" href="#today-schedule">
+    <a class="sd-kpi" href="#schedule">
       <span>Calls today</span>
       <strong>{{ calls_today|length }}</strong>
       <small>Upcoming today</small>
@@ -146,59 +165,49 @@
     </article>
   </section>
 
-  <section class="sd-schedules">
-    <article class="sd-panel" id="today-schedule">
-      <div class="sd-head">
-        <div>
-          <span class="over">SCHEDULE</span>
-          <h2>Today</h2>
-          <p>Only calls still ahead today.</p>
-        </div>
-      </div>
-
-      {% if calls_today %}
-        {% for call in calls_today %}
-        <div class="sd-call-workflow-row">
-          <a class="sd-call-main" href="{{ call.href or '/dashboard' }}">
-            <strong>{{ call.name or call.title or 'Call' }}</strong>
-            <span class="sd-call-time">{% if call.local_start_time %}{{ call.local_start_time.strftime('%I:%M %p') }}{% endif %}{% if call.local_end_time %} – {{ call.local_end_time.strftime('%I:%M %p') }}{% endif %}{% if call.call_type %} · {{ call.call_type }}{% endif %}</span>
-          </a>
-          <span class="sd-booked">Booked</span>
-        </div>
-        {% endfor %}
-      {% else %}
-        <div class="sd-empty">
-          <div class="sd-empty-icon">☀</div>
-          <div><strong>No more calls today</strong><p>Your remaining day is clear.</p></div>
-        </div>
-      {% endif %}
-    </article>
-
-    <article class="sd-panel" id="week-schedule">
+  <section class="sd-schedule-panel" id="schedule">
+    <article class="sd-panel">
       <div class="sd-head">
         <div>
           <span class="over">SCHEDULE</span>
           <h2>This week</h2>
-          <p>Remaining upcoming calls through Sunday.</p>
+          <p>Today is highlighted. Everything else stays in one chronological view.</p>
         </div>
+        <span class="sd-booked">{{ schedule_calls|length }} upcoming</span>
       </div>
 
-      {% if calls_this_week %}
-      <div class="sd-week-list">
-        {% for call in calls_this_week %}
-        <div class="sd-call-workflow-card">
-          <a class="sd-call-main" href="{{ call.href or '/dashboard' }}">
-            <strong>{{ call.name or call.title or 'Call' }}</strong>
-            <span>{{ call.local_start_time.strftime('%a, %d %b · %I:%M %p') if call.local_start_time else '' }}{% if call.call_type %} · {{ call.call_type }}{% endif %}</span>
-          </a>
-          <span class="sd-arrow">›</span>
-        </div>
+      {% if schedule_calls %}
+      <div class="sd-schedule-list">
+        {% set ns = namespace(last_day=None, open_day=false) %}
+        {% for call in schedule_calls %}
+          {% set call_day = call.local_start_time.date() if call.local_start_time else none %}
+          {% if ns.last_day != call_day %}
+            {% if ns.open_day %}</div></section>{% endif %}
+            <section class="sd-schedule-day {% if call.is_today %}today{% endif %}">
+              <div class="sd-schedule-day-head">
+                <strong>{% if call.is_today %}Today · {% endif %}{{ call.local_start_time.strftime('%a, %d %b') if call.local_start_time else '' }}</strong>
+                {% if call.is_today %}<span class="sd-today-pill">Today</span>{% endif %}
+              </div>
+              <div>
+            {% set ns.last_day = call_day %}
+            {% set ns.open_day = true %}
+          {% endif %}
+
+          <div class="sd-schedule-row">
+            <div class="sd-schedule-time">{{ call.local_start_time.strftime('%I:%M %p').lstrip('0') if call.local_start_time else '—' }}</div>
+            <a class="sd-schedule-main" href="{{ call.href or '/dashboard' }}">
+              <strong>{{ call.name or call.title or 'Call' }}</strong>
+              <span>{{ call.call_type or 'Call' }}</span>
+            </a>
+            <span class="sd-schedule-status">Booked</span>
+          </div>
         {% endfor %}
+        {% if ns.open_day %}</div></section>{% endif %}
       </div>
       {% else %}
         <div class="sd-empty">
           <div class="sd-empty-icon">✓</div>
-          <div><strong>No remaining calls this week</strong><p>Nothing else is scheduled.</p></div>
+          <div><strong>No remaining calls this week</strong><p>Your schedule is clear through Sunday.</p></div>
         </div>
       {% endif %}
     </article>
