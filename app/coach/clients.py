@@ -1153,6 +1153,7 @@ def client_profile(
     next_week_start = None
     next_week_end = None
     next_week_actions = []
+    coach_week_checkin = None
 
     if week_start and week_end:
         # Overview remains anchored to the real current week.
@@ -1175,13 +1176,23 @@ def client_profile(
             coach_week_end,
         )
 
-        # Next-week planning is only actionable from the current week.
-        next_week_number = week_number + 1
-        next_week_start = week_end + timedelta(days=1)
+        # Find the saved coaching conversation for the selected week.
+        # If older duplicate rows exist, checkins are newest-first, so the
+        # newest record for that week is the editable source of truth.
+        for saved_checkin in (profile.get("checkins") or []):
+            saved_date = saved_checkin.get("call_date")
+            if saved_date and coach_week_start <= saved_date <= coach_week_end:
+                coach_week_checkin = saved_checkin
+                break
+
+        # Planning always belongs to the week immediately AFTER the selected
+        # coaching week (Week N review -> Week N+1 plan), including history.
+        next_week_number = coach_week_number + 1
+        next_week_start = coach_week_end + timedelta(days=1)
         next_week_end = next_week_start + timedelta(days=6)
         next_week_actions = ClientService.actions(
             client_id,
-            status="active",
+            status=None,
             start_date=next_week_start,
             end_date=next_week_end,
         )
@@ -1212,55 +1223,43 @@ def client_profile(
         weeks=12,
     )
 
-    # Preselect every currently ACTIVE commitment for next week.
-    #
-    # Actions can be created at different times (especially custom actions),
-    # so they must not be grouped by one shared start_date/checkin.
-    # ClientService.actions() returns newest rows first. Keep only the newest
-    # active record for each action name, then classify it as library/custom.
+    # Populate PLAN from the actual following week when it already exists.
+    # For a brand-new plan, carry forward commitments from the selected week.
     carry_forward_action_defaults = {}
     carry_forward_custom_actions = []
+    library_key_by_name = ACTION_LIBRARY_KEY_BY_NORMALIZED_NAME
 
-    if coach_week_is_current:
-        library_key_by_name = ACTION_LIBRARY_KEY_BY_NORMALIZED_NAME
+    plan_source_rows = next_week_actions or ClientService.actions(
+        client_id,
+        status=None,
+        start_date=coach_week_start,
+        end_date=coach_week_end,
+    ) or []
 
-        active_rows = ClientService.actions(
-            client_id,
-            status="active",
-        ) or []
+    latest_by_name = {}
+    for row in plan_source_rows:
+        name = (row.get("action_name") or "").strip()
+        if not name or name in latest_by_name:
+            continue
+        latest_by_name[name] = row
 
-        latest_by_name = {}
-
-        for row in active_rows:
-            name = (row.get("action_name") or "").strip()
-            if not name:
-                continue
-
-            # Rows are returned newest first, so the first occurrence wins.
-            if name in latest_by_name:
-                continue
-
-            latest_by_name[name] = row
-
-        for name, action in latest_by_name.items():
-            stable_key = (action.get("action_key") or "").strip()
-            default = {
-                "name": name,
-                "action_key": stable_key,
-                "target_count": action.get("target_count"),
-                "target_unit": action.get("target_unit") or "days",
-            }
-
-            library_key = (
-                stable_key
-                if stable_key in ACTION_LIBRARY_BY_KEY
-                else library_key_by_name.get(_normalize_action_name(name))
-            )
-
-            if library_key:
-                carry_forward_action_defaults[library_key] = default
-            else:
-                carry_forward_custom_actions.append(default)
+    for name, action in latest_by_name.items():
+        stable_key = (action.get("action_key") or "").strip()
+        default = {
+            "name": name,
+            "action_key": stable_key,
+            "target_count": action.get("target_count"),
+            "target_unit": action.get("target_unit") or "days",
+        }
+        library_key = (
+            stable_key
+            if stable_key in ACTION_LIBRARY_BY_KEY
+            else library_key_by_name.get(_normalize_action_name(name))
+        )
+        if library_key:
+            carry_forward_action_defaults[library_key] = default
+        else:
+            carry_forward_custom_actions.append(default)
 
     # Keep enough custom rows for all carried-forward custom actions plus
     # a few blank rows for additions during the coaching call.
@@ -1307,6 +1306,7 @@ def client_profile(
             "coach_week_is_current": coach_week_is_current,
             "coach_week_is_past": coach_week_is_past,
             "coach_week_is_future": coach_week_is_future,
+            "coach_week_checkin": coach_week_checkin,
             "coach_week_can_previous": coach_week_number > 1,
             "coach_week_can_next": coach_week_number < week_number + 1,
             "progress_summary": progress_summary,
@@ -1878,6 +1878,7 @@ def add_client_checkin(
     request: Request,
     client_id: int,
     call_date: str = Form(...),
+    checkin_id: str = Form(""),
     wins: str = Form(""),
     struggles: str = Form(""),
     improvements_needed: str = Form(""),
@@ -1894,7 +1895,8 @@ def add_client_checkin(
     if not coach_is_logged_in(request):
         return RedirectResponse("/coach/login", status_code=303)
 
-    checkin_id = ClientService.add_checkin(
+    checkin_id = ClientService.save_checkin(
+        checkin_id=checkin_id.strip() or None,
         client_id=client_id,
         call_date=call_date,
         weight_kg=None,
@@ -1954,7 +1956,13 @@ def add_client_checkin(
         )
         existing_action_names.add(assignment["name"])
 
+    saved_client = ClientService.get(client_id) or {}
+    saved_week_number, _, _ = _coaching_week_bounds(
+        saved_client,
+        date.fromisoformat(call_date),
+    )
+    week_query = f"&week={saved_week_number}" if saved_week_number else ""
     return RedirectResponse(
-        f"/dashboard/clients/{client_id}?tab=weekly",
+        f"/dashboard/clients/{client_id}?tab=weekly{week_query}",
         status_code=303,
     )

@@ -5,6 +5,7 @@ from app.database import (
     get_client,
     get_clients,
     create_weekly_checkin,
+    update_weekly_checkin,
     get_client_checkins,
     get_calls_today,
     get_calls_this_week,
@@ -84,6 +85,48 @@ class ClientService:
             improvements_needed=improvements_needed,
             coach_support=coach_support,
         )
+
+
+    @staticmethod
+    def save_checkin(
+        client_id,
+        call_date,
+        checkin_id=None,
+        weight_kg=None,
+        next_call_date=None,
+        next_call_time=None,
+        wins=None,
+        struggles=None,
+        improvements_needed=None,
+        coach_support=None,
+    ):
+        """Create a coaching review once; update that same review on later edits."""
+        if checkin_id:
+            return update_weekly_checkin(
+                checkin_id=int(checkin_id),
+                client_id=client_id,
+                call_date=call_date,
+                weight_kg=weight_kg,
+                next_call_date=next_call_date,
+                next_call_time=next_call_time,
+                wins=wins,
+                struggles=struggles,
+                improvements_needed=improvements_needed,
+                coach_support=coach_support,
+            )
+
+        return create_weekly_checkin(
+            client_id=client_id,
+            call_date=call_date,
+            weight_kg=weight_kg,
+            next_call_date=next_call_date,
+            next_call_time=next_call_time,
+            wins=wins,
+            struggles=struggles,
+            improvements_needed=improvements_needed,
+            coach_support=coach_support,
+        )
+
 
     @staticmethod
     def checkins(client_id):

@@ -1524,6 +1524,57 @@ def create_weekly_checkin(
 
             return int(row["id"])
 
+
+def update_weekly_checkin(
+    checkin_id: int,
+    client_id: int,
+    call_date,
+    weight_kg=None,
+    next_call_date=None,
+    next_call_time=None,
+    wins=None,
+    struggles=None,
+    improvements_needed=None,
+    coach_support=None,
+):
+    """Update one existing coaching check-in owned by this client."""
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE client_weekly_checkins
+                SET
+                    call_date = %s,
+                    weight_kg = COALESCE(%s, weight_kg),
+                    next_call_date = %s,
+                    next_call_time = %s,
+                    wins = %s,
+                    struggles = %s,
+                    improvements_needed = %s,
+                    coach_support = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+                  AND client_id = %s
+                RETURNING id
+                """,
+                (
+                    call_date,
+                    weight_kg,
+                    next_call_date,
+                    next_call_time,
+                    wins,
+                    struggles,
+                    improvements_needed,
+                    coach_support,
+                    checkin_id,
+                    client_id,
+                ),
+            )
+            row = cursor.fetchone()
+            if not row:
+                raise RuntimeError("Weekly check-in could not be updated")
+            return int(row["id"])
+
 def get_client_checkins(client_id: int):
     with get_connection() as connection:
         with connection.cursor() as cursor:
