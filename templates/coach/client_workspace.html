@@ -809,7 +809,7 @@
   .nw-workout-plan-grid{grid-template-columns:1fr}
 }
 
-</style>
+.nw-coaching-loop{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:12px;padding:15px 17px;border:1px solid #e4d4ea;border-radius:14px;background:#fbf6fd}.nw-coaching-loop strong{display:block;font-size:14px}.nw-coaching-loop span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px}.nw-coaching-loop-actions{display:flex;gap:6px;flex-wrap:wrap}.nw-coaching-loop-actions a{padding:7px 9px;border-radius:8px;background:#fff;color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850;border:1px solid #eadfee}.nw-last-call{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:12px;padding:13px 15px;border:1px solid var(--coach-border);border-radius:13px;background:#fff}.nw-last-call span{display:block;color:var(--coach-muted);font-size:9px;font-weight:850}.nw-last-call strong{display:block;margin-top:4px;font-size:12px}.nw-last-call p{margin:4px 0 0;color:var(--coach-muted);font-size:10px}.nw-last-call a{color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850}.nw-workflow-event{display:grid;grid-template-columns:58px 28px minmax(0,1fr);gap:9px;align-items:start;padding:10px 0;border-top:1px solid #f0ebf1}.nw-workflow-event:first-child{border-top:0}.nw-workflow-event-date{color:var(--coach-muted);font-size:10px}.nw-workflow-event-icon{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:#eee1f3;color:var(--coach-purple);font-size:9px;font-weight:900}.nw-workflow-event-icon.nudge{background:#edf8f0;color:#2f6f4e}.nw-workflow-event strong{display:block;font-size:11px}.nw-workflow-event p{margin:3px 0 0;color:var(--coach-muted);font-size:10px;line-height:1.45}@media(max-width:750px){.nw-coaching-loop,.nw-last-call{display:block}.nw-coaching-loop-actions{margin-top:10px}.nw-last-call a{display:inline-block;margin-top:8px}}</style>
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
 
@@ -1013,6 +1013,18 @@
   
 
 <section class="nw-panel-tab active" data-panel="overview">
+<section class="nw-coaching-loop">
+    <div><p class="nw-kicker" style="margin:0 0 4px">COACHING LOOP</p><strong>Prepare → Coach → Record → Plan</strong><span>Keep the conversation and next steps connected.</span></div>
+    <div class="nw-coaching-loop-actions">
+      <a href="/dashboard/clients/{{ client.id }}/prepare-call">Prepare for call</a>
+      <a href="/dashboard/clients/{{ client.id }}/after-call">Record after call</a>
+      <a href="/dashboard/clients/{{ client.id }}?tab=timeline">View timeline</a>
+    </div>
+  </section>
+  {% if latest_call_note %}
+  <section class="nw-last-call"><div><span>LAST CALL · {{ latest_call_note.call_date.strftime("%d %b %Y") }}</span><strong>{{ latest_call_note.summary or "Call notes recorded" }}</strong>{% if latest_call_note.next_focus %}<p>Next focus: {{ latest_call_note.next_focus }}</p>{% endif %}</div><a href="/dashboard/clients/{{ client.id }}/prepare-call">Use for next call →</a></section>
+  {% endif %}
+
     <div class="nw-overview">
       <div class="nw-stack">
         <section class="nw-panel nw-pad">
@@ -1724,6 +1736,17 @@
           {% if checkins %}<div class="nw-timeline">{% for checkin in checkins %}<div class="nw-timeline-item"><div class="nw-timeline-date">{{ checkin.call_date.strftime("%d %b %Y") }}</div><div class="nw-timeline-copy"><strong>{{ checkin.wins or "Weekly check-in completed" }}</strong><p>{% if checkin.improvements_needed %}Next focus: {{ checkin.improvements_needed }}{% endif %}</p></div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">Progress history will appear after the first completed weekly review.</p>{% endif %}
         </section>
 </div>
+
+    <section class="nw-panel nw-pad">
+      <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Coach activity</p><h2>Calls & follow-ups</h2><p>Recorded coaching calls and gentle nudges, newest first.</p></div></div>
+      {% if workflow_timeline %}
+      <div class="nw-workflow-timeline">
+        {% for item in workflow_timeline %}
+        <div class="nw-workflow-event"><div class="nw-workflow-event-date">{{ item.event_date.strftime("%d %b") }}</div><div class="nw-workflow-event-icon {% if item.event_type == 'nudge' %}nudge{% endif %}">{% if item.event_type == 'call' %}C{% else %}N{% endif %}</div><div><strong>{{ item.label }}</strong>{% if item.detail %}<p>{{ item.detail }}</p>{% endif %}</div></div>
+        {% endfor %}
+      </div>
+      {% else %}<div class="nw-inline-empty">Recorded coaching calls and nudges will appear here.</div>{% endif %}
+    </section>
 
     <section class="nw-panel nw-pad">
       <div class="nw-heading">

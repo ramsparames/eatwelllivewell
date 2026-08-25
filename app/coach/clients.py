@@ -70,6 +70,14 @@ from app.services.client_nudge_service import (
     nudge_is_recent,
 )
 
+from app.services.coaching_call_workflow_service import (
+    create_coaching_call_tables,
+    get_call_notes,
+    get_latest_call_note,
+    get_workflow_timeline,
+    save_call_note,
+)
+
 router = APIRouter()
 
 # Client-facing routes live in app/client/portal.py.
@@ -84,6 +92,7 @@ templates = Jinja2Templates(
 create_phase_a_tables()
 create_workout_tables()
 create_macro_tracking_tables()
+create_coaching_call_tables()
 
 
 ACTION_LIBRARY = [{'category': 'Nutrition',
@@ -1267,6 +1276,10 @@ def client_profile(
     client_timeline = build_client_timeline(profile["client"])
     coach_summary = build_coach_summary(call_prep, progress_summary)
 
+    coaching_call_notes = get_call_notes(client_id, limit=20)
+    latest_call_note = coaching_call_notes[0] if coaching_call_notes else None
+    workflow_timeline = get_workflow_timeline(client_id, limit=30)
+
     next_synced_call = get_next_client_call(profile["client"])
     coaching_booking_base_url = os.getenv(
         "SYNAMATE_COACHING_CALL_URL",
@@ -1304,6 +1317,9 @@ def client_profile(
             "macro_settings": macro_settings,
             "macro_history": macro_history,
             "client_timeline": client_timeline,
+            "coaching_call_notes": coaching_call_notes,
+            "latest_call_note": latest_call_note,
+            "workflow_timeline": workflow_timeline,
             "client_resources": client_resources,
             "available_resources": available_resources,
             "client_workouts": client_workouts,
@@ -1326,6 +1342,66 @@ def client_profile(
     )
 
 
+
+@router.get("/dashboard/clients/{client_id}/prepare-call", response_class=HTMLResponse)
+def prepare_client_call(request: Request, client_id: int):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    profile=ClientService.profile(client_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+    week_number, week_start, week_end = _coaching_week_bounds(profile["client"], date.today())
+    call_prep = build_call_prep(client_id, week_start, week_end) if week_start and week_end else None
+    progress_summary = get_client_progress_summary(client_id, week_start, week_number, weeks=4) if week_start and week_end else None
+    return templates.TemplateResponse("coach/call_prepare.html", {
+        "request":request, "active_nav":"clients", "client":profile["client"],
+        "current_week":week_number, "week_start":week_start, "week_end":week_end,
+        "call_prep":call_prep,
+        "coach_summary":build_coach_summary(call_prep, progress_summary),
+        "latest_call_note":get_latest_call_note(client_id),
+        "next_call":get_next_client_call(profile["client"]),
+    })
+
+@router.get("/dashboard/clients/{client_id}/after-call", response_class=HTMLResponse)
+def after_client_call(request: Request, client_id: int):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    profile=ClientService.profile(client_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+    week_number, week_start, week_end = _coaching_week_bounds(profile["client"], date.today())
+    return templates.TemplateResponse("coach/call_after.html", {
+        "request":request, "active_nav":"clients", "client":profile["client"],
+        "current_week":week_number, "week_start":week_start,
+        "week_end":week_end, "today":date.today()
+    })
+
+@router.post("/dashboard/clients/{client_id}/after-call")
+def save_after_client_call(
+    request: Request, client_id: int, call_date: str = Form(...),
+    summary: str = Form(""), wins: str = Form(""), barriers: str = Form(""),
+    decisions: str = Form(""), next_focus: str = Form(""),
+    client_message: str = Form(""), private_note: str = Form("")
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    profile=ClientService.profile(client_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+    parsed=date.fromisoformat(call_date)
+    _, week_start, _ = _coaching_week_bounds(profile["client"], parsed)
+    save_call_note(
+        client_id=client_id, call_date=parsed, week_start=week_start,
+        summary=summary.strip() or None, wins=wins.strip() or None,
+        barriers=barriers.strip() or None, decisions=decisions.strip() or None,
+        next_focus=next_focus.strip() or None,
+        client_message=client_message.strip() or None,
+        private_note=private_note.strip() or None
+    )
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=weekly&after_call_saved=1",
+        status_code=303
+    )
 
 @router.get(
     "/dashboard/resources",
