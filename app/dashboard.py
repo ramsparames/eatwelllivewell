@@ -533,6 +533,10 @@ def dashboard_home(request: Request):
             if matched_client
             else "/dashboard/clients"
         )
+        item["prepare_href"] = (
+            f"/dashboard/clients/{matched_client['id']}/prepare-call"
+            if matched_client else None
+        )
         calls_today.append(item)
 
     clarity_calls = (
@@ -619,6 +623,10 @@ def dashboard_home(request: Request):
             f"/dashboard/clients/{matched_client['id']}?tab=weekly"
             if matched_client
             else "/dashboard/clients"
+        )
+        item["prepare_href"] = (
+            f"/dashboard/clients/{matched_client['id']}/prepare-call"
+            if matched_client else None
         )
         calls_this_week.append(item)
 
