@@ -809,7 +809,14 @@
   .nw-workout-plan-grid{grid-template-columns:1fr}
 }
 
-.nw-coaching-loop{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:12px;padding:15px 17px;border:1px solid #e4d4ea;border-radius:14px;background:#fbf6fd}.nw-coaching-loop strong{display:block;font-size:14px}.nw-coaching-loop span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px}.nw-coaching-loop-actions{display:flex;gap:6px;flex-wrap:wrap}.nw-coaching-loop-actions a{padding:7px 9px;border-radius:8px;background:#fff;color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850;border:1px solid #eadfee}.nw-last-call{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:12px;padding:13px 15px;border:1px solid var(--coach-border);border-radius:13px;background:#fff}.nw-last-call span{display:block;color:var(--coach-muted);font-size:9px;font-weight:850}.nw-last-call strong{display:block;margin-top:4px;font-size:12px}.nw-last-call p{margin:4px 0 0;color:var(--coach-muted);font-size:10px}.nw-last-call a{color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850}.nw-workflow-event{display:grid;grid-template-columns:58px 28px minmax(0,1fr);gap:9px;align-items:start;padding:10px 0;border-top:1px solid #f0ebf1}.nw-workflow-event:first-child{border-top:0}.nw-workflow-event-date{color:var(--coach-muted);font-size:10px}.nw-workflow-event-icon{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:#eee1f3;color:var(--coach-purple);font-size:9px;font-weight:900}.nw-workflow-event-icon.nudge{background:#edf8f0;color:#2f6f4e}.nw-workflow-event strong{display:block;font-size:11px}.nw-workflow-event p{margin:3px 0 0;color:var(--coach-muted);font-size:10px;line-height:1.45}@media(max-width:750px){.nw-coaching-loop,.nw-last-call{display:block}.nw-coaching-loop-actions{margin-top:10px}.nw-last-call a{display:inline-block;margin-top:8px}}</style>
+.nw-coaching-loop{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:12px;padding:15px 17px;border:1px solid #e4d4ea;border-radius:14px;background:#fbf6fd}.nw-coaching-loop strong{display:block;font-size:14px}.nw-coaching-loop span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px}.nw-coaching-loop-actions{display:flex;gap:6px;flex-wrap:wrap}.nw-coaching-loop-actions a{padding:7px 9px;border-radius:8px;background:#fff;color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850;border:1px solid #eadfee}.nw-last-call{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:12px;padding:13px 15px;border:1px solid var(--coach-border);border-radius:13px;background:#fff}.nw-last-call span{display:block;color:var(--coach-muted);font-size:9px;font-weight:850}.nw-last-call strong{display:block;margin-top:4px;font-size:12px}.nw-last-call p{margin:4px 0 0;color:var(--coach-muted);font-size:10px}.nw-last-call a{color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850}.nw-workflow-event{display:grid;grid-template-columns:58px 28px minmax(0,1fr);gap:9px;align-items:start;padding:10px 0;border-top:1px solid #f0ebf1}.nw-workflow-event:first-child{border-top:0}.nw-workflow-event-date{color:var(--coach-muted);font-size:10px}.nw-workflow-event-icon{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:#eee1f3;color:var(--coach-purple);font-size:9px;font-weight:900}.nw-workflow-event-icon.nudge{background:#edf8f0;color:#2f6f4e}.nw-workflow-event strong{display:block;font-size:11px}.nw-workflow-event p{margin:3px 0 0;color:var(--coach-muted);font-size:10px;line-height:1.45}@media(max-width:750px){.nw-coaching-loop,.nw-last-call{display:block}.nw-coaching-loop-actions{margin-top:10px}.nw-last-call a{display:inline-block;margin-top:8px}}
+.nw-weekly-flow-intro{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:12px;padding:15px 17px;border:1px solid #e4d4ea;border-radius:14px;background:#fbf6fd}
+.nw-weekly-flow-intro strong{display:block;font-size:14px}
+.nw-weekly-flow-intro span{display:block;margin-top:3px;color:var(--coach-muted);font-size:10px;line-height:1.45}
+.nw-weekly-flow-intro a{color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850;white-space:nowrap}
+.nw-weekly-flow-intro a:hover{text-decoration:underline}
+@media(max-width:700px){.nw-weekly-flow-intro{display:block}.nw-weekly-flow-intro a{display:inline-block;margin-top:9px}}
+</style>
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
 
@@ -998,7 +1005,7 @@
 {% else %}
 <div class="nw">
   <header class="nw-top">
-    <div><a class="nw-back" href="/dashboard/clients">← Clients</a><p class="nw-kicker">CLIENT WORKSPACE</p><h1>{{ client.name }}</h1><p>{{ client.program or "Coaching" }} · Week {{ current_week }} · {{ (client.status or "active")|title }}</p></div>
+    <div><a class="nw-back" href="/dashboard/clients">← All clients</a><p class="nw-kicker">CLIENT WORKSPACE</p><h1>{{ client.name }}</h1><p>{{ client.program or "Coaching" }} · Week {{ current_week }} · {{ (client.status or "active")|title }}</p></div>
     <div class="nw-meta"><span class="nw-chip"><strong>Week {{ current_week }}</strong> · {{ current_week_start.strftime("%d %b %Y") }} – {{ current_week_end.strftime("%d %b %Y") }}</span><span class="nw-chip">Next call: <strong>{% if next_synced_call and next_synced_call.local_start_time %}{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}{% else %}Not scheduled{% endif %}</strong></span><span class="nw-chip">{{ (client.status or "active")|title }}</span></div>
   </header>
 
@@ -1014,10 +1021,10 @@
 
 <section class="nw-panel-tab active" data-panel="overview">
 <section class="nw-coaching-loop">
-    <div><p class="nw-kicker" style="margin:0 0 4px">COACHING LOOP</p><strong>Prepare → Coach → Record → Plan</strong><span>Keep the conversation and next steps connected.</span></div>
+    <div><p class="nw-kicker" style="margin:0 0 4px">COACHING LOOP</p><strong>Prepare → Coach → Weekly Coaching → Publish</strong><span>One place to review the week, capture the conversation and plan what comes next.</span></div>
     <div class="nw-coaching-loop-actions">
       <a href="/dashboard/clients/{{ client.id }}/prepare-call">Prepare for call</a>
-      <a href="/dashboard/clients/{{ client.id }}/after-call">Record after call</a>
+      <a href="/dashboard/clients/{{ client.id }}?tab=weekly">Weekly Coaching</a>
       <a href="/dashboard/clients/{{ client.id }}?tab=timeline">View timeline</a>
     </div>
   </section>
@@ -1087,6 +1094,16 @@
   </section>
 
   <section class="nw-panel-tab" data-panel="weekly">
+
+  <section class="nw-weekly-flow-intro">
+    <div>
+      <p class="nw-kicker" style="margin:0 0 4px">WEEKLY COACHING</p>
+      <strong>Review → Coach → Plan → Publish</strong>
+      <span>Use this one workspace for wins, struggles, coach notes and next-week actions.</span>
+    </div>
+    <a href="/dashboard/clients/{{ client.id }}/prepare-call">Prepare for call →</a>
+  </section>
+
 <div class="nw-workflow-strip">
     <div class="active"><span>1</span><strong>Review</strong><small>This week’s data</small></div>
     <div><span>2</span><strong>Coach</strong><small>Wins & barriers</small></div>
