@@ -26,9 +26,9 @@
 .nw-data-week-head>div{display:flex;align-items:baseline;gap:9px}.nw-data-week-head strong{font-size:13px}.nw-data-week-head span{font-size:10px;color:var(--coach-muted)}
 .nw-transposed-wrap{border:0;border-radius:0;max-height:none!important}
 .nw-excel.nw-transposed{min-width:760px;width:100%;font-size:10px!important}
-.nw-excel.nw-transposed thead th{min-width:88px;text-align:center}.nw-excel.nw-transposed thead th small{display:block;margin-top:3px;font-size:8px;text-transform:none;letter-spacing:0}
+.nw-excel.nw-transposed thead th{min-width:88px;text-align:center;vertical-align:middle}.nw-excel.nw-transposed thead th .nw-day-name{display:block;font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}.nw-excel.nw-transposed thead th .nw-day-date{display:block;margin-top:4px;font-size:9px;font-weight:850;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
 .nw-excel.nw-transposed .nw-metric-head{position:sticky;left:0;z-index:5;min-width:190px;max-width:240px;text-align:left;background:#faf7fb;white-space:normal}
-.nw-excel.nw-transposed thead .nw-metric-head{z-index:8}.nw-excel.nw-transposed tbody td{text-align:center}
+.nw-excel.nw-transposed thead .nw-metric-head{z-index:8}.nw-excel.nw-transposed tbody td{text-align:center!important;vertical-align:middle!important}.nw-excel.nw-transposed tbody td .yes,.nw-excel.nw-transposed tbody td .no,.nw-excel.nw-transposed tbody td .na{display:inline-flex;align-items:center;justify-content:center;min-width:20px;min-height:20px;margin:0 auto}
 .nw-excel.nw-transposed .nw-note-cell{min-width:110px;white-space:normal;text-align:left;line-height:1.35}
 .nw-excel.nw-transposed .nw-row-section th,.nw-excel.nw-transposed .nw-row-section td{background:#f5eff7;font-size:8px;text-transform:uppercase;letter-spacing:.05em;font-weight:900;color:var(--coach-purple)}
 .nw-excel.nw-transposed .nw-metric-head small{display:block;margin-top:2px;color:var(--coach-muted);font-size:8px;font-weight:700}
@@ -1481,7 +1481,7 @@
               <thead>
                 <tr>
                   <th class="nw-metric-head">Data</th>
-                  {% for row in week.rows %}<th>{{ row.date.strftime("%a") }}<small>{{ row.date.strftime("%d %b") }}</small></th>{% endfor %}
+                  {% for row in week.rows %}<th><span class="nw-day-name">{{ row.date.strftime("%a") }}</span><span class="nw-day-date">{{ row.date.strftime("%d %b") }}</span></th>{% endfor %}
                 </tr>
               </thead>
               <tbody>
