@@ -163,7 +163,7 @@
             <strong>{{ call.name or call.title or 'Call' }}</strong>
             <span>{{ call.local_start_time.strftime('%I:%M %p') if call.local_start_time else '' }}{% if call.call_type %} · {{ call.call_type }}{% endif %}</span>
           </a>
-          {% if call.prepare_href %}<a class="sd-prepare-link" href="{{ call.prepare_href }}">Prepare →</a>{% else %}<span class="sd-booked">Booked</span>{% endif %}
+          <span class="sd-booked">Booked</span>
         </div>
         {% endfor %}
       {% else %}
@@ -191,7 +191,7 @@
             <strong>{{ call.name or call.title or 'Call' }}</strong>
             <span>{{ call.local_start_time.strftime('%a, %d %b · %I:%M %p') if call.local_start_time else '' }}{% if call.call_type %} · {{ call.call_type }}{% endif %}</span>
           </a>
-          {% if call.prepare_href %}<a class="sd-prepare-link" href="{{ call.prepare_href }}">Prepare →</a>{% else %}<span class="sd-arrow">›</span>{% endif %}
+          <span class="sd-arrow">›</span>
         </div>
         {% endfor %}
       </div>

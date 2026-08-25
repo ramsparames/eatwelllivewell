@@ -816,6 +816,13 @@
 .nw-weekly-flow-intro a{color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850;white-space:nowrap}
 .nw-weekly-flow-intro a:hover{text-decoration:underline}
 @media(max-width:700px){.nw-weekly-flow-intro{display:block}.nw-weekly-flow-intro a{display:inline-block;margin-top:9px}}
+
+.nw-review-hero,.nw-weekly-hero{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:12px;padding:18px 20px;border:1px solid #e4d4ea;border-radius:15px;background:#fbf6fd}
+.nw-review-hero h2,.nw-weekly-hero h2{margin:0;font-size:21px}.nw-review-hero p,.nw-weekly-hero p{margin:5px 0 0;color:var(--coach-muted);font-size:11px;line-height:1.5}.nw-review-hero>a,.nw-weekly-hero>a{color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850;white-space:nowrap}
+.nw-review-snapshot{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}.nw-review-snapshot>div{padding:13px 14px;border:1px solid var(--coach-border);border-radius:12px;background:#fff}.nw-review-snapshot span,.nw-review-snapshot small{display:block;color:var(--coach-muted);font-size:9px}.nw-review-snapshot strong{display:block;margin:4px 0 2px;color:var(--coach-purple);font-size:20px}
+.nw-review-brief{margin-bottom:12px}.nw-review-detail-link{color:var(--coach-purple);text-decoration:none;font-size:10px;font-weight:850}.nw-review-summary{padding:13px;border-radius:11px;background:#f8f2fa}.nw-review-summary strong{font-size:12px}.nw-review-summary p{margin:4px 0 0;color:var(--coach-muted);font-size:10px;line-height:1.5}.nw-review-columns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.nw-review-columns>div{padding:13px;border-radius:11px;background:#faf9fb}.nw-review-columns h3{margin:0 0 7px;font-size:12px}.nw-review-columns ul{margin:0;padding-left:17px}.nw-review-columns li{margin:4px 0;font-size:10px;line-height:1.45}.nw-review-alert{margin-top:6px;padding:7px 8px;border-radius:8px;background:#fff4ed;color:#8c4c33;font-size:9px}.nw-review-client-note{padding:7px 0;border-top:1px solid #eee8f0}.nw-review-client-note:first-of-type{border-top:0}.nw-review-client-note strong{font-size:9px}.nw-review-client-note p{margin:2px 0 0;color:var(--coach-muted);font-size:10px}.nw-review-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.nw-review-actions>div{display:flex;gap:8px;padding:7px 9px;border:1px solid #eee8f0;border-radius:9px;font-size:9px}.nw-review-actions strong{color:var(--coach-purple)}
+.nw-workflow-clean{grid-template-columns:repeat(4,1fr)}.nw-workflow-clean .done{background:#f7f3f8}.nw-workflow-clean .done span{background:#ddd0e2;color:var(--coach-purple)}
+@media(max-width:760px){.nw-review-hero,.nw-weekly-hero{display:block}.nw-review-hero>a,.nw-weekly-hero>a{display:inline-block;margin-top:9px}.nw-review-snapshot{grid-template-columns:1fr 1fr}.nw-review-columns{grid-template-columns:1fr}}
 </style>
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
@@ -1011,25 +1018,68 @@
 
   <nav class="nw-tabs nw-tabs-polished">
     <button class="nw-tab active" type="button" data-tab="overview">Overview</button>
-    <button class="nw-tab" type="button" data-tab="weekly">Weekly Coaching</button>
     <button class="nw-tab" type="button" data-tab="clientdata">Data</button>
-    <button class="nw-tab" type="button" data-tab="resources">Workouts & Resources</button>
+    <button class="nw-tab" type="button" data-tab="weekly">Weekly Coaching</button>
     <button class="nw-tab" type="button" data-tab="timeline">Progress</button>
+    <button class="nw-tab" type="button" data-tab="resources">Workouts & Resources</button>
   </nav>
 
   
 
 <section class="nw-panel-tab active" data-panel="overview">
-<section class="nw-coaching-loop">
-    <div><p class="nw-kicker" style="margin:0 0 4px">COACHING LOOP</p><strong>Prepare → Coach → Weekly Coaching → Publish</strong><span>One place to review the week, capture the conversation and plan what comes next.</span></div>
-    <div class="nw-coaching-loop-actions">
-      <a href="/dashboard/clients/{{ client.id }}/prepare-call">Prepare for call</a>
-      <a href="/dashboard/clients/{{ client.id }}?tab=weekly">Weekly Coaching</a>
-      <a href="/dashboard/clients/{{ client.id }}?tab=timeline">View timeline</a>
+
+  <section class="nw-review-hero">
+    <div class="nw-review-hero-copy">
+      <p class="nw-kicker" style="margin:0 0 4px">1 · REVIEW</p>
+      <h2>Ready for this week's coaching conversation</h2>
+      <p>Current signals, client context and the few things worth discussing. Use Data only when you want to drill into the detail.</p>
+    </div>
+    <a href="/dashboard/clients/{{ client.id }}?tab=weekly">Start Weekly Coaching →</a>
+  </section>
+
+  {% if call_prep %}
+  <section class="nw-review-snapshot">
+    <div><span>Check-ins</span><strong>{{ call_prep.submitted_count }}/7</strong><small>this week</small></div>
+    <div><span>Commitments</span><strong>{{ call_prep.action_percent }}%</strong><small>completed</small></div>
+    <div><span>Average steps</span><strong>{{ "{:,}".format(call_prep.average_steps) if call_prep.average_steps else "—" }}</strong><small>this week</small></div>
+    <div><span>Weight</span><strong>{% if call_prep.weight_change is not none %}{{ "%+.1f"|format(call_prep.weight_change) }} kg{% elif call_prep.weight_latest is not none %}{{ call_prep.weight_latest }} kg{% else %}—{% endif %}</strong><small>{% if call_prep.weight_change is not none %}vs previous{% else %}latest{% endif %}</small></div>
+  </section>
+
+  <section class="nw-review-brief">
+    <div class="nw-panel nw-pad">
+      <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">This week</p><h2>What matters right now</h2></div><a class="nw-review-detail-link" href="/dashboard/clients/{{ client.id }}?tab=clientdata">View detailed data →</a></div>
+      {% if coach_summary %}
+      <div class="nw-review-summary">
+        <strong>{{ coach_summary.headline }}</strong>
+        <p>{{ coach_summary.focus }}</p>
+      </div>
+      {% endif %}
+      <div class="nw-review-columns">
+        <div>
+          <h3>Worth discussing</h3>
+          {% if call_prep.top_focus %}
+          <ul>{% for item in call_prep.top_focus %}<li>{{ item }}</li>{% endfor %}</ul>
+          {% else %}<p class="nw-helper">No major coaching flags this week.</p>{% endif %}
+          {% for item in call_prep.attention %}<div class="nw-review-alert">{{ item }}</div>{% endfor %}
+        </div>
+        <div>
+          <h3>Client notes / help requested</h3>
+          {% if call_prep.client_notes %}
+            {% for note in call_prep.client_notes[-3:] %}
+            <div class="nw-review-client-note"><strong>{{ note.date.strftime("%d %b") }}</strong><p>{{ note.note }}</p></div>
+            {% endfor %}
+          {% else %}<p class="nw-helper">No client notes entered this week.</p>{% endif %}
+        </div>
+      </div>
+      {% if call_prep.action_rows %}
+      <div class="nw-review-actions">
+        {% for action in call_prep.action_rows %}
+        <div><span>{{ action.name }}</span><strong>{{ action.completed }}/{{ action.target }}</strong></div>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
   </section>
-  {% if latest_call_note %}
-  <section class="nw-last-call"><div><span>LAST CALL · {{ latest_call_note.call_date.strftime("%d %b %Y") }}</span><strong>{{ latest_call_note.summary or "Call notes recorded" }}</strong>{% if latest_call_note.next_focus %}<p>Next focus: {{ latest_call_note.next_focus }}</p>{% endif %}</div><a href="/dashboard/clients/{{ client.id }}/prepare-call">Use for next call →</a></section>
   {% endif %}
 
     <div class="nw-overview">
@@ -1095,147 +1145,42 @@
 
   <section class="nw-panel-tab" data-panel="weekly">
 
-  <section class="nw-weekly-flow-intro">
+  <section class="nw-weekly-hero">
     <div>
-      <p class="nw-kicker" style="margin:0 0 4px">WEEKLY COACHING</p>
-      <strong>Review → Coach → Plan → Publish</strong>
-      <span>Use this one workspace for wins, struggles, coach notes and next-week actions.</span>
+      <p class="nw-kicker" style="margin:0 0 4px">WEEKLY COACHING · WEEK {{ coach_week_number }}</p>
+      <h2>Coach → Plan → Publish</h2>
+      <p>The Review lives on Overview. Capture the conversation here, decide what changes next week, then publish.</p>
     </div>
-    <a href="/dashboard/clients/{{ client.id }}/prepare-call">Prepare for call →</a>
+    <a href="/dashboard/clients/{{ client.id }}">← Review on Overview</a>
   </section>
 
-<div class="nw-workflow-strip">
-    <div class="active"><span>1</span><strong>Review</strong><small>This week’s data</small></div>
-    <div><span>2</span><strong>Coach</strong><small>Wins & barriers</small></div>
-    <div><span>3</span><strong>Plan</strong><small>Actions & workouts</small></div>
-    <div><span>4</span><strong>Respond</strong><small>Feedback to client</small></div>
-    <div><span>5</span><strong>Publish</strong><small>Save next week</small></div>
+  <div class="nw-workflow-strip nw-workflow-clean">
+    <div class="done"><span>1</span><strong>Review</strong><small>Overview</small></div>
+    <div class="active"><span>2</span><strong>Coach</strong><small>Capture conversation</small></div>
+    <div><span>3</span><strong>Plan</strong><small>Next week</small></div>
+    <div><span>4</span><strong>Publish</strong><small>Make it live</small></div>
   </div>
 
-    <div class="nw-coach-week-browser">
-      {% if coach_week_can_previous %}
-      <a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number - 1 }}">←</a>
-      {% else %}
-      <span class="nw-coach-week-nav disabled">←</span>
-      {% endif %}
+  <div class="nw-coach-week-browser">
+    {% if coach_week_can_previous %}<a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number - 1 }}">←</a>{% else %}<span class="nw-coach-week-nav disabled">←</span>{% endif %}
+    <div class="nw-coach-week-main"><strong>Week {{ coach_week_number }}</strong><span>{{ coach_week_start.strftime("%d %b") }} – {{ coach_week_end.strftime("%d %b %Y") }}</span>{% if coach_week_is_current %}<span class="nw-coach-week-mode">Current week</span>{% elif coach_week_is_past %}<span class="nw-coach-week-mode readonly">Read-only history</span>{% else %}<span class="nw-coach-week-mode future">Upcoming week</span>{% endif %}</div>
+    {% if coach_week_can_next %}<a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number + 1 }}">→</a>{% else %}<span class="nw-coach-week-nav disabled">→</span>{% endif %}
+  </div>
 
-      <div class="nw-coach-week-main">
-        <strong>Week {{ coach_week_number }}</strong>
-        <span>{{ coach_week_start.strftime("%d %b") }} – {{ coach_week_end.strftime("%d %b %Y") }}</span>
-        {% if coach_week_is_current %}
-        <span class="nw-coach-week-mode">Current week</span>
-        {% elif coach_week_is_past %}
-        <span class="nw-coach-week-mode readonly">Read-only history</span>
-        {% else %}
-        <span class="nw-coach-week-mode future">Upcoming week</span>
-        {% endif %}
-      </div>
-
-      {% if coach_week_can_next %}
-      <a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number + 1 }}">→</a>
-      {% else %}
-      <span class="nw-coach-week-nav disabled">→</span>
-      {% endif %}
-    </div>
-
-    <div class="nw-week-banner"><div><strong>Week {{ coach_week_number }} review</strong><span>{{ coach_week_start.strftime("%d %b %Y") }} – {{ coach_week_end.strftime("%d %b %Y") }}</span></div><div class="nw-week-stat"><b>{{ week_review.submitted_count if week_review else 0 }} / 7</b><span>client check-ins submitted</span></div></div>
-
-    {% if coach_week_is_past %}
-    <div class="nw-week-readonly-note">This coaching week is closed. Daily entries, commitments and body measurements are available for review only.</div>
-    {% elif coach_week_is_future %}
-    <div class="nw-week-readonly-note">This is the upcoming coaching week. Any actions already planned are shown for reference; client tracking has not opened yet.</div>
-    {% endif %}
-
-    <div class="nw-review">
-      {% if call_prep and not coach_week_is_future %}
-      <section class="nw-panel nw-pad">
-        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Call prep</p><h2>What to know before the call</h2><p>A one-minute summary built from the client’s daily entries.</p></div></div>
-
-        {% if coach_summary %}
-        <div class="nw-summary-ai">
-          <div class="nw-summary-ai-head">
-            <div><h3>{{ coach_summary.headline }}</h3><p>Generated from NourisHer tracking, commitments and weekly progress.</p></div>
-            <span class="nw-ai-badge">Coach summary</span>
-          </div>
-          <div class="nw-summary-cols">
-            <div class="nw-summary-box">
-              <strong>What the data says</strong>
-              <ul>{% for item in coach_summary.observations %}<li>{{ item }}</li>{% endfor %}</ul>
-            </div>
-            <div class="nw-summary-box">
-              <strong>Recommended focus</strong>
-              <p style="margin:0;color:var(--coach-ink)">{{ coach_summary.focus }}</p>
-            </div>
-          </div>
-        </div>
-        {% endif %}
-
-        <div class="nw-prep-grid" style="margin-top:10px">
-          <div class="nw-prep-stat"><span>Daily check-ins</span><strong>{{ call_prep.submitted_count }}/7</strong></div>
-          <div class="nw-prep-stat"><span>Action adherence</span><strong>{{ call_prep.action_percent }}%</strong></div>
-          <div class="nw-prep-stat"><span>Average steps</span><strong>{{ call_prep.average_steps if call_prep.average_steps else "—" }}</strong></div>
-          <div class="nw-prep-stat"><span>Weight change</span><strong>{% if call_prep.weight_change is not none %}{{ "%+.1f"|format(call_prep.weight_change) }} kg{% elif call_prep.weight_latest is not none %}{{ call_prep.weight_latest }} kg{% else %}—{% endif %}</strong></div>
-        </div>
-
-        <div class="nw-prep-focus">
-          <div class="nw-prep-focus-box">
-            <h3>Coach focus for this call</h3>
-            <ul>
-              {% for item in call_prep.top_focus %}
-              <li>{{ item }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-          <div class="nw-prep-focus-box">
-            <h3>Client notes / help to discuss</h3>
-            {% if call_prep.client_notes %}
-            <div class="nw-client-notes">
-              {% for note in call_prep.client_notes[-3:] %}
-              <div class="nw-client-note"><strong>{{ note.date.strftime("%d %b") }}</strong><p>{{ note.note }}</p></div>
-              {% endfor %}
-            </div>
-            {% else %}
-            <p class="nw-helper" style="margin:0">No client notes were entered this week.</p>
-            {% endif %}
-          </div>
-        </div>
-
-        {% if call_prep.action_rows %}<div class="nw-prep-actions">{% for action in call_prep.action_rows %}<div class="nw-prep-action"><span>{{ action.name }}</span><strong>{{ action.completed }}/{{ action.target }}</strong></div>{% endfor %}</div>{% endif %}
-        {% if call_prep.measurement_changes %}<div class="nw-prep-alert">Measurements vs previous entry: {% for item in call_prep.measurement_changes %}{{ item.label }} {{ "%+.1f"|format(item.change) }} cm{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
-        {% for item in call_prep.attention %}<div class="nw-prep-alert">{{ item }}</div>{% endfor %}
-      </section>
-      {% endif %}
-
-      <section class="nw-panel nw-pad">
-        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Commitments</p><h2>All action-plan completion</h2><p>Every action across every day of this coaching week.</p></div></div>
-        {% if week_review and week_review.actions %}<div class="nw-table-wrap"><table class="nw-table"><thead><tr><th>Action</th>{% for day in week_review.days %}<th>{{ day.date.strftime("%d %b") }}</th>{% endfor %}<th>Total</th></tr></thead><tbody>
-          {% for action in week_review.actions %}<tr><td><strong>{{ action.action_name }}</strong><br><span style="color:var(--coach-muted)">{{ action.target_count or "—" }} {{ action.target_unit or "" }}</span></td>{% for result in action.days %}<td>{% if not result.eligible %}<span class="na">·</span>{% elif result.completed is true %}<span class="yes">✓</span>{% elif result.completed is false %}<span class="no">○</span>{% else %}<span class="na">—</span>{% endif %}</td>{% endfor %}<td><strong>{{ action.completed_count }}/{{ action.eligible_days }}</strong></td></tr>{% endfor %}
-        </tbody></table></div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">No commitments were assigned for this coaching week.</p>{% endif %}
-      </section>
-
-      <section class="nw-panel nw-pad">
-        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Daily data</p><h2>What the client entered</h2><p>One view of submitted days, steps and the notes that may need discussion.</p></div></div>
-        <div class="nw-days">{% if week_review %}{% for day in week_review.days %}<div class="nw-day {% if day.submitted %}submitted{% endif %}"><strong>{{ day.date.strftime("%d %b") }}</strong><small>{{ "✓ Submitted" if day.submitted else "No check-in" }}</small>{% if day.submitted %}<div class="nw-day-data"><span>Steps: <b>{{ day.steps if day.steps is not none else "—" }}</b></span><span>Weight: <b>{{ (day.weight_kg ~ " kg") if day.weight_kg is not none else "—" }}</b></span></div>{% if day.note %}<p class="nw-day-note"><strong>Client note:</strong> {{ day.note }}</p>{% endif %}{% endif %}</div>{% endfor %}{% endif %}</div>
-      </section>
-
-      <section class="nw-panel nw-pad">
-        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Measurements</p><h2>Measurements entered this week {% if week_review and week_review.measurements %}<span class="nw-measure-status">Received</span>{% else %}<span class="nw-measure-status">Not entered</span>{% endif %}</h2></div></div>
-        {% if week_review and week_review.measurements %}<div class="nw-measures">{% for m in week_review.measurements %}<div class="nw-measure"><strong>{{ m.measured_on.strftime("%d %b %Y") }}</strong><div class="nw-values">{% if m.weight_kg is not none %}<span>Weight {{ m.weight_kg }} kg</span>{% endif %}{% if m.upper_arm_cm is not none %}<span>Upper arm {{ m.upper_arm_cm }} cm</span>{% endif %}{% if m.chest_cm is not none %}<span>Chest {{ m.chest_cm }} cm</span>{% endif %}{% if m.waist_cm is not none %}<span>Waist {{ m.waist_cm }} cm</span>{% endif %}{% if m.lower_abdomen_cm is not none %}<span>Lower abdomen {{ m.lower_abdomen_cm }} cm</span>{% endif %}{% if m.hip_cm is not none %}<span>Hip {{ m.hip_cm }} cm</span>{% endif %}{% if m.thigh_cm is not none %}<span>Thigh {{ m.thigh_cm }} cm</span>{% endif %}</div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">No weekly body measurements have been submitted for this coaching week.</p>{% endif %}
-      </section>
-
-      {% if coach_week_is_current %}
+  <div class="nw-review">
+{% if coach_week_is_current %}
       <form method="post" action="/dashboard/clients/{{ client.id }}/checkin" class="nw-panel nw-pad nw-call">
-        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Weekly call</p><h2>Review this week, then plan the next</h2><p>Start with the client notes and attention items above, capture the conversation, then assign Week {{ next_week_number }}.</p></div></div>
+        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">2 · Coach</p><h2>Capture the conversation</h2><p>No tracking data repeated here. Record only what came out of the coaching conversation.</p></div></div>
         <div style="max-width:360px">
           <label>
-            <span class="nw-label">This review date</span>
+            <span class="nw-label">Coaching date</span>
             <input class="nw-input" type="date" name="call_date" value="{{ current_week_end }}" required>
           </label>
-          <p class="nw-helper">The date this Week {{ coach_week_number }} coaching review happened.</p>
+          <p class="nw-helper">The date of this coaching conversation.</p>
         </div>
-        <div class="nw-call-notes"><label><span class="nw-label">Wins</span><textarea class="nw-textarea" name="wins"></textarea></label><label><span class="nw-label">Struggles</span><textarea class="nw-textarea" name="struggles"></textarea></label><label><span class="nw-label">Improvements / focus</span><textarea class="nw-textarea" name="improvements_needed"></textarea></label><label><span class="nw-label">Help / support needed</span><textarea class="nw-textarea" name="coach_support"></textarea></label></div>
+        <div class="nw-call-notes"><label><span class="nw-label">Wins</span><textarea class="nw-textarea" name="wins"></textarea></label><label><span class="nw-label">Struggles</span><textarea class="nw-textarea" name="struggles"></textarea></label><label><span class="nw-label">Agreed focus</span><textarea class="nw-textarea" name="improvements_needed"></textarea></label><label><span class="nw-label">Coach notes / support</span><textarea class="nw-textarea" name="coach_support"></textarea></label></div>
 
-        <div class="nw-next"><h3>Set Week {{ next_week_number }} action plan</h3><p>{{ next_week_start.strftime("%d %b %Y") }} – {{ next_week_end.strftime("%d %b %Y") }} · These actions start next week, not the week being reviewed.</p>
+        <div class="nw-next"><p class="nw-kicker" style="margin:0 0 4px">3 · PLAN</p><h3>Week {{ next_week_number }} commitments</h3><p>{{ next_week_start.strftime("%d %b %Y") }} – {{ next_week_end.strftime("%d %b %Y") }} · Current commitments are carried forward by default. Change only what should be different.</p>
 
           <p class="nw-helper nw-action-help"><strong>Current actions are selected by default.</strong> Leave them checked to carry them into Week {{ next_week_number }}, uncheck anything you want to stop, adjust the target if needed, and add any new actions.</p>
           <div class="nw-library">
@@ -1377,13 +1322,13 @@
         <section class="nw-workflow-card">
           <div class="nw-workflow-head">
             <div>
-              <p class="nw-kicker" style="margin:0 0 4px">Close the coaching loop</p>
-              <h3>Sushma's feedback</h3>
+              <p class="nw-kicker" style="margin:0 0 4px">4 · PUBLISH</p>
+              <h3>Note to client</h3>
             </div>
           </div>
           <div class="nw-grid2">
             <label>
-              <span class="nw-label">Feedback visible to client</span>
+              <span class="nw-label">Coach note visible to client</span>
               <textarea class="nw-input nw-textarea" name="weekly_client_feedback"
                 placeholder="What should she feel proud of, and what should she focus on next?">{{ coach_weekly_feedback.client_feedback if coach_weekly_feedback else "" }}</textarea>
             </label>
@@ -1439,7 +1384,7 @@
           <p class="nw-next-call-note">Synamate opens in a new tab, so the notes and next-week actions on this page stay intact. After booking, save this review; the webhook will sync the appointment automatically.</p>
         </section>
 
-        <div class="nw-save"><p>Saving closes this coaching review and publishes the plan for Week {{ next_week_number }}.</p><button class="nw-btn nw-primary" type="submit">Save & publish next week →</button></div>
+        <div class="nw-save"><p>Publish makes the Week {{ next_week_number }} commitments, workouts and coach note live for the client.</p><button class="nw-btn nw-primary" type="submit">Publish Week {{ next_week_number }} →</button></div>
       </form>
       {% elif coach_week_is_past %}
       <section class="nw-panel nw-pad">
@@ -1461,9 +1406,9 @@
     <section class="nw-panel nw-pad">
       <div class="nw-grid-toolbar">
         <div>
-          <p class="nw-kicker" style="margin-top:0">All coaching data</p>
-          <h2>Client data grid</h2>
-          <p>All weeks and dates in one spreadsheet-style view.</p>
+          <p class="nw-kicker" style="margin-top:0">DATA</p>
+          <h2>Detailed client tracking</h2>
+          <p>Use this when you want to investigate the evidence behind the Overview summary. All weeks and dates remain available here.</p>
         </div>
         <div class="nw-grid-filters">
           <button class="nw-grid-filter active" type="button" data-grid-filter="all">All weeks</button>
@@ -1753,17 +1698,6 @@
           {% if checkins %}<div class="nw-timeline">{% for checkin in checkins %}<div class="nw-timeline-item"><div class="nw-timeline-date">{{ checkin.call_date.strftime("%d %b %Y") }}</div><div class="nw-timeline-copy"><strong>{{ checkin.wins or "Weekly check-in completed" }}</strong><p>{% if checkin.improvements_needed %}Next focus: {{ checkin.improvements_needed }}{% endif %}</p></div></div>{% endfor %}</div>{% else %}<p style="color:var(--coach-muted);font-size:14.5px">Progress history will appear after the first completed weekly review.</p>{% endif %}
         </section>
 </div>
-
-    <section class="nw-panel nw-pad">
-      <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">Coach activity</p><h2>Calls & follow-ups</h2><p>Recorded coaching calls and gentle nudges, newest first.</p></div></div>
-      {% if workflow_timeline %}
-      <div class="nw-workflow-timeline">
-        {% for item in workflow_timeline %}
-        <div class="nw-workflow-event"><div class="nw-workflow-event-date">{{ item.event_date.strftime("%d %b") }}</div><div class="nw-workflow-event-icon {% if item.event_type == 'nudge' %}nudge{% endif %}">{% if item.event_type == 'call' %}C{% else %}N{% endif %}</div><div><strong>{{ item.label }}</strong>{% if item.detail %}<p>{{ item.detail }}</p>{% endif %}</div></div>
-        {% endfor %}
-      </div>
-      {% else %}<div class="nw-inline-empty">Recorded coaching calls and nudges will appear here.</div>{% endif %}
-    </section>
 
     <section class="nw-panel nw-pad">
       <div class="nw-heading">

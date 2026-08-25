@@ -1343,25 +1343,6 @@ def client_profile(
 
 
 
-@router.get("/dashboard/clients/{client_id}/prepare-call", response_class=HTMLResponse)
-def prepare_client_call(request: Request, client_id: int):
-    if not coach_is_logged_in(request):
-        return RedirectResponse("/coach/login", status_code=303)
-    profile=ClientService.profile(client_id)
-    if profile is None:
-        raise HTTPException(status_code=404, detail="Client not found")
-    week_number, week_start, week_end = _coaching_week_bounds(profile["client"], date.today())
-    call_prep = build_call_prep(client_id, week_start, week_end) if week_start and week_end else None
-    progress_summary = get_client_progress_summary(client_id, week_start, week_number, weeks=4) if week_start and week_end else None
-    return templates.TemplateResponse("coach/call_prepare.html", {
-        "request":request, "active_nav":"clients", "client":profile["client"],
-        "current_week":week_number, "week_start":week_start, "week_end":week_end,
-        "call_prep":call_prep,
-        "coach_summary":build_coach_summary(call_prep, progress_summary),
-        "latest_call_note":get_latest_call_note(client_id),
-        "next_call":get_next_client_call(profile["client"]),
-    })
-
 @router.get(
     "/dashboard/resources",
     response_class=HTMLResponse,
