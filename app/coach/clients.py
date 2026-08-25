@@ -70,6 +70,8 @@ from app.services.client_nudge_service import (
     nudge_is_recent,
 )
 
+from app.services.coaching_workflow_service import get_weekly_reflection
+
 from app.services.coaching_call_workflow_service import (
     create_coaching_call_tables,
     get_call_notes,
@@ -1146,6 +1148,13 @@ def client_profile(
     portal_access = get_portal_access(client_id)
     portal_activity = get_recent_client_activity(client_id, limit=14)
 
+    # Client-authored weekly reflection shown on Overview -> This Week.
+    client_weekly_reflection = (
+        get_weekly_reflection(client_id, week_start)
+        if week_start
+        else None
+    )
+
     week_review = None
     call_prep = None
     progress_summary = None
@@ -1210,6 +1219,31 @@ def client_profile(
     if coach_history_grid and macro_settings.get("enabled"):
         for row in coach_history_grid.get("rows") or []:
             row["macro"] = macro_history["by_date"].get(row["date"])
+
+    # Data tab is presented as a transposed spreadsheet: dates are columns
+    # and tracked metrics/actions are rows. Group the existing history by week
+    # so the template stays simple and the underlying data model is unchanged.
+    history_weeks = []
+    if coach_history_grid:
+        grouped_history = {}
+        for row in coach_history_grid.get("rows") or []:
+            grouped_history.setdefault(row["week_number"], []).append(row)
+
+        for history_week_number in sorted(grouped_history, reverse=True):
+            history_rows = sorted(
+                grouped_history[history_week_number],
+                key=lambda item: item["date"],
+            )
+            week_measurement = next(
+                (item.get("measurement") for item in history_rows if item.get("measurement")),
+                None,
+            )
+            history_weeks.append({
+                "week_number": history_week_number,
+                "rows": history_rows,
+                "is_current_week": history_week_number == week_number,
+                "measurement": week_measurement,
+            })
 
     # Coaching intelligence for the current client workspace.
     # These are computed before TemplateResponse so the Jinja context never
@@ -1298,6 +1332,7 @@ def client_profile(
             "call_time_slots": CALL_TIME_SLOTS,
             "portal_access": portal_access,
             "portal_activity": portal_activity,
+            "client_weekly_reflection": client_weekly_reflection,
             "week_review": week_review,
             "call_prep": call_prep,
             "coach_week_number": coach_week_number,
@@ -1312,6 +1347,7 @@ def client_profile(
             "progress_summary": progress_summary,
             "coach_summary": coach_summary,
             "coach_history_grid": coach_history_grid,
+            "history_weeks": history_weeks,
             "coaching_week_summary": coaching_week_summary,
             "progress_charts": progress_charts,
             "macro_settings": macro_settings,

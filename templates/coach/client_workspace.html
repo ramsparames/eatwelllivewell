@@ -17,6 +17,23 @@
 .nw-workflow-strip strong{font-size:11px}.nw-workflow-strip small{color:var(--coach-muted);font-size:9px}
 .nw-panel{border-radius:15px;box-shadow:0 3px 14px rgba(43,26,52,.03)}.nw-pad{padding:19px}
 @media(max-width:850px){.nw-client-snapshot{grid-template-columns:1fr 1fr}.nw-workflow-strip{grid-template-columns:1fr 1fr}}
+
+.nw-client-reflection-overview{margin:16px 0;background:#fffafd}
+.nw-transposed-history{display:grid;gap:18px;margin-top:16px}
+.nw-data-week{border:1px solid var(--coach-border);border-radius:14px;overflow:hidden;background:#fff}
+.nw-data-week.current-week{border-color:#c9add5;box-shadow:0 0 0 2px rgba(91,14,145,.04)}
+.nw-data-week-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#fbf8fc;border-bottom:1px solid var(--coach-border)}
+.nw-data-week-head>div{display:flex;align-items:baseline;gap:9px}.nw-data-week-head strong{font-size:13px}.nw-data-week-head span{font-size:10px;color:var(--coach-muted)}
+.nw-transposed-wrap{border:0;border-radius:0;max-height:none!important}
+.nw-excel.nw-transposed{min-width:760px;width:100%;font-size:10px!important}
+.nw-excel.nw-transposed thead th{min-width:88px;text-align:center}.nw-excel.nw-transposed thead th small{display:block;margin-top:3px;font-size:8px;text-transform:none;letter-spacing:0}
+.nw-excel.nw-transposed .nw-metric-head{position:sticky;left:0;z-index:5;min-width:190px;max-width:240px;text-align:left;background:#faf7fb;white-space:normal}
+.nw-excel.nw-transposed thead .nw-metric-head{z-index:8}.nw-excel.nw-transposed tbody td{text-align:center}
+.nw-excel.nw-transposed .nw-note-cell{min-width:110px;white-space:normal;text-align:left;line-height:1.35}
+.nw-excel.nw-transposed .nw-row-section th,.nw-excel.nw-transposed .nw-row-section td{background:#f5eff7;font-size:8px;text-transform:uppercase;letter-spacing:.05em;font-weight:900;color:var(--coach-purple)}
+.nw-excel.nw-transposed .nw-metric-head small{display:block;margin-top:2px;color:var(--coach-muted);font-size:8px;font-weight:700}
+.nw-week-measurements{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:#fff;border-top:1px solid var(--coach-border);font-size:9px;color:var(--coach-muted)}.nw-week-measurements strong{color:var(--coach-purple)}
+.nw-data-orientation-note{font-size:9px;font-weight:800;color:var(--coach-muted);padding:8px 10px;border:1px solid var(--coach-border);border-radius:9px;background:#fff}
 </style>
 
 <style>
@@ -935,31 +952,6 @@
       </div>
 
       
-        <section class="nw-workflow-card">
-          <div class="nw-workflow-head">
-            <div>
-              <p class="nw-kicker" style="margin:0 0 4px">Client reflection</p>
-              <h3>What she said about this week</h3>
-            </div>
-            {% if client_weekly_reflection %}
-            <span class="nw-cell-state done">Submitted</span>
-            {% else %}
-            <span class="nw-cell-state">Not submitted</span>
-            {% endif %}
-          </div>
-          {% if client_weekly_reflection %}
-          <div class="nw-reflection-grid">
-            <div><span>Biggest win</span><p>{{ client_weekly_reflection.wins or "—" }}</p></div>
-            <div><span>Biggest challenge</span><p>{{ client_weekly_reflection.challenge or "—" }}</p></div>
-            <div><span>Energy</span><p>{{ client_weekly_reflection.energy_score or "—" }}/5</p></div>
-            <div><span>Help she wants</span><p>{{ client_weekly_reflection.help_needed or "—" }}</p></div>
-          </div>
-          {% else %}
-          <p class="nw-helper" style="margin:0">The client's weekly reflection will appear here once she submits it from her portal.</p>
-          {% endif %}
-        </section>
-
-
           <div class="nw-standing-plan">
             <strong>Automatic weekly carry-forward is on</strong>
             <span>If you make no changes, the same actions and targets continue into the next coaching week. Change the selections below only when Week {{ next_week_number }} needs a different plan.</span>
@@ -1114,6 +1106,26 @@
       {% endfor %}
     </div>
     {% endif %}
+
+    <section class="nw-workflow-card nw-client-reflection-overview">
+      <div class="nw-workflow-head">
+        <div>
+          <p class="nw-kicker" style="margin:0 0 4px">CLIENT WEEKLY REFLECTION</p>
+          <h3>What {{ client.name.split()[0] if client.name else "she" }} said about this week</h3>
+        </div>
+        {% if client_weekly_reflection %}<span class="nw-cell-state done">Submitted</span>{% else %}<span class="nw-cell-state">Not submitted</span>{% endif %}
+      </div>
+      {% if client_weekly_reflection %}
+      <div class="nw-reflection-grid">
+        <div><span>Biggest win</span><p>{{ client_weekly_reflection.wins or "—" }}</p></div>
+        <div><span>Biggest challenge</span><p>{{ client_weekly_reflection.challenge or "—" }}</p></div>
+        <div><span>Energy</span><p>{% if client_weekly_reflection.energy_score is not none %}{{ client_weekly_reflection.energy_score }}/5{% else %}—{% endif %}</p></div>
+        <div><span>Help she wants</span><p>{{ client_weekly_reflection.help_needed or "—" }}</p></div>
+      </div>
+      {% else %}
+      <p class="nw-helper" style="margin:0">No weekly reflection submitted yet.</p>
+      {% endif %}
+    </section>
 
     <div class="nw-week-context-grid">
       <div class="nw-week-context-card">
@@ -1420,11 +1432,7 @@
           <h2>Detailed client tracking</h2>
           <p>Use this when you want to investigate the evidence behind the Overview summary. All weeks and dates remain available here.</p>
         </div>
-        <div class="nw-grid-filters">
-          <button class="nw-grid-filter active" type="button" data-grid-filter="all">All weeks</button>
-          <button class="nw-grid-filter" type="button" data-grid-filter="current">Current week</button>
-          <button class="nw-grid-filter" type="button" data-grid-filter="submitted">Submitted only</button>
-        </div>
+        <div class="nw-data-orientation-note">Dates → across the top · Actions ↓ down the side</div>
       </div>
 
       <section class="nw-panel nw-pad" style="margin-bottom:16px">
@@ -1457,108 +1465,63 @@
         {% endif %}
       </section>
 
-      {% if coach_history_grid and coach_history_grid.rows %}
-      <div class="nw-excel-wrap">
-        <table class="nw-excel">
-          <thead>
-            <tr>
-              <th class="sticky-week">Week</th>
-              <th class="sticky-date">Date</th>
-              <th>Status</th>
-              <th>Steps</th>
-              <th>Weight</th>
-              {% if macro_settings.enabled %}
-              <th>Protein</th><th>Carbs</th><th>Fat</th><th>Calories</th>
-              {% endif %}
-              {% for action in coach_history_grid.action_columns %}
-              <th class="nw-action-head">
-                {{ action.name }}
-                {% if action.target_count %}
-                <small>{{ action.target_count }} {{ action.target_unit or "" }}</small>
+      {% if history_weeks %}
+      <div class="nw-transposed-history">
+        {% for week in history_weeks %}
+        <section class="nw-data-week {% if week.is_current_week %}current-week{% endif %}" data-history-week="{{ week.week_number }}">
+          <div class="nw-data-week-head">
+            <div>
+              <strong>Week {{ week.week_number }}</strong>
+              {% if week.rows %}<span>{{ week.rows[0].date.strftime("%d %b") }} – {{ week.rows[-1].date.strftime("%d %b %Y") }}</span>{% endif %}
+            </div>
+            {% if week.is_current_week %}<span class="nw-cell-state done">Current week</span>{% endif %}
+          </div>
+          <div class="nw-excel-wrap nw-transposed-wrap">
+            <table class="nw-excel nw-transposed">
+              <thead>
+                <tr>
+                  <th class="nw-metric-head">Data</th>
+                  {% for row in week.rows %}<th>{{ row.date.strftime("%a") }}<small>{{ row.date.strftime("%d %b") }}</small></th>{% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th class="nw-metric-head">Check-in</th>{% for row in week.rows %}<td>{% if row.submitted %}<span class="yes">✓</span>{% else %}<span class="na">—</span>{% endif %}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Steps</th>{% for row in week.rows %}<td>{{ "{:,}".format(row.steps) if row.steps is not none else "—" }}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Weight</th>{% for row in week.rows %}<td>{% if row.weight_kg is not none %}{{ row.weight_kg }} kg{% else %}—{% endif %}</td>{% endfor %}</tr>
+                {% if macro_settings.enabled %}
+                <tr class="nw-row-section"><th class="nw-metric-head">Nutrition</th>{% for row in week.rows %}<td></td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Protein</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Carbs</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Fat</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Calories</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</td>{% endfor %}</tr>
                 {% endif %}
-              </th>
-              {% endfor %}
-              <th>Client note</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% set ns = namespace(last_week=None, week_measurement=None) %}
-            {% for row in coach_history_grid.rows %}
-            {% if ns.last_week != row.week_number %}
-              {% set ns.week_measurement = none %}
-            {% endif %}
-            {% if row.measurement %}
-              {% set ns.week_measurement = row.measurement %}
-            {% endif %}
-            <tr
-              class="{% if row.is_current_week %}current-week{% endif %} {% if ns.last_week != row.week_number %}week-start{% endif %}"
-              data-grid-current="{{ '1' if row.is_current_week else '0' }}"
-              data-grid-submitted="{{ '1' if row.submitted else '0' }}"
-            >
-              <td class="sticky-week"><strong>Week {{ row.week_number }}</strong></td>
-              <td class="sticky-date"><strong>{{ row.date.strftime("%d %b") }}</strong></td>
-              <td>
-                {% if row.submitted %}
-                <span class="nw-cell-state done">Entered</span>
-                {% else %}
-                <span class="nw-cell-state">No entry</span>
+                {% if coach_history_grid.action_columns %}
+                <tr class="nw-row-section"><th class="nw-metric-head">Commitments</th>{% for row in week.rows %}<td></td>{% endfor %}</tr>
+                {% for action in coach_history_grid.action_columns %}
+                <tr>
+                  <th class="nw-metric-head"><strong>{{ action.name }}</strong>{% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}</th>
+                  {% for row in week.rows %}{% set cell=row.actions.get(action.id) %}<td class="nw-action-cell">{% if not cell or not cell.eligible %}<span class="na">·</span>{% elif cell.completed is true %}<span class="yes">✓</span>{% elif cell.completed is false %}<span class="no">○</span>{% else %}<span class="na">—</span>{% endif %}</td>{% endfor %}
+                </tr>
+                {% endfor %}
                 {% endif %}
-              </td>
-
-              <td>{{ row.steps if row.steps is not none else "—" }}</td>
-              <td>{% if row.weight_kg is not none %}{{ row.weight_kg }} kg{% else %}—{% endif %}</td>
-              {% if macro_settings.enabled %}
-                {% set macro = row.macro %}
-                <td>{% if macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}</td>
-                <td>{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}</td>
-                <td>{% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</td>
-                <td>{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</td>
-              {% endif %}
-
-              {% for action in coach_history_grid.action_columns %}
-              {% set cell = row.actions.get(action.id) %}
-              <td class="nw-action-cell">
-                {% if not cell or not cell.eligible %}
-                  <span class="na">·</span>
-                {% elif cell.completed is true %}
-                  <span class="yes">✓</span>
-                {% elif cell.completed is false %}
-                  <span class="no">○</span>
-                {% else %}
-                  <span class="na">—</span>
-                {% endif %}
-              </td>
-              {% endfor %}
-
-              <td class="nw-note-cell">{{ row.note or "—" }}</td>
-            </tr>
-
-            {% if loop.index0 % 7 == 6 %}
-            <tr class="nw-measure-week-row">
-              <td class="sticky-week"></td>
-              <td class="sticky-date"><strong style="color:var(--coach-purple)">Measurements</strong></td>
-              <td colspan="{{ coach_history_grid.action_columns|length + 4 + (4 if macro_settings.enabled else 0) }}">
-                {% if ns.week_measurement %}
-                <div class="nw-week-measure-inline">
-                  <strong>{{ ns.week_measurement.measured_on.strftime("%d %b %Y") }}</strong>
-                  {% if ns.week_measurement.upper_arm_cm is not none %}<span>Arm {{ ns.week_measurement.upper_arm_cm }} cm</span>{% endif %}
-                  {% if ns.week_measurement.chest_cm is not none %}<span>Chest {{ ns.week_measurement.chest_cm }} cm</span>{% endif %}
-                  {% if ns.week_measurement.waist_cm is not none %}<span>Waist {{ ns.week_measurement.waist_cm }} cm</span>{% endif %}
-                  {% if ns.week_measurement.lower_abdomen_cm is not none %}<span>Lower abdomen {{ ns.week_measurement.lower_abdomen_cm }} cm</span>{% endif %}
-                  {% if ns.week_measurement.hip_cm is not none %}<span>Hip {{ ns.week_measurement.hip_cm }} cm</span>{% endif %}
-                  {% if ns.week_measurement.thigh_cm is not none %}<span>Thigh {{ ns.week_measurement.thigh_cm }} cm</span>{% endif %}
-                </div>
-                {% else %}
-                <span style="color:var(--coach-muted)">No weekly measurements entered.</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endif %}
-
-            {% set ns.last_week = row.week_number %}
-            {% endfor %}
-          </tbody>
-        </table>
+                <tr><th class="nw-metric-head">Client note</th>{% for row in week.rows %}<td class="nw-note-cell">{{ row.note or "—" }}</td>{% endfor %}</tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="nw-week-measurements">
+            <strong>Weekly measurements</strong>
+            {% if week.measurement %}
+              <span>{{ week.measurement.measured_on.strftime("%d %b %Y") }}</span>
+              {% if week.measurement.upper_arm_cm is not none %}<span>Arm {{ week.measurement.upper_arm_cm }} cm</span>{% endif %}
+              {% if week.measurement.chest_cm is not none %}<span>Chest {{ week.measurement.chest_cm }} cm</span>{% endif %}
+              {% if week.measurement.waist_cm is not none %}<span>Waist {{ week.measurement.waist_cm }} cm</span>{% endif %}
+              {% if week.measurement.lower_abdomen_cm is not none %}<span>Lower abdomen {{ week.measurement.lower_abdomen_cm }} cm</span>{% endif %}
+              {% if week.measurement.hip_cm is not none %}<span>Hip {{ week.measurement.hip_cm }} cm</span>{% endif %}
+              {% if week.measurement.thigh_cm is not none %}<span>Thigh {{ week.measurement.thigh_cm }} cm</span>{% endif %}
+            {% else %}<span>No measurements entered.</span>{% endif %}
+          </div>
+        </section>
+        {% endfor %}
       </div>
       {% else %}
       <div class="nw-inline-empty">Client tracking history will appear here once daily updates begin.</div>
