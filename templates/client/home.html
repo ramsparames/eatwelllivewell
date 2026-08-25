@@ -204,137 +204,47 @@
   .cp-grid-shell{max-height:none}
 }
 
-/* Typography consistency pass — client portal */
-.cp{
-  font-size:13px!important;
+/* Transposed coaching history: dates across the top, actions down the side */
+.cp-transposed-history{display:grid;gap:18px;margin-top:14px}
+.cp-week-sheet{border:1px solid var(--line);border-radius:15px;overflow:hidden;background:#fff}
+.cp-week-sheet.current{border-color:#cfb7da;box-shadow:0 0 0 2px rgba(91,14,145,.04)}
+.cp-week-sheet-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 13px;background:#fbf8fc;border-bottom:1px solid var(--line)}
+.cp-week-sheet-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px}
+.cp-week-sheet-title strong{font-size:12px}
+.cp-week-sheet-title span{font-size:9px;color:var(--muted)}
+.cp-current-pill{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#e8f4ec;color:#31704c;font-size:8px;font-weight:900}
+.cp-transposed-wrap{overflow:auto}
+.cp-transposed{width:100%;min-width:760px;border-collapse:separate;border-spacing:0;font-size:9px}
+.cp-transposed th,.cp-transposed td{padding:9px 8px;border-right:1px solid #eee8f0;border-bottom:1px solid #eee8f0;vertical-align:middle}
+.cp-transposed tr:last-child th,.cp-transposed tr:last-child td{border-bottom:0}
+.cp-transposed th:last-child,.cp-transposed td:last-child{border-right:0}
+.cp-transposed thead th{background:#f7f2f9;text-align:center}
+.cp-transposed .cp-metric-head{position:sticky;left:0;z-index:4;min-width:205px;max-width:260px;background:#fbf8fc;text-align:left;white-space:normal}
+.cp-transposed thead .cp-metric-head{z-index:7}
+.cp-day-name{display:block;font-size:9px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;line-height:1.1}
+.cp-day-date{display:block;margin-top:4px;font-size:9px;font-weight:850;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+.cp-transposed tbody td{text-align:center}
+.cp-transposed .cp-section-row th,.cp-transposed .cp-section-row td{background:#f6f0f8;color:var(--purple);font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.cp-transposed .cp-action-label strong{display:block;font-size:9px;line-height:1.25}
+.cp-transposed .cp-action-label small{display:block;margin-top:2px;font-size:8px;color:var(--muted);font-weight:700}
+.cp-center{display:flex;align-items:center;justify-content:center;min-height:26px;text-align:center}
+.cp-center .yes{color:#2e7b4d;font-size:16px;font-weight:900}
+.cp-center .no{color:#9b681e;font-size:16px;font-weight:900}
+.cp-center .na{color:#b8afb9;font-size:15px}
+.cp-grid-checkbox{display:block;margin:0 auto;width:17px;height:17px;accent-color:var(--purple)}
+.cp-grid-input{width:78px;max-width:100%;padding:6px 7px;border:1px solid var(--line);border-radius:7px;background:#fff;text-align:center;font:inherit;color:var(--ink)}
+.cp-save-mini{border:0;border-radius:8px;background:var(--purple);color:#fff;padding:6px 9px;font-size:8px;font-weight:900;cursor:pointer}
+.cp-note-cell{min-width:100px;white-space:normal;text-align:left!important;line-height:1.35}
+.cp-week-measurements{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 13px;border-top:1px solid var(--line);background:#fff;font-size:8px;color:var(--muted)}
+.cp-week-measurements strong{color:var(--ink)}
+.cp-measure-current-form{display:flex;gap:7px;align-items:center;flex-wrap:wrap;width:100%}
+.cp-measure-current-form .cp-sheet-input{width:74px}
+@media(max-width:760px){
+  .cp-week-sheet-head{align-items:flex-start}
+  .cp-transposed{min-width:720px}
+  .cp-transposed .cp-metric-head{min-width:175px}
 }
 
-.cp-eyebrow,
-.cp-kicker,
-.cp-date-note,
-.cp-small,
-.cp-grid-help,
-.cp-grid-legend span,
-.cp-sheet-status,
-.cp-sheet-action-head small,
-.cp-measure-label,
-.cp-measure-inline span,
-.cp-field span,
-.cp-status-item span,
-.cp-consistency span,
-.cp-consistency small{
-  font-size:11px!important;
-  line-height:1.45!important;
-}
-
-.cp-status-item strong,
-.cp-consistency strong{
-  font-size:14px!important;
-}
-
-.cp-title-row h2,
-.cp-card h2{
-  font-size:22px!important;
-}
-
-.cp-intro,
-.cp-sub,
-.cp-alert,
-.cp-section-empty{
-  font-size:12px!important;
-  line-height:1.5!important;
-}
-
-.cp-sheet{
-  font-size:12px!important;
-  min-width:1450px!important;
-}
-
-.cp-sheet th,
-.cp-sheet td{
-  font-size:12px!important;
-  line-height:1.4!important;
-  padding:11px 12px!important;
-}
-
-.cp-sheet thead th{
-  font-size:11px!important;
-  line-height:1.3!important;
-}
-
-.cp-sheet-action-head{
-  min-width:145px!important;
-  max-width:190px!important;
-  font-size:11px!important;
-  line-height:1.3!important;
-}
-
-.cp-sheet-action-head small{
-  font-size:10px!important;
-}
-
-.cp-sheet-check input{
-  width:19px!important;
-  height:19px!important;
-}
-
-.cp-sheet-check.readonly{
-  font-size:15px!important;
-}
-
-.cp-sheet-input,
-.cp-input,
-.cp-select{
-  font-size:12px!important;
-}
-
-.cp-sheet-input{
-  width:100px!important;
-}
-
-.cp-sheet-input.weight{
-  width:86px!important;
-}
-
-.cp-sheet-save,
-.cp-save{
-  font-size:12px!important;
-  padding:9px 12px!important;
-}
-
-.cp-measure-inline{
-  gap:8px!important;
-}
-
-.cp-measure-inline span{
-  font-size:11px!important;
-  padding:6px 8px!important;
-}
-
-.cp-measure-grid-inline{
-  grid-template-columns:repeat(6,92px)!important;
-  gap:7px!important;
-}
-
-.cp-measure-row td{
-  font-size:12px!important;
-}
-
-.cp-count{
-  font-size:12px!important;
-}
-
-.cp-status-strip{
-  gap:10px!important;
-}
-
-/* Keep text readable and allow horizontal scrolling */
-.cp-grid-shell{
-  overflow-x:auto!important;
-}
-
-.cp-sheet .macro-grid-input{width:88px!important;min-width:88px!important}
-.cp-sheet .macro-calories-cell{min-width:90px;font-weight:800}
 </style>
 
 
@@ -407,230 +317,182 @@
         <span>· not assigned that day</span>
       </div>
 
-      {% if macro_settings.enabled %}
-      <div class="cp-measure-saved-simple" style="margin-bottom:12px">
-        <strong>Macro tracking enabled</strong>
-        <div class="cp-measure-saved-values">
-          <span>Protein target {{ macro_settings.protein_target_g if macro_settings.protein_target_g is not none else "—" }} g</span>
-          <span>Carb target {{ macro_settings.carbs_target_g if macro_settings.carbs_target_g is not none else "—" }} g</span>
-          <span>Fat target {{ macro_settings.fat_target_g if macro_settings.fat_target_g is not none else "—" }} g</span>
-          <span>Calorie target {{ macro_settings.calorie_target if macro_settings.calorie_target is not none else "—" }}{% if macro_settings.calorie_target is not none %} kcal{% endif %}</span>
-        </div>
-      </div>
-      {% endif %}
-
       {% if client_history_grid and client_history_grid.rows %}
-      <div class="cp-grid-shell">
-        <table class="cp-sheet">
-          <thead>
-            <tr>
-              <th class="sticky-week">Week</th>
-              <th class="sticky-date">Date</th>
-              <th>Status</th>
-              <th>Steps</th>
-              <th>Weight</th>
-              {% if macro_settings.enabled %}
-              <th>Protein</th>
-              <th>Carbs</th>
-              <th>Fat</th>
-              <th>Calories</th>
-              {% endif %}
-              {% for action in client_history_grid.action_columns %}
-              <th class="cp-sheet-action-head">
-                {{ action.name }}
-                {% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}
-              </th>
-              {% endfor %}
-              <th>Save</th>
-            </tr>
-          </thead>
+      <div class="cp-transposed-history">
+        {% for week_rows in client_history_grid.rows|batch(7) %}
+        {% set first = week_rows[0] %}
+        {% set last = week_rows[-1] %}
+        <section class="cp-week-sheet {% if first.is_current_week %}current{% endif %}">
+          <div class="cp-week-sheet-head">
+            <div class="cp-week-sheet-title">
+              <strong>Week {{ first.week_number }}</strong>
+              <span>{{ first.date.strftime("%d %b") }} – {{ last.date.strftime("%d %b %Y") }}</span>
+            </div>
+            {% if first.is_current_week %}<span class="cp-current-pill">Current week</span>{% endif %}
+          </div>
 
-          <tbody>
-            {% set ns = namespace(last_week=None) %}
-            {% for row in client_history_grid.rows %}
-            <tr class="{% if row.is_current_week %}current-week{% endif %} {% if ns.last_week != row.week_number %}week-start{% endif %}">
-              <td class="sticky-week"><strong>Week {{ row.week_number }}</strong></td>
-              <td class="sticky-date"><strong>{{ row.date.strftime("%d %b") }}</strong></td>
-              <td>
-                {% if row.submitted %}
-                  <span class="cp-sheet-status done">Entered</span>
-                {% elif row.editable and row.date == today %}
-                  <span class="cp-sheet-status today">Today</span>
-                {% elif row.editable %}
-                  <span class="cp-sheet-status open">Open</span>
-                {% elif row.is_future_day %}
-                  <span class="cp-sheet-status future">Upcoming</span>
-                {% else %}
-                  <span class="cp-sheet-status">No entry</span>
-                {% endif %}
-              </td>
-
-              {% if row.editable %}
-                <form id="day-form-{{ row.date.isoformat() }}" method="post" action="/client/{{ access_token }}/daily">
-                  <input type="hidden" name="tracked_on" value="{{ row.date.isoformat() }}">
-                  <input type="hidden" name="selected_week_number" value="{{ row.week_number }}">
-                </form>
-              {% endif %}
-
-              <td>
-                {% if row.editable %}
-                <input class="cp-sheet-input" type="number" min="0" inputmode="numeric"
-                       name="steps"
-                       form="day-form-{{ row.date.isoformat() }}"
-                       value="{{ row.steps if row.steps is not none else '' }}"
-                       placeholder="Steps">
-                {% else %}
-                {{ row.steps if row.steps is not none else "—" }}
-                {% endif %}
-              </td>
-
-              <td>
-                {% if row.editable %}
-                <input class="cp-sheet-input weight" type="number" step="0.1"
-                       name="weight_kg"
-                       form="day-form-{{ row.date.isoformat() }}"
-                       value="{{ row.weight_kg if row.weight_kg is not none else '' }}"
-                       placeholder="kg">
-                {% else %}
-                {% if row.weight_kg is not none %}{{ row.weight_kg }} kg{% else %}—{% endif %}
-                {% endif %}
-              </td>
-
-              {% if macro_settings.enabled %}
-                {% set macro = row.macro if row.macro is defined else none %}
-                <td>
-                  {% if row.editable %}
-                  <input class="cp-sheet-input macro-grid-input"
-                         type="number" min="0" step="0.1"
-                         name="protein_g"
-                         form="day-form-{{ row.date.isoformat() }}"
-                         value="{% if macro and macro.protein_g is not none %}{{ macro.protein_g }}{% endif %}"
-                         placeholder="g">
-                  {% else %}
-                  {% if macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}
-                  {% endif %}
-                </td>
-                <td>
-                  {% if row.editable %}
-                  <input class="cp-sheet-input macro-grid-input"
-                         type="number" min="0" step="0.1"
-                         name="carbs_g"
-                         form="day-form-{{ row.date.isoformat() }}"
-                         value="{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }}{% endif %}"
-                         placeholder="g">
-                  {% else %}
-                  {% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}
-                  {% endif %}
-                </td>
-                <td>
-                  {% if row.editable %}
-                  <input class="cp-sheet-input macro-grid-input"
-                         type="number" min="0" step="0.1"
-                         name="fat_g"
-                         form="day-form-{{ row.date.isoformat() }}"
-                         value="{% if macro and macro.fat_g is not none %}{{ macro.fat_g }}{% endif %}"
-                         placeholder="g">
-                  {% else %}
-                  {% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}
-                  {% endif %}
-                </td>
-                <td class="macro-calories-cell"
-                    data-macro-date="{{ row.date.isoformat() }}">
-                  {% if macro and macro.calories is not none %}
-                    {{ macro.calories }}
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-              {% endif %}
-
-              {% for action in client_history_grid.action_columns %}
-                {% set cell = row.actions.get(action.id) %}
-                <td>
-                  <div class="cp-sheet-check {% if not row.editable %}readonly{% endif %}">
-                    {% if not cell or not cell.eligible %}
-                      <span class="na">·</span>
-                    {% elif row.editable %}
-                      <input type="checkbox"
-                             name="completed_action_ids"
-                             value="{{ cell.action_id }}"
-                             form="day-form-{{ row.date.isoformat() }}"
-                             {% if cell.completed is true %}checked{% endif %}>
-                    {% elif cell.completed is true %}
-                      <span class="yes">✓</span>
-                    {% elif cell.completed is false %}
-                      <span class="no">○</span>
-                    {% else %}
-                      <span class="na">—</span>
-                    {% endif %}
-                  </div>
-                </td>
-              {% endfor %}
-
-              <td>
-                {% if row.editable %}
-                <button class="cp-sheet-save" type="submit" form="day-form-{{ row.date.isoformat() }}">
-                  {% if row.submitted %}Update{% else %}Save{% endif %}
-                </button>
-                {% else %}—{% endif %}
-              </td>
-            </tr>
-
-            {% if loop.index0 % 7 == 6 %}
-              <tr class="cp-measure-row">
-                <td class="sticky-week"></td>
-                <td class="sticky-date"><span class="cp-measure-label">Measurements</span></td>
-                <td colspan="{{ client_history_grid.action_columns|length + 4 + (4 if macro_settings.enabled else 0) }}">
-                  {% set wm = client_history_grid.week_measurements.get(row.week_number) %}
-                  {% if wm %}
-                  <div class="cp-measure-inline">
-                    <strong>{{ wm.measured_on.strftime("%d %b %Y") }}</strong>
-                    {% if wm.upper_arm_cm is not none %}<span>Arm {{ wm.upper_arm_cm }}</span>{% endif %}
-                    {% if wm.chest_cm is not none %}<span>Chest {{ wm.chest_cm }}</span>{% endif %}
-                    {% if wm.waist_cm is not none %}<span>Waist {{ wm.waist_cm }}</span>{% endif %}
-                    {% if wm.lower_abdomen_cm is not none %}<span>Lower abd {{ wm.lower_abdomen_cm }}</span>{% endif %}
-                    {% if wm.hip_cm is not none %}<span>Hip {{ wm.hip_cm }}</span>{% endif %}
-                    {% if wm.thigh_cm is not none %}<span>Thigh {{ wm.thigh_cm }}</span>{% endif %}
-                  </div>
-
-                  {% elif row.week_number == client_history_grid.current_week_number %}
-                  <form method="post" action="/client/{{ access_token }}/measurements">
-                    <div class="cp-measure-inline">
-                      <div class="cp-field">
-                        <span>Date</span>
-                        <input class="cp-input" type="date" name="measured_on"
-                               min="{{ row.week_start if row.week_start is defined else week_completion.week_start }}"
-                               max="{{ today }}" value="{{ today }}" required>
-                      </div>
-                      <div class="cp-field">
-                        <span>Unit</span>
-                        <select class="cp-select" name="measurement_unit">
-                          <option value="cm">cm</option>
-                          <option value="inches">inches</option>
-                        </select>
-                      </div>
-                      <div class="cp-measure-grid-inline">
-                        <input class="cp-sheet-input" type="number" step="0.1" name="upper_arm" placeholder="Arm" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="chest" placeholder="Chest" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="waist" placeholder="Waist" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="lower_abdomen" placeholder="Lower abd" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="hip" placeholder="Hip" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="thigh" placeholder="Thigh" required>
-                      </div>
-                      <button class="cp-sheet-save" type="submit">Save measurements</button>
-                    </div>
-                  </form>
-                  {% else %}
-                  <span style="color:var(--muted)">No measurements entered.</span>
-                  {% endif %}
-                </td>
-              </tr>
+          {# One form per editable date. Inputs inside the grid attach to these forms via form=id. #}
+          {% for row in week_rows %}
+            {% if row.editable %}
+            <form id="day-form-{{ row.date.isoformat() }}" method="post" action="/client/{{ access_token }}/daily">
+              <input type="hidden" name="tracked_on" value="{{ row.date.isoformat() }}">
+              <input type="hidden" name="selected_week_number" value="{{ row.week_number }}">
+            </form>
             {% endif %}
+          {% endfor %}
 
-            {% set ns.last_week = row.week_number %}
-            {% endfor %}
-          </tbody>
-        </table>
+          <div class="cp-transposed-wrap">
+            <table class="cp-transposed">
+              <thead>
+                <tr>
+                  <th class="cp-metric-head">Data</th>
+                  {% for row in week_rows %}
+                  <th>
+                    <span class="cp-day-name">{{ row.date.strftime("%a") }}</span>
+                    <span class="cp-day-date">{{ row.date.strftime("%d %b") }}</span>
+                  </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th class="cp-metric-head">Check-in</th>
+                  {% for row in week_rows %}
+                  <td><div class="cp-center">{% if row.submitted %}<span class="yes">✓</span>{% else %}<span class="na">—</span>{% endif %}</div></td>
+                  {% endfor %}
+                </tr>
+
+                <tr>
+                  <th class="cp-metric-head">Steps</th>
+                  {% for row in week_rows %}
+                  <td>
+                    <div class="cp-center">
+                    {% if row.editable %}
+                      <input class="cp-grid-input" type="number" min="0" inputmode="numeric"
+                             name="steps" form="day-form-{{ row.date.isoformat() }}"
+                             value="{{ row.steps if row.steps is not none else '' }}" placeholder="—">
+                    {% else %}
+                      {{ "{:,}".format(row.steps) if row.steps is not none else "—" }}
+                    {% endif %}
+                    </div>
+                  </td>
+                  {% endfor %}
+                </tr>
+
+                <tr>
+                  <th class="cp-metric-head">Weight</th>
+                  {% for row in week_rows %}
+                  <td>
+                    <div class="cp-center">
+                    {% if row.editable %}
+                      <input class="cp-grid-input" type="number" step="0.1"
+                             name="weight_kg" form="day-form-{{ row.date.isoformat() }}"
+                             value="{{ row.weight_kg if row.weight_kg is not none else '' }}" placeholder="—">
+                    {% elif row.weight_kg is not none %}
+                      {{ row.weight_kg }} kg
+                    {% else %}—{% endif %}
+                    </div>
+                  </td>
+                  {% endfor %}
+                </tr>
+
+                {% if client_history_grid.action_columns %}
+                <tr class="cp-section-row">
+                  <th class="cp-metric-head">Commitments</th>
+                  {% for row in week_rows %}<td></td>{% endfor %}
+                </tr>
+
+                {% for action in client_history_grid.action_columns %}
+                <tr>
+                  <th class="cp-metric-head cp-action-label">
+                    <strong>{{ action.name }}</strong>
+                    {% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}
+                  </th>
+                  {% for row in week_rows %}
+                    {% set cell = row.actions.get(action.id) %}
+                    <td>
+                      <div class="cp-center">
+                      {% if not cell or not cell.eligible %}
+                        <span class="na">·</span>
+                      {% elif row.editable %}
+                        <input class="cp-grid-checkbox" type="checkbox"
+                               name="completed_action_ids" value="{{ action.id }}"
+                               form="day-form-{{ row.date.isoformat() }}"
+                               {% if cell.completed is true %}checked{% endif %}>
+                      {% elif cell.completed is true %}
+                        <span class="yes">✓</span>
+                      {% elif cell.completed is false %}
+                        <span class="no">○</span>
+                      {% else %}
+                        <span class="na">—</span>
+                      {% endif %}
+                      </div>
+                    </td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+                {% endif %}
+
+                <tr>
+                  <th class="cp-metric-head">Client note</th>
+                  {% for row in week_rows %}
+                  <td class="cp-note-cell">{{ row.note or "—" }}</td>
+                  {% endfor %}
+                </tr>
+
+                {% if first.is_current_week %}
+                <tr>
+                  <th class="cp-metric-head">Save changes</th>
+                  {% for row in week_rows %}
+                  <td>
+                    <div class="cp-center">
+                    {% if row.editable %}
+                      <button class="cp-save-mini" type="submit" form="day-form-{{ row.date.isoformat() }}">
+                        {% if row.submitted %}Update{% else %}Save{% endif %}
+                      </button>
+                    {% else %}<span class="na">—</span>{% endif %}
+                    </div>
+                  </td>
+                  {% endfor %}
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+
+          {% set wm = client_history_grid.week_measurements.get(first.week_number) %}
+          <div class="cp-week-measurements">
+            <strong>Weekly measurements</strong>
+            {% if wm %}
+              <span>{{ wm.measured_on.strftime("%d %b %Y") }}</span>
+              {% if wm.upper_arm_cm is not none %}<span>Arm {{ wm.upper_arm_cm }}</span>{% endif %}
+              {% if wm.chest_cm is not none %}<span>Chest {{ wm.chest_cm }}</span>{% endif %}
+              {% if wm.waist_cm is not none %}<span>Waist {{ wm.waist_cm }}</span>{% endif %}
+              {% if wm.lower_abdomen_cm is not none %}<span>Lower abd {{ wm.lower_abdomen_cm }}</span>{% endif %}
+              {% if wm.hip_cm is not none %}<span>Hip {{ wm.hip_cm }}</span>{% endif %}
+              {% if wm.thigh_cm is not none %}<span>Thigh {{ wm.thigh_cm }}</span>{% endif %}
+            {% elif first.is_current_week %}
+              <form class="cp-measure-current-form" method="post" action="/client/{{ access_token }}/measurements">
+                <input class="cp-sheet-input" type="date" name="measured_on"
+                       min="{{ first.date }}" max="{{ today }}" value="{{ today }}" required>
+                <select class="cp-select" name="measurement_unit">
+                  <option value="cm">cm</option>
+                  <option value="inches">inches</option>
+                </select>
+                <input class="cp-sheet-input" type="number" step="0.1" name="upper_arm" placeholder="Arm" required>
+                <input class="cp-sheet-input" type="number" step="0.1" name="chest" placeholder="Chest" required>
+                <input class="cp-sheet-input" type="number" step="0.1" name="waist" placeholder="Waist" required>
+                <input class="cp-sheet-input" type="number" step="0.1" name="lower_abdomen" placeholder="Lower abd" required>
+                <input class="cp-sheet-input" type="number" step="0.1" name="hip" placeholder="Hip" required>
+                <input class="cp-sheet-input" type="number" step="0.1" name="thigh" placeholder="Thigh" required>
+                <button class="cp-sheet-save" type="submit">Save measurements</button>
+              </form>
+            {% else %}
+              <span>No measurements entered.</span>
+            {% endif %}
+          </div>
+        </section>
+        {% endfor %}
       </div>
       {% else %}
       <div class="cp-section-empty">Your coaching data will appear here once tracking begins.</div>
@@ -659,35 +521,3 @@
 })();
 </script>
 {% endblock %}
-
-{% if macro_settings.enabled %}
-<script>
-(function(){
-  function recalcRow(formId){
-    const form = document.getElementById(formId);
-    if(!form) return;
-    const p = parseFloat(form.querySelector('[name="protein_g"]')?.value || 0);
-    const c = parseFloat(form.querySelector('[name="carbs_g"]')?.value || 0);
-    const f = parseFloat(form.querySelector('[name="fat_g"]')?.value || 0);
-    const date = form.querySelector('[name="tracked_on"]')?.value;
-    const cell = document.querySelector('[data-macro-date="'+date+'"]');
-    if(!cell) return;
-    const any = form.querySelector('[name="protein_g"]')?.value ||
-                form.querySelector('[name="carbs_g"]')?.value ||
-                form.querySelector('[name="fat_g"]')?.value;
-    cell.textContent = any ? Math.round((p*4)+(c*4)+(f*9)) : '—';
-  }
-
-  document.querySelectorAll('.macro-grid-input').forEach(function(input){
-    input.addEventListener('input', function(){
-      const formId = input.getAttribute('form');
-      if(formId) recalcRow(formId);
-    });
-  });
-
-  document.querySelectorAll('form[id^="day-form-"]').forEach(function(form){
-    recalcRow(form.id);
-  });
-})();
-</script>
-{% endif %}
