@@ -26,9 +26,9 @@
 .nw-data-week-head>div{display:flex;align-items:baseline;gap:9px}.nw-data-week-head strong{font-size:13px}.nw-data-week-head span{font-size:10px;color:var(--coach-muted)}
 .nw-transposed-wrap{border:0;border-radius:0;max-height:none!important}
 .nw-excel.nw-transposed{min-width:760px;width:100%;font-size:10px!important}
-.nw-excel.nw-transposed thead th{min-width:88px;text-align:center!important;vertical-align:middle!important}.nw-excel.nw-transposed .nw-day-label{display:block;font-size:10px!important;font-weight:900;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}.nw-excel.nw-transposed .nw-date-label{display:block;margin-top:4px;font-size:10px!important;font-weight:800;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
+.nw-excel.nw-transposed thead th{min-width:88px;text-align:center}.nw-excel.nw-transposed thead th small{display:block;margin-top:3px;font-size:8px;text-transform:none;letter-spacing:0}
 .nw-excel.nw-transposed .nw-metric-head{position:sticky;left:0;z-index:5;min-width:190px;max-width:240px;text-align:left;background:#faf7fb;white-space:normal}
-.nw-excel.nw-transposed thead .nw-metric-head{z-index:8}.nw-excel.nw-transposed tbody td{text-align:center!important;vertical-align:middle!important}.nw-excel.nw-transposed .nw-action-cell{text-align:center!important;vertical-align:middle!important}.nw-excel.nw-transposed tbody td .yes,.nw-excel.nw-transposed tbody td .no,.nw-excel.nw-transposed tbody td .na{display:inline-flex;align-items:center;justify-content:center;min-width:22px;min-height:22px;margin:0 auto}
+.nw-excel.nw-transposed thead .nw-metric-head{z-index:8}.nw-excel.nw-transposed tbody td{text-align:center}
 .nw-excel.nw-transposed .nw-note-cell{min-width:110px;white-space:normal;text-align:left;line-height:1.35}
 .nw-excel.nw-transposed .nw-row-section th,.nw-excel.nw-transposed .nw-row-section td{background:#f5eff7;font-size:8px;text-transform:uppercase;letter-spacing:.05em;font-weight:900;color:var(--coach-purple)}
 .nw-excel.nw-transposed .nw-metric-head small{display:block;margin-top:2px;color:var(--coach-muted);font-size:8px;font-weight:700}
@@ -41,6 +41,150 @@
 .nw-progress-intro h2{margin:0;font-size:21px}
 .nw-progress-intro p:last-child{margin:5px 0 0;color:var(--coach-muted);font-size:13px}
 .nw-progress-moved{margin-bottom:12px}
+</style>
+
+
+<style>
+/* FINAL COACH DATA GRID FIX */
+.nw-transposed-history{
+  display:grid !important;
+  gap:26px !important;
+  margin-top:18px !important;
+}
+.nw-data-week{
+  overflow:hidden !important;
+  border:1px solid var(--coach-border) !important;
+  border-radius:14px !important;
+  background:#fff !important;
+}
+.nw-data-week-head{
+  padding:13px 15px !important;
+}
+.nw-excel.nw-transposed{
+  width:100% !important;
+  min-width:760px !important;
+}
+.nw-excel.nw-transposed th,
+.nw-excel.nw-transposed td{
+  vertical-align:middle !important;
+}
+.nw-excel.nw-transposed thead th{
+  min-width:88px !important;
+  text-align:center !important;
+  vertical-align:middle !important;
+  white-space:nowrap !important;
+}
+.nw-excel.nw-transposed .nw-metric-head{
+  min-width:210px !important;
+  max-width:270px !important;
+  text-align:center !important;
+  vertical-align:middle !important;
+  white-space:normal !important;
+}
+.nw-excel.nw-transposed tbody td,
+.nw-excel.nw-transposed td.nw-action-cell,
+.nw-excel.nw-transposed td.nw-note-cell{
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+.nw-excel.nw-transposed td.nw-note-cell{
+  white-space:normal !important;
+  line-height:1.35 !important;
+}
+.nw-date-head{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:4px !important;
+  line-height:1.05 !important;
+}
+.nw-date-head .nw-day{
+  display:block !important;
+  font-size:10px !important;
+  font-weight:900 !important;
+  letter-spacing:.07em !important;
+  text-transform:uppercase !important;
+}
+.nw-date-head .nw-date{
+  display:block !important;
+  font-size:9px !important;
+  font-weight:800 !important;
+  letter-spacing:.02em !important;
+  text-transform:uppercase !important;
+}
+.nw-excel.nw-transposed .yes,
+.nw-excel.nw-transposed .no,
+.nw-excel.nw-transposed .na{
+  display:inline-flex !important;
+  min-width:22px !important;
+  min-height:22px !important;
+  margin:0 auto !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+}
+.nw-excel.nw-transposed .nw-metric-head > strong,
+.nw-excel.nw-transposed .nw-metric-head > span{
+  display:block !important;
+  text-align:center !important;
+}
+.nw-excel.nw-transposed .nw-metric-head small{
+  display:block !important;
+  margin-top:4px !important;
+  text-align:center !important;
+  color:var(--coach-muted) !important;
+  font-size:8px !important;
+  font-weight:750 !important;
+}
+
+/* Measurements are a distinct footer card, not a sentence between weeks. */
+.nw-week-measurements{
+  display:block !important;
+  padding:14px 16px !important;
+  border-top:1px solid var(--coach-border) !important;
+  background:#fcfafc !important;
+  font-size:10px !important;
+}
+.nw-measurement-title{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:10px !important;
+  margin-bottom:9px !important;
+}
+.nw-measurement-title strong{
+  color:var(--coach-ink) !important;
+  font-size:11px !important;
+}
+.nw-measurement-date{
+  color:var(--coach-purple) !important;
+  font-size:9px !important;
+  font-weight:850 !important;
+}
+.nw-measurement-values{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap:7px !important;
+}
+.nw-measurement-chip{
+  display:inline-flex !important;
+  align-items:center !important;
+  padding:6px 9px !important;
+  border:1px solid var(--coach-border) !important;
+  border-radius:999px !important;
+  background:#fff !important;
+  color:var(--coach-ink) !important;
+  font-size:9px !important;
+  font-weight:750 !important;
+}
+.nw-measurement-empty{
+  padding:9px 11px !important;
+  border-radius:9px !important;
+  background:#f5f2f6 !important;
+  color:var(--coach-muted) !important;
+  font-size:10px !important;
+}
 </style>
 
 {% endblock %}
@@ -1481,7 +1625,7 @@
               <thead>
                 <tr>
                   <th class="nw-metric-head">Data</th>
-                  {% for row in week.rows %}<th><span class="nw-day-label">{{ row.date.strftime("%a") }}</span><span class="nw-date-label">{{ row.date.strftime("%d %b") }}</span></th>{% endfor %}
+                  {% for row in week.rows %}<th><div class="nw-date-head"><span class="nw-day">{{ row.date.strftime("%a") }}</span><span class="nw-date">{{ row.date.strftime("%d %b") }}</span></div></th>{% endfor %}
                 </tr>
               </thead>
               <tbody>
@@ -1509,16 +1653,22 @@
             </table>
           </div>
           <div class="nw-week-measurements">
-            <strong>Weekly measurements</strong>
+            <div class="nw-measurement-title">
+              <strong>Weekly measurements</strong>
+              {% if week.measurement %}<span class="nw-measurement-date">{{ week.measurement.measured_on.strftime("%d %b %Y") }}</span>{% endif %}
+            </div>
             {% if week.measurement %}
-              <span>{{ week.measurement.measured_on.strftime("%d %b %Y") }}</span>
-              {% if week.measurement.upper_arm_cm is not none %}<span>Arm {{ week.measurement.upper_arm_cm }} cm</span>{% endif %}
-              {% if week.measurement.chest_cm is not none %}<span>Chest {{ week.measurement.chest_cm }} cm</span>{% endif %}
-              {% if week.measurement.waist_cm is not none %}<span>Waist {{ week.measurement.waist_cm }} cm</span>{% endif %}
-              {% if week.measurement.lower_abdomen_cm is not none %}<span>Lower abdomen {{ week.measurement.lower_abdomen_cm }} cm</span>{% endif %}
-              {% if week.measurement.hip_cm is not none %}<span>Hip {{ week.measurement.hip_cm }} cm</span>{% endif %}
-              {% if week.measurement.thigh_cm is not none %}<span>Thigh {{ week.measurement.thigh_cm }} cm</span>{% endif %}
-            {% else %}<span>No measurements entered.</span>{% endif %}
+            <div class="nw-measurement-values">
+              {% if week.measurement.upper_arm_cm is not none %}<span class="nw-measurement-chip">Arm · {{ week.measurement.upper_arm_cm }} cm</span>{% endif %}
+              {% if week.measurement.chest_cm is not none %}<span class="nw-measurement-chip">Chest · {{ week.measurement.chest_cm }} cm</span>{% endif %}
+              {% if week.measurement.waist_cm is not none %}<span class="nw-measurement-chip">Waist · {{ week.measurement.waist_cm }} cm</span>{% endif %}
+              {% if week.measurement.lower_abdomen_cm is not none %}<span class="nw-measurement-chip">Lower abdomen · {{ week.measurement.lower_abdomen_cm }} cm</span>{% endif %}
+              {% if week.measurement.hip_cm is not none %}<span class="nw-measurement-chip">Hip · {{ week.measurement.hip_cm }} cm</span>{% endif %}
+              {% if week.measurement.thigh_cm is not none %}<span class="nw-measurement-chip">Thigh · {{ week.measurement.thigh_cm }} cm</span>{% endif %}
+            </div>
+            {% else %}
+            <div class="nw-measurement-empty">No measurements entered for this week.</div>
+            {% endif %}
           </div>
         </section>
         {% endfor %}
