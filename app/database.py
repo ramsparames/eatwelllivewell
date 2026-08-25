@@ -457,6 +457,20 @@ def create_database() -> None:
 
             cursor.execute(
                 """
+                ALTER TABLE client_weekly_checkins
+                ADD COLUMN IF NOT EXISTS client_feedback TEXT
+                """
+            )
+
+            cursor.execute(
+                """
+                ALTER TABLE client_weekly_checkins
+                ADD COLUMN IF NOT EXISTS private_coach_note TEXT
+                """
+            )
+
+            cursor.execute(
+                """
                 ALTER TABLE client_measurements
                 ADD COLUMN IF NOT EXISTS checkin_id INTEGER
                 REFERENCES client_weekly_checkins(id)
@@ -1480,6 +1494,8 @@ def create_weekly_checkin(
     struggles=None,
     improvements_needed=None,
     coach_support=None,
+    client_feedback=None,
+    private_coach_note=None,
 ):
     with get_connection() as connection:
         with connection.cursor() as cursor:
@@ -1494,11 +1510,13 @@ def create_weekly_checkin(
                     wins,
                     struggles,
                     improvements_needed,
-                    coach_support
+                    coach_support,
+                    client_feedback,
+                    private_coach_note
                 )
                 VALUES (
                     %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s
                 )
                 RETURNING id
                 """,
@@ -1512,6 +1530,8 @@ def create_weekly_checkin(
                     struggles,
                     improvements_needed,
                     coach_support,
+                    client_feedback,
+                    private_coach_note,
                 ),
             )
 
@@ -1536,6 +1556,8 @@ def update_weekly_checkin(
     struggles=None,
     improvements_needed=None,
     coach_support=None,
+    client_feedback=None,
+    private_coach_note=None,
 ):
     """Update one existing coaching check-in owned by this client."""
     with get_connection() as connection:
@@ -1552,6 +1574,8 @@ def update_weekly_checkin(
                     struggles = %s,
                     improvements_needed = %s,
                     coach_support = %s,
+                    client_feedback = %s,
+                    private_coach_note = %s,
                     updated_at = NOW()
                 WHERE id = %s
                   AND client_id = %s
@@ -1566,6 +1590,8 @@ def update_weekly_checkin(
                     struggles,
                     improvements_needed,
                     coach_support,
+                    client_feedback,
+                    private_coach_note,
                     checkin_id,
                     client_id,
                 ),

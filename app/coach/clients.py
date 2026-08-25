@@ -1883,6 +1883,8 @@ def add_client_checkin(
     struggles: str = Form(""),
     improvements_needed: str = Form(""),
     coach_support: str = Form(""),
+    weekly_client_feedback: str = Form(""),
+    weekly_private_note: str = Form(""),
     action_keys: list[str] = Form(default=[]),
     action_all_keys: list[str] = Form(default=[]),
     action_target_counts: list[str] = Form(default=[]),
@@ -1906,6 +1908,8 @@ def add_client_checkin(
         struggles=struggles.strip() or None,
         improvements_needed=improvements_needed.strip() or None,
         coach_support=coach_support.strip() or None,
+        client_feedback=weekly_client_feedback.strip() or None,
+        private_coach_note=weekly_private_note.strip() or None,
     )
 
     client = ClientService.get(client_id) or {}

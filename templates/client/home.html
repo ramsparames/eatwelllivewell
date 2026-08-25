@@ -1,992 +1,380 @@
 {% extends "client/base.html" %}
-{% block title %}My Data | NourisHer{% endblock %}
+
+{% block title %}Today | NourisHer{% endblock %}
 
 {% block content %}
 <style>
-.cp,.cp *{box-sizing:border-box}
-.cp{
-  --purple:#5b0e91;--purple2:#8427b7;--ink:#28232c;--muted:#756f79;
-  --line:#e6dee9;--soft:#faf7fb;--green:#287a50;--gold:#d5b35a;
-  width:min(1180px,calc(100% - 34px));margin:17px auto 25px;color:var(--ink)
+/* NourisHer Client Portal V5 — coaching-week view */
+.nh-v5, .nh-v5 * { box-sizing:border-box; }
+.nh-v5 {
+  --purple:#5b0e91; --purple2:#8427b7; --ink:#25212a; --muted:#77717d;
+  --line:#e7e0e9; --soft:#faf7fb; --gold:#f1d36d; --green:#287a50;
+  width:min(1180px,calc(100% - 34px)); margin:18px auto 26px;
+  color:var(--ink); font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
-.cp-hero{
-  display:grid;grid-template-columns:minmax(0,1fr) 235px;gap:25px;align-items:center;
-  min-height:135px;padding:23px 28px;border-radius:24px;color:#fff;overflow:hidden;
-  position:relative;background:linear-gradient(120deg,#4d0879,#651097 58%,#882bb1);
-  box-shadow:0 15px 36px rgba(74,16,111,.13)
+.nh-v5-hero {
+  min-height:138px; display:grid; grid-template-columns:minmax(0,1fr) 230px; gap:28px;
+  align-items:center; padding:23px 30px; border-radius:26px; color:#fff; position:relative; overflow:hidden;
+  background:linear-gradient(120deg,#4d0879 0%,#651097 58%,#8a2db5 100%);
+  box-shadow:0 16px 38px rgba(74,16,111,.14);
 }
-.cp-hero:after{content:"";position:absolute;width:270px;height:270px;right:-90px;top:-165px;border:1px solid rgba(255,255,255,.15);border-radius:50%}
-.cp-eyebrow{margin:0 0 8px;color:#f0d578;font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
-.cp-hero h1{margin:0;font-size:clamp(34px,4vw,47px);line-height:1;letter-spacing:-.045em}
-.cp-sub{margin:8px 0 0;color:rgba(255,255,255,.8);font-size:13px}
-.cp-consistency{position:relative;z-index:1;padding:15px 17px;border:1px solid rgba(255,255,255,.18);border-radius:17px;background:rgba(255,255,255,.1)}
-.cp-consistency span{display:block;color:rgba(255,255,255,.72);font-size:9px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
-.cp-consistency strong{display:block;margin:4px 0 3px;font-size:26px;line-height:1}
-.cp-consistency small{color:rgba(255,255,255,.76);font-size:10px}
-.cp-alert{margin-top:10px;padding:10px 13px;border-radius:11px;background:#edf8f0;color:#286c49;font-size:11px}
-.cp-alert.error{background:#fff4ee;color:#98512e}
-.cp-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,.8fr);gap:14px;align-items:start;margin-top:14px}
-.cp-card{border:1px solid var(--line);border-radius:19px;background:#fff;box-shadow:0 5px 18px rgba(48,27,59,.04)}
-.cp-main{padding:21px 22px}
-.cp-side{display:grid;gap:12px}
-.cp-side .cp-card{padding:16px 18px}
-.cp-kicker{margin:0 0 5px;color:var(--purple);font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
-.cp-title-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-.cp h2{margin:0;font-size:22px;line-height:1.15;letter-spacing:-.025em}
-.cp-intro{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
-.cp-count{flex:none;padding:6px 9px;border-radius:999px;background:#f5eef8;color:var(--purple);font-size:10px;font-weight:850}
-.cp-actions{display:grid;gap:8px;margin-top:15px}
-.cp-action{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;min-height:59px;padding:9px 11px;border:1px solid #eee8f0;border-radius:13px;cursor:pointer}
-.cp-action input{position:absolute;opacity:0}
-.cp-check{width:31px;height:31px;display:grid;place-items:center;border:1.5px solid #d4cadb;border-radius:10px;color:transparent}
-.cp-check svg{width:16px}
-.cp-action:has(input:checked){background:#fbf7fd;border-color:#d9c1e6}
-.cp-action:has(input:checked) .cp-check{background:var(--purple);border-color:var(--purple);color:#fff}
-.cp-action-copy strong{display:block;font-size:13px;line-height:1.3}
-.cp-action-copy small{display:block;margin-top:2px;color:var(--muted);font-size:10px}
-.cp-done{color:transparent;font-size:9px;font-weight:900;text-transform:uppercase}
-.cp-action:has(input:checked) .cp-done{color:var(--purple)}
-.cp-action.locked{cursor:default}
-.cp-empty{margin-top:15px;padding:32px;border:1px dashed #dacfe0;border-radius:15px;text-align:center;background:#fcfafc}
-.cp-empty strong{display:block;font-size:15px}.cp-empty p{margin:5px 0 0;color:var(--muted);font-size:11px}
+.nh-v5-hero:after { content:""; position:absolute; width:260px; height:260px; right:-85px; top:-150px; border:1px solid rgba(255,255,255,.16); border-radius:50%; }
+.nh-v5-eyebrow { margin:0 0 10px; color:var(--gold); font-size:10px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
+.nh-v5-hero h1 { margin:0; font-size:clamp(34px,4vw,48px); line-height:1; letter-spacing:-.045em; }
+.nh-v5-sub { margin:8px 0 0; color:rgba(255,255,255,.8); font-size:13px; }
+.nh-v5-week-summary { position:relative; z-index:1; padding:15px 17px; border:1px solid rgba(255,255,255,.18); border-radius:17px; background:rgba(255,255,255,.1); }
+.nh-v5-week-summary span { display:block; font-size:9px; font-weight:850; letter-spacing:.13em; text-transform:uppercase; color:rgba(255,255,255,.72); }
+.nh-v5-week-summary strong { display:block; margin:4px 0 3px; font-size:25px; line-height:1.05; }
+.nh-v5-week-summary small { font-size:10px; color:rgba(255,255,255,.76); line-height:1.35; }
+.nh-v5-success { margin-top:10px; padding:10px 13px; border-radius:12px; background:#edf8f0; color:#286c49; font-size:12px; }
+.nh-v5-form { margin-top:14px; }
+.nh-v5-grid { display:grid; grid-template-columns:minmax(0,1.48fr) minmax(340px,.82fr); gap:14px; align-items:start; }
+.nh-v5-card { border:1px solid var(--line); border-radius:20px; background:#fff; box-shadow:0 5px 20px rgba(48,27,59,.04); }
+.nh-v5-main { min-height:0; height:calc(100vh - 202px); min-height:450px; max-height:600px; padding:21px 22px; display:flex; flex-direction:column; }
+.nh-v5-side { display:grid; gap:12px; }
+.nh-v5-side .nh-v5-card { padding:16px 18px; }
+.nh-v5-kicker { margin:0 0 5px; color:var(--purple); font-size:9px; font-weight:900; letter-spacing:.15em; text-transform:uppercase; }
+.nh-v5-title-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.nh-v5 h2 { margin:0; font-size:21px; line-height:1.12; letter-spacing:-.025em; }
+.nh-v5-intro { margin:6px 0 0; max-width:590px; color:var(--muted); font-size:11px; line-height:1.45; }
+.nh-v5-count { flex:none; padding:6px 9px; border-radius:999px; background:#f5eef8; color:var(--purple); font-size:10px; font-weight:850; }
+.nh-v5-actions { display:grid; gap:8px; margin-top:15px; overflow:auto; padding-right:3px; }
+.nh-v5-action { position:relative; display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:10px; align-items:center; min-height:59px; padding:9px 11px; border:1px solid #eee8f0; border-radius:14px; cursor:pointer; }
+.nh-v5-action input { position:absolute; opacity:0; }
+.nh-v5-check { width:31px; height:31px; display:grid; place-items:center; border:1.5px solid #d4cadb; border-radius:10px; color:transparent; }
+.nh-v5-check svg { width:16px; }
+.nh-v5-action:has(input:checked) { background:#fbf7fd; border-color:#d9c1e6; }
+.nh-v5-action:has(input:checked) .nh-v5-check { background:var(--purple); border-color:var(--purple); color:#fff; }
+.nh-v5-action-copy strong { display:block; font-size:12px; line-height:1.3; }
+.nh-v5-action-copy small { display:block; margin-top:2px; font-size:9px; color:var(--muted); }
+.nh-v5-done { color:transparent; font-size:9px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+.nh-v5-action:has(input:checked) .nh-v5-done { color:var(--purple); }
+.nh-v5-action.is-locked { cursor:default; }
+.nh-v5-empty { flex:1; min-height:0; margin-top:14px; display:flex; align-items:center; justify-content:center; padding:24px; border:1px dashed #dacfe0; border-radius:16px; text-align:center; background:linear-gradient(180deg,#fdfbfd,#faf7fb); }
+.nh-v5-empty-icon { width:42px; height:42px; display:grid; place-items:center; margin:0 auto 10px; border-radius:13px; background:#f1e6f7; color:var(--purple); font-size:19px; }
+.nh-v5-empty strong { display:block; font-size:15px; }
+.nh-v5-empty p { max-width:360px; margin:5px auto 0; color:var(--muted); font-size:11px; line-height:1.45; }
 
-.cp-daily-numbers{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px;padding-top:14px;border-top:1px solid #eee8f0}
-.cp-field label,.cp-field span{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:800}
-.cp-input,.cp-select{width:100%;height:41px;padding:0 11px;border:1px solid var(--line);border-radius:10px;background:#fbfafc;color:var(--ink);font-size:12px;outline:none}
-.cp-input:focus,.cp-select:focus{border-color:#b795c8;box-shadow:0 0 0 3px rgba(91,14,145,.06);background:#fff}
-.cp-input:disabled{opacity:1;background:#f5f2f6;color:#706a74}
-.cp-save{width:100%;min-height:45px;margin-top:12px;padding:0 14px;border:0;border-radius:11px;background:linear-gradient(135deg,#63109a,#4c0878);color:#fff;font-size:12px;font-weight:850;cursor:pointer}
-.cp-save:disabled{background:#e6dee9;color:#766f7a;cursor:default}
-.cp-lock{margin:7px 0 0;color:var(--green);font-size:10px;font-weight:750;text-align:center}
+/* Coaching week */
+.nh-v5-week-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.nh-v5-week-head strong { display:block; font-size:19px; letter-spacing:-.02em; }
+.nh-v5-week-head span { color:var(--muted); font-size:10px; }
+.nh-v5-week-progress { height:6px; overflow:hidden; border-radius:999px; background:#eee8f0; margin-bottom:10px; }
+.nh-v5-week-progress span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#5b0e91,#8d35bd); }
+.nh-v5-days { display:grid; gap:5px; }
+.nh-v5-day { border:1px solid #eee8f0; border-radius:11px; background:#fff; overflow:hidden; }
+.nh-v5-day summary { list-style:none; display:grid; grid-template-columns:62px minmax(0,1fr) auto; gap:9px; align-items:center; min-height:38px; padding:7px 9px; cursor:default; }
+.nh-v5-day summary::-webkit-details-marker { display:none; }
+.nh-v5-day[data-submitted="true"] summary { cursor:pointer; }
+.nh-v5-day-date { font-size:10px; font-weight:850; }
+.nh-v5-day-state { color:var(--muted); font-size:9px; }
+.nh-v5-day-badge { font-size:8px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
+.nh-v5-day[data-state="submitted"] .nh-v5-day-badge { color:var(--green); }
+.nh-v5-day[data-state="today"] { border-color:#d8bce7; background:#fcf9fd; }
+.nh-v5-day[data-state="today"] .nh-v5-day-badge { color:var(--purple); }
+.nh-v5-day[data-state="missed"] .nh-v5-day-badge,
+.nh-v5-day[data-state="upcoming"] .nh-v5-day-badge { color:#aaa3ad; }
+.nh-v5-day-detail { padding:0 10px 10px; border-top:1px solid #f0ebf2; }
+.nh-v5-day-actions { display:grid; gap:4px; padding-top:8px; }
+.nh-v5-day-action { display:flex; gap:7px; align-items:flex-start; font-size:9px; line-height:1.35; }
+.nh-v5-day-action b { color:var(--purple); }
+.nh-v5-day-meta { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:8px; color:var(--muted); font-size:9px; }
+.nh-v5-day-note { margin:8px 0 0; padding:8px 9px; border-radius:9px; background:#faf7fb; color:#5f5963; font-size:9px; line-height:1.4; }
 
-.cp-week-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;margin-bottom:9px}
-.cp-week-head strong{display:block;font-size:18px}.cp-week-head span{color:var(--muted);font-size:10px}
-.cp-progress{height:6px;border-radius:999px;background:#eee8f0;overflow:hidden;margin-bottom:10px}
-.cp-progress span{display:block;height:100%;background:linear-gradient(90deg,#5b0e91,#8d35bd)}
-.cp-days{display:grid;gap:5px}
-.cp-day{border:1px solid #eee8f0;border-radius:10px;overflow:hidden;background:#fff}
-.cp-day summary{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:9px;align-items:center;min-height:37px;padding:7px 9px;list-style:none}
-.cp-day summary::-webkit-details-marker{display:none}.cp-day[data-submitted="true"] summary{cursor:pointer}
-.cp-day-date{font-size:10px;font-weight:850}.cp-day-state{color:var(--muted);font-size:9px}.cp-day-badge{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
-.cp-day[data-state="submitted"] .cp-day-badge{color:var(--green)}.cp-day[data-state="today"]{border-color:#d8bce7;background:#fcf9fd}.cp-day[data-state="today"] .cp-day-badge{color:var(--purple)}.cp-day[data-state="missed"] .cp-day-badge,.cp-day[data-state="upcoming"] .cp-day-badge{color:#aaa3ad}
-.cp-day-detail{padding:8px 10px 10px;border-top:1px solid #f0ebf2}
-.cp-day-action{display:flex;gap:7px;margin-top:3px;font-size:9px}.cp-day-action b{color:var(--purple)}
-.cp-day-meta{display:flex;flex-wrap:wrap;gap:7px 12px;margin-top:7px;color:var(--muted);font-size:9px}
+/* Inputs */
+.nh-v5-fields { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:10px; }
+.nh-v5-field span { display:block; margin-bottom:4px; color:var(--muted); font-size:9px; font-weight:800; }
+.nh-v5-field input { width:100%; height:40px; padding:0 11px; border:1px solid var(--line); border-radius:11px; outline:none; background:#fbfafc; color:var(--ink); font-size:12px; }
+.nh-v5-field input:focus,.nh-v5-note:focus { border-color:#b795c8; box-shadow:0 0 0 3px rgba(91,14,145,.06); background:#fff; }
+.nh-v5-note-card { display:flex; flex-direction:column; }
+.nh-v5-note { width:100%; min-height:82px; margin-top:9px; padding:10px 11px; border:1px solid var(--line); border-radius:11px; outline:none; resize:none; background:#fbfafc; color:var(--ink); font-size:11px; line-height:1.4; }
+.nh-v5 input:disabled,.nh-v5 textarea:disabled { opacity:1; color:#706a74; background:#f6f3f7; cursor:not-allowed; }
+.nh-v5-lock-note { margin:8px 0 0; color:var(--green); font-size:10px; font-weight:750; }
+.nh-v5-save-card { padding:12px!important; background:linear-gradient(145deg,#faf6fc,#fff)!important; }
+.nh-v5-save { width:100%; min-height:43px; display:flex; align-items:center; justify-content:space-between; padding:0 15px; border:0; border-radius:12px; color:#fff; background:linear-gradient(135deg,#63109a,#4c0878); box-shadow:0 8px 18px rgba(91,14,145,.16); cursor:pointer; font-size:12px; font-weight:850; }
+.nh-v5-save:disabled { cursor:default; background:#e8e0eb; color:#756d7a; box-shadow:none; }
+.nh-v5-save-card p { margin:6px 2px 0; color:var(--muted); font-size:9px; text-align:center; }
 
-.cp-measure-head{display:flex;justify-content:space-between;gap:10px;align-items:start}
-.cp-measure-badge{padding:5px 8px;border-radius:999px;background:#f5eef8;color:var(--purple);font-size:9px;font-weight:850}
-.cp-measure-form{display:grid;gap:10px;margin-top:12px}
-.cp-measure-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cp-measure-date-row{display:grid;grid-template-columns:1fr 105px;gap:8px}
-.cp-measure-saved{margin-top:12px;padding:11px;border-radius:11px;background:#faf7fb}
-.cp-measure-saved strong{display:block;font-size:12px}
-.cp-measure-values{display:flex;flex-wrap:wrap;gap:5px 11px;margin-top:7px;color:var(--muted);font-size:10px}
-.cp-small{margin:7px 0 0;color:var(--muted);font-size:9px;line-height:1.4}
-
-
-.cp-call-card{background:linear-gradient(145deg,#fbf7fd,#fff)!important;border-color:#dcc9e6!important}
-.cp-call-row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:9px}
-.cp-call-when strong{display:block;font-size:14px}.cp-call-when span{display:block;margin-top:2px;color:var(--muted);font-size:10px}
-.cp-call-link{flex:none;padding:8px 10px;border-radius:9px;background:#f1e6f7;color:var(--purple);text-decoration:none;font-size:10px;font-weight:850}
-
-@media(max-width:900px){
-  .cp{width:min(100% - 24px,720px)}
-  .cp-hero{grid-template-columns:1fr auto}
-  .cp-grid{grid-template-columns:1fr}
+@media (max-width:900px){
+  .nh-v5{width:min(100% - 24px,720px);margin-top:12px}
+  .nh-v5-hero{grid-template-columns:1fr auto;min-height:130px;padding:21px 22px}
+  .nh-v5-grid{grid-template-columns:1fr}
+  .nh-v5-main{height:auto;max-height:none;min-height:0}
 }
-@media(max-width:560px){
-  .cp{width:100%;padding:0 12px;margin-top:0}
-  .cp-hero{margin:0 -12px;border-radius:0 0 22px 22px;grid-template-columns:1fr;padding:21px 17px;gap:14px}
-  .cp-main,.cp-side .cp-card{padding:16px}
-  .cp-daily-numbers,.cp-measure-grid,.cp-measure-date-row{grid-template-columns:1fr}
-  .cp-action{grid-template-columns:31px minmax(0,1fr)}.cp-done{display:none}
+@media (max-width:560px){
+  .nh-v5{width:100%;padding:0 12px;margin:0 auto 24px}
+  .nh-v5-hero{margin:0 -12px;border-radius:0 0 23px 23px;grid-template-columns:1fr;padding:22px 17px;gap:15px}
+  .nh-v5-week-summary{width:100%}
+  .nh-v5-main,.nh-v5-side .nh-v5-card{padding:16px}
+  .nh-v5-fields{grid-template-columns:1fr}
+  .nh-v5-action{grid-template-columns:31px minmax(0,1fr)}
+  .nh-v5-done{display:none}
 }
-
-.cp-status-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
-.cp-status-item{padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
-.cp-status-item span{display:block;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
-.cp-status-item strong{display:block;margin-top:4px;font-size:12px}
-.cp-status-item.good strong{color:#31704c}.cp-status-item.due strong{color:#8b5f17}
-.cp-section-empty{padding:18px;border:1px dashed #d9cedf;border-radius:12px;background:#fcfafc;color:var(--muted);font-size:11px;line-height:1.45}
-.cp-date-note{margin-top:5px;color:var(--muted);font-size:9px}
-@media(max-width:560px){.cp-status-strip{grid-template-columns:1fr}}
-
-.cp-resources{display:grid;gap:8px}.cp-resource{padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}.cp-resource-top{display:flex;justify-content:space-between;gap:8px;align-items:start}.cp-resource-tag{padding:4px 7px;border-radius:999px;background:#f1e7f6;color:var(--purple);font-size:8px;font-weight:850;text-transform:uppercase}.cp-resource h3{margin:7px 0 3px;font-size:13px}.cp-resource-meta{color:var(--muted);font-size:9px}.cp-resource p{margin:6px 0;color:var(--muted);font-size:10px;line-height:1.45}.cp-resource-note{padding:7px 8px;border-radius:8px;background:#faf5fc!important;color:#503e58!important}.cp-resource-link{display:inline-flex;margin-top:5px;padding:8px 10px;border-radius:9px;background:var(--purple);color:#fff;text-decoration:none;font-size:9px;font-weight:850}
-
-.cp-date-picker{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}.cp-date-pill{display:inline-flex;align-items:center;justify-content:center;padding:7px 9px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);text-decoration:none;font-size:9px;font-weight:800}.cp-date-pill:hover{border-color:#cab2d5}.cp-date-pill.active{border-color:var(--purple);background:#f6eef9;color:var(--purple)}.cp-date-pill.done:after{content:"✓";margin-left:5px;color:#31704c}
-.cp-edit-note{margin:8px 0 0;padding:9px 10px;border-radius:9px;background:#faf5fc;color:#65556b;font-size:9px;line-height:1.4}
-
-@media(min-width:980px){
-  .cp-layout{align-items:start}
-  .cp-side{position:sticky;top:18px}
-}
-
-.cp-selected-status{display:inline-flex;align-items:center;gap:6px;margin:8px 0 2px;padding:6px 9px;border-radius:999px;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.06em}
-.cp-selected-status.open{background:#f5eef8;color:#6a3c79}
-.cp-selected-status.today{background:#eee4f5;color:var(--purple)}
-.cp-selected-status.upcoming{background:#f4f2f5;color:#8f8792}
-.cp-date-pill.upcoming{opacity:.7}
-.cp-upcoming-box{padding:18px;border:1px dashed #d9cedf;border-radius:12px;background:#fcfafc;color:var(--muted);font-size:11px;line-height:1.5}
-
-.cp-week-browser{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fcfafc}
-.cp-week-browser-main{text-align:center}
-.cp-week-browser-main strong{display:block;font-size:13px}
-.cp-week-browser-main span{display:block;margin-top:2px;color:var(--muted);font-size:9px}
-.cp-week-nav{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--purple);text-decoration:none;font-size:17px;font-weight:800}
-.cp-week-nav.disabled{opacity:.3;pointer-events:none}
-.cp-week-mode{display:inline-flex;margin-top:5px;padding:4px 7px;border-radius:999px;background:#f1e8f5;color:var(--purple);font-size:8px;font-weight:850;text-transform:uppercase}
-.cp-week-mode.readonly{background:#f1f0f2;color:#7a727c}
-.cp-week-mode.future{background:#f4f2f5;color:#918a94}
-.cp-readonly-entry{padding:13px;border:1px solid #eee8f0;border-radius:11px;background:#fcfafc}
-.cp-readonly-entry h3{margin:0 0 8px;font-size:12px}
-.cp-readonly-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cp-readonly-stat{padding:9px;border:1px solid #eee8f0;border-radius:9px;background:#fff}
-.cp-readonly-stat span{display:block;color:var(--muted);font-size:8px}
-.cp-readonly-stat strong{display:block;margin-top:3px;font-size:11px}
-.cp-readonly-actions{margin-top:10px;display:grid;gap:5px}
-.cp-readonly-action{display:flex;gap:7px;font-size:9px}
-.cp-week-measurements{margin-top:12px;padding:11px 12px;border:1px solid #eee8f0;border-radius:11px;background:#fcfafc}
-.cp-week-measurements h3{margin:0 0 7px;font-size:11px}
-.cp-week-measurements-grid{display:flex;flex-wrap:wrap;gap:6px}
-.cp-week-measurements-grid span{padding:5px 7px;border:1px solid #eee7ef;border-radius:8px;background:#fff;color:#625c65;font-size:8px}
-
-.cp-left-measurements{margin-top:16px;padding-top:16px;border-top:1px solid #eee8f0}
-.cp-left-measurements-head{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:10px}
-.cp-left-measurements-head h3{margin:2px 0 0;font-size:16px}
-.cp-left-measurements-head p{margin:4px 0 0;color:var(--muted);font-size:9px}
-.cp-left-measurements-badge{padding:4px 7px;border-radius:999px;background:#f3e9f8;color:var(--purple);font-size:8px;font-weight:850;white-space:nowrap}
-.cp-left-measurements-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cp-left-measurements .cp-measure-date-row{display:grid;grid-template-columns:1fr 140px;gap:8px}
-.cp-measure-saved-simple{padding:12px;border:1px solid #e8dfea;border-radius:11px;background:#fcfafc}
-.cp-measure-saved-simple strong{display:block;font-size:10px;color:#31704c}
-.cp-measure-saved-values{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.cp-measure-saved-values span{padding:5px 7px;border:1px solid #eee7ef;border-radius:8px;background:#fff;color:#625c65;font-size:8px}
-@media(max-width:650px){.cp-left-measurements-grid,.cp-left-measurements .cp-measure-date-row{grid-template-columns:1fr}}
-
-.cp-grid-shell{overflow:auto;max-height:72vh;border:1px solid var(--line);border-radius:13px;background:#fff}
-.cp-sheet{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:11px}
-.cp-sheet th,.cp-sheet td{padding:10px 11px;border-right:1px solid #eee8f0;border-bottom:1px solid #eee8f0;vertical-align:middle;background:#fff;white-space:nowrap}
-.cp-sheet thead th{position:sticky;top:0;z-index:6;background:#f8f4fa;color:#5e5362;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
-.cp-sheet .sticky-week{position:sticky;left:0;z-index:5;min-width:70px}
-.cp-sheet .sticky-date{position:sticky;left:70px;z-index:5;min-width:82px}
-.cp-sheet thead .sticky-week,.cp-sheet thead .sticky-date{z-index:8;background:#f4eef7}
-.cp-sheet tr.current-week td{background:#fdf9ff}
-.cp-sheet tr.current-week .sticky-week,.cp-sheet tr.current-week .sticky-date{background:#f9f1fc}
-.cp-sheet tr.week-start td{border-top:2px solid #cbb4d5}
-.cp-sheet-status{display:inline-flex;padding:3px 6px;border-radius:999px;background:#f0eef1;color:#777078;font-size:7px;font-weight:850}
-.cp-sheet-status.done{background:#eaf5ef;color:#31704c}
-.cp-sheet-status.open{background:#f5eef8;color:#6a3c79}
-.cp-sheet-status.today{background:#eee4f5;color:var(--purple)}
-.cp-sheet-status.future{background:#f4f2f5;color:#918a94}
-.cp-sheet-check{display:flex;align-items:center;justify-content:center}
-.cp-sheet-check input{width:16px;height:16px;accent-color:var(--purple)}
-.cp-sheet-check.readonly{font-size:12px;font-weight:900}
-.cp-sheet-check .yes{color:#31704c}.cp-sheet-check .no{color:#a26f2c}.cp-sheet-check .na{color:#bbb2bd}
-.cp-sheet-input{width:92px;padding:8px 7px;border:1px solid #ddd4e1;border-radius:8px;background:#fff;font:inherit;font-size:9px}
-.cp-sheet-input.weight{width:78px}
-.cp-sheet-save{padding:8px 10px;border:0;border-radius:8px;background:var(--purple);color:#fff;font-size:8px;font-weight:850;cursor:pointer}
-.cp-sheet-save:hover{filter:brightness(.96)}
-.cp-sheet-action-head{max-width:150px;white-space:normal!important;line-height:1.2}
-.cp-sheet-action-head small{display:block;margin-top:3px;color:#8c828f;font-size:7px;font-weight:600;text-transform:none;letter-spacing:0}
-.cp-measure-row td{background:#fcfafc!important}
-.cp-measure-label{font-weight:900;color:var(--purple)}
-.cp-measure-inline{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
-.cp-measure-inline span{padding:4px 6px;border:1px solid #eee7ef;border-radius:7px;background:#fff;font-size:8px;color:#625c65}
-.cp-measure-inline .cp-field{min-width:105px}
-.cp-measure-inline .cp-input,.cp-measure-inline .cp-select{padding:6px 7px;font-size:8px}
-.cp-measure-grid-inline{display:grid;grid-template-columns:repeat(6,78px);gap:5px}
-.cp-grid-help{margin:0 0 10px;color:var(--muted);font-size:10px;line-height:1.45}
-.cp-grid-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
-.cp-grid-legend span{font-size:8px;color:var(--muted)}
-.cp-grid-card{grid-column:1/-1;width:100%}
-@media(max-width:800px){
-  .cp-sheet{min-width:950px}
-  .cp-grid-shell{max-height:none}
-}
-
-/* Typography consistency pass — client portal */
-.cp{
-  font-size:13px!important;
-}
-
-.cp-eyebrow,
-.cp-kicker,
-.cp-date-note,
-.cp-small,
-.cp-grid-help,
-.cp-grid-legend span,
-.cp-sheet-status,
-.cp-sheet-action-head small,
-.cp-measure-label,
-.cp-measure-inline span,
-.cp-field span,
-.cp-status-item span,
-.cp-consistency span,
-.cp-consistency small{
-  font-size:11px!important;
-  line-height:1.45!important;
-}
-
-.cp-status-item strong,
-.cp-consistency strong{
-  font-size:14px!important;
-}
-
-.cp-title-row h2,
-.cp-card h2{
-  font-size:22px!important;
-}
-
-.cp-intro,
-.cp-sub,
-.cp-alert,
-.cp-section-empty{
-  font-size:12px!important;
-  line-height:1.5!important;
-}
-
-.cp-sheet{
-  font-size:12px!important;
-  min-width:1450px!important;
-}
-
-.cp-sheet th,
-.cp-sheet td{
-  font-size:12px!important;
-  line-height:1.4!important;
-  padding:11px 12px!important;
-}
-
-.cp-sheet thead th{
-  font-size:11px!important;
-  line-height:1.3!important;
-}
-
-.cp-sheet-action-head{
-  min-width:145px!important;
-  max-width:190px!important;
-  font-size:11px!important;
-  line-height:1.3!important;
-}
-
-.cp-sheet-action-head small{
-  font-size:10px!important;
-}
-
-.cp-sheet-check input{
-  width:19px!important;
-  height:19px!important;
-}
-
-.cp-sheet-check.readonly{
-  font-size:15px!important;
-}
-
-.cp-sheet-input,
-.cp-input,
-.cp-select{
-  font-size:12px!important;
-}
-
-.cp-sheet-input{
-  width:100px!important;
-}
-
-.cp-sheet-input.weight{
-  width:86px!important;
-}
-
-.cp-sheet-save,
-.cp-save{
-  font-size:12px!important;
-  padding:9px 12px!important;
-}
-
-.cp-measure-inline{
-  gap:8px!important;
-}
-
-.cp-measure-inline span{
-  font-size:11px!important;
-  padding:6px 8px!important;
-}
-
-.cp-measure-grid-inline{
-  grid-template-columns:repeat(6,92px)!important;
-  gap:7px!important;
-}
-
-.cp-measure-row td{
-  font-size:12px!important;
-}
-
-.cp-count{
-  font-size:12px!important;
-}
-
-.cp-status-strip{
-  gap:10px!important;
-}
-
-/* Keep text readable and allow horizontal scrolling */
-.cp-grid-shell{
-  overflow-x:auto!important;
-}
-
-.cp-sheet .macro-grid-input{width:88px!important;min-width:88px!important}
-.cp-sheet .macro-calories-cell{min-width:90px;font-weight:800}
-
-.cp-workout-section{margin-top:18px}.cp-workout-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cp-workout-card{padding:15px;border:1px solid var(--line);border-radius:13px;background:#fff}.cp-workout-card h3{margin:7px 0 4px;font-size:16px}.cp-workout-card p{font-size:11px;line-height:1.45;color:var(--muted)}.cp-workout-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f1edf3;color:#6c6370;font-size:10px;font-weight:850}.cp-workout-status.completed{background:#eaf5ef;color:#31704c}.cp-workout-status.in_progress{background:#fff4df;color:#8b5f17}.cp-workout-open{display:inline-flex;margin-top:8px;padding:9px 12px;border-radius:9px;background:var(--purple);color:#fff;text-decoration:none;font-size:11px;font-weight:850}.cp-regular-resources{margin-top:14px}@media(max-width:750px){.cp-workout-grid{grid-template-columns:1fr}}
-
-/* Workout & Resources — current client portal */
-.cp-workout-section{
-  margin-top:16px;
-  padding:20px 22px!important;
-}
-.cp-workout-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-  margin-top:14px;
-}
-.cp-workout-card{
-  min-width:0;
-  padding:16px;
-  border:1px solid var(--line);
-  border-radius:14px;
-  background:#fff;
-}
-.cp-workout-card h3{
-  margin:10px 0 5px;
-  font-size:17px;
-  line-height:1.3;
-}
-.cp-workout-card p{
-  margin:5px 0;
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.45;
-}
-.cp-workout-status{
-  display:inline-flex;
-  padding:6px 9px;
-  border-radius:999px;
-  background:#f1edf3;
-  color:var(--muted);
-  font-size:12px;
-  font-weight:850;
-}
-.cp-workout-status.completed{background:#eaf5ef;color:#31704c}
-.cp-workout-status.in_progress{background:#f3e9f8;color:var(--purple)}
-.cp-workout-open{
-  display:inline-flex;
-  align-items:center;
-  margin-top:11px;
-  padding:9px 12px;
-  border-radius:9px;
-  background:var(--purple);
-  color:#fff!important;
-  text-decoration:none;
-  font-size:13px;
-  font-weight:850;
-}
-.cp-regular-resources{margin-top:14px}
-@media(max-width:760px){
-  .cp-workout-grid{grid-template-columns:1fr}
-}
-
-/* Assigned workouts — inside the main client portal shell */
-.cp-workout-section{
-  width:100%;
-  margin-top:14px;
-  padding:20px 22px!important;
-}
-.cp-workout-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-  margin-top:14px;
-}
-.cp-workout-card{
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-  min-height:170px;
-  padding:16px;
-  border:1px solid var(--line);
-  border-radius:14px;
-  background:#fff;
-}
-.cp-workout-card h3{
-  margin:11px 0 5px;
-  font-size:17px;
-  line-height:1.25;
-}
-.cp-workout-card p{
-  margin:5px 0;
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.4;
-}
-.cp-workout-open{
-  display:inline-flex!important;
-  align-items:center;
-  justify-content:center;
-  width:max-content;
-  margin-top:auto!important;
-  padding:10px 13px!important;
-  border-radius:9px!important;
-  background:var(--purple)!important;
-  color:#fff!important;
-  text-decoration:none!important;
-  font-size:13px!important;
-  font-weight:850!important;
-}
-@media(max-width:760px){
-  .cp-workout-grid{grid-template-columns:1fr}
-}
-
-/* Client Resources — isolated final layout */
-.cp-res-panel{
-  margin-top:14px;
-  padding:21px 22px;
-  width:100%;
-  overflow:hidden;
-}
-.cp-res-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:16px;
-}
-.cp-res-workouts{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-  margin-top:16px;
-}
-.cp-res-workout-card{
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-  padding:16px;
-  border:1px solid var(--line);
-  border-radius:14px;
-  background:#fff;
-}
-.cp-res-workout-top{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  align-items:flex-start;
-}
-.cp-res-workout-card h3{
-  margin:12px 0 5px;
-  color:var(--ink);
-  font-size:18px;
-  line-height:1.25;
-}
-.cp-res-meta{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.45;
-}
-.cp-res-note{
-  margin-top:10px;
-  padding:9px 10px;
-  border-radius:9px;
-  background:#faf5fc;
-  color:#594a60;
-  font-size:13px;
-  line-height:1.4;
-}
-.cp-res-status{
-  display:inline-flex;
-  padding:6px 9px;
-  border-radius:999px;
-  background:#f1edf3;
-  color:#685f6d;
-  font-size:12px;
-  font-weight:850;
-}
-.cp-res-status.completed{
-  background:#eaf5ef;
-  color:#31704c;
-}
-.cp-res-status.in_progress{
-  background:#f3e9f8;
-  color:var(--purple);
-}
-.cp-res-cta,
-.cp-res-cta:visited,
-.cp-res-cta:hover,
-.cp-res-cta:active{
-  display:inline-flex!important;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  width:max-content;
-  min-height:42px;
-  margin-top:16px;
-  padding:0 15px;
-  border-radius:10px;
-  background:#5b0e91!important;
-  color:#ffffff!important;
-  text-decoration:none!important;
-  font-size:14px!important;
-  font-weight:850!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-.cp-res-other{
-  margin-top:14px;
-}
-@media(max-width:760px){
-  .cp-res-head{display:block}
-  .cp-res-head .cp-count{display:inline-flex;margin-top:10px}
-  .cp-res-workouts{grid-template-columns:1fr}
-}
-
-.cp-client-tabs{
-  display:flex;
-  gap:5px;
-  width:max-content;
-  margin-top:12px;
-  padding:5px;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:#fff;
-}
-.cp-client-tab{
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-  padding:9px 14px;
-  border-radius:8px;
-  color:var(--muted);
-  text-decoration:none;
-  font-size:14px;
-  font-weight:800;
-}
-.cp-client-tab.active{
-  background:var(--purple);
-  color:#fff;
-}
-.cp-client-tab span{
-  display:inline-flex;
-  min-width:20px;
-  height:20px;
-  align-items:center;
-  justify-content:center;
-  padding:0 6px;
-  border-radius:999px;
-  background:#f3e9f8;
-  color:var(--purple);
-  font-size:11px;
-  font-weight:900;
-}
-.cp-client-tab.active span{
-  background:rgba(255,255,255,.18);
-  color:#fff;
-}
-
-
-.cp-weekly-reflection{margin-top:18px;padding:22px}
-.cp-reflection-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}
-.cp-reflection-head h2{margin:3px 0 5px;font-size:24px}
-.cp-reflection-head p{margin:0;color:var(--muted);font-size:14px}
-.cp-reflection-status{padding:6px 10px;border-radius:999px;background:#eaf5ef;color:#31704c;font-size:12px;font-weight:850}
-.cp-reflection-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cp-reflection-grid label>span{display:block;margin-bottom:6px;font-size:13px;font-weight:800;color:var(--muted)}
-.cp-reflection-grid textarea,.cp-reflection-grid select{width:100%;min-height:46px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:14px}
-.cp-reflection-grid textarea{min-height:88px;resize:vertical}
-.cp-reflection-save{margin-top:13px;min-height:44px;padding:0 16px;border:0;border-radius:10px;background:var(--purple);color:#fff;font-size:14px;font-weight:850;cursor:pointer}
-.cp-coach-feedback{margin-bottom:16px;padding:15px 16px;border-radius:12px;background:#f7effa}
-.cp-coach-feedback span{display:block;color:var(--purple);font-size:11px;font-weight:900;letter-spacing:.08em}
-.cp-coach-feedback strong{display:block;margin-top:5px;font-size:16px}
-.cp-coach-feedback p{margin:6px 0 0;font-size:14px;line-height:1.5}
-.cp-reflection-readonly{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.cp-reflection-readonly>div{padding:12px;border-radius:10px;background:#faf7fb}
-.cp-reflection-readonly span{color:var(--muted);font-size:12px;font-weight:800}
-.cp-reflection-readonly p{margin:5px 0 0;font-size:14px}
-@media(max-width:700px){.cp-reflection-grid,.cp-reflection-readonly{grid-template-columns:1fr}}
-
-
-.cp-data-intro{
-  display:flex;justify-content:space-between;gap:18px;align-items:flex-end;
-  width:min(1180px,calc(100% - 34px));margin:14px auto 0;padding:18px 20px;
-  border:1px solid #e7dfea;border-radius:16px;background:#fff
-}
-.cp-data-intro h1{margin:0;font-size:28px;letter-spacing:-.03em}
-.cp-data-intro p:not(.cp-kicker){margin:5px 0 0;color:#756f79;font-size:13px}
-.cp-data-intro>span{color:#5b0e91;font-size:12px;font-weight:850;white-space:nowrap}
-@media(max-width:700px){.cp-data-intro{display:block}.cp-data-intro>span{display:block;margin-top:9px}}
 </style>
 
+{% set today_locked = daily_entry and daily_entry.is_submitted %}
 
-<section class="cp">
-  {% set active_workout_count = assigned_workouts|selectattr("status","ne","completed")|list|length %}
-{% include "client/_portal_nav.html" %}
-<div class="cp-data-intro">
-  <div>
-    <p class="cp-kicker">MY DATA</p>
-    <h1>Track your week</h1>
-    <p>Update the current coaching week here. Previous weeks stay visible and read-only.</p>
-  </div>
-  <span>Week {{ week_completion.week_number }} · {{ week_completion.week_start.strftime("%d %b") }}–{{ week_completion.week_end.strftime("%d %b") }}</span>
-</div>
+<section class="nh-v5">
+  <header class="nh-v5-hero">
+    <div>
+      <p class="nh-v5-eyebrow">NourisHer · Week {{ week_completion.week_number }}</p>
+      <h1>Hi {{ client.name.split(" ")[0] }} 👋</h1>
+      <p class="nh-v5-sub">
+        {{ today.strftime("%A, %d %B %Y") }}
+        · {% if today_locked %}Today’s check-in is complete.{% else %}A quick check-in for the day.{% endif %}
+      </p>
+    </div>
 
-
+    <aside class="nh-v5-week-summary" aria-label="Current coaching week consistency">
+      <span>You’re building consistency</span>
+      <strong>{{ week_completion.checkins_completed }} of 7</strong>
+      <small>daily check-ins completed this coaching week</small>
+    </aside>
+  </header>
 
   {% if saved %}
-  <div class="cp-alert"><strong>✓ {{ selected_date.strftime("%d %b") }} saved.</strong> You can update it again anytime before this coaching week closes.</div>
-  {% endif %}
-  {% if measurement_saved %}
-  <div class="cp-alert"><strong>✓ Weekly measurements saved.</strong> They’re available to Sushma for your weekly review.</div>
-  {% endif %}
-  {% if not weekly_measurement %}
-  <div class="cp-alert error"><strong>Weekly measurements are due.</strong> Complete all six once during this coaching week, using the date you actually measured.</div>
-  {% endif %}
-  {% if measurement_error %}
-  <div class="cp-alert error">
-    {% if measurement_error == "already_saved" %}
-      Measurements have already been submitted for this coaching week.
-    {% else %}
-      Please complete all six measurements and choose a valid date from this coaching week.
-    {% endif %}
+  <div class="nh-v5-success">
+    <strong>✓ Today submitted.</strong> Your check-in is now read-only.
   </div>
   {% endif %}
 
-  <div class="cp-status-strip">
-    <div class="cp-status-item {% if week_completion.days|selectattr("date","equalto",today)|selectattr("submitted")|list %}good{% endif %}">
-      <span>Today</span>
-      <strong>Week remains editable</strong>
-    </div>
-    <div class="cp-status-item {% if weekly_measurement %}good{% else %}due{% endif %}">
-      <span>This week</span>
-      <strong>{% if weekly_measurement %}Measurements complete ✓{% else %}Measurements still due{% endif %}</strong>
-    </div>
-    <div class="cp-status-item">
-      <span>Next coaching call</span>
-      <strong>{% if next_call and next_call.local_start_time %}{{ next_call.local_start_time.strftime("%d %b · %I:%M %p") }}{% else %}Not scheduled yet{% endif %}</strong>
-    </div>
-  </div>
+  <form class="nh-v5-form" method="post" action="/client/{{ access_token }}/daily">
+    <div class="nh-v5-grid">
 
-  <div class="cp-grid">
-    <section class="cp-card cp-grid-card" id="client-grid">
-      <div class="cp-title-row">
-        <div>
-          <p class="cp-kicker">Your coaching data</p>
-          <h2>All weeks</h2>
-          <p class="cp-grid-help">Past weeks are read-only. In the current week, you can update any day up to today directly in the grid.</p>
-        </div>
-        <span class="cp-count">Week {{ client_history_grid.current_week_number }}</span>
-      </div>
-
-      <div class="cp-grid-legend">
-        <span>✓ completed</span>
-        <span>○ not completed</span>
-        <span>· not assigned that day</span>
-      </div>
-
-      {% if macro_settings.enabled %}
-      <div class="cp-measure-saved-simple" style="margin-bottom:12px">
-        <strong>Macro tracking enabled</strong>
-        <div class="cp-measure-saved-values">
-          <span>Protein target {{ macro_settings.protein_target_g if macro_settings.protein_target_g is not none else "—" }} g</span>
-          <span>Carb target {{ macro_settings.carbs_target_g if macro_settings.carbs_target_g is not none else "—" }} g</span>
-          <span>Fat target {{ macro_settings.fat_target_g if macro_settings.fat_target_g is not none else "—" }} g</span>
-          <span>Calorie target {{ macro_settings.calorie_target if macro_settings.calorie_target is not none else "—" }}{% if macro_settings.calorie_target is not none %} kcal{% endif %}</span>
-        </div>
-      </div>
-      {% endif %}
-
-      {% if client_history_grid and client_history_grid.rows %}
-      <div class="cp-grid-shell">
-        <table class="cp-sheet">
-          <thead>
-            <tr>
-              <th class="sticky-week">Week</th>
-              <th class="sticky-date">Date</th>
-              <th>Status</th>
-              <th>Steps</th>
-              <th>Weight</th>
-              {% if macro_settings.enabled %}
-              <th>Protein</th>
-              <th>Carbs</th>
-              <th>Fat</th>
-              <th>Calories</th>
+      <section class="nh-v5-card nh-v5-main">
+        <div class="nh-v5-title-row">
+          <div>
+            <p class="nh-v5-kicker">Your focus for today</p>
+            <h2>Today’s commitments</h2>
+            {% if actions %}
+            <p class="nh-v5-intro">
+              {% if today_locked %}
+                Here’s what you submitted today.
+              {% else %}
+                Check them off as you go. Consistency matters more than perfection.
               {% endif %}
-              {% for action in client_history_grid.action_columns %}
-              <th class="cp-sheet-action-head">
-                {{ action.name }}
-                {% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}
-              </th>
-              {% endfor %}
-              <th>Save</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {% set ns = namespace(last_week=None) %}
-            {% for row in client_history_grid.rows %}
-            <tr class="{% if row.is_current_week %}current-week{% endif %} {% if ns.last_week != row.week_number %}week-start{% endif %}">
-              <td class="sticky-week"><strong>Week {{ row.week_number }}</strong></td>
-              <td class="sticky-date"><strong>{{ row.date.strftime("%d %b") }}</strong></td>
-              <td>
-                {% if row.submitted %}
-                  <span class="cp-sheet-status done">Entered</span>
-                {% elif row.editable and row.date == today %}
-                  <span class="cp-sheet-status today">Today</span>
-                {% elif row.editable %}
-                  <span class="cp-sheet-status open">Open</span>
-                {% elif row.is_future_day %}
-                  <span class="cp-sheet-status future">Upcoming</span>
-                {% else %}
-                  <span class="cp-sheet-status">No entry</span>
-                {% endif %}
-              </td>
-
-              {% if row.editable %}
-                <form id="day-form-{{ row.date.isoformat() }}" method="post" action="/client/{{ access_token }}/daily">
-                  <input type="hidden" name="tracked_on" value="{{ row.date.isoformat() }}">
-                  <input type="hidden" name="selected_week_number" value="{{ row.week_number }}">
-                </form>
-              {% endif %}
-
-              <td>
-                {% if row.editable %}
-                <input class="cp-sheet-input" type="number" min="0" inputmode="numeric"
-                       name="steps"
-                       form="day-form-{{ row.date.isoformat() }}"
-                       value="{{ row.steps if row.steps is not none else '' }}"
-                       placeholder="Steps">
-                {% else %}
-                {{ row.steps if row.steps is not none else "—" }}
-                {% endif %}
-              </td>
-
-              <td>
-                {% if row.editable %}
-                <input class="cp-sheet-input weight" type="number" step="0.1"
-                       name="weight_kg"
-                       form="day-form-{{ row.date.isoformat() }}"
-                       value="{{ row.weight_kg if row.weight_kg is not none else '' }}"
-                       placeholder="kg">
-                {% else %}
-                {% if row.weight_kg is not none %}{{ row.weight_kg }} kg{% else %}—{% endif %}
-                {% endif %}
-              </td>
-
-              {% if macro_settings.enabled %}
-                {% set macro = row.macro if row.macro is defined else none %}
-                <td>
-                  {% if row.editable %}
-                  <input class="cp-sheet-input macro-grid-input"
-                         type="number" min="0" step="0.1"
-                         name="protein_g"
-                         form="day-form-{{ row.date.isoformat() }}"
-                         value="{% if macro and macro.protein_g is not none %}{{ macro.protein_g }}{% endif %}"
-                         placeholder="g">
-                  {% else %}
-                  {% if macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}
-                  {% endif %}
-                </td>
-                <td>
-                  {% if row.editable %}
-                  <input class="cp-sheet-input macro-grid-input"
-                         type="number" min="0" step="0.1"
-                         name="carbs_g"
-                         form="day-form-{{ row.date.isoformat() }}"
-                         value="{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }}{% endif %}"
-                         placeholder="g">
-                  {% else %}
-                  {% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}
-                  {% endif %}
-                </td>
-                <td>
-                  {% if row.editable %}
-                  <input class="cp-sheet-input macro-grid-input"
-                         type="number" min="0" step="0.1"
-                         name="fat_g"
-                         form="day-form-{{ row.date.isoformat() }}"
-                         value="{% if macro and macro.fat_g is not none %}{{ macro.fat_g }}{% endif %}"
-                         placeholder="g">
-                  {% else %}
-                  {% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}
-                  {% endif %}
-                </td>
-                <td class="macro-calories-cell"
-                    data-macro-date="{{ row.date.isoformat() }}">
-                  {% if macro and macro.calories is not none %}
-                    {{ macro.calories }}
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-              {% endif %}
-
-              {% for action in client_history_grid.action_columns %}
-                {% set cell = row.actions.get(action.id) %}
-                <td>
-                  <div class="cp-sheet-check {% if not row.editable %}readonly{% endif %}">
-                    {% if not cell or not cell.eligible %}
-                      <span class="na">·</span>
-                    {% elif row.editable %}
-                      <input type="checkbox"
-                             name="completed_action_ids"
-                             value="{{ cell.action_id }}"
-                             form="day-form-{{ row.date.isoformat() }}"
-                             {% if cell.completed is true %}checked{% endif %}>
-                    {% elif cell.completed is true %}
-                      <span class="yes">✓</span>
-                    {% elif cell.completed is false %}
-                      <span class="no">○</span>
-                    {% else %}
-                      <span class="na">—</span>
-                    {% endif %}
-                  </div>
-                </td>
-              {% endfor %}
-
-              <td>
-                {% if row.editable %}
-                <button class="cp-sheet-save" type="submit" form="day-form-{{ row.date.isoformat() }}">
-                  {% if row.submitted %}Update{% else %}Save{% endif %}
-                </button>
-                {% else %}—{% endif %}
-              </td>
-            </tr>
-
-            {% if loop.index0 % 7 == 6 %}
-              <tr class="cp-measure-row">
-                <td class="sticky-week"></td>
-                <td class="sticky-date"><span class="cp-measure-label">Measurements</span></td>
-                <td colspan="{{ client_history_grid.action_columns|length + 4 + (4 if macro_settings.enabled else 0) }}">
-                  {% set wm = client_history_grid.week_measurements.get(row.week_number) %}
-                  {% if wm %}
-                  <div class="cp-measure-inline">
-                    <strong>{{ wm.measured_on.strftime("%d %b %Y") }}</strong>
-                    {% if wm.upper_arm_cm is not none %}<span>Arm {{ wm.upper_arm_cm }}</span>{% endif %}
-                    {% if wm.chest_cm is not none %}<span>Chest {{ wm.chest_cm }}</span>{% endif %}
-                    {% if wm.waist_cm is not none %}<span>Waist {{ wm.waist_cm }}</span>{% endif %}
-                    {% if wm.lower_abdomen_cm is not none %}<span>Lower abd {{ wm.lower_abdomen_cm }}</span>{% endif %}
-                    {% if wm.hip_cm is not none %}<span>Hip {{ wm.hip_cm }}</span>{% endif %}
-                    {% if wm.thigh_cm is not none %}<span>Thigh {{ wm.thigh_cm }}</span>{% endif %}
-                  </div>
-
-                  {% elif row.week_number == client_history_grid.current_week_number %}
-                  <form method="post" action="/client/{{ access_token }}/measurements">
-                    <div class="cp-measure-inline">
-                      <div class="cp-field">
-                        <span>Date</span>
-                        <input class="cp-input" type="date" name="measured_on"
-                               min="{{ row.week_start if row.week_start is defined else week_completion.week_start }}"
-                               max="{{ today }}" value="{{ today }}" required>
-                      </div>
-                      <div class="cp-field">
-                        <span>Unit</span>
-                        <select class="cp-select" name="measurement_unit">
-                          <option value="cm">cm</option>
-                          <option value="inches">inches</option>
-                        </select>
-                      </div>
-                      <div class="cp-measure-grid-inline">
-                        <input class="cp-sheet-input" type="number" step="0.1" name="upper_arm" placeholder="Arm" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="chest" placeholder="Chest" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="waist" placeholder="Waist" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="lower_abdomen" placeholder="Lower abd" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="hip" placeholder="Hip" required>
-                        <input class="cp-sheet-input" type="number" step="0.1" name="thigh" placeholder="Thigh" required>
-                      </div>
-                      <button class="cp-sheet-save" type="submit">Save measurements</button>
-                    </div>
-                  </form>
-                  {% else %}
-                  <span style="color:var(--muted)">No measurements entered.</span>
-                  {% endif %}
-                </td>
-              </tr>
+            </p>
             {% endif %}
+          </div>
 
-            {% set ns.last_week = row.week_number %}
+          {% if actions %}
+          <span class="nh-v5-count" data-completion-count>
+            {{ actions|selectattr("completed_today")|list|length }} / {{ actions|length }} done
+          </span>
+          {% endif %}
+        </div>
+
+        {% if actions %}
+        <div class="nh-v5-actions">
+          {% for action in actions %}
+          <label class="nh-v5-action {% if today_locked %}is-locked{% endif %}">
+            <input
+              type="checkbox"
+              name="completed_action_ids"
+              value="{{ action.id }}"
+              data-action-checkbox
+              {% if action.completed_today %}checked{% endif %}
+              {% if today_locked %}disabled{% endif %}
+            >
+            <span class="nh-v5-check" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none">
+                <path d="M4.5 10.3L8.2 14l7.3-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="nh-v5-action-copy">
+              <strong>{{ action.action_name }}</strong>
+              {% if action.target_count %}
+              <small>{{ action.target_count }} {{ action.target_unit or "" }} weekly target</small>
+              {% endif %}
+            </span>
+            <span class="nh-v5-done">Done</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="nh-v5-empty">
+          <div>
+            <div class="nh-v5-empty-icon">♡</div>
+            <strong>Your plan is being prepared</strong>
+            <p>Your focus actions will appear here as soon as Sushma assigns them.</p>
+          </div>
+        </div>
+        {% endif %}
+      </section>
+
+      <aside class="nh-v5-side">
+
+        <section class="nh-v5-card">
+          <p class="nh-v5-kicker">Your week</p>
+
+          <div class="nh-v5-week-head">
+            <div>
+              <strong>Week {{ week_completion.week_number }}</strong>
+              <span>
+                {{ week_completion.week_start.strftime("%d %b") }}
+                – {{ week_completion.week_end.strftime("%d %b") }}
+              </span>
+            </div>
+            <span>{{ week_completion.checkins_completed }} / 7 check-ins</span>
+          </div>
+
+          <div class="nh-v5-week-progress" aria-hidden="true">
+            <span style="width:{{ week_completion.checkin_percent }}%"></span>
+          </div>
+
+          <div class="nh-v5-days">
+            {% for day in week_completion.days %}
+            <details
+              class="nh-v5-day"
+              data-state="{{ day.state }}"
+              data-submitted="{{ 'true' if day.submitted else 'false' }}"
+            >
+              <summary>
+                <span class="nh-v5-day-date">
+                  {{ day.date.strftime("%d %b") }}
+                </span>
+
+                <span class="nh-v5-day-state">
+                  {% if day.submitted and day.actions_total %}
+                    {{ day.actions_completed }}/{{ day.actions_total }} commitments
+                  {% elif day.submitted %}
+                    Check-in saved
+                  {% elif day.state == "today" %}
+                    Today
+                  {% elif day.state == "missed" %}
+                    No check-in
+                  {% else %}
+                    Upcoming
+                  {% endif %}
+                </span>
+
+                <span class="nh-v5-day-badge">
+                  {% if day.state == "submitted" %}✓ Submitted
+                  {% elif day.state == "today" %}● Today
+                  {% elif day.state == "missed" %}—
+                  {% else %}Soon{% endif %}
+                </span>
+              </summary>
+
+              {% if day.submitted %}
+              <div class="nh-v5-day-detail">
+                {% if day.actions %}
+                <div class="nh-v5-day-actions">
+                  {% for item in day.actions %}
+                  <div class="nh-v5-day-action">
+                    <b>{{ "✓" if item.completed else "○" }}</b>
+                    <span>{{ item.action_name }}</span>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="nh-v5-day-meta">
+                  {% if day.steps is not none %}<span>Steps: <strong>{{ day.steps }}</strong></span>{% endif %}
+                  {% if day.weight_kg is not none %}<span>Weight: <strong>{{ day.weight_kg }} kg</strong></span>{% endif %}
+                </div>
+
+                {% if day.note %}
+                <p class="nh-v5-day-note">{{ day.note }}</p>
+                {% endif %}
+              </div>
+              {% endif %}
+            </details>
             {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <div class="cp-section-empty">Your coaching data will appear here once tracking begins.</div>
-      {% endif %}
-    </section>
+          </div>
+        </section>
 
+        <section class="nh-v5-card">
+          <p class="nh-v5-kicker">Optional</p>
+          <h2>Quick numbers</h2>
+          <div class="nh-v5-fields">
+            <label class="nh-v5-field">
+              <span>Steps</span>
+              <input
+                type="number"
+                name="steps"
+                min="0"
+                inputmode="numeric"
+                value="{% if daily_entry and daily_entry.steps is not none %}{{ daily_entry.steps }}{% endif %}"
+                placeholder="e.g. 7000"
+                {% if today_locked %}disabled{% endif %}
+              >
+            </label>
 
+            <label class="nh-v5-field">
+              <span>Weight (kg)</span>
+              <input
+                type="number"
+                step="0.1"
+                name="weight_kg"
+                inputmode="decimal"
+                value="{% if daily_entry and daily_entry.weight_kg is not none %}{{ daily_entry.weight_kg }}{% endif %}"
+                placeholder="Optional"
+                {% if today_locked %}disabled{% endif %}
+              >
+            </label>
+          </div>
+        </section>
 
-    
+        <section class="nh-v5-card nh-v5-note-card">
+          <p class="nh-v5-kicker">Between you & Sushma</p>
+          <h2>Anything to share?</h2>
+          <textarea
+            class="nh-v5-note"
+            name="note"
+            placeholder="A win, a struggle, hunger, sleep, travel… anything Sushma should know."
+            {% if today_locked %}disabled{% endif %}
+          >{% if daily_entry and daily_entry.note %}{{ daily_entry.note }}{% endif %}</textarea>
+          {% if today_locked %}
+          <p class="nh-v5-lock-note">✓ Submitted and locked for today.</p>
+          {% endif %}
+        </section>
 
-  </div>
+        <section class="nh-v5-card nh-v5-save-card">
+          <button type="submit" class="nh-v5-save" {% if today_locked %}disabled{% endif %}>
+            <span>
+              {% if today_locked %}
+                ✓ Today submitted
+              {% else %}
+                Submit today’s check-in
+              {% endif %}
+            </span>
+            {% if not today_locked %}<span aria-hidden="true">→</span>{% endif %}
+          </button>
+          <p>
+            {% if today_locked %}
+              You can view this check-in anytime from Your Week.
+            {% else %}
+              Once submitted, today’s check-in becomes read-only.
+            {% endif %}
+          </p>
+        </section>
 
-
-
-
-
-
-
+      </aside>
+    </div>
+  </form>
 </section>
 
 <script>
 (() => {
-  const boxes = [...document.querySelectorAll("[data-action-checkbox]")];
-  const count = document.querySelector("[data-completion-count]");
+  const boxes = Array.from(document.querySelectorAll('[data-action-checkbox]'));
+  const count = document.querySelector('[data-completion-count]');
   const refresh = () => {
-    if (count) count.textContent = `${boxes.filter(b => b.checked).length} / ${boxes.length} done`;
+    if (count) {
+      count.textContent = `${boxes.filter(b => b.checked).length} / ${boxes.length} done`;
+    }
   };
-  boxes.forEach(b => b.addEventListener("change", refresh));
+  boxes.forEach(b => b.addEventListener('change', refresh));
   refresh();
 
-  document.querySelectorAll(".cp-day").forEach(day => {
-    if (day.dataset.submitted !== "true") {
-      day.addEventListener("click", event => event.preventDefault());
+  // Only submitted days are expandable.
+  document.querySelectorAll('.nh-v5-day').forEach(day => {
+    if (day.dataset.submitted !== 'true') {
+      day.addEventListener('click', event => {
+        event.preventDefault();
+      });
     }
   });
 })();
 </script>
-
-
-
-
-
-
-
 {% endblock %}
-
-{% if macro_settings.enabled %}
-<script>
-(function(){
-  function recalcRow(formId){
-    const form = document.getElementById(formId);
-    if(!form) return;
-    const p = parseFloat(form.querySelector('[name="protein_g"]')?.value || 0);
-    const c = parseFloat(form.querySelector('[name="carbs_g"]')?.value || 0);
-    const f = parseFloat(form.querySelector('[name="fat_g"]')?.value || 0);
-    const date = form.querySelector('[name="tracked_on"]')?.value;
-    const cell = document.querySelector('[data-macro-date="'+date+'"]');
-    if(!cell) return;
-    const any = form.querySelector('[name="protein_g"]')?.value ||
-                form.querySelector('[name="carbs_g"]')?.value ||
-                form.querySelector('[name="fat_g"]')?.value;
-    cell.textContent = any ? Math.round((p*4)+(c*4)+(f*9)) : '—';
-  }
-
-  document.querySelectorAll('.macro-grid-input').forEach(function(input){
-    input.addEventListener('input', function(){
-      const formId = input.getAttribute('form');
-      if(formId) recalcRow(formId);
-    });
-  });
-
-  document.querySelectorAll('form[id^="day-form-"]').forEach(function(form){
-    recalcRow(form.id);
-  });
-})();
-</script>
-{% endif %}

@@ -73,6 +73,8 @@ class ClientService:
         struggles=None,
         improvements_needed=None,
         coach_support=None,
+        client_feedback=None,
+        private_coach_note=None,
     ):
         return create_weekly_checkin(
             client_id=client_id,
@@ -84,6 +86,8 @@ class ClientService:
             struggles=struggles,
             improvements_needed=improvements_needed,
             coach_support=coach_support,
+            client_feedback=client_feedback,
+            private_coach_note=private_coach_note,
         )
 
 
@@ -99,6 +103,8 @@ class ClientService:
         struggles=None,
         improvements_needed=None,
         coach_support=None,
+        client_feedback=None,
+        private_coach_note=None,
     ):
         """Create a coaching review once; update that same review on later edits."""
         if checkin_id:
@@ -113,6 +119,8 @@ class ClientService:
                 struggles=struggles,
                 improvements_needed=improvements_needed,
                 coach_support=coach_support,
+                client_feedback=client_feedback,
+                private_coach_note=private_coach_note,
             )
 
         return create_weekly_checkin(
@@ -125,6 +133,8 @@ class ClientService:
             struggles=struggles,
             improvements_needed=improvements_needed,
             coach_support=coach_support,
+            client_feedback=client_feedback,
+            private_coach_note=private_coach_note,
         )
 
 

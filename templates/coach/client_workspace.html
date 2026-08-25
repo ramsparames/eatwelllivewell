@@ -1344,14 +1344,14 @@
           </div>
           <div class="nw-grid2">
             <label>
-              <span class="nw-label">Coach note visible to client</span>
+              <span class="nw-label">Note for client <small style="font-weight:600;text-transform:none">· visible in her portal</small></span>
               <textarea class="nw-input nw-textarea" name="weekly_client_feedback"
-                placeholder="What should she feel proud of, and what should she focus on next?">{{ coach_weekly_feedback.client_feedback if coach_weekly_feedback else "" }}</textarea>
+                placeholder="What should she feel proud of, and what should she focus on next?">{{ coach_week_checkin.client_feedback or "" if coach_week_checkin else "" }}</textarea>
             </label>
             <label>
-              <span class="nw-label">Private coach note</span>
+              <span class="nw-label">Private coach note <small style="font-weight:600;text-transform:none">· only Sushma can see this</small></span>
               <textarea class="nw-input nw-textarea" name="weekly_private_note"
-                placeholder="Only Sushma can see this.">{{ coach_weekly_feedback.private_note if coach_weekly_feedback else "" }}</textarea>
+                placeholder="Only Sushma can see this.">{{ coach_week_checkin.private_coach_note or "" if coach_week_checkin else "" }}</textarea>
             </label>
           </div>
         </section>
