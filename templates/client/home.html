@@ -720,7 +720,36 @@
             <tr><th class="cp-metric-head">Fat</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td><div class="cp-cell-center">{% if row.editable %}<input class="cp-sheet-input macro-grid-input" type="number" min="0" step="0.1" name="fat_g" form="day-form-{{ row.date.isoformat() }}" value="{% if macro and macro.fat_g is not none %}{{ macro.fat_g }}{% endif %}" placeholder="—">{% elif macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</div></td>{% endfor %}</tr>
             <tr><th class="cp-metric-head">Calories</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td class="macro-calories-cell" data-macro-date="{{ row.date.isoformat() }}"><div class="cp-cell-center">{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</div></td>{% endfor %}</tr>{% endif %}
             {% if client_history_grid.action_columns %}<tr class="cp-section-row"><th class="cp-metric-head">Commitments</th>{% for row in week_rows %}<td></td>{% endfor %}</tr>{% endif %}
-            {% for action in client_history_grid.action_columns %}<tr><th class="cp-metric-head cp-sheet-action-head">{{ action.name }}{% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}</th>{% for row in week_rows %}{% set cell=row.actions.get(action.id) %}<td><div class="cp-cell-center">{% if not cell or not cell.eligible %}<span class="na">·</span>{% elif row.editable %}<input type="checkbox" name="completed_action_ids" value="{{ cell.action_id }}" form="day-form-{{ row.date.isoformat() }}" {% if cell.completed is true %}checked{% endif %}>{% elif cell.completed is true %}<span class="yes">✓</span>{% elif cell.completed is false %}<span class="no">○</span>{% else %}<span class="na">—</span>{% endif %}</div></td>{% endfor %}</tr>{% endfor %}
+            {% for action in client_history_grid.action_columns %}
+              {% set action_ns = namespace(show=false) %}
+              {% for row in week_rows %}
+                {% set cell = row.actions.get(action.id) %}
+                {% if cell and cell.eligible %}
+                  {% set action_ns.show = true %}
+                {% endif %}
+              {% endfor %}
+              {% if action_ns.show %}
+              <tr>
+                <th class="cp-metric-head cp-sheet-action-head">{{ action.name }}{% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}</th>
+                {% for row in week_rows %}
+                  {% set cell=row.actions.get(action.id) %}
+                  <td><div class="cp-cell-center">
+                    {% if not cell or not cell.eligible %}
+                      <span class="na">·</span>
+                    {% elif row.editable %}
+                      <input type="checkbox" name="completed_action_ids" value="{{ cell.action_id }}" form="day-form-{{ row.date.isoformat() }}" {% if cell.completed is true %}checked{% endif %}>
+                    {% elif cell.completed is true %}
+                      <span class="yes">✓</span>
+                    {% elif cell.completed is false %}
+                      <span class="no">○</span>
+                    {% else %}
+                      <span class="na">—</span>
+                    {% endif %}
+                  </div></td>
+                {% endfor %}
+              </tr>
+              {% endif %}
+            {% endfor %}
             <tr><th class="cp-metric-head">Save</th>{% for row in week_rows %}<td><div class="cp-cell-center">{% if row.editable %}<button class="cp-sheet-save" type="submit" form="day-form-{{ row.date.isoformat() }}">{% if row.submitted %}Update{% else %}Save{% endif %}</button>{% else %}<span class="na">—</span>{% endif %}</div></td>{% endfor %}</tr>
           </tbody></table></div>
           {% set wm=client_history_grid.week_measurements.get(first.week_number) %}<div class="cp-data-week-measurements">{% if wm %}<div class="cp-measure-inline"><strong>Measurements · {{ wm.measured_on.strftime("%d %b %Y") }}</strong>{% if wm.upper_arm_cm is not none %}<span>Arm {{ wm.upper_arm_cm }}</span>{% endif %}{% if wm.chest_cm is not none %}<span>Chest {{ wm.chest_cm }}</span>{% endif %}{% if wm.waist_cm is not none %}<span>Waist {{ wm.waist_cm }}</span>{% endif %}{% if wm.lower_abdomen_cm is not none %}<span>Lower abd {{ wm.lower_abdomen_cm }}</span>{% endif %}{% if wm.hip_cm is not none %}<span>Hip {{ wm.hip_cm }}</span>{% endif %}{% if wm.thigh_cm is not none %}<span>Thigh {{ wm.thigh_cm }}</span>{% endif %}</div>{% elif first.is_current_week %}<form method="post" action="/client/{{ access_token }}/measurements"><div class="cp-measure-inline"><strong>Measurements</strong><div class="cp-field"><span>Date</span><input class="cp-input" type="date" name="measured_on" min="{{ week_completion.week_start }}" max="{{ today }}" value="{{ today }}" required></div><div class="cp-field"><span>Unit</span><select class="cp-select" name="measurement_unit"><option value="cm">cm</option><option value="inches">inches</option></select></div><div class="cp-measure-grid-inline"><input class="cp-sheet-input" type="number" step="0.1" name="upper_arm" placeholder="Arm" required><input class="cp-sheet-input" type="number" step="0.1" name="chest" placeholder="Chest" required><input class="cp-sheet-input" type="number" step="0.1" name="waist" placeholder="Waist" required><input class="cp-sheet-input" type="number" step="0.1" name="lower_abdomen" placeholder="Lower abd" required><input class="cp-sheet-input" type="number" step="0.1" name="hip" placeholder="Hip" required><input class="cp-sheet-input" type="number" step="0.1" name="thigh" placeholder="Thigh" required></div><button class="cp-sheet-save" type="submit">Save measurements</button></div></form>{% else %}<span style="color:var(--muted)">No measurements entered.</span>{% endif %}</div>
