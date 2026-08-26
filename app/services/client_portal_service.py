@@ -371,9 +371,6 @@ def save_weekly_measurements(
     if measured_on > today:
         raise ValueError("Measurement date cannot be in the future.")
 
-    if get_current_week_measurement(client_id, on_date=today):
-        return False
-
     values = [
         upper_arm,
         chest,
@@ -387,6 +384,61 @@ def save_weekly_measurements(
             "All weekly body measurements are required."
         )
 
+    clean_unit = (
+        measurement_unit
+        if measurement_unit in {"cm", "inches"}
+        else "cm"
+    )
+
+    def to_cm(value):
+        value = float(value)
+        if clean_unit == "inches":
+            return round(value * 2.54, 2)
+        return value
+
+    existing = get_current_week_measurement(
+        client_id,
+        on_date=today,
+    )
+
+    if existing:
+        # Keep the week's measurement editable until that coaching week ends.
+        # Update the same row rather than creating duplicates.
+        with get_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE client_measurements
+                    SET
+                        measured_on = %s,
+                        upper_arm_cm = %s,
+                        chest_cm = %s,
+                        waist_cm = %s,
+                        lower_abdomen_cm = %s,
+                        hip_cm = %s,
+                        thigh_cm = %s
+                    WHERE id = %s
+                      AND client_id = %s
+                    RETURNING id
+                    """,
+                    (
+                        measured_on,
+                        to_cm(upper_arm),
+                        to_cm(chest),
+                        to_cm(waist),
+                        to_cm(lower_abdomen),
+                        to_cm(hip),
+                        to_cm(thigh),
+                        existing["id"],
+                        client_id,
+                    ),
+                )
+                if cursor.fetchone() is None:
+                    raise RuntimeError(
+                        "Weekly measurements could not be updated."
+                    )
+        return True
+
     ClientService.add_measurement(
         client_id=client_id,
         measured_on=measured_on,
@@ -397,11 +449,7 @@ def save_weekly_measurements(
         lower_abdomen=lower_abdomen,
         hip=hip,
         thigh=thigh,
-        measurement_unit=(
-            measurement_unit
-            if measurement_unit in {"cm", "inches"}
-            else "cm"
-        ),
+        measurement_unit=clean_unit,
         checkin_id=None,
     )
     return True

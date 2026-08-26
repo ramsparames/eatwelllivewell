@@ -752,7 +752,50 @@
             {% endfor %}
             <tr><th class="cp-metric-head">Save</th>{% for row in week_rows %}<td><div class="cp-cell-center">{% if row.editable %}<button class="cp-sheet-save" type="submit" form="day-form-{{ row.date.isoformat() }}">{% if row.submitted %}Update{% else %}Save{% endif %}</button>{% else %}<span class="na">—</span>{% endif %}</div></td>{% endfor %}</tr>
           </tbody></table></div>
-          {% set wm=client_history_grid.week_measurements.get(first.week_number) %}<div class="cp-data-week-measurements">{% if wm %}<div class="cp-measure-inline"><strong>Measurements · {{ wm.measured_on.strftime("%d %b %Y") }}</strong>{% if wm.upper_arm_cm is not none %}<span>Arm {{ wm.upper_arm_cm }}</span>{% endif %}{% if wm.chest_cm is not none %}<span>Chest {{ wm.chest_cm }}</span>{% endif %}{% if wm.waist_cm is not none %}<span>Waist {{ wm.waist_cm }}</span>{% endif %}{% if wm.lower_abdomen_cm is not none %}<span>Lower abd {{ wm.lower_abdomen_cm }}</span>{% endif %}{% if wm.hip_cm is not none %}<span>Hip {{ wm.hip_cm }}</span>{% endif %}{% if wm.thigh_cm is not none %}<span>Thigh {{ wm.thigh_cm }}</span>{% endif %}</div>{% elif first.is_current_week %}<form method="post" action="/client/{{ access_token }}/measurements"><div class="cp-measure-inline"><strong>Measurements</strong><div class="cp-field"><span>Date</span><input class="cp-input" type="date" name="measured_on" min="{{ week_completion.week_start }}" max="{{ today }}" value="{{ today }}" required></div><div class="cp-field"><span>Unit</span><select class="cp-select" name="measurement_unit"><option value="cm">cm</option><option value="inches">inches</option></select></div><div class="cp-measure-grid-inline"><input class="cp-sheet-input" type="number" step="0.1" name="upper_arm" placeholder="Arm" required><input class="cp-sheet-input" type="number" step="0.1" name="chest" placeholder="Chest" required><input class="cp-sheet-input" type="number" step="0.1" name="waist" placeholder="Waist" required><input class="cp-sheet-input" type="number" step="0.1" name="lower_abdomen" placeholder="Lower abd" required><input class="cp-sheet-input" type="number" step="0.1" name="hip" placeholder="Hip" required><input class="cp-sheet-input" type="number" step="0.1" name="thigh" placeholder="Thigh" required></div><button class="cp-sheet-save" type="submit">Save measurements</button></div></form>{% else %}<span style="color:var(--muted)">No measurements entered.</span>{% endif %}</div>
+          {% set wm=client_history_grid.week_measurements.get(first.week_number) %}
+          <div class="cp-data-week-measurements">
+            {% if first.is_current_week %}
+            <form method="post" action="/client/{{ access_token }}/measurements">
+              <div class="cp-measure-inline">
+                <strong>{% if wm %}Measurements · editable this week{% else %}Measurements{% endif %}</strong>
+                <div class="cp-field">
+                  <span>Date</span>
+                  <input class="cp-input" type="date" name="measured_on"
+                         min="{{ week_completion.week_start }}" max="{{ today }}"
+                         value="{{ wm.measured_on if wm else today }}" required>
+                </div>
+                <div class="cp-field">
+                  <span>Unit</span>
+                  <select class="cp-select" name="measurement_unit">
+                    <option value="cm" selected>cm</option>
+                    <option value="inches">inches</option>
+                  </select>
+                </div>
+                <div class="cp-measure-grid-inline">
+                  <input class="cp-sheet-input" type="number" step="0.1" name="upper_arm" placeholder="Arm" value="{{ wm.upper_arm_cm if wm and wm.upper_arm_cm is not none else '' }}" required>
+                  <input class="cp-sheet-input" type="number" step="0.1" name="chest" placeholder="Chest" value="{{ wm.chest_cm if wm and wm.chest_cm is not none else '' }}" required>
+                  <input class="cp-sheet-input" type="number" step="0.1" name="waist" placeholder="Waist" value="{{ wm.waist_cm if wm and wm.waist_cm is not none else '' }}" required>
+                  <input class="cp-sheet-input" type="number" step="0.1" name="lower_abdomen" placeholder="Lower abd" value="{{ wm.lower_abdomen_cm if wm and wm.lower_abdomen_cm is not none else '' }}" required>
+                  <input class="cp-sheet-input" type="number" step="0.1" name="hip" placeholder="Hip" value="{{ wm.hip_cm if wm and wm.hip_cm is not none else '' }}" required>
+                  <input class="cp-sheet-input" type="number" step="0.1" name="thigh" placeholder="Thigh" value="{{ wm.thigh_cm if wm and wm.thigh_cm is not none else '' }}" required>
+                </div>
+                <button class="cp-sheet-save" type="submit">{% if wm %}Update measurements{% else %}Save measurements{% endif %}</button>
+              </div>
+            </form>
+            {% elif wm %}
+              <div class="cp-measure-inline">
+                <strong>Measurements · {{ wm.measured_on.strftime("%d %b %Y") }}</strong>
+                {% if wm.upper_arm_cm is not none %}<span>Arm {{ wm.upper_arm_cm }}</span>{% endif %}
+                {% if wm.chest_cm is not none %}<span>Chest {{ wm.chest_cm }}</span>{% endif %}
+                {% if wm.waist_cm is not none %}<span>Waist {{ wm.waist_cm }}</span>{% endif %}
+                {% if wm.lower_abdomen_cm is not none %}<span>Lower abd {{ wm.lower_abdomen_cm }}</span>{% endif %}
+                {% if wm.hip_cm is not none %}<span>Hip {{ wm.hip_cm }}</span>{% endif %}
+                {% if wm.thigh_cm is not none %}<span>Thigh {{ wm.thigh_cm }}</span>{% endif %}
+              </div>
+            {% else %}
+              <span style="color:var(--muted)">No measurements entered.</span>
+            {% endif %}
+          </div>
         </section>{% endfor %}
       </div>
       {% else %}
