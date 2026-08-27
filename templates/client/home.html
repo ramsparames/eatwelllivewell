@@ -698,6 +698,7 @@
           <span>Protein target {{ macro_settings.protein_target_g if macro_settings.protein_target_g is not none else "—" }} g</span>
           <span>Carb target {{ macro_settings.carbs_target_g if macro_settings.carbs_target_g is not none else "—" }} g</span>
           <span>Fat target {{ macro_settings.fat_target_g if macro_settings.fat_target_g is not none else "—" }} g</span>
+          <span>Fibre target {{ macro_settings.fibre_target_g if macro_settings.fibre_target_g is not none else "—" }} g</span>
           <span>Calorie target {{ macro_settings.calorie_target if macro_settings.calorie_target is not none else "—" }}{% if macro_settings.calorie_target is not none %} kcal{% endif %}</span>
         </div>
       </div>
@@ -718,6 +719,7 @@
             <tr><th class="cp-metric-head">Protein</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td><div class="cp-cell-center">{% if row.editable %}<input class="cp-sheet-input macro-grid-input" type="number" min="0" step="0.1" name="protein_g" form="day-form-{{ row.date.isoformat() }}" value="{% if macro and macro.protein_g is not none %}{{ macro.protein_g }}{% endif %}" placeholder="—">{% elif macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}</div></td>{% endfor %}</tr>
             <tr><th class="cp-metric-head">Carbs</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td><div class="cp-cell-center">{% if row.editable %}<input class="cp-sheet-input macro-grid-input" type="number" min="0" step="0.1" name="carbs_g" form="day-form-{{ row.date.isoformat() }}" value="{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }}{% endif %}" placeholder="—">{% elif macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}</div></td>{% endfor %}</tr>
             <tr><th class="cp-metric-head">Fat</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td><div class="cp-cell-center">{% if row.editable %}<input class="cp-sheet-input macro-grid-input" type="number" min="0" step="0.1" name="fat_g" form="day-form-{{ row.date.isoformat() }}" value="{% if macro and macro.fat_g is not none %}{{ macro.fat_g }}{% endif %}" placeholder="—">{% elif macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</div></td>{% endfor %}</tr>
+            <tr><th class="cp-metric-head">Fibre</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td><div class="cp-cell-center">{% if row.editable %}<input class="cp-sheet-input macro-grid-input" type="number" min="0" step="0.1" name="fibre_g" form="day-form-{{ row.date.isoformat() }}" value="{% if macro and macro.fibre_g is not none %}{{ macro.fibre_g }}{% endif %}" placeholder="—">{% elif macro and macro.fibre_g is not none %}{{ macro.fibre_g }} g{% else %}—{% endif %}</div></td>{% endfor %}</tr>
             <tr><th class="cp-metric-head">Calories</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td class="macro-calories-cell" data-macro-date="{{ row.date.isoformat() }}"><div class="cp-cell-center">{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</div></td>{% endfor %}</tr>{% endif %}
             {% if client_history_grid.action_columns %}<tr class="cp-section-row"><th class="cp-metric-head">Commitments</th>{% for row in week_rows %}<td></td>{% endfor %}</tr>{% endif %}
             {% for action in client_history_grid.action_columns %}
@@ -857,7 +859,8 @@
     if(!cell) return;
     const any = form.querySelector('[name="protein_g"]')?.value ||
                 form.querySelector('[name="carbs_g"]')?.value ||
-                form.querySelector('[name="fat_g"]')?.value;
+                form.querySelector('[name="fat_g"]')?.value ||
+                form.querySelector('[name="fibre_g"]')?.value;
     cell.textContent = any ? Math.round((p*4)+(c*4)+(f*9)) : '—';
   }
 

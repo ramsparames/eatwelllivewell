@@ -1051,6 +1051,7 @@
         <label><span class="nw-label">Protein target (g)</span><input class="nw-input" type="number" step="1" min="0" name="macro_protein_target_g" placeholder="e.g. 100"></label>
         <label><span class="nw-label">Carb target (g)</span><input class="nw-input" type="number" step="1" min="0" name="macro_carbs_target_g" placeholder="e.g. 150"></label>
         <label><span class="nw-label">Fat target (g)</span><input class="nw-input" type="number" step="1" min="0" name="macro_fat_target_g" placeholder="e.g. 50"></label>
+        <label><span class="nw-label">Fibre target (g)</span><input class="nw-input" type="number" step="1" min="0" name="macro_fibre_target_g" placeholder="e.g. 25"></label>
         <div><span class="nw-label">Calories</span><div class="nw-goal"><strong>Calculated automatically</strong><span>Protein × 4 + carbs × 4 + fat × 9</span></div></div>
       </div>
     </section>
@@ -1597,6 +1598,7 @@
             <label><span class="nw-label">Protein target (g)</span><input class="nw-input" type="number" min="0" step="1" name="macro_protein_target_g" value="{{ macro_settings.protein_target_g if macro_settings.protein_target_g is not none else '' }}"></label>
             <label><span class="nw-label">Carb target (g)</span><input class="nw-input" type="number" min="0" step="1" name="macro_carbs_target_g" value="{{ macro_settings.carbs_target_g if macro_settings.carbs_target_g is not none else '' }}"></label>
             <label><span class="nw-label">Fat target (g)</span><input class="nw-input" type="number" min="0" step="1" name="macro_fat_target_g" value="{{ macro_settings.fat_target_g if macro_settings.fat_target_g is not none else '' }}"></label>
+            <label><span class="nw-label">Fibre target (g)</span><input class="nw-input" type="number" min="0" step="1" name="macro_fibre_target_g" value="{{ macro_settings.fibre_target_g if macro_settings.fibre_target_g is not none else '' }}"></label>
             <div class="nw-goal"><span>Calculated calorie target</span><strong>{{ macro_settings.calorie_target if macro_settings.calorie_target is not none else "—" }}{% if macro_settings.calorie_target is not none %} kcal{% endif %}</strong></div>
           </div>
           <button class="nw-btn nw-primary" style="margin-top:14px" type="submit">Save macro settings</button>
@@ -1607,6 +1609,7 @@
           <div class="nw-grid2" style="margin-top:16px">
             <div class="nw-goal"><span>This week</span><strong>{{ current_macro.days_logged }}/7 days logged</strong></div>
             <div class="nw-goal"><span>Average protein</span><strong>{{ current_macro.avg_protein if current_macro.avg_protein is not none else "—" }}{% if current_macro.avg_protein is not none %} g{% endif %}</strong></div>
+            <div class="nw-goal"><span>Average fibre</span><strong>{{ current_macro.avg_fibre if current_macro.avg_fibre is not none else "—" }}{% if current_macro.avg_fibre is not none %} g{% endif %}</strong></div>
             <div class="nw-goal"><span>Average calories</span><strong>{{ current_macro.avg_calories if current_macro.avg_calories is not none else "—" }}{% if current_macro.avg_calories is not none %} kcal{% endif %}</strong></div>
           </div>
           {% endif %}
@@ -1641,6 +1644,7 @@
                 <tr><th class="nw-metric-head">Protein</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
                 <tr><th class="nw-metric-head">Carbs</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
                 <tr><th class="nw-metric-head">Fat</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Fibre</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.fibre_g is not none %}{{ macro.fibre_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
                 <tr><th class="nw-metric-head">Calories</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</td>{% endfor %}</tr>
                 {% endif %}
                 {% if coach_history_grid.action_columns %}

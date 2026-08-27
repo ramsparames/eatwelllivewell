@@ -686,6 +686,7 @@ def save_client_day(
     protein_g: str = Form(""),
     carbs_g: str = Form(""),
     fat_g: str = Form(""),
+    fibre_g: str = Form(""),
 ):
     client = get_client_by_token(access_token)
     if not client:
@@ -744,6 +745,7 @@ def save_client_day(
             protein_g=parse_float(protein_g),
             carbs_g=parse_float(carbs_g),
             fat_g=parse_float(fat_g),
+            fibre_g=parse_float(fibre_g),
         )
 
     return RedirectResponse(

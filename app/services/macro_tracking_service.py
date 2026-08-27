@@ -15,6 +15,7 @@ def create_macro_tracking_tables() -> None:
                     protein_target_g NUMERIC(8,2),
                     carbs_target_g NUMERIC(8,2),
                     fat_target_g NUMERIC(8,2),
+                    fibre_target_g NUMERIC(8,2),
                     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
@@ -27,10 +28,23 @@ def create_macro_tracking_tables() -> None:
                     protein_g NUMERIC(8,2),
                     carbs_g NUMERIC(8,2),
                     fat_g NUMERIC(8,2),
+                    fibre_g NUMERIC(8,2),
                     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                     UNIQUE (client_id, tracked_on)
                 )
             """)
+
+            # Existing production databases already have these tables.
+            # Add fibre columns non-destructively.
+            cursor.execute("""
+                ALTER TABLE client_macro_settings
+                ADD COLUMN IF NOT EXISTS fibre_target_g NUMERIC(8,2)
+            """)
+            cursor.execute("""
+                ALTER TABLE client_macro_logs
+                ADD COLUMN IF NOT EXISTS fibre_g NUMERIC(8,2)
+            """)
+
 
 
 def _num(value):
@@ -53,7 +67,7 @@ def get_macro_settings(client_id: int):
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT client_id, enabled, protein_target_g,
-                       carbs_target_g, fat_target_g
+                       carbs_target_g, fat_target_g, fibre_target_g
                 FROM client_macro_settings
                 WHERE client_id = %s
                 LIMIT 1
@@ -66,11 +80,13 @@ def get_macro_settings(client_id: int):
             "protein_target_g": None,
             "carbs_target_g": None,
             "fat_target_g": None,
+            "fibre_target_g": None,
             "calorie_target": None,
         }
     row["protein_target_g"] = _num(row.get("protein_target_g"))
     row["carbs_target_g"] = _num(row.get("carbs_target_g"))
     row["fat_target_g"] = _num(row.get("fat_target_g"))
+    row["fibre_target_g"] = _num(row.get("fibre_target_g"))
     row["calorie_target"] = calculated_calories(
         row["protein_target_g"], row["carbs_target_g"], row["fat_target_g"]
     )
@@ -83,25 +99,27 @@ def save_macro_settings(
     protein_target_g=None,
     carbs_target_g=None,
     fat_target_g=None,
+    fibre_target_g=None,
 ):
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO client_macro_settings (
                     client_id, enabled, protein_target_g,
-                    carbs_target_g, fat_target_g
+                    carbs_target_g, fat_target_g, fibre_target_g
                 )
-                VALUES (%s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 ON CONFLICT (client_id)
                 DO UPDATE SET
                     enabled = EXCLUDED.enabled,
                     protein_target_g = EXCLUDED.protein_target_g,
                     carbs_target_g = EXCLUDED.carbs_target_g,
                     fat_target_g = EXCLUDED.fat_target_g,
+                    fibre_target_g = EXCLUDED.fibre_target_g,
                     updated_at = NOW()
             """, (
                 client_id, enabled, protein_target_g,
-                carbs_target_g, fat_target_g,
+                carbs_target_g, fat_target_g, fibre_target_g,
             ))
 
 
@@ -109,7 +127,7 @@ def get_macro_log(client_id: int, tracked_on: date):
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT client_id, tracked_on, protein_g, carbs_g, fat_g
+                SELECT client_id, tracked_on, protein_g, carbs_g, fat_g, fibre_g
                 FROM client_macro_logs
                 WHERE client_id = %s AND tracked_on = %s
                 LIMIT 1
@@ -120,6 +138,7 @@ def get_macro_log(client_id: int, tracked_on: date):
     row["protein_g"] = _num(row.get("protein_g"))
     row["carbs_g"] = _num(row.get("carbs_g"))
     row["fat_g"] = _num(row.get("fat_g"))
+    row["fibre_g"] = _num(row.get("fibre_g"))
     row["calories"] = calculated_calories(
         row["protein_g"], row["carbs_g"], row["fat_g"]
     )
@@ -132,28 +151,30 @@ def save_macro_log(
     protein_g=None,
     carbs_g=None,
     fat_g=None,
+    fibre_g=None,
 ):
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO client_macro_logs (
-                    client_id, tracked_on, protein_g, carbs_g, fat_g
+                    client_id, tracked_on, protein_g, carbs_g, fat_g, fibre_g
                 )
-                VALUES (%s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 ON CONFLICT (client_id, tracked_on)
                 DO UPDATE SET
                     protein_g = EXCLUDED.protein_g,
                     carbs_g = EXCLUDED.carbs_g,
                     fat_g = EXCLUDED.fat_g,
+                    fibre_g = EXCLUDED.fibre_g,
                     updated_at = NOW()
-            """, (client_id, tracked_on, protein_g, carbs_g, fat_g))
+            """, (client_id, tracked_on, protein_g, carbs_g, fat_g, fibre_g))
 
 
 def get_macro_logs_between(client_id: int, start_date: date, end_date: date):
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT tracked_on, protein_g, carbs_g, fat_g
+                SELECT tracked_on, protein_g, carbs_g, fat_g, fibre_g
                 FROM client_macro_logs
                 WHERE client_id = %s
                   AND tracked_on BETWEEN %s AND %s
@@ -165,6 +186,7 @@ def get_macro_logs_between(client_id: int, start_date: date, end_date: date):
         row["protein_g"] = _num(row.get("protein_g"))
         row["carbs_g"] = _num(row.get("carbs_g"))
         row["fat_g"] = _num(row.get("fat_g"))
+        row["fibre_g"] = _num(row.get("fibre_g"))
         row["calories"] = calculated_calories(
             row["protein_g"], row["carbs_g"], row["fat_g"]
         )
@@ -183,19 +205,19 @@ def get_macro_history(client_id: int, client_start_date: date | None, today: dat
     for tracked_on, row in logs.items():
         week_number = ((tracked_on - client_start_date).days // 7) + 1
         bucket = summaries.setdefault(week_number, {
-            "days_logged": 0, "protein": [], "carbs": [], "fat": [], "calories": []
+            "days_logged": 0, "protein": [], "carbs": [], "fat": [], "fibre": [], "calories": []
         })
-        if any(row.get(k) is not None for k in ("protein_g", "carbs_g", "fat_g")):
+        if any(row.get(k) is not None for k in ("protein_g", "carbs_g", "fat_g", "fibre_g")):
             bucket["days_logged"] += 1
         for source, dest in (
             ("protein_g", "protein"), ("carbs_g", "carbs"),
-            ("fat_g", "fat"), ("calories", "calories")
+            ("fat_g", "fat"), ("fibre_g", "fibre"), ("calories", "calories")
         ):
             if row.get(source) is not None:
                 bucket[dest].append(float(row[source]))
 
     for bucket in summaries.values():
-        for key in ("protein", "carbs", "fat", "calories"):
+        for key in ("protein", "carbs", "fat", "fibre", "calories"):
             values = bucket[key]
             bucket[f"avg_{key}"] = round(sum(values) / len(values), 1) if values else None
             del bucket[key]
