@@ -19,6 +19,10 @@ from app.database import (
 from app.services.client_service import ClientService
 from app.services.client_portal_service import get_client_operations_status
 from app.services.coaching_insights_service import get_dashboard_client_coaching_signals
+from app.services.client_nudge_service import (
+    get_latest_client_nudges,
+    nudge_is_recent,
+)
 from fastapi import Form
 
 router = APIRouter()
@@ -732,6 +736,63 @@ def dashboard_home(request: Request):
         )
     )
 
+    # Dashboard presentation is intentionally simpler than the raw operations
+    # engine. "Needs follow-up" means Sushma should actively intervene:
+    # missed tracking (2+ days) or low commitment adherence.
+    # "Ready for review" is kept separate so it does not disappear inside
+    # the broader Needs attention bucket.
+    latest_nudges = get_latest_client_nudges(
+        [client["id"] for client in active_clients]
+    )
+    follow_up_clients = []
+    review_ready_clients = []
+
+    for client in active_clients:
+        ops = client.get("operations") or {}
+        signals = ops.get("coaching_signals") or {}
+
+        follow_reasons = []
+        if (ops.get("missed_daily_count") or 0) >= 2:
+            missed = ops.get("missed_daily_count") or 0
+            follow_reasons.append(
+                f"No tracking for {missed} day"
+                + ("s" if missed != 1 else "")
+            )
+
+        if signals.get("low_adherence"):
+            action_percent = signals.get("action_percent")
+            if action_percent is not None:
+                follow_reasons.append(
+                    f"Action consistency {round(action_percent)}%"
+                )
+            else:
+                follow_reasons.append("Low action consistency")
+
+        if follow_reasons:
+            client["dashboard_follow_up_reasons"] = follow_reasons
+            last_nudge = latest_nudges.get(client["id"])
+            client["last_nudge"] = last_nudge
+            client["nudge_recent"] = nudge_is_recent(last_nudge)
+            client["suggested_nudge_reason"] = (
+                "missed_tracking"
+                if (ops.get("missed_daily_count") or 0) >= 2
+                else "low_adherence"
+            )
+            follow_up_clients.append(client)
+
+        if ops.get("weekly_review_overdue"):
+            review_ready_clients.append(client)
+
+    follow_up_clients.sort(
+        key=lambda client: (
+            -(client.get("operations", {}).get("missed_daily_count") or 0),
+            client.get("name") or "",
+        )
+    )
+    review_ready_clients.sort(
+        key=lambda client: client.get("name") or ""
+    )
+
     all_leads = get_all_leads()
     new_leads = 0
 
@@ -751,6 +812,8 @@ def dashboard_home(request: Request):
             "active_clients": active_clients,
             "clients_without_next_call": clients_without_next_call,
             "needs_attention_clients": needs_attention_clients,
+            "follow_up_clients": follow_up_clients,
+            "review_ready_clients": review_ready_clients,
             "operations_counts": operations_counts,
             "missed_update_clients": missed_update_clients,
             "measurement_due_clients": measurement_due_clients,
