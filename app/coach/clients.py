@@ -1225,6 +1225,43 @@ def client_profile(
         for row in coach_history_grid.get("rows") or []:
             row["macro"] = macro_history["by_date"].get(row["date"])
 
+    # Build the weekly structure expected by the current Excel-style
+    # coach Data tab. The service returns flat daily rows.
+    history_weeks = []
+    grouped_history_rows = {}
+
+    for history_row in (coach_history_grid.get("rows") or []):
+        week_no = history_row.get("week_number")
+        if week_no is None:
+            continue
+        grouped_history_rows.setdefault(week_no, []).append(history_row)
+
+    current_history_week = coach_history_grid.get("current_week_number") or 0
+
+    for week_no in sorted(grouped_history_rows.keys(), reverse=True):
+        week_rows = sorted(
+            grouped_history_rows[week_no],
+            key=lambda item: item.get("date"),
+        )
+
+        week_measurement = next(
+            (
+                item.get("measurement")
+                for item in week_rows
+                if item.get("measurement")
+            ),
+            None,
+        )
+
+        history_weeks.append(
+            {
+                "week_number": week_no,
+                "rows": week_rows,
+                "measurement": week_measurement,
+                "is_current_week": week_no == current_history_week,
+            }
+        )
+
     # Coaching intelligence for the current client workspace.
     # These are computed before TemplateResponse so the Jinja context never
     # references undefined variables.
@@ -1326,6 +1363,7 @@ def client_profile(
             "progress_summary": progress_summary,
             "coach_summary": coach_summary,
             "coach_history_grid": coach_history_grid,
+            "history_weeks": history_weeks,
             "coaching_week_summary": coaching_week_summary,
             "progress_charts": progress_charts,
             "macro_settings": macro_settings,
