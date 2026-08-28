@@ -28,6 +28,6 @@ uvicorn==0.30.6
 uvloop==0.22.1
 watchfiles==1.2.0
 websockets==16.1.1
-resend==2.35.0N
+resend==2.35.0
 httpx==0.28.1
 reportlab==4.4.4
