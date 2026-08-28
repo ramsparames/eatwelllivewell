@@ -20,8 +20,11 @@ from app.services.client_service import ClientService
 from app.services.client_portal_service import get_client_operations_status
 from app.services.coaching_insights_service import get_dashboard_client_coaching_signals
 from app.services.client_nudge_service import (
+    default_nudge_message,
     get_latest_client_nudges,
     nudge_is_recent,
+    record_client_nudge,
+    whatsapp_prefilled_url,
 )
 from fastapi import Form
 
@@ -829,6 +832,101 @@ def dashboard_home(request: Request):
             ),
         },
     )
+
+
+
+@router.get("/dashboard/clients/{client_id}/nudge", response_class=HTMLResponse)
+def client_nudge_preview(
+    request: Request,
+    client_id: int,
+    reason: str = "missed_tracking",
+    source: str = "dashboard",
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    client = next(
+        (
+            dict(row)
+            for row in ClientService.dashboard_clients()
+            if row.get("id") == client_id
+        ),
+        None,
+    )
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    allowed_reasons = {
+        "missed_tracking",
+        "low_adherence",
+        "workout",
+        "reflection",
+        "custom",
+    }
+    if reason not in allowed_reasons:
+        reason = "custom"
+
+    latest = get_latest_client_nudges([client_id]).get(client_id)
+
+    return templates.TemplateResponse(
+        "coach/nudge_client.html",
+        {
+            "request": request,
+            "active_nav": "clients",
+            "client": client,
+            "reason": reason,
+            "message": default_nudge_message(
+                client_name=client.get("name"),
+                reason=reason,
+            ),
+            "last_nudge": latest,
+            "source": "clients" if source == "clients" else "dashboard",
+        },
+    )
+
+
+@router.post("/dashboard/clients/{client_id}/nudge")
+def send_client_nudge(
+    request: Request,
+    client_id: int,
+    reason: str = Form("custom"),
+    message: str = Form(...),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    client = next(
+        (
+            dict(row)
+            for row in ClientService.dashboard_clients()
+            if row.get("id") == client_id
+        ),
+        None,
+    )
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    clean_message = message.strip() or default_nudge_message(
+        client_name=client.get("name"),
+        reason=reason,
+    )
+
+    try:
+        whatsapp_url = whatsapp_prefilled_url(
+            phone=client.get("phone"),
+            message=clean_message,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    # Record only after the WhatsApp URL has been validated successfully.
+    record_client_nudge(
+        client_id=client_id,
+        reason=reason,
+        message=clean_message,
+    )
+
+    return RedirectResponse(whatsapp_url, status_code=303)
 
 
 @router.get("/dashboard/synamate-calendars", response_class=HTMLResponse)
