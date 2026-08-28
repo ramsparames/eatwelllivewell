@@ -1779,6 +1779,11 @@
   <div class="nw-progress-intro">
     <p class="nw-kicker" style="margin-top:0">PROGRESS</p>
     <h2>Progress over time</h2>
+    <div class="nw-card nw-progress-report-card">
+      <div class="nw-progress-report-copy"><p class="nw-kicker" style="margin-top:0">Milestone review</p><h3>Client Progress Review</h3><p>Download a polished review-call summary with key changes, consistency, actions, measurements, macros and coaching reflections.</p></div>
+      <div class="nw-progress-report-actions"><a class="nw-btn nw-btn-secondary" href="/dashboard/clients/{{ client.id }}/progress-pdf?period=last4">Last 4 weeks PDF</a><a class="nw-btn nw-btn-primary" href="/dashboard/clients/{{ client.id }}/progress-pdf?period=since_start">Since start PDF</a></div>
+    </div>
+
     <p>Trends and coaching history live here, so Overview can stay focused on what matters now.</p>
   </div>
 
@@ -1930,6 +1935,10 @@
 {% endif %}
 
 <style>
+
+/* Milestone progress PDF */
+.nw-progress-report-card{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:18px 0 24px;padding:22px 24px;background:linear-gradient(135deg,#fffaf0 0%,#faf6ff 100%);border:1px solid #eadcf4;border-radius:18px}.nw-progress-report-copy{max-width:650px}.nw-progress-report-copy h3{margin:3px 0 7px;font-size:20px}.nw-progress-report-copy p:last-child{margin:0;color:var(--coach-muted);line-height:1.55}.nw-progress-report-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0}@media(max-width:850px){.nw-progress-report-card{align-items:flex-start;flex-direction:column}.nw-progress-report-actions{justify-content:flex-start}}
+
 /* ===== Unified typography — Progress & Resources are the reference ===== */
 /* Keep layout/workflow untouched; normalize readable type across Overview, Data and Weekly Coaching. */
 .nw{font-size:13px!important;}

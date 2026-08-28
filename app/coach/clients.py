@@ -4,7 +4,7 @@ from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from fastapi import APIRouter, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
 from app.auth import coach_is_logged_in
@@ -51,6 +51,8 @@ from app.services.coaching_insights_service import (
     get_client_weekly_summary,
     get_client_progress_charts,
 )
+
+from app.services.progress_pdf_service import build_client_progress_pdf
 
 from app.services.client_portal_service import (
     ensure_portal_access,
@@ -1084,6 +1086,18 @@ def create_client_portal_access(
         f"/dashboard/clients/{client_id}",
         status_code=303,
     )
+
+
+@router.get("/dashboard/clients/{client_id}/progress-pdf")
+def download_client_progress_pdf(request: Request, client_id: int, period: str = "last4"):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    if period not in {"last4", "since_start"}:
+        raise HTTPException(status_code=400, detail="Invalid progress report period")
+    if ClientService.profile(client_id) is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+    pdf_bytes, filename = build_client_progress_pdf(client_id=client_id, period=period)
+    return StreamingResponse(iter([pdf_bytes]), media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store"})
 
 
 @router.get(
