@@ -371,6 +371,9 @@ def save_weekly_measurements(
     if measured_on > today:
         raise ValueError("Measurement date cannot be in the future.")
 
+    if get_current_week_measurement(client_id, on_date=today):
+        return False
+
     values = [
         upper_arm,
         chest,
@@ -384,61 +387,6 @@ def save_weekly_measurements(
             "All weekly body measurements are required."
         )
 
-    clean_unit = (
-        measurement_unit
-        if measurement_unit in {"cm", "inches"}
-        else "cm"
-    )
-
-    def to_cm(value):
-        value = float(value)
-        if clean_unit == "inches":
-            return round(value * 2.54, 2)
-        return value
-
-    existing = get_current_week_measurement(
-        client_id,
-        on_date=today,
-    )
-
-    if existing:
-        # Keep the week's measurement editable until that coaching week ends.
-        # Update the same row rather than creating duplicates.
-        with get_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
-                    UPDATE client_measurements
-                    SET
-                        measured_on = %s,
-                        upper_arm_cm = %s,
-                        chest_cm = %s,
-                        waist_cm = %s,
-                        lower_abdomen_cm = %s,
-                        hip_cm = %s,
-                        thigh_cm = %s
-                    WHERE id = %s
-                      AND client_id = %s
-                    RETURNING id
-                    """,
-                    (
-                        measured_on,
-                        to_cm(upper_arm),
-                        to_cm(chest),
-                        to_cm(waist),
-                        to_cm(lower_abdomen),
-                        to_cm(hip),
-                        to_cm(thigh),
-                        existing["id"],
-                        client_id,
-                    ),
-                )
-                if cursor.fetchone() is None:
-                    raise RuntimeError(
-                        "Weekly measurements could not be updated."
-                    )
-        return True
-
     ClientService.add_measurement(
         client_id=client_id,
         measured_on=measured_on,
@@ -449,7 +397,11 @@ def save_weekly_measurements(
         lower_abdomen=lower_abdomen,
         hip=hip,
         thigh=thigh,
-        measurement_unit=clean_unit,
+        measurement_unit=(
+            measurement_unit
+            if measurement_unit in {"cm", "inches"}
+            else "cm"
+        ),
         checkin_id=None,
     )
     return True
@@ -887,6 +839,7 @@ def get_client_operations_status(client: dict, on_date: date | None = None):
             "week_start": None,
             "week_end": None,
             "missed_daily_count": 0,
+            "submitted_daily_count": 0,
             "measurement_due": False,
             "weekly_review_overdue": False,
             "no_next_call": True,
@@ -909,6 +862,16 @@ def get_client_operations_status(client: dict, on_date: date | None = None):
                 (client_id, week_start, week_end),
             )
             submitted_dates = {row["tracked_on"] for row in cursor.fetchall()}
+
+            # This is the TRUE number of client-submitted days this coaching week.
+            # Do not derive it from missed days: missed_daily_count intentionally
+            # ignores today/future dates, which previously made a client with no
+            # submissions appear as 7/7 early in the week.
+            submitted_daily_count = sum(
+                1
+                for submitted_date in submitted_dates
+                if week_start <= submitted_date <= min(on_date, week_end)
+            )
 
             cursor.execute(
                 """
@@ -978,6 +941,7 @@ def get_client_operations_status(client: dict, on_date: date | None = None):
         "week_start": week_start,
         "week_end": week_end,
         "missed_daily_count": len(missed_dates),
+        "submitted_daily_count": submitted_daily_count,
         "measurement_due": measurement_due,
         "weekly_review_overdue": weekly_review_overdue,
         "no_next_call": no_next_call,

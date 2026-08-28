@@ -156,7 +156,7 @@
               <span><b>{{ client.operations.coaching_signals.action_percent if client.operations.coaching_signals.action_percent is not none else "—" }}{% if client.operations.coaching_signals.action_percent is not none %}%{% endif %}</b> actions</span>
               <span><b>{{ client.operations.coaching_signals.workouts_completed or 0 }}/{{ client.operations.coaching_signals.workouts_assigned or 0 }}</b> strength</span>
             {% endif %}
-            <span><b>{{ 7 - (client.operations.missed_daily_count or 0) }}/7</b> updates</span>
+            <span><b>{{ client.operations.submitted_daily_count or 0 }}/7</b> updates</span>
           {% else %}<span>Open workspace for coaching summary</span>{% endif %}
         </div>
         <div class="client-next"><span>Next call</span><strong>{% if client.next_call_date %}{{ client.next_call_date.strftime("%d %b") }}{% else %}Not scheduled{% endif %}</strong></div>
