@@ -1794,6 +1794,99 @@
     <div><span>Check-in</span><strong>{% if week_review %}{{ week_review.submitted_count or 0 }}/7{% else %}—{% endif %}</strong><small>daily updates</small></div>
   </section>
 
+{% if measurement_progress and measurement_progress.summary %}
+<section class="nw-panel nw-pad nw-wow-section">
+  <div class="nw-heading nw-wow-heading">
+    <div>
+      <p class="nw-kicker" style="margin-top:0">Body progress</p>
+      <h2>Week-over-week changes</h2>
+      <p>Latest recorded weight and measurements compared with the previous actual entry. Missing weeks are skipped, never counted as zero.</p>
+    </div>
+  </div>
+
+  <div class="nw-wow-summary">
+    {% for metric in measurement_progress.summary %}
+    <div class="nw-wow-card">
+      <span>{{ metric.label }}</span>
+      <strong>{{ "%.1f"|format(metric.latest) }} {{ metric.unit }}</strong>
+      <div class="nw-wow-card-lines">
+        <small>
+          Last change:
+          {% if metric.previous_delta is not none %}
+            <b class="{% if metric.previous_delta < 0 %}down{% elif metric.previous_delta > 0 %}up{% else %}same{% endif %}">
+              {% if metric.previous_delta > 0 %}↑{% elif metric.previous_delta < 0 %}↓{% else %}—{% endif %}
+              {{ "%.1f"|format(metric.previous_delta|abs) }} {{ metric.unit }}
+            </b>
+          {% else %}
+            <b class="same">—</b>
+          {% endif %}
+        </small>
+        <small>
+          Since first:
+          {% if metric.since_start_delta is not none %}
+            <b class="{% if metric.since_start_delta < 0 %}down{% elif metric.since_start_delta > 0 %}up{% else %}same{% endif %}">
+              {% if metric.since_start_delta > 0 %}↑{% elif metric.since_start_delta < 0 %}↓{% else %}—{% endif %}
+              {{ "%.1f"|format(metric.since_start_delta|abs) }} {{ metric.unit }}
+            </b>
+          {% else %}
+            <b class="same">—</b>
+          {% endif %}
+        </small>
+      </div>
+      <small class="nw-wow-week">Latest: Week {{ metric.latest_week }}</small>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="nw-wow-table-wrap">
+    <table class="nw-wow-table">
+      <thead>
+        <tr>
+          <th>Coaching week</th>
+          {% for metric in measurement_progress.metrics %}
+          <th>{{ metric.label }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in measurement_progress.weeks %}
+        <tr>
+          <th>
+            <strong>Week {{ week.week_number }}</strong>
+            {% if week.week_start and week.week_end %}
+            <small>{{ week.week_start.strftime("%d %b") }}–{{ week.week_end.strftime("%d %b") }}</small>
+            {% endif %}
+          </th>
+
+          {% for metric in measurement_progress.metrics %}
+          {% set value = week.values.get(metric.key) %}
+          {% set delta = week.deltas.get(metric.key) %}
+          <td>
+            {% if value is not none %}
+              <strong>{{ "%.1f"|format(value) }} {{ metric.unit }}</strong>
+              {% if delta is not none %}
+                <small class="nw-wow-delta {% if delta < 0 %}down{% elif delta > 0 %}up{% else %}same{% endif %}">
+                  {% if delta > 0 %}↑{% elif delta < 0 %}↓{% else %}—{% endif %}
+                  {{ "%.1f"|format(delta|abs) }} {{ metric.unit }}
+                </small>
+              {% else %}
+                <small class="nw-wow-delta same">first entry</small>
+              {% endif %}
+            {% else %}
+              <span class="nw-wow-missing">—</span>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="nw-wow-note">↑ / ↓ show direction only. They are intentionally neutral — Sushma can interpret normal weight and measurement fluctuations in the coaching context.</p>
+</section>
+{% endif %}
+
 <div class="nw-progress-moved">
         {% if progress_summary and progress_summary.weeks %}
         <section class="nw-panel nw-pad">
@@ -1935,6 +2028,28 @@
 {% endif %}
 
 <style>
+
+/* Week-over-week body progress */
+.nw-wow-section{margin-bottom:12px}
+.nw-wow-heading{margin-bottom:14px}
+.nw-wow-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.nw-wow-card{padding:14px 15px;border:1px solid var(--coach-border);border-radius:13px;background:#fff}
+.nw-wow-card>span{display:block;color:var(--coach-muted);font-size:11px;font-weight:800}
+.nw-wow-card>strong{display:block;margin:5px 0 8px;color:var(--coach-purple);font-size:20px;line-height:1.15}
+.nw-wow-card-lines{display:grid;gap:4px}.nw-wow-card-lines small{display:flex;justify-content:space-between;gap:8px;color:var(--coach-muted);font-size:10px}
+.nw-wow-card-lines b{font-weight:850}.nw-wow-week{display:block;margin-top:8px;color:var(--coach-muted);font-size:9px}
+.nw-wow-table-wrap{overflow:auto;border:1px solid var(--coach-border);border-radius:13px}
+.nw-wow-table{width:100%;min-width:980px;border-collapse:collapse;background:#fff;font-size:11px}
+.nw-wow-table th,.nw-wow-table td{padding:11px 12px;border-bottom:1px solid var(--coach-border);border-right:1px solid var(--coach-border);text-align:center;vertical-align:top;white-space:nowrap}
+.nw-wow-table th:last-child,.nw-wow-table td:last-child{border-right:0}.nw-wow-table tbody tr:last-child th,.nw-wow-table tbody tr:last-child td{border-bottom:0}
+.nw-wow-table thead th{background:#faf7fb;color:var(--coach-purple);font-size:10px;font-weight:900}
+.nw-wow-table tbody th{position:sticky;left:0;z-index:2;background:#fff;text-align:left;min-width:125px}
+.nw-wow-table tbody th strong{display:block;font-size:11px}.nw-wow-table tbody th small{display:block;margin-top:3px;color:var(--coach-muted);font-size:9px;font-weight:600}
+.nw-wow-table td>strong{display:block;color:var(--coach-text);font-size:11px}.nw-wow-delta{display:block;margin-top:4px;font-size:9px;font-weight:800}
+.nw-wow-missing{color:#b9afbE}.nw-wow-note{margin:10px 0 0;color:var(--coach-muted);font-size:10px;line-height:1.45}
+.nw-wow-card .up,.nw-wow-card .down,.nw-wow-card .same,.nw-wow-delta.up,.nw-wow-delta.down,.nw-wow-delta.same{color:var(--coach-muted)}
+@media(max-width:980px){.nw-wow-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.nw-wow-summary{grid-template-columns:1fr 1fr}.nw-wow-card>strong{font-size:17px}}
 
 /* Milestone progress PDF */
 .nw-progress-report-card{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:18px 0 24px;padding:22px 24px;background:linear-gradient(135deg,#fffaf0 0%,#faf6ff 100%);border:1px solid #eadcf4;border-radius:18px}.nw-progress-report-copy{max-width:650px}.nw-progress-report-copy h3{margin:3px 0 7px;font-size:20px}.nw-progress-report-copy p:last-child{margin:0;color:var(--coach-muted);line-height:1.55}.nw-progress-report-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0}@media(max-width:850px){.nw-progress-report-card{align-items:flex-start;flex-direction:column}.nw-progress-report-actions{justify-content:flex-start}}

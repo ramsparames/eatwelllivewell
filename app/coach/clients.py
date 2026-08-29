@@ -1262,6 +1262,180 @@ def client_profile(
             }
         )
 
+    # Progress-tab week-over-week measurement and weight view.
+    # Reuse the existing history grid so there is no new query or schema.
+    # Each metric compares against its PREVIOUS ACTUAL recorded value; a
+    # missing week is never treated as zero/no-change.
+    def _progress_number(value):
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    measurement_metric_specs = [
+        ("weight_kg", "Weight", "kg"),
+        ("waist_cm", "Waist", "cm"),
+        ("lower_abdomen_cm", "Lower abdomen", "cm"),
+        ("hip_cm", "Hip", "cm"),
+        ("thigh_cm", "Thigh", "cm"),
+        ("upper_arm_cm", "Upper arm", "cm"),
+        ("chest_cm", "Chest", "cm"),
+    ]
+
+    progress_week_map = {}
+    for history_row in (coach_history_grid.get("rows") or []):
+        week_no = history_row.get("week_number")
+        if week_no is None:
+            continue
+
+        week_entry = progress_week_map.setdefault(
+            week_no,
+            {
+                "week_number": week_no,
+                "week_start": None,
+                "week_end": None,
+                "weight_kg": None,
+                "weight_date": None,
+                "measurement": None,
+            },
+        )
+
+        row_date = history_row.get("date")
+        if row_date is not None:
+            if week_entry["week_start"] is None or row_date < week_entry["week_start"]:
+                week_entry["week_start"] = row_date
+            if week_entry["week_end"] is None or row_date > week_entry["week_end"]:
+                week_entry["week_end"] = row_date
+
+        row_weight = _progress_number(history_row.get("weight_kg"))
+        if row_weight is not None and (
+            week_entry["weight_date"] is None
+            or (row_date is not None and row_date >= week_entry["weight_date"])
+        ):
+            week_entry["weight_kg"] = row_weight
+            week_entry["weight_date"] = row_date
+
+        if history_row.get("measurement"):
+            measurement = dict(history_row["measurement"])
+            measurement["_date"] = measurement.get("measured_on") or row_date
+            existing_measurement = week_entry.get("measurement")
+            if (
+                existing_measurement is None
+                or (
+                    measurement.get("_date") is not None
+                    and (
+                        existing_measurement.get("_date") is None
+                        or measurement.get("_date") >= existing_measurement.get("_date")
+                    )
+                )
+            ):
+                week_entry["measurement"] = measurement
+
+    measurement_progress_weeks = []
+    previous_values = {key: None for key, _, _ in measurement_metric_specs}
+
+    for week_no in sorted(progress_week_map):
+        source_week = progress_week_map[week_no]
+        measurement = source_week.get("measurement") or {}
+
+        values = {
+            "weight_kg": source_week.get("weight_kg"),
+            "waist_cm": _progress_number(measurement.get("waist_cm")),
+            "lower_abdomen_cm": _progress_number(measurement.get("lower_abdomen_cm")),
+            "hip_cm": _progress_number(measurement.get("hip_cm")),
+            "thigh_cm": _progress_number(measurement.get("thigh_cm")),
+            "upper_arm_cm": _progress_number(measurement.get("upper_arm_cm")),
+            "chest_cm": _progress_number(measurement.get("chest_cm")),
+        }
+
+        deltas = {}
+        has_any_value = False
+        for metric_key, _, _ in measurement_metric_specs:
+            value = values.get(metric_key)
+            if value is not None:
+                has_any_value = True
+                prior_value = previous_values.get(metric_key)
+                deltas[metric_key] = (
+                    round(value - prior_value, 1)
+                    if prior_value is not None
+                    else None
+                )
+                previous_values[metric_key] = value
+            else:
+                deltas[metric_key] = None
+
+        if has_any_value:
+            measurement_progress_weeks.append(
+                {
+                    "week_number": week_no,
+                    "week_start": source_week.get("week_start"),
+                    "week_end": source_week.get("week_end"),
+                    "measurement_date": measurement.get("_date"),
+                    "values": values,
+                    "deltas": deltas,
+                }
+            )
+
+    # Build latest-vs-previous and latest-vs-start summaries independently
+    # for every metric. This correctly handles clients who skip a measurement.
+    measurement_progress_summary = []
+    for metric_key, label, unit in measurement_metric_specs:
+        recorded = []
+        for week in measurement_progress_weeks:
+            value = week["values"].get(metric_key)
+            if value is not None:
+                recorded.append(
+                    {
+                        "value": value,
+                        "week_number": week["week_number"],
+                        "date": (
+                            week.get("measurement_date")
+                            if metric_key != "weight_kg"
+                            else progress_week_map[week["week_number"]].get("weight_date")
+                        ),
+                    }
+                )
+
+        if not recorded:
+            continue
+
+        latest = recorded[-1]
+        previous = recorded[-2] if len(recorded) >= 2 else None
+        first = recorded[0]
+
+        measurement_progress_summary.append(
+            {
+                "key": metric_key,
+                "label": label,
+                "unit": unit,
+                "latest": latest["value"],
+                "latest_week": latest["week_number"],
+                "latest_date": latest["date"],
+                "previous_delta": (
+                    round(latest["value"] - previous["value"], 1)
+                    if previous is not None
+                    else None
+                ),
+                "since_start_delta": (
+                    round(latest["value"] - first["value"], 1)
+                    if len(recorded) >= 2
+                    else None
+                ),
+                "record_count": len(recorded),
+            }
+        )
+
+    measurement_progress = {
+        "summary": measurement_progress_summary,
+        "weeks": list(reversed(measurement_progress_weeks)),
+        "metrics": [
+            {"key": key, "label": label, "unit": unit}
+            for key, label, unit in measurement_metric_specs
+        ],
+    }
+
     # Coaching intelligence for the current client workspace.
     # These are computed before TemplateResponse so the Jinja context never
     # references undefined variables.
@@ -1364,6 +1538,7 @@ def client_profile(
             "coach_summary": coach_summary,
             "coach_history_grid": coach_history_grid,
             "history_weeks": history_weeks,
+            "measurement_progress": measurement_progress,
             "coaching_week_summary": coaching_week_summary,
             "progress_charts": progress_charts,
             "macro_settings": macro_settings,
