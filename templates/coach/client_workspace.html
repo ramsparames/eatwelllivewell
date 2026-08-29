@@ -1808,7 +1808,7 @@
         <input type="hidden" name="review_id" value="{{ milestone_review_edit.id if milestone_review_edit else '' }}">
 
         <div class="nw-milestone-top">
-          <label><span class="nw-label">Milestone</span><input class="nw-input" name="milestone_label" required value="{{ milestone_review_edit.milestone_label if milestone_review_edit else ('Week ' ~ profile.current_week ~ ' Review') }}"></label>
+          <label><span class="nw-label">Milestone</span><input class="nw-input" name="milestone_label" required value="{{ milestone_review_edit.milestone_label if milestone_review_edit else ('Week ' ~ current_week ~ ' Review') }}"></label>
           <label><span class="nw-label">Review date</span><input class="nw-input" type="date" name="review_date" required value="{{ milestone_review_edit.review_date.isoformat() if milestone_review_edit and milestone_review_edit.review_date else today.isoformat() }}"></label>
           <label><span class="nw-label">Next review</span><input class="nw-input" type="date" name="next_review_date" value="{{ milestone_review_edit.next_review_date.isoformat() if milestone_review_edit and milestone_review_edit.next_review_date else '' }}"></label>
         </div>
