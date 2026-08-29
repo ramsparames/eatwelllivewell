@@ -1859,8 +1859,8 @@
           </th>
 
           {% for metric in measurement_progress.metrics %}
-          {% set value = week.values.get(metric.key) %}
-          {% set delta = week.deltas.get(metric.key) %}
+          {% set value = week["values"].get(metric.key) %}
+          {% set delta = week["deltas"].get(metric.key) %}
           <td>
             {% if value is not none %}
               <strong>{{ "%.1f"|format(value) }} {{ metric.unit }}</strong>
