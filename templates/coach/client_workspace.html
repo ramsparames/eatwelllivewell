@@ -1780,9 +1780,97 @@
     <p class="nw-kicker" style="margin-top:0">PROGRESS</p>
     <h2>Progress over time</h2>
     <div class="nw-card nw-progress-report-card">
-      <div class="nw-progress-report-copy"><p class="nw-kicker" style="margin-top:0">Milestone review</p><h3>Client Progress Review</h3><p>Download a polished review-call summary with key changes, consistency, actions, measurements, macros and coaching reflections.</p></div>
-      <div class="nw-progress-report-actions"><a class="nw-btn nw-btn-secondary" href="/dashboard/clients/{{ client.id }}/progress-pdf?period=last4">Last 4 weeks PDF</a><a class="nw-btn nw-btn-primary" href="/dashboard/clients/{{ client.id }}/progress-pdf?period=since_start">Since start PDF</a></div>
+      <div class="nw-progress-report-copy">
+        <p class="nw-kicker" style="margin-top:0">Milestone review</p>
+        <h3>Client Progress Review</h3>
+        <p>Pause at meaningful points in the journey, capture what changed, and agree on the next focus.</p>
+      </div>
+      <div class="nw-progress-report-actions">
+        <a class="nw-btn nw-btn-secondary" href="/dashboard/clients/{{ client.id }}/progress-pdf?period=last4">Last 4 weeks PDF</a>
+        <a class="nw-btn nw-btn-secondary" href="/dashboard/clients/{{ client.id }}/progress-pdf?period=since_start">Since start PDF</a>
+        <a class="nw-btn nw-btn-primary" href="#milestone-review-form">{% if milestone_review_edit %}Edit review{% else %}New milestone review{% endif %}</a>
+      </div>
     </div>
+
+    <section class="nw-panel nw-pad nw-milestone-review" id="milestone-review-form">
+      <div class="nw-heading">
+        <div>
+          <p class="nw-kicker" style="margin-top:0">{% if milestone_review_edit %}EDIT REVIEW{% else %}NEW REVIEW{% endif %}</p>
+          <h2>{% if milestone_review_edit %}{{ milestone_review_edit.milestone_label }}{% else %}Milestone conversation{% endif %}</h2>
+          <p>Use this during the review call. Scores are optional and coach notes stay in the coach workspace.</p>
+        </div>
+        {% if milestone_review_edit %}
+        <a class="nw-btn nw-btn-secondary" href="/dashboard/clients/{{ client.id }}?tab=timeline#milestone-review-form">Start new</a>
+        {% endif %}
+      </div>
+
+      <form method="post" action="/dashboard/clients/{{ client.id }}/milestone-review" class="nw-milestone-form">
+        <input type="hidden" name="review_id" value="{{ milestone_review_edit.id if milestone_review_edit else '' }}">
+
+        <div class="nw-milestone-top">
+          <label><span class="nw-label">Milestone</span><input class="nw-input" name="milestone_label" required value="{{ milestone_review_edit.milestone_label if milestone_review_edit else ('Week ' ~ profile.current_week ~ ' Review') }}"></label>
+          <label><span class="nw-label">Review date</span><input class="nw-input" type="date" name="review_date" required value="{{ milestone_review_edit.review_date.isoformat() if milestone_review_edit and milestone_review_edit.review_date else today.isoformat() }}"></label>
+          <label><span class="nw-label">Next review</span><input class="nw-input" type="date" name="next_review_date" value="{{ milestone_review_edit.next_review_date.isoformat() if milestone_review_edit and milestone_review_edit.next_review_date else '' }}"></label>
+        </div>
+
+        <div class="nw-milestone-text-grid">
+          <label><span class="nw-label">Biggest wins</span><textarea class="nw-textarea" name="biggest_wins" rows="4" placeholder="What is the client most proud of?">{{ milestone_review_edit.biggest_wins if milestone_review_edit else '' }}</textarea></label>
+          <label><span class="nw-label">What has improved</span><textarea class="nw-textarea" name="improvements" rows="4" placeholder="Habits, energy, strength, food relationship, measurements…">{{ milestone_review_edit.improvements if milestone_review_edit else '' }}</textarea></label>
+          <label><span class="nw-label">Still struggling with</span><textarea class="nw-textarea" name="struggles" rows="4" placeholder="What still feels hard?">{{ milestone_review_edit.struggles if milestone_review_edit else '' }}</textarea></label>
+          <label><span class="nw-label">Biggest focus next</span><textarea class="nw-textarea" name="next_focus" rows="4" placeholder="What matters most for the next phase?">{{ milestone_review_edit.next_focus if milestone_review_edit else '' }}</textarea></label>
+        </div>
+
+        <div class="nw-milestone-scores">
+          {% for field, label in [('nutrition_score','Nutrition'),('movement_score','Movement / strength'),('sleep_score','Sleep / recovery'),('confidence_score','Confidence')] %}
+          <label>
+            <span class="nw-label">{{ label }}</span>
+            <select class="nw-select" name="{{ field }}">
+              <option value="">Not scored</option>
+              {% set selected_score = milestone_review_edit[field] if milestone_review_edit else none %}
+              {% for score in range(1,6) %}
+              <option value="{{ score }}" {% if selected_score == score %}selected{% endif %}>{{ score }} / 5</option>
+              {% endfor %}
+            </select>
+          </label>
+          {% endfor %}
+        </div>
+
+        <label class="nw-milestone-private"><span class="nw-label">Coach notes <small>Private</small></span><textarea class="nw-textarea" name="coach_notes" rows="3" placeholder="Anything Sushma wants to remember for future coaching conversations.">{{ milestone_review_edit.coach_notes if milestone_review_edit else '' }}</textarea></label>
+
+        <div class="nw-milestone-actions">
+          <button class="nw-btn nw-btn-primary" type="submit">{% if milestone_review_edit %}Update milestone review{% else %}Save milestone review{% endif %}</button>
+        </div>
+      </form>
+    </section>
+
+    {% if milestone_reviews %}
+    <section class="nw-panel nw-pad nw-milestone-history">
+      <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">REVIEW HISTORY</p><h2>Milestones so far</h2><p>A running record of the client's journey and the focus chosen at each review.</p></div></div>
+      <div class="nw-milestone-list">
+        {% for review in milestone_reviews %}
+        <article class="nw-milestone-item">
+          <div class="nw-milestone-item-head">
+            <div><strong>{{ review.milestone_label }}</strong><small>{{ review.review_date.strftime("%d %b %Y") }}</small></div>
+            <a class="nw-btn nw-btn-secondary" href="/dashboard/clients/{{ client.id }}?tab=timeline&milestone={{ review.id }}#milestone-review-form">Edit</a>
+          </div>
+          <div class="nw-milestone-item-body">
+            {% if review.biggest_wins %}<div><span>Biggest wins</span><p>{{ review.biggest_wins }}</p></div>{% endif %}
+            {% if review.improvements %}<div><span>Improved</span><p>{{ review.improvements }}</p></div>{% endif %}
+            {% if review.struggles %}<div><span>Still working on</span><p>{{ review.struggles }}</p></div>{% endif %}
+            {% if review.next_focus %}<div class="focus"><span>Next focus</span><p>{{ review.next_focus }}</p></div>{% endif %}
+          </div>
+          <div class="nw-milestone-item-foot">
+            {% if review.nutrition_score %}<span>Nutrition <b>{{ review.nutrition_score }}/5</b></span>{% endif %}
+            {% if review.movement_score %}<span>Movement <b>{{ review.movement_score }}/5</b></span>{% endif %}
+            {% if review.sleep_score %}<span>Sleep <b>{{ review.sleep_score }}/5</b></span>{% endif %}
+            {% if review.confidence_score %}<span>Confidence <b>{{ review.confidence_score }}/5</b></span>{% endif %}
+            {% if review.next_review_date %}<span>Next review <b>{{ review.next_review_date.strftime("%d %b") }}</b></span>{% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
 
     <p>Trends and coaching history live here, so Overview can stay focused on what matters now.</p>
   </div>
@@ -2050,6 +2138,29 @@
 .nw-wow-card .up,.nw-wow-card .down,.nw-wow-card .same,.nw-wow-delta.up,.nw-wow-delta.down,.nw-wow-delta.same{color:var(--coach-muted)}
 @media(max-width:980px){.nw-wow-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.nw-wow-summary{grid-template-columns:1fr 1fr}.nw-wow-card>strong{font-size:17px}}
+
+/* Saved milestone reviews */
+.nw-milestone-review,.nw-milestone-history{margin:0 0 16px}
+.nw-milestone-form{display:grid;gap:16px}
+.nw-milestone-top{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:12px}
+.nw-milestone-text-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.nw-milestone-form label{display:block}.nw-milestone-form .nw-label{display:block;margin-bottom:6px}
+.nw-milestone-form .nw-textarea{width:100%;resize:vertical}
+.nw-milestone-scores{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:14px;border:1px solid var(--coach-border);border-radius:14px;background:#faf7fb}
+.nw-milestone-private{padding:14px;border-left:3px solid #d7a514;background:#fffaf0;border-radius:10px}
+.nw-milestone-private .nw-label small{margin-left:6px;color:var(--coach-muted);font-weight:700}
+.nw-milestone-actions{display:flex;justify-content:flex-end}
+.nw-milestone-list{display:grid;gap:12px}
+.nw-milestone-item{border:1px solid var(--coach-border);border-radius:15px;background:#fff;overflow:hidden}
+.nw-milestone-item-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:#faf7fb}
+.nw-milestone-item-head strong{display:block;color:var(--coach-purple);font-size:15px}.nw-milestone-item-head small{display:block;margin-top:3px;color:var(--coach-muted)}
+.nw-milestone-item-body{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--coach-border)}
+.nw-milestone-item-body>div{padding:13px 16px;border-right:1px solid var(--coach-border);border-bottom:1px solid var(--coach-border)}
+.nw-milestone-item-body>div:nth-child(even){border-right:0}.nw-milestone-item-body span{display:block;margin-bottom:4px;color:var(--coach-muted);font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.04em}
+.nw-milestone-item-body p{margin:0;white-space:pre-wrap;line-height:1.45}.nw-milestone-item-body .focus{background:#fffaf0}
+.nw-milestone-item-foot{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px}.nw-milestone-item-foot span{padding:5px 8px;border-radius:999px;background:#f5f1f7;color:var(--coach-muted);font-size:10px}.nw-milestone-item-foot b{color:var(--coach-text)}
+@media(max-width:850px){.nw-milestone-top,.nw-milestone-text-grid{grid-template-columns:1fr}.nw-milestone-scores{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.nw-milestone-scores,.nw-milestone-item-body{grid-template-columns:1fr}.nw-milestone-item-body>div{border-right:0}}
 
 /* Milestone progress PDF */
 .nw-progress-report-card{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:18px 0 24px;padding:22px 24px;background:linear-gradient(135deg,#fffaf0 0%,#faf6ff 100%);border:1px solid #eadcf4;border-radius:18px}.nw-progress-report-copy{max-width:650px}.nw-progress-report-copy h3{margin:3px 0 7px;font-size:20px}.nw-progress-report-copy p:last-child{margin:0;color:var(--coach-muted);line-height:1.55}.nw-progress-report-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0}@media(max-width:850px){.nw-progress-report-card{align-items:flex-start;flex-direction:column}.nw-progress-report-actions{justify-content:flex-start}}

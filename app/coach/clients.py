@@ -53,6 +53,12 @@ from app.services.coaching_insights_service import (
 )
 
 from app.services.progress_pdf_service import build_client_progress_pdf
+from app.services.milestone_review_service import (
+    ensure_milestone_reviews_table,
+    get_milestone_review,
+    list_milestone_reviews,
+    save_milestone_review,
+)
 
 from app.services.client_portal_service import (
     ensure_portal_access,
@@ -1088,6 +1094,70 @@ def create_client_portal_access(
     )
 
 
+@router.post("/dashboard/clients/{client_id}/milestone-review")
+def save_client_milestone_review(
+    request: Request,
+    client_id: int,
+    review_id: str = Form(""),
+    review_date: str = Form(""),
+    milestone_label: str = Form("Milestone Review"),
+    biggest_wins: str = Form(""),
+    improvements: str = Form(""),
+    struggles: str = Form(""),
+    nutrition_score: str = Form(""),
+    movement_score: str = Form(""),
+    sleep_score: str = Form(""),
+    confidence_score: str = Form(""),
+    next_focus: str = Form(""),
+    coach_notes: str = Form(""),
+    next_review_date: str = Form(""),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    if ClientService.profile(client_id) is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    def parse_optional_int(value):
+        try:
+            return int(value) if str(value).strip() else None
+        except (TypeError, ValueError):
+            return None
+
+    def parse_optional_date(value):
+        try:
+            return date.fromisoformat(value) if str(value).strip() else None
+        except (TypeError, ValueError):
+            return None
+
+    parsed_review_date = parse_optional_date(review_date) or date.today()
+    parsed_review_id = parse_optional_int(review_id)
+
+    try:
+        saved_id = save_milestone_review(
+            client_id=client_id,
+            review_id=parsed_review_id,
+            review_date=parsed_review_date,
+            milestone_label=milestone_label,
+            biggest_wins=biggest_wins,
+            improvements=improvements,
+            struggles=struggles,
+            nutrition_score=parse_optional_int(nutrition_score),
+            movement_score=parse_optional_int(movement_score),
+            sleep_score=parse_optional_int(sleep_score),
+            confidence_score=parse_optional_int(confidence_score),
+            next_focus=next_focus,
+            coach_notes=coach_notes,
+            next_review_date=parse_optional_date(next_review_date),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=timeline&milestone_saved={saved_id}",
+        status_code=303,
+    )
+
+
 @router.get("/dashboard/clients/{client_id}/progress-pdf")
 def download_client_progress_pdf(request: Request, client_id: int, period: str = "last4"):
     if not coach_is_logged_in(request):
@@ -1159,6 +1229,15 @@ def client_profile(
 
     portal_access = get_portal_access(client_id)
     portal_activity = get_recent_client_activity(client_id, limit=14)
+    ensure_milestone_reviews_table()
+    milestone_reviews = list_milestone_reviews(client_id)
+    requested_milestone_id = request.query_params.get("milestone")
+    milestone_review_edit = None
+    if requested_milestone_id:
+        try:
+            milestone_review_edit = get_milestone_review(client_id, int(requested_milestone_id))
+        except (TypeError, ValueError):
+            milestone_review_edit = None
 
     week_review = None
     call_prep = None
@@ -1539,6 +1618,9 @@ def client_profile(
             "coach_history_grid": coach_history_grid,
             "history_weeks": history_weeks,
             "measurement_progress": measurement_progress,
+            "today": date.today(),
+            "milestone_reviews": milestone_reviews,
+            "milestone_review_edit": milestone_review_edit,
             "coaching_week_summary": coaching_week_summary,
             "progress_charts": progress_charts,
             "macro_settings": macro_settings,
