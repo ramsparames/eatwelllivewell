@@ -644,6 +644,15 @@
   color:var(--muted);
 }
 
+
+/* Wins Bank — client view */
+.cp-client-wins{margin:14px 0;background:linear-gradient(145deg,#fffdf6,#fff);border-color:#eadfb8}
+.cp-win-head{display:flex;justify-content:space-between;gap:12px;align-items:start}.cp-win-head h2{margin:2px 0 4px}.cp-win-head p:not(.cp-kicker){margin:0;color:var(--muted);font-size:10px}.cp-win-head>span{flex:none;padding:5px 8px;border-radius:999px;background:#fff4c7;color:#765d0a;font-size:9px;font-weight:850}
+.cp-win-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.cp-win-item{display:grid;grid-template-columns:30px minmax(0,1fr);gap:9px;padding:11px;border:1px solid #eee5c8;border-radius:12px;background:#fff}
+.cp-win-star{display:grid;place-items:center;width:29px;height:29px;border-radius:9px;background:#fff6d6;font-size:14px}.cp-win-meta{display:flex;gap:7px;align-items:center;margin-bottom:4px}.cp-win-meta span{padding:3px 6px;border-radius:999px;background:#f5eef8;color:var(--purple);font-size:7px;font-weight:900;text-transform:uppercase}.cp-win-meta small{color:var(--muted);font-size:8px}.cp-win-item strong{display:block;font-size:11px;line-height:1.35}.cp-win-item p{margin:4px 0 0;color:var(--muted);font-size:9px;line-height:1.4}
+@media(max-width:620px){.cp-win-list{grid-template-columns:1fr}}
+
+
 </style>
 
 
@@ -696,6 +705,31 @@
       <strong>{% if next_call and next_call.local_start_time %}{{ next_call.local_start_time.strftime("%d %b · %I:%M %p") }}{% else %}Not scheduled yet{% endif %}</strong>
     </div>
   </div>
+
+  {% if client_wins %}
+  <section class="cp-card cp-client-wins">
+    <div class="cp-win-head">
+      <div>
+        <p class="cp-kicker">YOUR WINS ⭐</p>
+        <h2>Look how far you've come</h2>
+        <p>Progress is more than a number. These are moments worth remembering.</p>
+      </div>
+      <span>{{ client_wins|length }} recent</span>
+    </div>
+    <div class="cp-win-list">
+      {% for win in client_wins %}
+      <article class="cp-win-item">
+        <div class="cp-win-star">⭐</div>
+        <div>
+          <div class="cp-win-meta"><span>{{ win.category }}</span><small>{{ win.win_date.strftime("%d %b") }}</small></div>
+          <strong>{{ win.title }}</strong>
+          {% if win.note %}<p>{{ win.note }}</p>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 
   <div class="cp-grid">
     <section class="cp-card cp-grid-card" id="client-grid">

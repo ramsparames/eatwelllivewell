@@ -59,6 +59,13 @@ from app.services.milestone_review_service import (
     list_milestone_reviews,
     save_milestone_review,
 )
+from app.services.client_win_service import (
+    WIN_CATEGORIES,
+    delete_client_win,
+    ensure_client_wins_table,
+    list_client_wins,
+    save_client_win,
+)
 
 from app.services.client_portal_service import (
     ensure_portal_access,
@@ -1094,6 +1101,57 @@ def create_client_portal_access(
     )
 
 
+@router.post("/dashboard/clients/{client_id}/wins")
+def add_client_win(
+    request: Request,
+    client_id: int,
+    win_date: str = Form(""),
+    category: str = Form("Other"),
+    title: str = Form(""),
+    note: str = Form(""),
+    visible_to_client: str = Form(""),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    if ClientService.profile(client_id) is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    try:
+        parsed_date = date.fromisoformat(win_date) if win_date else date.today()
+    except ValueError:
+        parsed_date = date.today()
+
+    try:
+        save_client_win(
+            client_id=client_id,
+            win_date=parsed_date,
+            category=category,
+            title=title,
+            note=note,
+            visible_to_client=visible_to_client == "1",
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=timeline#wins-bank",
+        status_code=303,
+    )
+
+
+@router.post("/dashboard/clients/{client_id}/wins/{win_id}/delete")
+def remove_client_win(request: Request, client_id: int, win_id: int):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+    if ClientService.profile(client_id) is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+    delete_client_win(client_id, win_id)
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=timeline#wins-bank",
+        status_code=303,
+    )
+
+
 @router.post("/dashboard/clients/{client_id}/milestone-review")
 def save_client_milestone_review(
     request: Request,
@@ -1231,6 +1289,8 @@ def client_profile(
     portal_activity = get_recent_client_activity(client_id, limit=14)
     ensure_milestone_reviews_table()
     milestone_reviews = list_milestone_reviews(client_id)
+    ensure_client_wins_table()
+    client_wins = list_client_wins(client_id)
     requested_milestone_id = request.query_params.get("milestone")
     milestone_review_edit = None
     if requested_milestone_id:
@@ -1621,6 +1681,8 @@ def client_profile(
             "today": date.today(),
             "milestone_reviews": milestone_reviews,
             "milestone_review_edit": milestone_review_edit,
+            "client_wins": client_wins,
+            "win_categories": WIN_CATEGORIES,
             "coaching_week_summary": coaching_week_summary,
             "progress_charts": progress_charts,
             "macro_settings": macro_settings,

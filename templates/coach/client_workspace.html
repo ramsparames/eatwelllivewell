@@ -1779,6 +1779,68 @@
   <div class="nw-progress-intro">
     <p class="nw-kicker" style="margin-top:0">PROGRESS</p>
     <h2>Progress over time</h2>
+    <section class="nw-panel nw-pad nw-wins-bank" id="wins-bank">
+      <div class="nw-heading nw-wins-heading">
+        <div>
+          <p class="nw-kicker" style="margin-top:0">WINS BANK ⭐</p>
+          <h2>Progress beyond the numbers</h2>
+          <p>Save the moments worth remembering — habits, confidence, strength, sleep, mindset and everyday consistency.</p>
+        </div>
+        <span class="nw-win-count">{{ client_wins|length }} saved</span>
+      </div>
+
+      <form method="post" action="/dashboard/clients/{{ client.id }}/wins" class="nw-win-form">
+        <div class="nw-win-form-main">
+          <label>
+            <span class="nw-label">The win</span>
+            <input class="nw-input" name="title" required placeholder="e.g. Went out for dinner and enjoyed it without guilt">
+          </label>
+          <label>
+            <span class="nw-label">A little context <small>optional</small></span>
+            <input class="nw-input" name="note" placeholder="Anything you want to remember about this moment">
+          </label>
+        </div>
+        <div class="nw-win-form-meta">
+          <label><span class="nw-label">Date</span><input class="nw-input" type="date" name="win_date" value="{{ today.isoformat() }}"></label>
+          <label>
+            <span class="nw-label">Category</span>
+            <select class="nw-select" name="category">
+              {% for category in win_categories %}<option value="{{ category }}">{{ category }}</option>{% endfor %}
+            </select>
+          </label>
+          <label class="nw-win-visible">
+            <input type="checkbox" name="visible_to_client" value="1" checked>
+            <span>Show this win to the client</span>
+          </label>
+          <button class="nw-btn nw-btn-primary" type="submit">Save as Win ⭐</button>
+        </div>
+      </form>
+
+      {% if client_wins %}
+      <div class="nw-win-list">
+        {% for win in client_wins %}
+        <article class="nw-win-item">
+          <div class="nw-win-icon">⭐</div>
+          <div class="nw-win-copy">
+            <div class="nw-win-meta">
+              <span>{{ win.category }}</span>
+              <small>{{ win.win_date.strftime("%d %b %Y") }}</small>
+              {% if win.visible_to_client %}<small>Visible to client</small>{% else %}<small>Coach only</small>{% endif %}
+            </div>
+            <strong>{{ win.title }}</strong>
+            {% if win.note %}<p>{{ win.note }}</p>{% endif %}
+          </div>
+          <form method="post" action="/dashboard/clients/{{ client.id }}/wins/{{ win.id }}/delete" onsubmit="return confirm('Remove this saved win?')">
+            <button class="nw-win-delete" type="submit" title="Remove win">×</button>
+          </form>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="nw-win-empty">No wins saved yet. Start with something the client is proud of — it does not have to be about weight.</div>
+      {% endif %}
+    </section>
+
     <div class="nw-card nw-progress-report-card">
       <div class="nw-progress-report-copy">
         <p class="nw-kicker" style="margin-top:0">Milestone review</p>
@@ -2138,6 +2200,22 @@
 .nw-wow-card .up,.nw-wow-card .down,.nw-wow-card .same,.nw-wow-delta.up,.nw-wow-delta.down,.nw-wow-delta.same{color:var(--coach-muted)}
 @media(max-width:980px){.nw-wow-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.nw-wow-summary{grid-template-columns:1fr 1fr}.nw-wow-card>strong{font-size:17px}}
+
+/* Wins Bank */
+.nw-wins-bank{margin:0 0 16px;background:linear-gradient(145deg,#fffdf7,#fff)}
+.nw-wins-heading{align-items:center}.nw-win-count{flex:none;padding:6px 10px;border-radius:999px;background:#fff4c7;color:#775d05;font-size:10px;font-weight:850}
+.nw-win-form{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.8fr);gap:12px;padding:14px;border:1px solid #eadfb8;border-radius:14px;background:#fffdf8}
+.nw-win-form-main{display:grid;gap:10px}.nw-win-form-meta{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:end}
+.nw-win-visible{grid-column:1/-1;display:flex!important;align-items:center;gap:8px;color:var(--coach-muted);font-size:10px;font-weight:750}.nw-win-visible input{accent-color:var(--coach-purple)}
+.nw-win-form-meta .nw-btn{grid-column:1/-1}
+.nw-win-list{display:grid;gap:9px;margin-top:14px}.nw-win-item{display:grid;grid-template-columns:32px minmax(0,1fr) 28px;gap:10px;align-items:start;padding:12px 13px;border:1px solid var(--coach-border);border-radius:13px;background:#fff}
+.nw-win-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#fff6d6;font-size:15px}
+.nw-win-copy strong{display:block;margin-top:4px;font-size:13px;line-height:1.35}.nw-win-copy p{margin:5px 0 0;color:var(--coach-muted);font-size:10px;line-height:1.45;white-space:pre-wrap}
+.nw-win-meta{display:flex;flex-wrap:wrap;gap:5px 9px;align-items:center}.nw-win-meta span{padding:3px 6px;border-radius:999px;background:#f5eef8;color:var(--coach-purple);font-size:8px;font-weight:850;text-transform:uppercase}.nw-win-meta small{color:var(--coach-muted);font-size:8px}
+.nw-win-delete{width:26px;height:26px;border:0;border-radius:8px;background:#f7f3f7;color:#8d7f8f;font-size:17px;cursor:pointer}.nw-win-delete:hover{background:#f2e8f3;color:#6a316f}
+.nw-win-empty{margin-top:12px;padding:14px;border:1px dashed #dfd2a7;border-radius:12px;color:var(--coach-muted);font-size:10px;background:#fffdf8}
+@media(max-width:850px){.nw-win-form{grid-template-columns:1fr}}
+@media(max-width:560px){.nw-win-form-meta{grid-template-columns:1fr}.nw-win-visible,.nw-win-form-meta .nw-btn{grid-column:auto}}
 
 /* Saved milestone reviews */
 .nw-milestone-review,.nw-milestone-history{margin:0 0 16px}

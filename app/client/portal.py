@@ -46,6 +46,10 @@ from app.services.coaching_insights_service import (
     get_client_weekly_summary,
     get_previous_exercise_performance,
 )
+from app.services.client_win_service import (
+    ensure_client_wins_table,
+    list_client_wins,
+)
 
 from app.services.client_portal_service import (
     create_portal_tables,
@@ -76,6 +80,7 @@ create_macro_tracking_tables()
 create_workout_tables()
 create_phase_a_tables()
 create_coaching_workflow_tables()
+ensure_client_wins_table()
 
 
 @router.get(
@@ -289,6 +294,12 @@ def client_data_page(request: Request, access_token: str):
         week_view["week_start"],
     )
 
+    client_wins = list_client_wins(
+        client["id"],
+        visible_only=True,
+        limit=8,
+    )
+
     return templates.TemplateResponse(
         "client/home.html",
         {
@@ -307,6 +318,7 @@ def client_data_page(request: Request, access_token: str):
             "macro_settings": macro_settings,
             "macro_entry": macro_entry,
             "client_history_grid": client_history_grid,
+            "client_wins": client_wins,
             "week_completion": current_week_completion,
             "week_view": week_view,
             "weekly_measurement": get_current_week_measurement(client["id"], on_date=today),
