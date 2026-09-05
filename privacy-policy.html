@@ -2,48 +2,171 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Privacy Policy | Eat Well Live Well</title>
-<meta name="description" content="How Eat Well Live Well and NourisHer collect, use, protect and manage personal information."/>
-<meta name="theme-color" content="#FBFAF7"/>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700;800&family=Sacramento&display=swap" rel="stylesheet"/>
-<link href="/static/styles.css" rel="stylesheet"/>
+<meta name="theme-color" content="#f7f4ef"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Manrope:wght@400;500;600;700;800&family=Sacramento&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:#21332b;
+  --deep:#172821;
+  --green:#2f6f5d;
+  --green2:#4d8d78;
+  --mint:#dfece6;
+  --cream:#f8f5ef;
+  --paper:#fffdf9;
+  --rose:#c96f86;
+  --rose-soft:#f7e7eb;
+  --muted:#68756f;
+  --line:#dddcd5;
+  --shadow:0 20px 60px rgba(29,53,43,.10);
+  --serif:"Cormorant Garamond", Georgia, serif;
+  --sans:"Manrope", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);line-height:1.7}
+a{color:inherit}
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:rgba(248,245,239,.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(33,51,43,.08);
+}
+.header-inner{
+  width:min(1180px,calc(100% - 48px));margin:auto;min-height:82px;
+  display:flex;align-items:center;justify-content:space-between;gap:28px
+}
+.wordmark{display:flex;align-items:baseline;gap:7px;text-decoration:none;color:var(--deep);font-family:var(--serif);font-size:30px;font-weight:700;white-space:nowrap}
+.wordmark .script{font-family:"Sacramento",cursive;color:var(--rose);font-size:34px;font-weight:400;margin:0 -2px}
+.nav{display:flex;align-items:center;gap:28px}
+.nav a{text-decoration:none;color:#52615a;font-size:13px;font-weight:700}
+.nav a:hover{color:var(--green)}
+.home-btn{padding:11px 17px;border:1px solid #cdd7d1;border-radius:999px;text-decoration:none;color:var(--green);font-weight:800;font-size:13px;background:#fff}
+.hero{
+  position:relative;overflow:hidden;
+  padding:84px 0 76px;
+  background:
+    radial-gradient(circle at 86% 18%, rgba(201,111,134,.15), transparent 28%),
+    radial-gradient(circle at 12% 75%, rgba(77,141,120,.17), transparent 30%),
+    linear-gradient(135deg,#eef5f1 0%,#faf6f1 58%,#f9eef1 100%);
+  border-bottom:1px solid rgba(33,51,43,.08)
+}
+.hero-inner{width:min(1050px,calc(100% - 48px));margin:auto}
+.kicker{margin:0 0 14px;color:var(--green);font-size:12px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+.hero h1{margin:0;font-family:var(--serif);font-size:clamp(54px,7vw,82px);line-height:.96;font-weight:600;letter-spacing:-.025em;color:var(--deep)}
+.hero h1 em{color:var(--rose);font-weight:600}
+.hero-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px;color:#65736d;font-size:13px}
+.hero-meta span{padding:8px 12px;border:1px solid rgba(47,111,93,.15);border-radius:999px;background:rgba(255,255,255,.55)}
+.shell{width:min(1180px,calc(100% - 48px));margin:58px auto 92px;display:grid;grid-template-columns:280px minmax(0,1fr);gap:46px;align-items:start}
+.toc{position:sticky;top:112px}
+.toc-card{padding:26px 22px;border:1px solid var(--line);border-radius:22px;background:rgba(255,253,249,.75);box-shadow:0 10px 35px rgba(29,53,43,.05)}
+.toc-title{margin:0 0 16px;font-family:var(--serif);font-size:26px;font-weight:600}
+.toc-links{display:flex;flex-direction:column;gap:3px;max-height:62vh;overflow:auto;padding-right:4px}
+.toc-links a{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:8px 8px;border-radius:10px;text-decoration:none;color:#64716c;font-size:11px;line-height:1.45}
+.toc-links a span{color:var(--rose);font-weight:800}
+.toc-links a:hover{background:#edf4f0;color:var(--deep)}
+.help-card{margin-top:18px;padding:20px;border-radius:18px;background:var(--deep);color:white}
+.help-card small{display:block;color:#b9c9c2;text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+.help-card strong{display:block;margin:6px 0 5px;font-family:var(--serif);font-size:22px}
+.help-card a{color:#f2b6c4;font-size:12px}
+.document-card{background:var(--paper);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:64px 70px}
+.legal-copy>p:first-of-type{font-family:var(--serif);font-size:24px;line-height:1.45;color:#405149;margin-top:0}
+.legal-copy h2{scroll-margin-top:110px;margin:58px 0 18px;padding-top:3px;font-family:var(--serif);font-size:36px;line-height:1.1;font-weight:600;color:var(--deep);letter-spacing:-.01em}
+.legal-copy h2::before{content:"";display:block;width:44px;height:3px;margin-bottom:18px;border-radius:99px;background:linear-gradient(90deg,var(--green2),var(--rose))}
+.legal-copy h3{margin:30px 0 10px;font-size:16px;line-height:1.35;color:var(--green);font-weight:800}
+.legal-copy p,.legal-copy li{font-size:14.5px;color:#53615b;line-height:1.85}
+.legal-copy p{margin:0 0 15px}
+.legal-copy ul{margin:12px 0 20px;padding-left:22px}
+.legal-copy li{padding-left:5px;margin:7px 0}
+.legal-copy strong{color:var(--deep)}
+.legal-copy a{color:var(--green);font-weight:700}
+.footer{background:var(--deep);color:#c9d2ce;padding:42px 0}
+.footer-inner{width:min(1180px,calc(100% - 48px));margin:auto;display:flex;justify-content:space-between;align-items:center;gap:30px;font-size:12px}
+.footer a{color:#e7b0bd;text-decoration:none}
+.footer-links{display:flex;gap:18px;flex-wrap:wrap}
+@media(max-width:900px){
+  .nav{display:none}
+  .shell{grid-template-columns:1fr}
+  .toc{position:static}
+  .toc-card{display:none}
+  .help-card{margin-top:0}
+  .document-card{padding:44px 34px}
+}
+@media(max-width:600px){
+  .header-inner,.hero-inner,.shell,.footer-inner{width:min(100% - 30px,1180px)}
+  .header-inner{min-height:70px}
+  .wordmark{font-size:24px;gap:5px}
+  .wordmark .script{font-size:29px}
+  .home-btn{font-size:11px;padding:9px 12px}
+  .hero{padding:58px 0 50px}
+  .hero h1{font-size:52px}
+  .shell{margin:30px auto 58px}
+  .document-card{padding:34px 22px;border-radius:20px}
+  .legal-copy>p:first-of-type{font-size:21px}
+  .legal-copy h2{font-size:31px;margin-top:48px}
+  .footer-inner{align-items:flex-start;flex-direction:column}
+}
+</style>
 </head>
-<body class="legal-body">
-<a class="skip-link" href="#main">Skip to content</a>
-<header class="legal-header">
-  <div class="legal-header-inner">
-    <a aria-label="Eat Well Live Well home" class="wordmark" href="/">
+<body>
+<header class="topbar">
+  <div class="header-inner">
+    <a class="wordmark" href="/" aria-label="Eat Well Live Well home">
       <span>Eat</span><span class="script">well</span><span>Live</span><span class="script">well</span>
     </a>
-    <a class="legal-back" href="/">← Back to home</a>
+    <nav class="nav" aria-label="Primary">
+      <a href="/#how">How it works</a>
+      <a href="/#pillars">Pillars</a>
+      <a href="/success-stories">Success Stories</a>
+      <a href="/#bio">About Sushma</a>
+    </nav>
+    <a class="home-btn" href="/">Back to home →</a>
   </div>
 </header>
 
-<main id="main" class="legal-page">
-  <section class="legal-hero">
-    <div class="legal-wrap">
-      <p class="eyebrow">Eat Well Live Well · NourisHer</p>
-      <h1>Privacy Policy</h1>
-      <p class="legal-updated">Last updated September 2026</p>
+<main>
+<section class="hero">
+  <div class="hero-inner">
+    <p class="kicker">Eat Well Live Well · NourisHer</p>
+    <h1>Privacy Policy</h1>
+    <div class="hero-meta">
+      <span>Last updated September 2026</span>
+      <span>India</span>
+      <span>Personal data & privacy</span>
     </div>
-  </section>
-  <section class="legal-content-section">
-    <article class="legal-document">
-      <p>EAT WELL LIVE WELL</p>
+  </div>
+</section>
+
+<div class="shell">
+  <aside class="toc">
+    <div class="toc-card">
+      <h2 class="toc-title">On this page</h2>
+      <div class="toc-links"><a href="#1-who-we-are-and-how-to-contact-us"><span>01</span>1. Who We Are and How to Contact Us</a><a href="#2-personal-data-we-may-collect"><span>02</span>2. Personal Data We May Collect</a><a href="#3-how-we-collect-personal-data"><span>03</span>3. How We Collect Personal Data</a><a href="#4-why-we-use-personal-data"><span>04</span>4. Why We Use Personal Data</a><a href="#5-health-and-other-personal-information-used-in-coaching"><span>05</span>5. Health and Other Personal Information Used in Coaching</a><a href="#6-consent-and-your-choices"><span>06</span>6. Consent and Your Choices</a><a href="#7-when-we-share-personal-data"><span>07</span>7. When We Share Personal Data</a><a href="#8-international-processing-and-service-providers"><span>08</span>8. International Processing and Service Providers</a><a href="#9-cookies-analytics-and-website-technologies"><span>09</span>9. Cookies, Analytics and Website Technologies</a><a href="#10-security-of-personal-data"><span>10</span>10. Security of Personal Data</a><a href="#11-data-retention"><span>11</span>11. Data Retention</a><a href="#12-your-rights-and-requests"><span>12</span>12. Your Rights and Requests</a><a href="#13-grievances-and-complaints"><span>13</span>13. Grievances and Complaints</a><a href="#14-children"><span>14</span>14. Children</a><a href="#15-third-party-links"><span>15</span>15. Third-Party Links</a><a href="#16-changes-to-this-privacy-policy"><span>16</span>16. Changes to This Privacy Policy</a><a href="#17-contact-details"><span>17</span>17. Contact Details</a></div>
+    </div>
+    <div class="help-card">
+      <small>Questions?</small>
+      <strong>We’re here to help.</strong>
+      <a href="mailto:hello@eatwelllivewell.in">hello@eatwelllivewell.in</a>
+    </div>
+  </aside>
+
+  <section class="document-card">
+    <article class="legal-copy">
+<p>EAT WELL LIVE WELL</p>
 <p>PRIVACY POLICY</p>
 <p>How Eat Well Live Well / NourisHer collects, uses, protects and manages personal data</p>
-<p>Eat Well Live Well / NourisHer (&quot;Eat Well Live Well&quot;, &quot;we&quot;, &quot;us&quot; or &quot;our&quot;) is committed to handling personal data responsibly. This Privacy Policy explains how we collect, use, disclose, store, protect and manage personal data when you visit eatwelllivewell.in, submit an enquiry or application, book a consultation, purchase or participate in coaching, attend classes, use a client portal, communicate with us, or otherwise use our services.</p>
+<p>Eat Well Live Well / NourisHer ("Eat Well Live Well", "we", "us" or "our") is committed to handling personal data responsibly. This Privacy Policy explains how we collect, use, disclose, store, protect and manage personal data when you visit eatwelllivewell.in, submit an enquiry or application, book a consultation, purchase or participate in coaching, attend classes, use a client portal, communicate with us, or otherwise use our services.</p>
 <p>This Policy is prepared with reference to the Digital Personal Data Protection Act, 2023 and the Digital Personal Data Protection Rules, 2025, as brought into force from time to time, together with other applicable Indian laws. It should be read alongside our Terms and Conditions and any programme-specific notices.</p>
-<h2>1. Who We Are and How to Contact Us</h2>
+<h2 id="1-who-we-are-and-how-to-contact-us">1. Who We Are and How to Contact Us</h2>
 <p>The Services are offered under the Eat Well Live Well and NourisHer brands by Eat Well Live Well, a registered sole proprietorship owned and operated by Sushma Subramaniam. Sushma uses the professional name Sushma Rams in her coaching practice and on social media.</p>
 <p>Privacy/contact email: hello@eatwelllivewell.in</p>
 <p>Phone: +91 95001 76477</p>
 <p>Website: eatwelllivewell.in</p>
 <p>Address: 94A Karpagam Ave, Block 2, Flat, RA Puram, Chennai 600028, Tamil Nadu, India</p>
-<h2>2. Personal Data We May Collect</h2>
+<h2 id="2-personal-data-we-may-collect">2. Personal Data We May Collect</h2>
 <p>The personal data we collect depends on how you interact with us and which Services you use. We aim to collect only information that is reasonably necessary for the relevant purpose.</p>
 <h3>Identity and contact information</h3>
 <ul>
@@ -72,11 +195,11 @@
 <li>Emails, WhatsApp messages, call or session scheduling information and other communications with us.</li>
 <li>Testimonials, photographs, videos, audio or before-and-after material only where you choose to provide them. Public marketing use of identifiable material is subject to appropriate permission or consent.</li>
 </ul>
-<h2>3. How We Collect Personal Data</h2>
+<h2 id="3-how-we-collect-personal-data">3. How We Collect Personal Data</h2>
 <p>We may collect personal data directly from you when you complete a form, contact us, attend a clarity or coaching call, enrol, make payment, participate in a programme, use a client portal, submit a check-in, attend a class or communicate with us.</p>
 <p>We may also receive limited personal data from service providers used to operate the business, such as payment processors, scheduling tools, website or form providers, client-management platforms, analytics providers, email or messaging platforms and video-conferencing services.</p>
 <p>Where reasonable and practicable, we will collect information directly from you.</p>
-<h2>4. Why We Use Personal Data</h2>
+<h2 id="4-why-we-use-personal-data">4. Why We Use Personal Data</h2>
 <p>We may use personal data for the following purposes, where permitted by applicable law:</p>
 <ul>
 <li>responding to enquiries and applications and deciding whether a coaching Service appears suitable;</li>
@@ -92,16 +215,16 @@
 <li>sending marketing or promotional communications where you have consented or where otherwise permitted by applicable law, with an available opt-out mechanism; and</li>
 <li>complying with legal obligations and responding to lawful requests.</li>
 </ul>
-<h2>5. Health and Other Personal Information Used in Coaching</h2>
+<h2 id="5-health-and-other-personal-information-used-in-coaching">5. Health and Other Personal Information Used in Coaching</h2>
 <p>Wellness coaching can involve personal information about health, symptoms, lifestyle, body measurements, nutrition, sleep, exercise and personal goals. We use such information only for legitimate coaching, safety, administration and related purposes that are reasonably connected with the Services you request.</p>
 <p>Please provide only information that you are comfortable sharing and that is relevant to the coaching relationship. Eat Well Live Well is not an emergency or medical-record service and the client portal is not a medical monitoring system.</p>
 <p>We will not sell health or coaching information to third parties.</p>
-<h2>6. Consent and Your Choices</h2>
+<h2 id="6-consent-and-your-choices">6. Consent and Your Choices</h2>
 <p>Where consent is the basis for processing, we will seek consent that is reasonably clear and linked to the stated purpose. You may withdraw consent for future processing where applicable. Withdrawal does not affect processing that was lawful before withdrawal.</p>
 <p>You may opt out of marketing communications at any time using the available unsubscribe mechanism or by contacting us.</p>
 <p>If you withdraw consent for information that is necessary to deliver or safely administer an ongoing Service, we may be unable to continue providing some or all of that Service.</p>
 <p>Where practicable, consent for public marketing use of an identifiable testimonial, photograph, video, health story or before-and-after material will be obtained separately from consent required to deliver coaching.</p>
-<h2>7. When We Share Personal Data</h2>
+<h2 id="7-when-we-share-personal-data">7. When We Share Personal Data</h2>
 <p>We do not sell personal data. We may share personal data only where reasonably necessary for the purposes described in this Policy, where you have asked us to do so, or where disclosure is required or authorised by law.</p>
 <p>Recipients may include:</p>
 <ul>
@@ -114,20 +237,20 @@
 <li>government, regulatory, judicial or law-enforcement authorities where disclosure is lawfully required.</li>
 </ul>
 <p>Third-party providers process information under their own service terms and privacy practices. We seek to use reputable providers and limit disclosure to information reasonably needed for the service.</p>
-<h2>8. International Processing and Service Providers</h2>
+<h2 id="8-international-processing-and-service-providers">8. International Processing and Service Providers</h2>
 <p>Some technology or communication providers may store or process data outside India. Where this occurs, we will handle such use in accordance with applicable Indian data-protection requirements, including any restrictions or conditions on cross-border processing that may be notified from time to time.</p>
-<h2>9. Cookies, Analytics and Website Technologies</h2>
+<h2 id="9-cookies-analytics-and-website-technologies">9. Cookies, Analytics and Website Technologies</h2>
 <p>Our Website may use cookies or similar technologies that are necessary for site operation, security, preferences, forms or analytics. Where required, choices or consent mechanisms may be provided for non-essential technologies.</p>
 <p>Third-party services embedded in or linked from the Website may also use their own cookies or tracking technologies and are governed by their own privacy notices.</p>
-<h2>10. Security of Personal Data</h2>
+<h2 id="10-security-of-personal-data">10. Security of Personal Data</h2>
 <p>We take reasonable technical and organisational measures appropriate to the nature of the information and the scale of our operations to protect personal data against unauthorised access, loss, misuse, alteration or disclosure.</p>
 <p>Measures may include access controls, passwords or multi-factor authentication where available, use of reputable hosted services, restricted access to client information, device and account security practices, backups and reasonable confidentiality controls.</p>
 <p>No method of electronic transmission or storage is completely secure. You are responsible for protecting your own account credentials and for choosing communication channels with an understanding of their inherent risks.</p>
-<h2>11. Data Retention</h2>
+<h2 id="11-data-retention">11. Data Retention</h2>
 <p>We retain personal data only for as long as reasonably necessary for the purpose for which it was collected, to provide and administer Services, maintain legitimate business and financial records, resolve disputes, enforce agreements, meet legal requirements or establish, exercise or defend legal claims.</p>
 <p>Different categories of information may be retained for different periods. When information is no longer reasonably required, we will take reasonable steps to delete, destroy, anonymise or de-identify it, subject to lawful retention needs.</p>
 <p>Retention periods are determined according to the purpose of collection, the duration of the coaching relationship, legitimate record-keeping needs and applicable legal, tax and accounting requirements. Eat Well Live Well will periodically review retained information and delete or de-identify information that is no longer reasonably required.</p>
-<h2>12. Your Rights and Requests</h2>
+<h2 id="12-your-rights-and-requests">12. Your Rights and Requests</h2>
 <p>Subject to applicable law and the relevant provisions being in force, you may have rights in relation to your personal data, including the ability to:</p>
 <ul>
 <li>request information about personal data being processed and certain information about its use or sharing;</li>
@@ -139,21 +262,21 @@
 <li>nominate another individual to exercise applicable rights in the event of death or incapacity, where provided by law.</li>
 </ul>
 <p>To protect your information, we may ask for reasonable verification before acting on a request. We will handle requests within the time and manner required by applicable law.</p>
-<h2>13. Grievances and Complaints</h2>
+<h2 id="13-grievances-and-complaints">13. Grievances and Complaints</h2>
 <p>If you have a privacy question, request or complaint, please contact us first so that we can try to resolve it:</p>
 <p>Privacy contact: hello@eatwelllivewell.in</p>
 <p>Phone: +91 95001 76477</p>
 <p>Address: 94A Karpagam Ave, Block 2, Flat, RA Puram, Chennai 600028, Tamil Nadu, India</p>
 <p>Where applicable, you may also have the right to approach the Data Protection Board of India or another competent authority after using the grievance process available under applicable law.</p>
-<h2>14. Children</h2>
-<p>Eat Well Live Well&#x27;s coaching Services are intended for adults aged 18 years and above unless a specific Service expressly states otherwise. We do not knowingly offer the standard NourisHer coaching Services to children.</p>
+<h2 id="14-children">14. Children</h2>
+<p>Eat Well Live Well's coaching Services are intended for adults aged 18 years and above unless a specific Service expressly states otherwise. We do not knowingly offer the standard NourisHer coaching Services to children.</p>
 <p>If we learn that personal data of a child has been collected in circumstances requiring parental or guardian consent or other protections, we will take appropriate steps in accordance with applicable law.</p>
-<h2>15. Third-Party Links</h2>
+<h2 id="15-third-party-links">15. Third-Party Links</h2>
 <p>Our Website or programme materials may contain links to third-party websites, tools or resources. We are not responsible for the privacy practices of independent third parties. Please review their privacy notices before providing personal data to them.</p>
-<h2>16. Changes to This Privacy Policy</h2>
+<h2 id="16-changes-to-this-privacy-policy">16. Changes to This Privacy Policy</h2>
 <p>We may update this Privacy Policy from time to time to reflect changes in our Services, technology, providers, business practices or legal requirements. The current version will be posted on the Website.</p>
 <p>Where reasonably appropriate, we will provide additional notice of material changes that significantly affect how we use personal data.</p>
-<h2>17. Contact Details</h2>
+<h2 id="17-contact-details">17. Contact Details</h2>
 <p>Eat Well Live Well / NourisHer</p>
 <p>Operated by: Sushma Subramaniam, sole proprietor of Eat Well Live Well</p>
 <p>Privacy/contact email: hello@eatwelllivewell.in</p>
@@ -161,15 +284,18 @@
 <p>Website: eatwelllivewell.in</p>
 <p>Address: 94A Karpagam Ave, Block 2, Flat, RA Puram, Chennai 600028, Tamil Nadu, India</p>
 <p>Last updated: September 2026</p>
-    </article>
+</article>
   </section>
+</div>
 </main>
 
 <footer class="footer">
-  <div class="wrap">
-    <div class="footer-bottom legal-footer-bottom">
-      <span>© 2026 Eat Well Live Well · Coaching by Sushma</span>
-      <span><a href="/privacy-policy">Privacy Policy</a> · <a href="/terms-and-conditions">Terms &amp; Conditions</a> · Chennai, India</span>
+  <div class="footer-inner">
+    <span>© 2026 Eat Well Live Well · Coaching by Sushma · Chennai, India</span>
+    <div class="footer-links">
+      <a href="/privacy-policy">Privacy Policy</a>
+      <a href="/terms-and-conditions">Terms &amp; Conditions</a>
+      <a href="mailto:hello@eatwelllivewell.in">Contact</a>
     </div>
   </div>
 </footer>
