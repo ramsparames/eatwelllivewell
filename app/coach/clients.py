@@ -53,10 +53,8 @@ from app.services.coaching_insights_service import (
 )
 
 from app.services.client_portal_service import (
-    create_portal_tables,
     ensure_portal_access,
     get_portal_access,
-    get_client_by_token,
     get_recent_client_activity,
     get_coach_week_review,
     build_call_prep,
@@ -64,9 +62,6 @@ from app.services.client_portal_service import (
     get_client_operations_status,
     get_client_progress_summary,
     get_coach_history_grid,
-    save_client_question,
-    get_client_questions,
-    mark_client_question_answered,
 )
 
 
@@ -98,7 +93,6 @@ create_phase_a_tables()
 create_workout_tables()
 create_macro_tracking_tables()
 create_coaching_call_tables()
-create_portal_tables()
 
 
 ACTION_LIBRARY = [{'category': 'Nutrition',
@@ -1092,52 +1086,6 @@ def create_client_portal_access(
     )
 
 
-@router.post("/client/{access_token}/questions")
-def submit_client_question(
-    access_token: str,
-    question_text: str = Form(...),
-):
-    client = get_client_by_token(access_token)
-    if not client:
-        raise HTTPException(status_code=404, detail="Client portal not found")
-
-    week_number, _, _ = _coaching_week_bounds(client, date.today())
-    try:
-        save_client_question(
-            client_id=client["id"],
-            question_text=question_text,
-            week_number=week_number,
-        )
-    except ValueError:
-        return RedirectResponse(
-            f"/client/{access_token}?question_error=1#ask-sushma",
-            status_code=303,
-        )
-
-    return RedirectResponse(
-        f"/client/{access_token}?question_saved=1#ask-sushma",
-        status_code=303,
-    )
-
-
-@router.post("/dashboard/clients/{client_id}/questions/{question_id}/answered")
-def answer_client_question(
-    request: Request,
-    client_id: int,
-    question_id: int,
-):
-    if not coach_is_logged_in(request):
-        return RedirectResponse("/coach/login", status_code=303)
-
-    if not mark_client_question_answered(client_id, question_id):
-        raise HTTPException(status_code=404, detail="Client question not found")
-
-    return RedirectResponse(
-        f"/dashboard/clients/{client_id}#client-questions",
-        status_code=303,
-    )
-
-
 @router.get(
     "/dashboard/clients/{client_id}",
     response_class=HTMLResponse,
@@ -1263,6 +1211,37 @@ def client_profile(
         for row in coach_history_grid.get("rows") or []:
             row["macro"] = macro_history["by_date"].get(row["date"])
 
+    # The coach Data tab renders one transposed table per coaching week.
+    # Build the week groups expected by templates/coach/client_workspace.html.
+    history_weeks = []
+    if coach_history_grid:
+        grouped_history_weeks = {}
+        current_history_week = coach_history_grid.get("current_week_number") or 0
+
+        for row in coach_history_grid.get("rows") or []:
+            week_number_for_row = row.get("week_number")
+            if week_number_for_row is None:
+                continue
+
+            week = grouped_history_weeks.setdefault(
+                week_number_for_row,
+                {
+                    "week_number": week_number_for_row,
+                    "rows": [],
+                    "measurement": None,
+                    "is_current_week": week_number_for_row == current_history_week,
+                },
+            )
+            week["rows"].append(row)
+
+            if row.get("measurement"):
+                week["measurement"] = row["measurement"]
+
+        history_weeks = [
+            grouped_history_weeks[week_number_key]
+            for week_number_key in sorted(grouped_history_weeks, reverse=True)
+        ]
+
     # Coaching intelligence for the current client workspace.
     # These are computed before TemplateResponse so the Jinja context never
     # references undefined variables.
@@ -1341,16 +1320,6 @@ def client_profile(
         profile["client"],
     )
 
-    client_questions = get_client_questions(client_id, limit=50)
-    open_client_questions = [
-        question
-        for question in client_questions
-        if question.get("status") == "open"
-    ]
-
-    if call_prep is not None:
-        call_prep["client_questions"] = open_client_questions
-
     return templates.TemplateResponse(
         "coach/client_workspace.html",
         {
@@ -1360,8 +1329,6 @@ def client_profile(
             "call_time_slots": CALL_TIME_SLOTS,
             "portal_access": portal_access,
             "portal_activity": portal_activity,
-            "client_questions": client_questions,
-            "open_client_questions": open_client_questions,
             "week_review": week_review,
             "call_prep": call_prep,
             "coach_week_number": coach_week_number,
@@ -1376,6 +1343,7 @@ def client_profile(
             "progress_summary": progress_summary,
             "coach_summary": coach_summary,
             "coach_history_grid": coach_history_grid,
+            "history_weeks": history_weeks,
             "coaching_week_summary": coaching_week_summary,
             "progress_charts": progress_charts,
             "macro_settings": macro_settings,
