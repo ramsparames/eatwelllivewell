@@ -111,6 +111,12 @@
   color:var(--muted);
   font-size:10px;
 }
+
+.ph-question-card{margin-top:12px;border-color:#e6d8eb;background:linear-gradient(135deg,#fbf6fd,#fff)}
+.ph-question-form textarea{width:100%;min-height:88px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:13px;resize:vertical}
+.ph-question-form textarea:focus{outline:none;border-color:#b795c8;box-shadow:0 0 0 3px rgba(91,14,145,.06)}
+.ph-question-saved{margin-bottom:10px;padding:9px 12px;border-radius:10px;background:#edf8f0;color:#286c49;font-size:12px}
+
 </style>
 
 <div class="ph">
@@ -174,6 +180,21 @@
           <button class="ph-save" type="submit">{% if weekly_reflection %}Update reflection{% else %}Save reflection{% endif %}</button>
         </form>
       </section>
+
+      <section class="ph-card ph-question-card" id="ask-sushma">
+        <div class="ph-head">
+          <div><h2>Questions for Sushma</h2><p>Anything you want to make sure we talk about in your next coaching call?</p></div>
+        </div>
+        {% if request.query_params.get("question_saved") == "1" %}
+        <div class="ph-question-saved">✓ Saved for your next coaching call.</div>
+        {% elif request.query_params.get("question_error") == "1" %}
+        <div class="ph-empty-note">Please type a question before sending.</div>
+        {% endif %}
+        <form class="ph-question-form" method="post" action="/client/{{ access_token }}/questions">
+          <textarea name="question_text" maxlength="1000" required placeholder="e.g. How should I handle my protein on travel days?"></textarea>
+          <button class="ph-save" type="submit">Add question</button>
+        </form>
+      </section>
     </div>
 
     <aside>
@@ -223,16 +244,6 @@
         {% endif %}
       </section>
 
-      <section class="ph-card" style="margin-top:12px">
-        <div class="ph-head"><div><h2>Workouts</h2><p>Your active strength sessions.</p></div><a class="ph-link" href="/client/{{ access_token }}/workouts">Open →</a></div>
-        {% if active_workouts %}
-          {% for workout in active_workouts[:3] %}
-          <div class="ph-workout"><div><strong>{{ workout.title }}</strong><br><span>{{ workout.exercise_count }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}</span></div><span>{{ workout.status|replace("_"," ")|title }}</span></div>
-          {% endfor %}
-        {% else %}
-          <div class="ph-empty-note">No active workouts right now.</div>
-        {% endif %}
-      </section>
     </aside>
   </div>
 </div>

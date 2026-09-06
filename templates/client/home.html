@@ -611,18 +611,6 @@
 .cp-reflection-readonly p{margin:5px 0 0;font-size:14px}
 @media(max-width:700px){.cp-reflection-grid,.cp-reflection-readonly{grid-template-columns:1fr}}
 
-.cp-question-card{margin:18px 0 0;padding:20px;border:1px solid #ddcae6;border-radius:16px;background:linear-gradient(145deg,#fbf7fd,#fff)}
-.cp-question-card h2{margin:3px 0 5px;font-size:21px}
-.cp-question-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
-.cp-question-form{margin-top:13px}
-.cp-question-form textarea{width:100%;min-height:96px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font:inherit;font-size:13px;line-height:1.5;resize:vertical;outline:none}
-.cp-question-form textarea:focus{border-color:#b795c8;box-shadow:0 0 0 3px rgba(91,14,145,.06)}
-.cp-question-actions{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:9px}
-.cp-question-actions small{color:var(--muted);font-size:10px;line-height:1.4}
-.cp-question-actions button{min-height:40px;padding:0 14px;border:0;border-radius:10px;background:var(--purple);color:#fff;font-size:12px;font-weight:850;cursor:pointer}
-.cp-question-success{margin-top:10px;padding:10px 12px;border-radius:10px;background:#edf8f0;color:#286c49;font-size:11px}
-.cp-question-error{margin-top:10px;padding:10px 12px;border-radius:10px;background:#fff4ee;color:#98512e;font-size:11px}
-@media(max-width:560px){.cp-question-actions{align-items:stretch;flex-direction:column}.cp-question-actions button{width:100%}}
 
 
 .cp-data-intro{
@@ -756,25 +744,6 @@
 
 
 
-    <section class="cp-question-card" id="ask-sushma">
-      <p class="cp-kicker">FOR OUR NEXT CALL</p>
-      <h2>Anything you want to ask me?</h2>
-      <p>Pop your question here whenever it comes to you. I’ll see it when I prepare for our next coaching call.</p>
-
-      {% if request.query_params.get("question_saved") == "1" %}
-      <div class="cp-question-success"><strong>✓ Question saved.</strong> It’s on my list for our next call.</div>
-      {% elif request.query_params.get("question_error") == "1" %}
-      <div class="cp-question-error">Please type a question before sending.</div>
-      {% endif %}
-
-      <form class="cp-question-form" method="post" action="/client/{{ access_token }}/questions">
-        <textarea name="question_text" maxlength="1000" required placeholder="e.g. How should I handle my protein on travel days?"></textarea>
-        <div class="cp-question-actions">
-          <small>You can send more than one question during the week.</small>
-          <button type="submit">Send to Sushma →</button>
-        </div>
-      </form>
-    </section>
 
 </section>
 
