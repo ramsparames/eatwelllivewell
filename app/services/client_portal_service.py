@@ -53,6 +53,27 @@ def create_portal_tables() -> None:
                 )
             """)
 
+            # Questions clients want to discuss on an upcoming coaching call.
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS client_questions (
+                    id BIGSERIAL PRIMARY KEY,
+                    client_id INTEGER NOT NULL
+                        REFERENCES clients(id) ON DELETE CASCADE,
+                    week_number INTEGER,
+                    question_text TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'open',
+                    asked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    answered_at TIMESTAMPTZ,
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    CHECK (status IN ('open', 'answered'))
+                )
+            """)
+
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_client_questions_status
+                ON client_questions(client_id, status, asked_at DESC)
+            """)
+
             # Align older builds with client_action_plans.
             cursor.execute("""
                 ALTER TABLE client_action_daily_logs
@@ -124,6 +145,87 @@ def get_client_by_token(access_token: str):
                 LIMIT 1
             """, (access_token,))
             return cursor.fetchone()
+
+
+def save_client_question(
+    client_id: int,
+    question_text: str,
+    week_number: int | None = None,
+):
+    """Save one client question for an upcoming coaching conversation."""
+    clean_question = " ".join((question_text or "").strip().split())
+    if not clean_question:
+        raise ValueError("Please enter a question before sending.")
+    if len(clean_question) > 1000:
+        raise ValueError("Please keep your question under 1000 characters.")
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO client_questions (
+                    client_id, week_number, question_text
+                )
+                VALUES (%s, %s, %s)
+                RETURNING *
+                """,
+                (client_id, week_number, clean_question),
+            )
+            return cursor.fetchone()
+
+
+def get_client_questions(
+    client_id: int,
+    status: str | None = None,
+    limit: int = 50,
+):
+    """Return newest client questions first."""
+    safe_limit = max(1, min(int(limit), 200))
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            if status:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM client_questions
+                    WHERE client_id = %s
+                      AND status = %s
+                    ORDER BY asked_at DESC, id DESC
+                    LIMIT %s
+                    """,
+                    (client_id, status, safe_limit),
+                )
+            else:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM client_questions
+                    WHERE client_id = %s
+                    ORDER BY asked_at DESC, id DESC
+                    LIMIT %s
+                    """,
+                    (client_id, safe_limit),
+                )
+            return [dict(row) for row in cursor.fetchall()]
+
+
+def mark_client_question_answered(client_id: int, question_id: int) -> bool:
+    """Resolve one question, scoped to its owning client."""
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE client_questions
+                SET status = 'answered',
+                    answered_at = NOW(),
+                    updated_at = NOW()
+                WHERE id = %s
+                  AND client_id = %s
+                RETURNING id
+                """,
+                (question_id, client_id),
+            )
+            return cursor.fetchone() is not None
 
 
 def get_active_actions(client_id: int):
@@ -839,7 +941,6 @@ def get_client_operations_status(client: dict, on_date: date | None = None):
             "week_start": None,
             "week_end": None,
             "missed_daily_count": 0,
-            "submitted_daily_count": 0,
             "measurement_due": False,
             "weekly_review_overdue": False,
             "no_next_call": True,
@@ -862,16 +963,6 @@ def get_client_operations_status(client: dict, on_date: date | None = None):
                 (client_id, week_start, week_end),
             )
             submitted_dates = {row["tracked_on"] for row in cursor.fetchall()}
-
-            # This is the TRUE number of client-submitted days this coaching week.
-            # Do not derive it from missed days: missed_daily_count intentionally
-            # ignores today/future dates, which previously made a client with no
-            # submissions appear as 7/7 early in the week.
-            submitted_daily_count = sum(
-                1
-                for submitted_date in submitted_dates
-                if week_start <= submitted_date <= min(on_date, week_end)
-            )
 
             cursor.execute(
                 """
@@ -941,7 +1032,6 @@ def get_client_operations_status(client: dict, on_date: date | None = None):
         "week_start": week_start,
         "week_end": week_end,
         "missed_daily_count": len(missed_dates),
-        "submitted_daily_count": submitted_daily_count,
         "measurement_due": measurement_due,
         "weekly_review_overdue": weekly_review_overdue,
         "no_next_call": no_next_call,

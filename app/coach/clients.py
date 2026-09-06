@@ -4,7 +4,7 @@ from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from fastapi import APIRouter, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.auth import coach_is_logged_in
@@ -52,24 +52,11 @@ from app.services.coaching_insights_service import (
     get_client_progress_charts,
 )
 
-from app.services.progress_pdf_service import build_client_progress_pdf
-from app.services.milestone_review_service import (
-    ensure_milestone_reviews_table,
-    get_milestone_review,
-    list_milestone_reviews,
-    save_milestone_review,
-)
-from app.services.client_win_service import (
-    WIN_CATEGORIES,
-    delete_client_win,
-    ensure_client_wins_table,
-    list_client_wins,
-    save_client_win,
-)
-
 from app.services.client_portal_service import (
+    create_portal_tables,
     ensure_portal_access,
     get_portal_access,
+    get_client_by_token,
     get_recent_client_activity,
     get_coach_week_review,
     build_call_prep,
@@ -77,6 +64,9 @@ from app.services.client_portal_service import (
     get_client_operations_status,
     get_client_progress_summary,
     get_coach_history_grid,
+    save_client_question,
+    get_client_questions,
+    mark_client_question_answered,
 )
 
 
@@ -108,6 +98,7 @@ create_phase_a_tables()
 create_workout_tables()
 create_macro_tracking_tables()
 create_coaching_call_tables()
+create_portal_tables()
 
 
 ACTION_LIBRARY = [{'category': 'Nutrition',
@@ -1101,131 +1092,50 @@ def create_client_portal_access(
     )
 
 
-@router.post("/dashboard/clients/{client_id}/wins")
-def add_client_win(
-    request: Request,
-    client_id: int,
-    win_date: str = Form(""),
-    category: str = Form("Other"),
-    title: str = Form(""),
-    note: str = Form(""),
-    visible_to_client: str = Form(""),
+@router.post("/client/{access_token}/questions")
+def submit_client_question(
+    access_token: str,
+    question_text: str = Form(...),
 ):
-    if not coach_is_logged_in(request):
-        return RedirectResponse("/coach/login", status_code=303)
-    if ClientService.profile(client_id) is None:
-        raise HTTPException(status_code=404, detail="Client not found")
+    client = get_client_by_token(access_token)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client portal not found")
 
+    week_number, _, _ = _coaching_week_bounds(client, date.today())
     try:
-        parsed_date = date.fromisoformat(win_date) if win_date else date.today()
+        save_client_question(
+            client_id=client["id"],
+            question_text=question_text,
+            week_number=week_number,
+        )
     except ValueError:
-        parsed_date = date.today()
-
-    try:
-        save_client_win(
-            client_id=client_id,
-            win_date=parsed_date,
-            category=category,
-            title=title,
-            note=note,
-            visible_to_client=visible_to_client == "1",
+        return RedirectResponse(
+            f"/client/{access_token}?question_error=1#ask-sushma",
+            status_code=303,
         )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
 
     return RedirectResponse(
-        f"/dashboard/clients/{client_id}?tab=timeline#wins-bank",
+        f"/client/{access_token}?question_saved=1#ask-sushma",
         status_code=303,
     )
 
 
-@router.post("/dashboard/clients/{client_id}/wins/{win_id}/delete")
-def remove_client_win(request: Request, client_id: int, win_id: int):
-    if not coach_is_logged_in(request):
-        return RedirectResponse("/coach/login", status_code=303)
-    if ClientService.profile(client_id) is None:
-        raise HTTPException(status_code=404, detail="Client not found")
-    delete_client_win(client_id, win_id)
-    return RedirectResponse(
-        f"/dashboard/clients/{client_id}?tab=timeline#wins-bank",
-        status_code=303,
-    )
-
-
-@router.post("/dashboard/clients/{client_id}/milestone-review")
-def save_client_milestone_review(
+@router.post("/dashboard/clients/{client_id}/questions/{question_id}/answered")
+def answer_client_question(
     request: Request,
     client_id: int,
-    review_id: str = Form(""),
-    review_date: str = Form(""),
-    milestone_label: str = Form("Milestone Review"),
-    biggest_wins: str = Form(""),
-    improvements: str = Form(""),
-    struggles: str = Form(""),
-    nutrition_score: str = Form(""),
-    movement_score: str = Form(""),
-    sleep_score: str = Form(""),
-    confidence_score: str = Form(""),
-    next_focus: str = Form(""),
-    coach_notes: str = Form(""),
-    next_review_date: str = Form(""),
+    question_id: int,
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse("/coach/login", status_code=303)
-    if ClientService.profile(client_id) is None:
-        raise HTTPException(status_code=404, detail="Client not found")
 
-    def parse_optional_int(value):
-        try:
-            return int(value) if str(value).strip() else None
-        except (TypeError, ValueError):
-            return None
-
-    def parse_optional_date(value):
-        try:
-            return date.fromisoformat(value) if str(value).strip() else None
-        except (TypeError, ValueError):
-            return None
-
-    parsed_review_date = parse_optional_date(review_date) or date.today()
-    parsed_review_id = parse_optional_int(review_id)
-
-    try:
-        saved_id = save_milestone_review(
-            client_id=client_id,
-            review_id=parsed_review_id,
-            review_date=parsed_review_date,
-            milestone_label=milestone_label,
-            biggest_wins=biggest_wins,
-            improvements=improvements,
-            struggles=struggles,
-            nutrition_score=parse_optional_int(nutrition_score),
-            movement_score=parse_optional_int(movement_score),
-            sleep_score=parse_optional_int(sleep_score),
-            confidence_score=parse_optional_int(confidence_score),
-            next_focus=next_focus,
-            coach_notes=coach_notes,
-            next_review_date=parse_optional_date(next_review_date),
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+    if not mark_client_question_answered(client_id, question_id):
+        raise HTTPException(status_code=404, detail="Client question not found")
 
     return RedirectResponse(
-        f"/dashboard/clients/{client_id}?tab=timeline&milestone_saved={saved_id}",
+        f"/dashboard/clients/{client_id}#client-questions",
         status_code=303,
     )
-
-
-@router.get("/dashboard/clients/{client_id}/progress-pdf")
-def download_client_progress_pdf(request: Request, client_id: int, period: str = "last4"):
-    if not coach_is_logged_in(request):
-        return RedirectResponse("/coach/login", status_code=303)
-    if period not in {"last4", "since_start"}:
-        raise HTTPException(status_code=400, detail="Invalid progress report period")
-    if ClientService.profile(client_id) is None:
-        raise HTTPException(status_code=404, detail="Client not found")
-    pdf_bytes, filename = build_client_progress_pdf(client_id=client_id, period=period)
-    return StreamingResponse(iter([pdf_bytes]), media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store"})
 
 
 @router.get(
@@ -1287,17 +1197,6 @@ def client_profile(
 
     portal_access = get_portal_access(client_id)
     portal_activity = get_recent_client_activity(client_id, limit=14)
-    ensure_milestone_reviews_table()
-    milestone_reviews = list_milestone_reviews(client_id)
-    ensure_client_wins_table()
-    client_wins = list_client_wins(client_id)
-    requested_milestone_id = request.query_params.get("milestone")
-    milestone_review_edit = None
-    if requested_milestone_id:
-        try:
-            milestone_review_edit = get_milestone_review(client_id, int(requested_milestone_id))
-        except (TypeError, ValueError):
-            milestone_review_edit = None
 
     week_review = None
     call_prep = None
@@ -1363,217 +1262,6 @@ def client_profile(
     if coach_history_grid and macro_settings.get("enabled"):
         for row in coach_history_grid.get("rows") or []:
             row["macro"] = macro_history["by_date"].get(row["date"])
-
-    # Build the weekly structure expected by the current Excel-style
-    # coach Data tab. The service returns flat daily rows.
-    history_weeks = []
-    grouped_history_rows = {}
-
-    for history_row in (coach_history_grid.get("rows") or []):
-        week_no = history_row.get("week_number")
-        if week_no is None:
-            continue
-        grouped_history_rows.setdefault(week_no, []).append(history_row)
-
-    current_history_week = coach_history_grid.get("current_week_number") or 0
-
-    for week_no in sorted(grouped_history_rows.keys(), reverse=True):
-        week_rows = sorted(
-            grouped_history_rows[week_no],
-            key=lambda item: item.get("date"),
-        )
-
-        week_measurement = next(
-            (
-                item.get("measurement")
-                for item in week_rows
-                if item.get("measurement")
-            ),
-            None,
-        )
-
-        history_weeks.append(
-            {
-                "week_number": week_no,
-                "rows": week_rows,
-                "measurement": week_measurement,
-                "is_current_week": week_no == current_history_week,
-            }
-        )
-
-    # Progress-tab week-over-week measurement and weight view.
-    # Reuse the existing history grid so there is no new query or schema.
-    # Each metric compares against its PREVIOUS ACTUAL recorded value; a
-    # missing week is never treated as zero/no-change.
-    def _progress_number(value):
-        if value is None:
-            return None
-        try:
-            return float(value)
-        except (TypeError, ValueError):
-            return None
-
-    measurement_metric_specs = [
-        ("weight_kg", "Weight", "kg"),
-        ("waist_cm", "Waist", "cm"),
-        ("lower_abdomen_cm", "Lower abdomen", "cm"),
-        ("hip_cm", "Hip", "cm"),
-        ("thigh_cm", "Thigh", "cm"),
-        ("upper_arm_cm", "Upper arm", "cm"),
-        ("chest_cm", "Chest", "cm"),
-    ]
-
-    progress_week_map = {}
-    for history_row in (coach_history_grid.get("rows") or []):
-        week_no = history_row.get("week_number")
-        if week_no is None:
-            continue
-
-        week_entry = progress_week_map.setdefault(
-            week_no,
-            {
-                "week_number": week_no,
-                "week_start": None,
-                "week_end": None,
-                "weight_kg": None,
-                "weight_date": None,
-                "measurement": None,
-            },
-        )
-
-        row_date = history_row.get("date")
-        if row_date is not None:
-            if week_entry["week_start"] is None or row_date < week_entry["week_start"]:
-                week_entry["week_start"] = row_date
-            if week_entry["week_end"] is None or row_date > week_entry["week_end"]:
-                week_entry["week_end"] = row_date
-
-        row_weight = _progress_number(history_row.get("weight_kg"))
-        if row_weight is not None and (
-            week_entry["weight_date"] is None
-            or (row_date is not None and row_date >= week_entry["weight_date"])
-        ):
-            week_entry["weight_kg"] = row_weight
-            week_entry["weight_date"] = row_date
-
-        if history_row.get("measurement"):
-            measurement = dict(history_row["measurement"])
-            measurement["_date"] = measurement.get("measured_on") or row_date
-            existing_measurement = week_entry.get("measurement")
-            if (
-                existing_measurement is None
-                or (
-                    measurement.get("_date") is not None
-                    and (
-                        existing_measurement.get("_date") is None
-                        or measurement.get("_date") >= existing_measurement.get("_date")
-                    )
-                )
-            ):
-                week_entry["measurement"] = measurement
-
-    measurement_progress_weeks = []
-    previous_values = {key: None for key, _, _ in measurement_metric_specs}
-
-    for week_no in sorted(progress_week_map):
-        source_week = progress_week_map[week_no]
-        measurement = source_week.get("measurement") or {}
-
-        values = {
-            "weight_kg": source_week.get("weight_kg"),
-            "waist_cm": _progress_number(measurement.get("waist_cm")),
-            "lower_abdomen_cm": _progress_number(measurement.get("lower_abdomen_cm")),
-            "hip_cm": _progress_number(measurement.get("hip_cm")),
-            "thigh_cm": _progress_number(measurement.get("thigh_cm")),
-            "upper_arm_cm": _progress_number(measurement.get("upper_arm_cm")),
-            "chest_cm": _progress_number(measurement.get("chest_cm")),
-        }
-
-        deltas = {}
-        has_any_value = False
-        for metric_key, _, _ in measurement_metric_specs:
-            value = values.get(metric_key)
-            if value is not None:
-                has_any_value = True
-                prior_value = previous_values.get(metric_key)
-                deltas[metric_key] = (
-                    round(value - prior_value, 1)
-                    if prior_value is not None
-                    else None
-                )
-                previous_values[metric_key] = value
-            else:
-                deltas[metric_key] = None
-
-        if has_any_value:
-            measurement_progress_weeks.append(
-                {
-                    "week_number": week_no,
-                    "week_start": source_week.get("week_start"),
-                    "week_end": source_week.get("week_end"),
-                    "measurement_date": measurement.get("_date"),
-                    "values": values,
-                    "deltas": deltas,
-                }
-            )
-
-    # Build latest-vs-previous and latest-vs-start summaries independently
-    # for every metric. This correctly handles clients who skip a measurement.
-    measurement_progress_summary = []
-    for metric_key, label, unit in measurement_metric_specs:
-        recorded = []
-        for week in measurement_progress_weeks:
-            value = week["values"].get(metric_key)
-            if value is not None:
-                recorded.append(
-                    {
-                        "value": value,
-                        "week_number": week["week_number"],
-                        "date": (
-                            week.get("measurement_date")
-                            if metric_key != "weight_kg"
-                            else progress_week_map[week["week_number"]].get("weight_date")
-                        ),
-                    }
-                )
-
-        if not recorded:
-            continue
-
-        latest = recorded[-1]
-        previous = recorded[-2] if len(recorded) >= 2 else None
-        first = recorded[0]
-
-        measurement_progress_summary.append(
-            {
-                "key": metric_key,
-                "label": label,
-                "unit": unit,
-                "latest": latest["value"],
-                "latest_week": latest["week_number"],
-                "latest_date": latest["date"],
-                "previous_delta": (
-                    round(latest["value"] - previous["value"], 1)
-                    if previous is not None
-                    else None
-                ),
-                "since_start_delta": (
-                    round(latest["value"] - first["value"], 1)
-                    if len(recorded) >= 2
-                    else None
-                ),
-                "record_count": len(recorded),
-            }
-        )
-
-    measurement_progress = {
-        "summary": measurement_progress_summary,
-        "weeks": list(reversed(measurement_progress_weeks)),
-        "metrics": [
-            {"key": key, "label": label, "unit": unit}
-            for key, label, unit in measurement_metric_specs
-        ],
-    }
 
     # Coaching intelligence for the current client workspace.
     # These are computed before TemplateResponse so the Jinja context never
@@ -1653,6 +1341,16 @@ def client_profile(
         profile["client"],
     )
 
+    client_questions = get_client_questions(client_id, limit=50)
+    open_client_questions = [
+        question
+        for question in client_questions
+        if question.get("status") == "open"
+    ]
+
+    if call_prep is not None:
+        call_prep["client_questions"] = open_client_questions
+
     return templates.TemplateResponse(
         "coach/client_workspace.html",
         {
@@ -1662,6 +1360,8 @@ def client_profile(
             "call_time_slots": CALL_TIME_SLOTS,
             "portal_access": portal_access,
             "portal_activity": portal_activity,
+            "client_questions": client_questions,
+            "open_client_questions": open_client_questions,
             "week_review": week_review,
             "call_prep": call_prep,
             "coach_week_number": coach_week_number,
@@ -1676,13 +1376,6 @@ def client_profile(
             "progress_summary": progress_summary,
             "coach_summary": coach_summary,
             "coach_history_grid": coach_history_grid,
-            "history_weeks": history_weeks,
-            "measurement_progress": measurement_progress,
-            "today": date.today(),
-            "milestone_reviews": milestone_reviews,
-            "milestone_review_edit": milestone_review_edit,
-            "client_wins": client_wins,
-            "win_categories": WIN_CATEGORIES,
             "coaching_week_summary": coaching_week_summary,
             "progress_charts": progress_charts,
             "macro_settings": macro_settings,
@@ -1972,7 +1665,6 @@ def save_client_intake_route(
     macro_protein_target_g: str = Form(""),
     macro_carbs_target_g: str = Form(""),
     macro_fat_target_g: str = Form(""),
-    macro_fibre_target_g: str = Form(""),
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse("/coach/login", status_code=303)
@@ -2006,7 +1698,6 @@ def save_client_intake_route(
         protein_target_g=_optional_float(macro_protein_target_g),
         carbs_target_g=_optional_float(macro_carbs_target_g),
         fat_target_g=_optional_float(macro_fat_target_g),
-        fibre_target_g=_optional_float(macro_fibre_target_g),
     )
 
     if parsed_present_weight is not None:
@@ -2061,7 +1752,6 @@ def update_client_macro_settings(
     macro_protein_target_g: str = Form(""),
     macro_carbs_target_g: str = Form(""),
     macro_fat_target_g: str = Form(""),
-    macro_fibre_target_g: str = Form(""),
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse("/coach/login", status_code=303)
@@ -2075,7 +1765,6 @@ def update_client_macro_settings(
         protein_target_g=optional_float(macro_protein_target_g),
         carbs_target_g=optional_float(macro_carbs_target_g),
         fat_target_g=optional_float(macro_fat_target_g),
-        fibre_target_g=optional_float(macro_fibre_target_g),
     )
     return RedirectResponse(
         f"/dashboard/clients/{client_id}?tab=clientdata&macro_saved=1",
