@@ -46,6 +46,12 @@
 .nw-excel.nw-transposed .nw-metric-head small{display:block;margin-top:2px;color:var(--coach-muted);font-size:8px;font-weight:700}
 .nw-week-measurements{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:#fff;border-top:1px solid var(--coach-border);font-size:9px;color:var(--coach-muted)}.nw-week-measurements strong{color:var(--coach-purple)}
 .nw-data-orientation-note{font-size:9px;font-weight:800;color:var(--coach-muted);padding:8px 10px;border:1px solid var(--coach-border);border-radius:9px;background:#fff}
+
+.nw-reflection-questions{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.nw-reflection-questions-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+.nw-reflection-questions-head h3{margin:0;font-size:15px}
+.nw-reflection-questions .nw-client-question{margin-top:8px}
+.nw-reflection-questions .nw-question-empty{margin:6px 0 0}
 </style>
 
 <style>
@@ -1285,33 +1291,34 @@
       {% else %}
       <p class="nw-helper" style="margin:0">No weekly reflection submitted yet.</p>
       {% endif %}
-    </section>
 
-    <section class="nw-client-questions" id="client-questions">
-    <div class="nw-client-questions-head">
-      <div>
-        <p class="nw-kicker" style="margin:0 0 4px">CLIENT QUESTIONS</p>
-        <h3>Questions for the next call</h3>
-      </div>
-      {% if open_client_questions %}<span class="nw-client-questions-count">{{ open_client_questions|length }} waiting</span>{% endif %}
-    </div>
-
-    {% if open_client_questions %}
-      {% for question in open_client_questions %}
-      <div class="nw-client-question">
-        <div>
-          <p>“{{ question.question_text }}”</p>
-          <small>Asked {% if question.asked_at %}{{ question.asked_at.strftime("%d %b · %I:%M %p") }}{% endif %}{% if question.week_number %} · Week {{ question.week_number }}{% endif %}</small>
+      <div class="nw-reflection-questions" id="client-questions">
+        <div class="nw-reflection-questions-head">
+          <div>
+            <p class="nw-kicker" style="margin:0 0 4px">QUESTIONS FOR THE NEXT CALL</p>
+            <h3>What {{ client.name.split()[0] if client.name else "she" }} wants to ask</h3>
+          </div>
+          {% if open_client_questions %}<span class="nw-client-questions-count">{{ open_client_questions|length }} waiting</span>{% endif %}
         </div>
-        <form method="post" action="/dashboard/clients/{{ client.id }}/questions/{{ question.id }}/answered">
-          <button class="nw-question-done" type="submit">Mark answered ✓</button>
-        </form>
+        {% if open_client_questions %}
+          {% for question in open_client_questions %}
+          <div class="nw-client-question">
+            <div>
+              <p>“{{ question.question_text }}”</p>
+              <small>Asked {% if question.asked_at %}{{ question.asked_at.strftime("%d %b · %I:%M %p") }}{% endif %}{% if question.week_number %} · Week {{ question.week_number }}{% endif %}</small>
+            </div>
+            <form method="post" action="/dashboard/clients/{{ client.id }}/questions/{{ question.id }}/answered">
+              <button class="nw-question-done" type="submit">Mark answered ✓</button>
+            </form>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="nw-question-empty">No questions saved for this call.</p>
+        {% endif %}
       </div>
-      {% endfor %}
-    {% else %}
-      <p class="nw-question-empty">No questions waiting for the next call.</p>
-    {% endif %}
     </section>
+
+
 
     <div class="nw-week-context-grid">
       <div class="nw-week-context-card">
