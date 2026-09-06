@@ -1287,32 +1287,7 @@
       {% endif %}
     </section>
 
-    <div class="nw-week-context-grid">
-      <div class="nw-week-context-card">
-        <h3>Client notes / reflection</h3>
-        {% if call_prep.client_notes %}
-          {% for note in call_prep.client_notes[-3:] %}
-          <div class="nw-review-client-note"><strong>{{ note.date.strftime("%d %b") }}</strong><p>{{ note.note }}</p></div>
-          {% endfor %}
-        {% else %}
-          <p class="nw-helper">No client notes entered this week.</p>
-        {% endif %}
-      </div>
-      <div class="nw-week-context-card">
-        <h3>Needs attention</h3>
-        {% if call_prep.attention %}
-          {% for item in call_prep.attention %}<div class="nw-review-alert">{{ item }}</div>{% endfor %}
-        {% else %}
-          <p class="nw-helper">Nothing needs special attention right now.</p>
-        {% endif %}
-      </div>
-    </div>
-    {% else %}
-    <div class="nw-inline-empty">This week's review will populate as the client starts checking in.</div>
-    {% endif %}
-  </section>
-
-  <section class="nw-client-questions" id="client-questions">
+    <section class="nw-client-questions" id="client-questions">
     <div class="nw-client-questions-head">
       <div>
         <p class="nw-kicker" style="margin:0 0 4px">CLIENT QUESTIONS</p>
@@ -1335,6 +1310,31 @@
       {% endfor %}
     {% else %}
       <p class="nw-question-empty">No questions waiting for the next call.</p>
+    {% endif %}
+    </section>
+
+    <div class="nw-week-context-grid">
+      <div class="nw-week-context-card">
+        <h3>Client notes / reflection</h3>
+        {% if call_prep.client_notes %}
+          {% for note in call_prep.client_notes[-3:] %}
+          <div class="nw-review-client-note"><strong>{{ note.date.strftime("%d %b") }}</strong><p>{{ note.note }}</p></div>
+          {% endfor %}
+        {% else %}
+          <p class="nw-helper">No client notes entered this week.</p>
+        {% endif %}
+      </div>
+      <div class="nw-week-context-card">
+        <h3>Needs attention</h3>
+        {% if call_prep.attention %}
+          {% for item in call_prep.attention %}<div class="nw-review-alert">{{ item }}</div>{% endfor %}
+        {% else %}
+          <p class="nw-helper">Nothing needs special attention right now.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <div class="nw-inline-empty">This week's review will populate as the client starts checking in.</div>
     {% endif %}
   </section>
 
