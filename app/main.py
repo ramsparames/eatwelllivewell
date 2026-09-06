@@ -35,6 +35,10 @@ create_database()
 
 app = FastAPI()
 validate_required_settings()
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 
 app.add_middleware(
     SessionMiddleware,
