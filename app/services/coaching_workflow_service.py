@@ -91,14 +91,48 @@ def save_weekly_reflection(
 
 
 def get_coach_weekly_feedback(client_id: int, week_start: date):
+    """
+    Return the client-visible coach feedback for the requested coaching week.
+
+    Newer coaching screens save client feedback into coach_weekly_feedback.
+    Older/current weekly check-in flows may still have the same note stored only
+    in client_weekly_checkins.client_feedback.  Prefer the week-keyed feedback
+    table, but fall back to the weekly check-in whose call date belongs to the
+    requested seven-day coaching week.
+    """
+    week_end = date.fromordinal(week_start.toordinal() + 6)
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT *
                 FROM coach_weekly_feedback
-                WHERE client_id = %s AND week_start = %s
+                WHERE client_id = %s
+                  AND week_start = %s
+                  AND NULLIF(BTRIM(client_feedback), '') IS NOT NULL
                 LIMIT 1
             """, (client_id, week_start))
+            feedback = cursor.fetchone()
+            if feedback:
+                return feedback
+
+            cursor.execute("""
+                SELECT
+                    NULL::BIGINT AS id,
+                    client_id,
+                    %s::DATE AS week_start,
+                    client_feedback,
+                    private_coach_note AS private_note,
+                    id AS checkin_id,
+                    created_at,
+                    updated_at
+                FROM client_weekly_checkins
+                WHERE client_id = %s
+                  AND call_date BETWEEN %s AND %s
+                  AND NULLIF(BTRIM(client_feedback), '') IS NOT NULL
+                ORDER BY call_date DESC, id DESC
+                LIMIT 1
+            """, (week_start, client_id, week_start, week_end))
             return cursor.fetchone()
 
 
