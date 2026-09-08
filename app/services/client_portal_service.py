@@ -1080,6 +1080,21 @@ def get_coach_week_review(
             """, (client_id, week_start, week_end))
             submission_rows = cursor.fetchall()
 
+            # Historical commitment recovery:
+            #
+            # 1. Normal case: the action-plan dates overlap this week.
+            # 2. Recovery case: a daily action log exists in this week.
+            # 3. Legacy planning case: older Weekly Check-in saved Week N+1
+            #    commitments against the Week N check-in.  Therefore an action
+            #    linked to a check-in in the immediately PREVIOUS coaching week
+            #    belongs to the requested week even if a later edit damaged its
+            #    action-plan dates.
+            #
+            # We also return the linked call date so eligibility can be
+            # reconstructed below without showing a later week's plan here.
+            previous_week_start = week_start - timedelta(days=7)
+            previous_week_end = week_start - timedelta(days=1)
+
             cursor.execute("""
                 SELECT DISTINCT
                     p.id,
@@ -1088,8 +1103,19 @@ def get_coach_week_review(
                     p.target_count,
                     p.target_unit,
                     p.start_date,
-                    p.end_date
+                    p.end_date,
+                    p.checkin_id,
+                    wc.call_date AS linked_call_date,
+                    EXISTS (
+                      SELECT 1
+                      FROM client_action_daily_logs historical_log
+                      WHERE historical_log.action_id = p.id
+                        AND historical_log.tracked_on BETWEEN %s AND %s
+                    ) AS has_log_in_week
                 FROM client_action_plans p
+                LEFT JOIN client_weekly_checkins wc
+                  ON wc.id = p.checkin_id
+                 AND wc.client_id = p.client_id
                 WHERE p.client_id = %s
                   AND (
                     (
@@ -1102,14 +1128,21 @@ def get_coach_week_review(
                       WHERE historical_log.action_id = p.id
                         AND historical_log.tracked_on BETWEEN %s AND %s
                     )
+                    OR (
+                      wc.call_date BETWEEN %s AND %s
+                    )
                   )
                 ORDER BY p.id
             """, (
+                week_start,
+                week_end,
                 client_id,
                 week_end,
                 week_start,
                 week_start,
                 week_end,
+                previous_week_start,
+                previous_week_end,
             ))
             action_plan_rows = cursor.fetchall()
 
@@ -1172,9 +1205,25 @@ def get_coach_week_review(
             )
         )
 
+        # Under the legacy Weekly Check-in flow, commitments for Week N were
+        # saved from the Week N-1 coaching call.  Preserve that relationship
+        # when rebuilding historical weeks.
+        linked_call_date = item.get("linked_call_date")
+        legacy_planned_for_week = bool(
+            linked_call_date
+            and previous_week_start <= linked_call_date <= previous_week_end
+        )
+        recovered_from_log = bool(item.get("has_log_in_week"))
+
+        belongs_to_week = (
+            action_overlaps_week
+            or legacy_planned_for_week
+            or recovered_from_log
+        )
+
         for day in days:
             d = day["date"]
-            eligible = action_overlaps_week
+            eligible = belongs_to_week
             completed = None
 
             if eligible:
