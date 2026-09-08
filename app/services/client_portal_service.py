@@ -858,6 +858,8 @@ def get_coach_history_grid(
                     "action_id": action["id"],
                     "action_key": key,
                     "action_name": action["action_name"],
+                    "target_count": action.get("target_count"),
+                    "target_unit": action.get("target_unit"),
                 }
 
         measurement = review["measurements"][0] if review["measurements"] else None
@@ -914,14 +916,38 @@ def get_coach_history_grid(
                     eligible_ids.append(action_id)
                     seen_ids.add(action_id)
 
+        # Build commitment metadata from THIS WEEK'S actual eligible cells.
+        # The same stable action key may have different targets across weeks,
+        # so global action_columns metadata must not decide a week's target.
+        week_action_meta = {}
+        for row in week_rows:
+            for action_id, cell in (row.get("actions") or {}).items():
+                if not cell or not cell.get("eligible"):
+                    continue
+                if action_id in week_action_meta:
+                    continue
+
+                global_column = column_by_id.get(action_id) or {}
+                week_action_meta[action_id] = {
+                    "id": action_id,
+                    "action_key": (
+                        cell.get("action_key")
+                        or global_column.get("action_key")
+                    ),
+                    "name": (
+                        cell.get("action_name")
+                        or global_column.get("name")
+                    ),
+                    "target_count": cell.get("target_count"),
+                    "target_unit": cell.get("target_unit"),
+                }
+
         normalized_week_action_columns[week_number] = [
-            column_by_id[action_id]
+            week_action_meta[action_id]
             for action_id in eligible_ids
-            if action_id in column_by_id
+            if action_id in week_action_meta
         ]
 
-        # Carry this exact list on every row so the transposed client template
-        # does not depend on integer/string dictionary key behavior in Jinja.
         for row in week_rows:
             row["week_actions"] = list(
                 normalized_week_action_columns[week_number]
