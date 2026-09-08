@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.auth import coach_is_logged_in
+from app.database import get_connection
 from app.services.client_service import ClientService
 from app.client.portal import router as client_portal_router
 from app.services.phase_a_service import (
@@ -737,6 +738,300 @@ def _add_action_with_identity(
 
 
 
+
+def _program_length_weeks(client: dict) -> int | None:
+    """Best available program length, so the final week has no fake next week."""
+    for key in ("program_weeks", "duration_weeks", "total_weeks"):
+        value = client.get(key)
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            parsed = 0
+        if parsed > 0:
+            return parsed
+
+    start_date = client.get("start_date")
+    for key in ("program_end_date", "end_date"):
+        end_date = client.get(key)
+        if start_date and end_date:
+            try:
+                return max(1, ((end_date - start_date).days // 7) + 1)
+            except Exception:
+                pass
+
+    # Current NourisHer program defaults. These only apply when the database
+    # does not already carry an explicit duration/end date.
+    program = (client.get("program") or "").strip().lower()
+    if "foundation" in program:
+        return 12
+    if "transformation" in program or "nourisher" in program:
+        return 26
+    return None
+
+
+def _week_action_defaults(rows: list[dict] | None):
+    """Split saved week actions into library defaults and custom actions."""
+    library_defaults = {}
+    custom_defaults = []
+    latest_by_name = {}
+
+    for raw in rows or []:
+        row = dict(raw)
+        name = (row.get("action_name") or "").strip()
+        if not name or name in latest_by_name:
+            continue
+        latest_by_name[name] = row
+
+    for name, row in latest_by_name.items():
+        stable_key = (row.get("action_key") or "").strip()
+        default = {
+            "name": name,
+            "action_key": stable_key,
+            "target_count": row.get("target_count"),
+            "target_unit": row.get("target_unit") or "days",
+        }
+        library_key = (
+            stable_key
+            if stable_key in ACTION_LIBRARY_BY_KEY
+            else ACTION_LIBRARY_KEY_BY_NORMALIZED_NAME.get(
+                _normalize_action_name(name)
+            )
+        )
+        if library_key:
+            default["action_key"] = library_key
+            library_defaults[library_key] = default
+        else:
+            custom_defaults.append(default)
+
+    return library_defaults, custom_defaults
+
+
+def _replace_week_actions(
+    *,
+    client_id: int,
+    week_start: date,
+    week_end: date,
+    assignments: list[dict],
+    checkin_id: int | None = None,
+):
+    """
+    Make the selected week exactly match the submitted commitments.
+
+    Existing rows are updated in place whenever possible so any daily logs
+    already attached to the assignment stay intact. Removed current-week
+    commitments are ended before today; future/past correction rows without
+    logs can be deleted safely.
+    """
+    desired = {}
+    for assignment in assignments:
+        key = (assignment.get("action_key") or "").strip()
+        identity = f"key:{key}" if key else (
+            "name:" + _normalize_action_name(assignment.get("name"))
+        )
+        desired[identity] = assignment
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT *
+                FROM client_action_plans
+                WHERE client_id = %s
+                  AND start_date <= %s
+                  AND (end_date IS NULL OR end_date >= %s)
+                ORDER BY id DESC
+                """,
+                (client_id, week_end, week_start),
+            )
+            existing_rows = [dict(row) for row in cursor.fetchall()]
+
+            cursor.execute(
+                """SELECT EXISTS (
+                       SELECT 1
+                       FROM information_schema.columns
+                       WHERE table_name='client_action_plans'
+                         AND column_name='action_key'
+                   ) AS yes"""
+            )
+            has_action_key = bool(cursor.fetchone()["yes"])
+
+            existing_by_identity = {}
+            for row in existing_rows:
+                stable_key = (row.get("action_key") or "").strip()
+                library_key = (
+                    stable_key
+                    if stable_key in ACTION_LIBRARY_BY_KEY
+                    else ACTION_LIBRARY_KEY_BY_NORMALIZED_NAME.get(
+                        _normalize_action_name(row.get("action_name"))
+                    )
+                )
+                identity = (
+                    f"key:{library_key}"
+                    if library_key
+                    else "name:" + _normalize_action_name(row.get("action_name"))
+                )
+                existing_by_identity.setdefault(identity, row)
+
+            kept_ids = set()
+            for identity, assignment in desired.items():
+                row = existing_by_identity.get(identity)
+                if row:
+                    kept_ids.add(row["id"])
+                    if has_action_key:
+                        cursor.execute(
+                            """
+                            UPDATE client_action_plans
+                            SET action_name=%s,
+                                action_key=%s,
+                                target_count=%s,
+                                target_unit=%s,
+                                start_date=%s,
+                                end_date=%s,
+                                status='active',
+                                checkin_id=COALESCE(%s, checkin_id)
+                            WHERE id=%s
+                            """,
+                            (
+                                assignment["name"],
+                                assignment.get("action_key") or None,
+                                assignment.get("target_count"),
+                                assignment.get("target_unit"),
+                                week_start,
+                                week_end,
+                                checkin_id,
+                                row["id"],
+                            ),
+                        )
+                    else:
+                        cursor.execute(
+                            """
+                            UPDATE client_action_plans
+                            SET action_name=%s,
+                                target_count=%s,
+                                target_unit=%s,
+                                start_date=%s,
+                                end_date=%s,
+                                status='active',
+                                checkin_id=COALESCE(%s, checkin_id)
+                            WHERE id=%s
+                            """,
+                            (
+                                assignment["name"],
+                                assignment.get("target_count"),
+                                assignment.get("target_unit"),
+                                week_start,
+                                week_end,
+                                checkin_id,
+                                row["id"],
+                            ),
+                        )
+                    continue
+
+                if has_action_key:
+                    cursor.execute(
+                        """
+                        INSERT INTO client_action_plans
+                        (client_id, checkin_id, action_name, action_key,
+                         target_count, target_unit, start_date, end_date, status)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'active')
+                        """,
+                        (
+                            client_id,
+                            checkin_id,
+                            assignment["name"],
+                            assignment.get("action_key") or None,
+                            assignment.get("target_count"),
+                            assignment.get("target_unit"),
+                            week_start,
+                            week_end,
+                        ),
+                    )
+                else:
+                    cursor.execute(
+                        """
+                        INSERT INTO client_action_plans
+                        (client_id, checkin_id, action_name,
+                         target_count, target_unit, start_date, end_date, status)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,'active')
+                        """,
+                        (
+                            client_id,
+                            checkin_id,
+                            assignment["name"],
+                            assignment.get("target_count"),
+                            assignment.get("target_unit"),
+                            week_start,
+                            week_end,
+                        ),
+                    )
+
+            # Remove commitments no longer selected. Preserve already-entered
+            # daily history by shortening the assignment instead of deleting it.
+            for row in existing_rows:
+                if row["id"] in kept_ids:
+                    continue
+
+                cursor.execute(
+                    """
+                    SELECT COUNT(*) AS n
+                    FROM client_action_daily_logs
+                    WHERE action_id=%s
+                    """,
+                    (row["id"],),
+                )
+                has_logs = (cursor.fetchone()["n"] or 0) > 0
+
+                if has_logs:
+                    cutoff = min(date.today() - timedelta(days=1), week_end)
+                    if cutoff >= week_start:
+                        cursor.execute(
+                            """
+                            UPDATE client_action_plans
+                            SET end_date=%s, status='completed'
+                            WHERE id=%s
+                            """,
+                            (cutoff, row["id"]),
+                        )
+                    else:
+                        cursor.execute(
+                            "UPDATE client_action_plans SET status='completed' WHERE id=%s",
+                            (row["id"],),
+                        )
+                else:
+                    cursor.execute(
+                        "DELETE FROM client_action_plans WHERE id=%s",
+                        (row["id"],),
+                    )
+
+
+def _submitted_assignments(
+    *,
+    selected_keys: list[str],
+    all_keys: list[str],
+    target_counts: list[str],
+    target_units: list[str],
+    custom_names: list[str],
+    custom_keys: list[str],
+    custom_counts: list[str],
+    custom_units: list[str],
+):
+    assignments = _selected_library_assignments(
+        selected_keys,
+        all_keys,
+        target_counts,
+        target_units,
+    )
+    assignments.extend(
+        _custom_action_assignments(
+            custom_names,
+            custom_counts,
+            custom_units,
+            custom_keys,
+        )
+    )
+    return assignments
+
+
 @router.post("/client/{access_token}/questions")
 def submit_client_question(
     access_token: str,
@@ -1220,9 +1515,12 @@ def client_profile(
     next_week_number = None
     next_week_start = None
     next_week_end = None
+    current_week_actions = []
     next_week_actions = []
     coach_week_checkin = None
     client_weekly_reflection = None
+    program_last_week_number = _program_length_weeks(profile["client"])
+    has_next_program_week = True
 
     if week_start and week_end:
         # Overview remains anchored to the real current week.
@@ -1261,17 +1559,29 @@ def client_profile(
                 coach_week_checkin = saved_checkin
                 break
 
-        # Planning always belongs to the week immediately AFTER the selected
-        # coaching week (Week N review -> Week N+1 plan), including history.
-        next_week_number = coach_week_number + 1
-        next_week_start = coach_week_end + timedelta(days=1)
-        next_week_end = next_week_start + timedelta(days=6)
-        next_week_actions = ClientService.actions(
+        # Current commitments always belong to the selected coaching week.
+        current_week_actions = ClientService.actions(
             client_id,
             status=None,
-            start_date=next_week_start,
-            end_date=next_week_end,
+            start_date=coach_week_start,
+            end_date=coach_week_end,
         )
+
+        # The next-week planning section disappears on the final program week.
+        has_next_program_week = (
+            program_last_week_number is None
+            or coach_week_number < program_last_week_number
+        )
+        if has_next_program_week:
+            next_week_number = coach_week_number + 1
+            next_week_start = coach_week_end + timedelta(days=1)
+            next_week_end = next_week_start + timedelta(days=6)
+            next_week_actions = ClientService.actions(
+                client_id,
+                status=None,
+                start_date=next_week_start,
+                end_date=next_week_end,
+            )
 
     client_questions = get_client_questions(
         client_id,
@@ -1342,49 +1652,28 @@ def client_profile(
         weeks=12,
     )
 
-    # Populate PLAN from the actual following week when it already exists.
-    # For a brand-new plan, carry forward commitments from the selected week.
-    carry_forward_action_defaults = {}
-    carry_forward_custom_actions = []
-    library_key_by_name = ACTION_LIBRARY_KEY_BY_NORMALIZED_NAME
+    # Prepare independent builders for the selected week and following week.
+    current_action_defaults, current_custom_actions = _week_action_defaults(
+        current_week_actions
+    )
 
-    plan_source_rows = next_week_actions or ClientService.actions(
-        client_id,
-        status=None,
-        start_date=coach_week_start,
-        end_date=coach_week_end,
-    ) or []
-
-    latest_by_name = {}
-    for row in plan_source_rows:
-        name = (row.get("action_name") or "").strip()
-        if not name or name in latest_by_name:
-            continue
-        latest_by_name[name] = row
-
-    for name, action in latest_by_name.items():
-        stable_key = (action.get("action_key") or "").strip()
-        default = {
-            "name": name,
-            "action_key": stable_key,
-            "target_count": action.get("target_count"),
-            "target_unit": action.get("target_unit") or "days",
-        }
-        library_key = (
-            stable_key
-            if stable_key in ACTION_LIBRARY_BY_KEY
-            else library_key_by_name.get(_normalize_action_name(name))
+    if has_next_program_week:
+        plan_source_rows = next_week_actions or current_week_actions or []
+        next_action_defaults, next_custom_actions = _week_action_defaults(
+            plan_source_rows
         )
-        if library_key:
-            carry_forward_action_defaults[library_key] = default
-        else:
-            carry_forward_custom_actions.append(default)
+    else:
+        next_action_defaults, next_custom_actions = {}, []
 
     # Keep enough custom rows for all carried-forward custom actions plus
     # a few blank rows for additions during the coaching call.
-    custom_action_slot_count = max(
+    current_custom_action_slot_count = max(
         5,
-        len(carry_forward_custom_actions) + 3,
+        len(current_custom_actions) + 3,
+    )
+    next_custom_action_slot_count = max(
+        5,
+        len(next_custom_actions) + 3,
     )
 
     client_resources = get_client_resources(client_id)
@@ -1430,7 +1719,7 @@ def client_profile(
             "coach_week_is_future": coach_week_is_future,
             "coach_week_checkin": coach_week_checkin,
             "coach_week_can_previous": coach_week_number > 1,
-            "coach_week_can_next": coach_week_number < week_number + 1,
+            "coach_week_can_next": coach_week_number < min(week_number + 1, program_last_week_number or (week_number + 1)),
             "progress_summary": progress_summary,
             "coach_summary": coach_summary,
             "coach_history_grid": coach_history_grid,
@@ -1454,12 +1743,16 @@ def client_profile(
             "next_week_number": next_week_number,
             "next_week_start": next_week_start,
             "next_week_end": next_week_end,
-            "next_week_action_names": {
-                row.get("action_name") for row in next_week_actions
-            },
-            "carry_forward_action_defaults": carry_forward_action_defaults,
-            "carry_forward_custom_actions": carry_forward_custom_actions,
-            "custom_action_slot_count": custom_action_slot_count,
+            "current_week_actions": current_week_actions,
+            "current_action_defaults": current_action_defaults,
+            "current_custom_actions": current_custom_actions,
+            "current_custom_action_slot_count": current_custom_action_slot_count,
+            "next_week_actions": next_week_actions,
+            "next_action_defaults": next_action_defaults,
+            "next_custom_actions": next_custom_actions,
+            "next_custom_action_slot_count": next_custom_action_slot_count,
+            "program_last_week_number": program_last_week_number,
+            "has_next_program_week": has_next_program_week,
             **profile,
         },
     )
@@ -1990,6 +2283,153 @@ def save_client_tracking(
 
     return RedirectResponse(
         f"/dashboard/clients/{client_id}",
+        status_code=303,
+    )
+
+
+
+@router.post("/dashboard/clients/{client_id}/weekly/current")
+def save_current_week_coaching(
+    request: Request,
+    client_id: int,
+    selected_week_number: int = Form(...),
+    call_date: str = Form(...),
+    checkin_id: str = Form(""),
+    wins: str = Form(""),
+    struggles: str = Form(""),
+    improvements_needed: str = Form(""),
+    coach_support: str = Form(""),
+    weekly_client_feedback: str = Form(""),
+    weekly_private_note: str = Form(""),
+    current_action_keys: list[str] = Form(default=[]),
+    current_action_all_keys: list[str] = Form(default=[]),
+    current_action_target_counts: list[str] = Form(default=[]),
+    current_action_target_units: list[str] = Form(default=[]),
+    current_custom_action_names: list[str] = Form(default=[]),
+    current_custom_action_keys: list[str] = Form(default=[]),
+    current_custom_target_counts: list[str] = Form(default=[]),
+    current_custom_target_units: list[str] = Form(default=[]),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    client = ClientService.get(client_id) or {}
+    start_date = client.get("start_date")
+    if not start_date:
+        raise HTTPException(status_code=400, detail="Client start date is required")
+
+    week_start = start_date + timedelta(days=(selected_week_number - 1) * 7)
+    week_end = week_start + timedelta(days=6)
+
+    parsed_call_date = date.fromisoformat(call_date)
+    if not (week_start <= parsed_call_date <= week_end):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Coaching date must fall inside Week {selected_week_number}",
+        )
+
+    saved_checkin_id = ClientService.save_checkin(
+        checkin_id=checkin_id.strip() or None,
+        client_id=client_id,
+        call_date=call_date,
+        weight_kg=None,
+        next_call_date=None,
+        next_call_time=None,
+        wins=wins.strip() or None,
+        struggles=struggles.strip() or None,
+        improvements_needed=improvements_needed.strip() or None,
+        coach_support=coach_support.strip() or None,
+        client_feedback=weekly_client_feedback.strip() or None,
+        private_coach_note=weekly_private_note.strip() or None,
+    )
+
+    assignments = _submitted_assignments(
+        selected_keys=current_action_keys,
+        all_keys=current_action_all_keys,
+        target_counts=current_action_target_counts,
+        target_units=current_action_target_units,
+        custom_names=current_custom_action_names,
+        custom_keys=current_custom_action_keys,
+        custom_counts=current_custom_target_counts,
+        custom_units=current_custom_target_units,
+    )
+    _replace_week_actions(
+        client_id=client_id,
+        week_start=week_start,
+        week_end=week_end,
+        assignments=assignments,
+        checkin_id=saved_checkin_id,
+    )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=weekly&week={selected_week_number}&current_saved=1",
+        status_code=303,
+    )
+
+
+@router.post("/dashboard/clients/{client_id}/weekly/next")
+def save_next_week_commitments(
+    request: Request,
+    client_id: int,
+    source_week_number: int = Form(...),
+    plan_week_number: int = Form(...),
+    next_action_keys: list[str] = Form(default=[]),
+    next_action_all_keys: list[str] = Form(default=[]),
+    next_action_target_counts: list[str] = Form(default=[]),
+    next_action_target_units: list[str] = Form(default=[]),
+    next_custom_action_names: list[str] = Form(default=[]),
+    next_custom_action_keys: list[str] = Form(default=[]),
+    next_custom_target_counts: list[str] = Form(default=[]),
+    next_custom_target_units: list[str] = Form(default=[]),
+    workout_ids: list[int] = Form(default=[]),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    client = ClientService.get(client_id) or {}
+    start_date = client.get("start_date")
+    if not start_date:
+        raise HTTPException(status_code=400, detail="Client start date is required")
+
+    if plan_week_number != source_week_number + 1:
+        raise HTTPException(status_code=400, detail="Invalid next-week plan")
+
+    program_last_week = _program_length_weeks(client)
+    if program_last_week is not None and plan_week_number > program_last_week:
+        raise HTTPException(status_code=400, detail="This is the final program week")
+
+    plan_start = start_date + timedelta(days=(plan_week_number - 1) * 7)
+    plan_end = plan_start + timedelta(days=6)
+
+    assignments = _submitted_assignments(
+        selected_keys=next_action_keys,
+        all_keys=next_action_all_keys,
+        target_counts=next_action_target_counts,
+        target_units=next_action_target_units,
+        custom_names=next_custom_action_names,
+        custom_keys=next_custom_action_keys,
+        custom_counts=next_custom_target_counts,
+        custom_units=next_custom_target_units,
+    )
+    _replace_week_actions(
+        client_id=client_id,
+        week_start=plan_start,
+        week_end=plan_end,
+        assignments=assignments,
+        checkin_id=None,
+    )
+
+    # Preserve the existing workout-library behaviour: selected workouts are
+    # assigned to the client. (Workout assignments are not week-dated today.)
+    for workout_id in workout_ids:
+        assign_workout(
+            workout_id=workout_id,
+            client_ids=[client_id],
+            coach_note=f"Week {plan_week_number} coaching plan",
+        )
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=weekly&week={source_week_number}&next_saved=1",
         status_code=303,
     )
 
