@@ -1559,13 +1559,15 @@ def client_profile(
                 coach_week_checkin = saved_checkin
                 break
 
-        # Current commitments always belong to the selected coaching week.
-        current_week_actions = ClientService.actions(
-            client_id,
-            status=None,
-            start_date=coach_week_start,
-            end_date=coach_week_end,
-        )
+        # Current commitments must use the exact same week review source as
+        # the Coach Data tab. This is especially important for historical
+        # weeks: older action rows can have legacy status/date combinations
+        # that make a generic ClientService.actions(...) query miss them even
+        # though the Data tab correctly shows them for that week.
+        current_week_actions = [
+            dict(action)
+            for action in (week_review.get("actions") or [])
+        ]
 
         # The next-week planning section disappears on the final program week.
         has_next_program_week = (

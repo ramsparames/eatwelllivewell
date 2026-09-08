@@ -611,6 +611,18 @@
 .cp-reflection-readonly p{margin:5px 0 0;font-size:14px}
 @media(max-width:700px){.cp-reflection-grid,.cp-reflection-readonly{grid-template-columns:1fr}}
 
+.cp-question-card{margin:18px 0 0;padding:20px;border:1px solid #ddcae6;border-radius:16px;background:linear-gradient(145deg,#fbf7fd,#fff)}
+.cp-question-card h2{margin:3px 0 5px;font-size:21px}
+.cp-question-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.cp-question-form{margin-top:13px}
+.cp-question-form textarea{width:100%;min-height:96px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font:inherit;font-size:13px;line-height:1.5;resize:vertical;outline:none}
+.cp-question-form textarea:focus{border-color:#b795c8;box-shadow:0 0 0 3px rgba(91,14,145,.06)}
+.cp-question-actions{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:9px}
+.cp-question-actions small{color:var(--muted);font-size:10px;line-height:1.4}
+.cp-question-actions button{min-height:40px;padding:0 14px;border:0;border-radius:10px;background:var(--purple);color:#fff;font-size:12px;font-weight:850;cursor:pointer}
+.cp-question-success{margin-top:10px;padding:10px 12px;border-radius:10px;background:#edf8f0;color:#286c49;font-size:11px}
+.cp-question-error{margin-top:10px;padding:10px 12px;border-radius:10px;background:#fff4ee;color:#98512e;font-size:11px}
+@media(max-width:560px){.cp-question-actions{align-items:stretch;flex-direction:column}.cp-question-actions button{width:100%}}
 
 
 .cp-data-intro{
@@ -720,8 +732,9 @@
             <tr><th class="cp-metric-head">Carbs</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td><div class="cp-cell-center">{% if row.editable %}<input class="cp-sheet-input macro-grid-input" type="number" min="0" step="0.1" name="carbs_g" form="day-form-{{ row.date.isoformat() }}" value="{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }}{% endif %}" placeholder="—">{% elif macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}</div></td>{% endfor %}</tr>
             <tr><th class="cp-metric-head">Fat</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td><div class="cp-cell-center">{% if row.editable %}<input class="cp-sheet-input macro-grid-input" type="number" min="0" step="0.1" name="fat_g" form="day-form-{{ row.date.isoformat() }}" value="{% if macro and macro.fat_g is not none %}{{ macro.fat_g }}{% endif %}" placeholder="—">{% elif macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</div></td>{% endfor %}</tr>
             <tr><th class="cp-metric-head">Calories</th>{% for row in week_rows %}{% set macro=row.macro if row.macro is defined else none %}<td class="macro-calories-cell" data-macro-date="{{ row.date.isoformat() }}"><div class="cp-cell-center">{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</div></td>{% endfor %}</tr>{% endif %}
-            {% if client_history_grid.action_columns %}<tr class="cp-section-row"><th class="cp-metric-head">Commitments</th>{% for row in week_rows %}<td></td>{% endfor %}</tr>{% endif %}
-            {% for action in client_history_grid.action_columns %}<tr><th class="cp-metric-head cp-sheet-action-head">{{ action.name }}{% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}</th>{% for row in week_rows %}{% set cell=row.actions.get(action.id) %}<td><div class="cp-cell-center">{% if not cell or not cell.eligible %}<span class="na">·</span>{% elif row.editable %}<input type="checkbox" name="completed_action_ids" value="{{ cell.action_id }}" form="day-form-{{ row.date.isoformat() }}" {% if cell.completed is true %}checked{% endif %}>{% elif cell.completed is true %}<span class="yes">✓</span>{% elif cell.completed is false %}<span class="no">○</span>{% else %}<span class="na">—</span>{% endif %}</div></td>{% endfor %}</tr>{% endfor %}
+            {% set week_actions = client_history_grid.week_action_columns.get(first.week_number, []) %}
+            {% if week_actions %}<tr class="cp-section-row"><th class="cp-metric-head">Commitments</th>{% for row in week_rows %}<td></td>{% endfor %}</tr>{% endif %}
+            {% for action in week_actions %}<tr><th class="cp-metric-head cp-sheet-action-head">{{ action.name }}{% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}</th>{% for row in week_rows %}{% set cell=row.actions.get(action.id) %}<td><div class="cp-cell-center">{% if not cell or not cell.eligible %}<span class="na">·</span>{% elif row.editable %}<input type="checkbox" name="completed_action_ids" value="{{ cell.action_id }}" form="day-form-{{ row.date.isoformat() }}" {% if cell.completed is true %}checked{% endif %}>{% elif cell.completed is true %}<span class="yes">✓</span>{% elif cell.completed is false %}<span class="no">○</span>{% else %}<span class="na">—</span>{% endif %}</div></td>{% endfor %}</tr>{% endfor %}
             <tr><th class="cp-metric-head">Save</th>{% for row in week_rows %}<td><div class="cp-cell-center">{% if row.editable %}<button class="cp-sheet-save" type="submit" form="day-form-{{ row.date.isoformat() }}">{% if row.submitted %}Update{% else %}Save{% endif %}</button>{% else %}<span class="na">—</span>{% endif %}</div></td>{% endfor %}</tr>
           </tbody></table></div>
           {% set wm=client_history_grid.week_measurements.get(first.week_number) %}<div class="cp-data-week-measurements">{% if wm %}<div class="cp-measure-inline"><strong>Measurements · {{ wm.measured_on.strftime("%d %b %Y") }}</strong>{% if wm.upper_arm_cm is not none %}<span>Arm {{ wm.upper_arm_cm }}</span>{% endif %}{% if wm.chest_cm is not none %}<span>Chest {{ wm.chest_cm }}</span>{% endif %}{% if wm.waist_cm is not none %}<span>Waist {{ wm.waist_cm }}</span>{% endif %}{% if wm.lower_abdomen_cm is not none %}<span>Lower abd {{ wm.lower_abdomen_cm }}</span>{% endif %}{% if wm.hip_cm is not none %}<span>Hip {{ wm.hip_cm }}</span>{% endif %}{% if wm.thigh_cm is not none %}<span>Thigh {{ wm.thigh_cm }}</span>{% endif %}</div>{% elif first.is_current_week %}<form method="post" action="/client/{{ access_token }}/measurements"><div class="cp-measure-inline"><strong>Measurements</strong><div class="cp-field"><span>Date</span><input class="cp-input" type="date" name="measured_on" min="{{ week_completion.week_start }}" max="{{ today }}" value="{{ today }}" required></div><div class="cp-field"><span>Unit</span><select class="cp-select" name="measurement_unit"><option value="cm">cm</option><option value="inches">inches</option></select></div><div class="cp-measure-grid-inline"><input class="cp-sheet-input" type="number" step="0.1" name="upper_arm" placeholder="Arm" required><input class="cp-sheet-input" type="number" step="0.1" name="chest" placeholder="Chest" required><input class="cp-sheet-input" type="number" step="0.1" name="waist" placeholder="Waist" required><input class="cp-sheet-input" type="number" step="0.1" name="lower_abdomen" placeholder="Lower abd" required><input class="cp-sheet-input" type="number" step="0.1" name="hip" placeholder="Hip" required><input class="cp-sheet-input" type="number" step="0.1" name="thigh" placeholder="Thigh" required></div><button class="cp-sheet-save" type="submit">Save measurements</button></div></form>{% else %}<span style="color:var(--muted)">No measurements entered.</span>{% endif %}</div>
@@ -744,6 +757,25 @@
 
 
 
+    <section class="cp-question-card" id="ask-sushma">
+      <p class="cp-kicker">FOR OUR NEXT CALL</p>
+      <h2>Anything you want to ask me?</h2>
+      <p>Pop your question here whenever it comes to you. I’ll see it when I prepare for our next coaching call.</p>
+
+      {% if request.query_params.get("question_saved") == "1" %}
+      <div class="cp-question-success"><strong>✓ Question saved.</strong> It’s on my list for our next call.</div>
+      {% elif request.query_params.get("question_error") == "1" %}
+      <div class="cp-question-error">Please type a question before sending.</div>
+      {% endif %}
+
+      <form class="cp-question-form" method="post" action="/client/{{ access_token }}/questions">
+        <textarea name="question_text" maxlength="1000" required placeholder="e.g. How should I handle my protein on travel days?"></textarea>
+        <div class="cp-question-actions">
+          <small>You can send more than one question during the week.</small>
+          <button type="submit">Send to Sushma →</button>
+        </div>
+      </form>
+    </section>
 
 </section>
 

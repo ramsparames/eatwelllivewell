@@ -819,6 +819,10 @@ def get_coach_history_grid(
 
     current_week_number, _, _ = _coaching_week(client_id, today)
     all_actions = {}
+    # Keep the exact commitment set for each coaching week as well as the
+    # global column list used by the coach history grid.  The client My Data
+    # view must never show a later week's commitments inside an earlier week.
+    week_action_columns = {}
     rows = []
 
     for week_number in range(1, current_week_number + 1):
@@ -826,16 +830,23 @@ def get_coach_history_grid(
         week_end = week_start + timedelta(days=6)
         review = get_coach_week_review(client_id, week_start, week_end)
 
+        this_week_actions = []
+        seen_week_keys = set()
         for action in review["actions"]:
             key = (action.get("action_key") or "").strip() or fallback_key(action)
+            column = {
+                "id": key,
+                "action_key": key,
+                "name": action["action_name"],
+                "target_count": action.get("target_count"),
+                "target_unit": action.get("target_unit"),
+            }
             if key not in all_actions:
-                all_actions[key] = {
-                    "id": key,
-                    "action_key": key,
-                    "name": action["action_name"],
-                    "target_count": action.get("target_count"),
-                    "target_unit": action.get("target_unit"),
-                }
+                all_actions[key] = column
+            if key not in seen_week_keys:
+                this_week_actions.append(column)
+                seen_week_keys.add(key)
+        week_action_columns[week_number] = this_week_actions
 
         status_by_key = {}
         for action in review["actions"]:
@@ -880,6 +891,7 @@ def get_coach_history_grid(
 
     return {
         "action_columns": action_columns,
+        "week_action_columns": week_action_columns,
         "rows": rows,
         "current_week_number": current_week_number,
     }
