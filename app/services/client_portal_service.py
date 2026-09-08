@@ -888,11 +888,50 @@ def get_coach_history_grid(
             normalized[action["id"]] = row["actions"].get((row["date"], action["id"]))
         row["actions"] = normalized
 
+    # Rebuild week-specific commitment definitions from the final normalized
+    # cells.  A commitment belongs to a week only when at least one cell in
+    # that week is eligible. This is the same information the Data grid uses
+    # to render ✓ / ○ / ·, so labels and cells cannot disagree.
+    column_by_id = {
+        column["id"]: column
+        for column in action_columns
+    }
+    normalized_week_action_columns = {}
+    for week_number in range(1, current_week_number + 1):
+        week_rows = [
+            row for row in rows
+            if row.get("week_number") == week_number
+        ]
+        eligible_ids = []
+        seen_ids = set()
+        for row in week_rows:
+            for action_id, cell in (row.get("actions") or {}).items():
+                if (
+                    cell
+                    and cell.get("eligible")
+                    and action_id not in seen_ids
+                ):
+                    eligible_ids.append(action_id)
+                    seen_ids.add(action_id)
+
+        normalized_week_action_columns[week_number] = [
+            column_by_id[action_id]
+            for action_id in eligible_ids
+            if action_id in column_by_id
+        ]
+
+        # Carry this exact list on every row so the transposed client template
+        # does not depend on integer/string dictionary key behavior in Jinja.
+        for row in week_rows:
+            row["week_actions"] = list(
+                normalized_week_action_columns[week_number]
+            )
+
     rows.sort(key=lambda row: (-row["week_number"], row["date"]))
 
     return {
         "action_columns": action_columns,
-        "week_action_columns": week_action_columns,
+        "week_action_columns": normalized_week_action_columns,
         "rows": rows,
         "current_week_number": current_week_number,
     }

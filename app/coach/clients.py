@@ -1659,6 +1659,62 @@ def client_profile(
             for week_number_key in sorted(grouped_history_weeks, reverse=True)
         ]
 
+    # Historical commitment source of truth
+    # ---------------------------------------
+    # The Data tab is the one view we already know is correctly showing which
+    # commitments belonged to Week 1 / Week 2 / etc.  Therefore, for a past
+    # selected coaching week, rebuild the commitment defaults directly from
+    # that exact normalized grid instead of trying to infer them again from
+    # action-plan dates/checkin linkage.
+    #
+    # This guarantees: if Data shows a commitment for Week N, Weekly Coaching
+    # preselects the same commitment for Week N.
+    if coach_history_grid and coach_week_number:
+        grid_columns = {
+            column.get("id"): column
+            for column in (coach_history_grid.get("action_columns") or [])
+        }
+        selected_week_rows = [
+            row
+            for row in (coach_history_grid.get("rows") or [])
+            if row.get("week_number") == coach_week_number
+        ]
+
+        selected_action_ids = []
+        seen_selected_action_ids = set()
+        for row in selected_week_rows:
+            for action_id, cell in (row.get("actions") or {}).items():
+                if (
+                    cell
+                    and cell.get("eligible")
+                    and action_id not in seen_selected_action_ids
+                ):
+                    selected_action_ids.append(action_id)
+                    seen_selected_action_ids.add(action_id)
+
+        grid_week_actions = []
+        for action_id in selected_action_ids:
+            column = grid_columns.get(action_id)
+            if not column:
+                continue
+            grid_week_actions.append({
+                "id": action_id,
+                "action_key": (
+                    column.get("action_key")
+                    if not str(action_id).startswith("legacy:")
+                    else None
+                ),
+                "action_name": column.get("name"),
+                "target_count": column.get("target_count"),
+                "target_unit": column.get("target_unit"),
+            })
+
+        # For historical/current weeks represented in the Data grid, this grid
+        # result is authoritative—even when empty. Do not fall back to a later
+        # week's actions, which is what caused the visible cross-week bleed.
+        if selected_week_rows:
+            current_week_actions = grid_week_actions
+
     # Coaching intelligence for the current client workspace.
     # These are computed before TemplateResponse so the Jinja context never
     # references undefined variables.
