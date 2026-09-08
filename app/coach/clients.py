@@ -53,8 +53,10 @@ from app.services.coaching_insights_service import (
 )
 
 from app.services.client_portal_service import (
+    create_portal_tables,
     ensure_portal_access,
     get_portal_access,
+    get_client_by_token,
     get_recent_client_activity,
     get_coach_week_review,
     build_call_prep,
@@ -62,6 +64,9 @@ from app.services.client_portal_service import (
     get_client_operations_status,
     get_client_progress_summary,
     get_coach_history_grid,
+    save_client_question,
+    get_client_questions,
+    mark_client_question_answered,
 )
 
 
@@ -93,6 +98,7 @@ create_phase_a_tables()
 create_workout_tables()
 create_macro_tracking_tables()
 create_coaching_call_tables()
+create_portal_tables()
 
 
 ACTION_LIBRARY = [{'category': 'Nutrition',
@@ -726,6 +732,64 @@ def _add_action_with_identity(
     )
 
 
+
+@router.post("/client/{access_token}/questions")
+def submit_client_question(
+    access_token: str,
+    question_text: str = Form(""),
+):
+    client = get_client_by_token(access_token)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client portal not found")
+
+    clean_question = (question_text or "").strip()
+    if not clean_question:
+        return RedirectResponse(
+            f"/client/{access_token}?question_error=1#ask-sushma",
+            status_code=303,
+        )
+
+    week_number, _, _ = _coaching_week_bounds(
+        dict(client),
+        date.today(),
+    )
+
+    try:
+        save_client_question(
+            client_id=client["id"],
+            question_text=clean_question,
+            week_number=week_number or None,
+        )
+    except ValueError:
+        return RedirectResponse(
+            f"/client/{access_token}?question_error=1#ask-sushma",
+            status_code=303,
+        )
+
+    return RedirectResponse(
+        f"/client/{access_token}?question_saved=1#ask-sushma",
+        status_code=303,
+    )
+
+
+@router.post(
+    "/dashboard/clients/{client_id}/questions/{question_id}/answered"
+)
+def answer_client_question(
+    request: Request,
+    client_id: int,
+    question_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    mark_client_question_answered(client_id, question_id)
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}#client-questions",
+        status_code=303,
+    )
+
+
 def _build_synamate_booking_url(
     base_url: str,
     client: dict,
@@ -1197,6 +1261,18 @@ def client_profile(
             end_date=next_week_end,
         )
 
+    client_questions = get_client_questions(
+        client_id,
+        limit=50,
+    )
+    open_client_questions = [
+        question
+        for question in client_questions
+        if question.get("status") == "open"
+    ]
+    if call_prep is not None:
+        call_prep["client_questions"] = open_client_questions
+
     coach_history_grid = get_coach_history_grid(
         client_id,
         on_date=date.today(),
@@ -1331,6 +1407,8 @@ def client_profile(
             "portal_activity": portal_activity,
             "week_review": week_review,
             "call_prep": call_prep,
+            "client_questions": client_questions,
+            "open_client_questions": open_client_questions,
             "coach_week_number": coach_week_number,
             "coach_week_start": coach_week_start,
             "coach_week_end": coach_week_end,
