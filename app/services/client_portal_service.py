@@ -1145,6 +1145,7 @@ def get_coach_week_review(
                     p.end_date,
                     p.checkin_id,
                     wc.call_date AS linked_call_date,
+                    FALSE AS carried_forward_history,
                     EXISTS (
                       SELECT 1
                       FROM client_action_daily_logs historical_log
@@ -1184,6 +1185,52 @@ def get_coach_week_review(
                 previous_week_end,
             ))
             action_plan_rows = cursor.fetchall()
+
+            # Missing historical week = standing-plan carry-forward.
+            #
+            # The database can legitimately have no action-plan rows for an
+            # older week even though the client was meant to continue the
+            # prior week's commitments. Suganthi Week 2 is exactly this case:
+            # Week 1 has four explicit plans, Week 2 has none, and Week 3 has
+            # its own explicit plan.  When a week has NO direct/recovered
+            # commitment evidence, use the most recent prior exact coaching
+            # week as that week's standing plan.
+            #
+            # This is display/review recovery only. Once Sushma saves that
+            # historical week in Weekly Coaching, the normal exact-week save
+            # path persists dedicated rows for that week.
+            if not action_plan_rows:
+                cursor.execute("""
+                    SELECT MAX(start_date) AS source_week_start
+                    FROM client_action_plans
+                    WHERE client_id = %s
+                      AND start_date < %s
+                      AND status = 'active'
+                """, (client_id, week_start))
+                source = cursor.fetchone() or {}
+                source_week_start = source.get("source_week_start")
+
+                if source_week_start is not None:
+                    cursor.execute("""
+                        SELECT
+                            p.id,
+                            p.action_name,
+                            p.action_key,
+                            p.target_count,
+                            p.target_unit,
+                            p.start_date,
+                            p.end_date,
+                            p.checkin_id,
+                            NULL::DATE AS linked_call_date,
+                            FALSE AS has_log_in_week,
+                            TRUE AS carried_forward_history
+                        FROM client_action_plans p
+                        WHERE p.client_id = %s
+                          AND p.start_date = %s
+                          AND p.status = 'active'
+                        ORDER BY p.id
+                    """, (client_id, source_week_start))
+                    action_plan_rows = cursor.fetchall()
 
             cursor.execute("""
                 SELECT
@@ -1253,11 +1300,13 @@ def get_coach_week_review(
             and previous_week_start <= linked_call_date <= previous_week_end
         )
         recovered_from_log = bool(item.get("has_log_in_week"))
+        carried_forward_history = bool(item.get("carried_forward_history"))
 
         belongs_to_week = (
             action_overlaps_week
             or legacy_planned_for_week
             or recovered_from_log
+            or carried_forward_history
         )
 
         for day in days:
