@@ -832,16 +832,19 @@ def _replace_week_actions(
 
     with get_connection() as connection:
         with connection.cursor() as cursor:
+            # Only rows that BELONG to this exact coaching week may be
+            # edited/reused. Older standing rows must never be moved forward,
+            # because doing that rewrites historical Week 1/2 commitments.
             cursor.execute(
                 """
                 SELECT *
                 FROM client_action_plans
                 WHERE client_id = %s
-                  AND start_date <= %s
-                  AND (end_date IS NULL OR end_date >= %s)
+                  AND start_date = %s
+                  AND (end_date = %s OR end_date IS NULL)
                 ORDER BY id DESC
                 """,
-                (client_id, week_end, week_start),
+                (client_id, week_start, week_end),
             )
             existing_rows = [dict(row) for row in cursor.fetchall()]
 
@@ -871,6 +874,20 @@ def _replace_week_actions(
                     else "name:" + _normalize_action_name(row.get("action_name"))
                 )
                 existing_by_identity.setdefault(identity, row)
+
+            # Close legacy/open-ended plans from PRIOR weeks at the boundary
+            # of the selected week. This keeps history immutable while making
+            # the selected week's explicit plan authoritative.
+            cursor.execute(
+                """
+                UPDATE client_action_plans
+                SET end_date = %s
+                WHERE client_id = %s
+                  AND start_date < %s
+                  AND (end_date IS NULL OR end_date >= %s)
+                """,
+                (week_start - timedelta(days=1), client_id, week_start, week_start),
+            )
 
             kept_ids = set()
             for identity, assignment in desired.items():

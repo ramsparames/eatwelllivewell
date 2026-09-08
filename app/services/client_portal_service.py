@@ -871,6 +871,7 @@ def get_coach_history_grid(
                 "weight_kg": day["weight_kg"],
                 "note": day["note"],
                 "actions": dict(status_by_key),
+                "week_actions": list(this_week_actions),
                 "measurement": (
                     measurement
                     if measurement and measurement.get("measured_on") == day["date"]
@@ -1080,19 +1081,36 @@ def get_coach_week_review(
             submission_rows = cursor.fetchall()
 
             cursor.execute("""
-                SELECT
+                SELECT DISTINCT
                     p.id,
                     p.action_name,
+                    p.action_key,
                     p.target_count,
                     p.target_unit,
                     p.start_date,
                     p.end_date
                 FROM client_action_plans p
                 WHERE p.client_id = %s
-                  AND p.start_date <= %s
-                  AND (p.end_date IS NULL OR p.end_date >= %s)
+                  AND (
+                    (
+                      p.start_date <= %s
+                      AND (p.end_date IS NULL OR p.end_date >= %s)
+                    )
+                    OR EXISTS (
+                      SELECT 1
+                      FROM client_action_daily_logs historical_log
+                      WHERE historical_log.action_id = p.id
+                        AND historical_log.tracked_on BETWEEN %s AND %s
+                    )
+                  )
                 ORDER BY p.id
-            """, (client_id, week_end, week_start))
+            """, (
+                client_id,
+                week_end,
+                week_start,
+                week_start,
+                week_end,
+            ))
             action_plan_rows = cursor.fetchall()
 
             cursor.execute("""
