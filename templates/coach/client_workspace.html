@@ -1709,9 +1709,10 @@
                 <tr><th class="nw-metric-head">Fat</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
                 <tr><th class="nw-metric-head">Calories</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</td>{% endfor %}</tr>
                 {% endif %}
-                {% if coach_history_grid.action_columns %}
+                {% set week_actions = (week.rows[0].week_actions if week.rows and week.rows[0].week_actions is defined else []) %}
+                {% if week_actions %}
                 <tr class="nw-row-section"><th class="nw-metric-head">Commitments</th>{% for row in week.rows %}<td></td>{% endfor %}</tr>
-                {% for action in coach_history_grid.action_columns %}
+                {% for action in week_actions %}
                 <tr>
                   <th class="nw-metric-head"><strong>{{ action.name }}</strong>{% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}</th>
                   {% for row in week.rows %}{% set cell=row.actions.get(action.id) %}<td class="nw-action-cell">{% if not cell or not cell.eligible %}<span class="na">·</span>{% elif cell.completed is true %}<span class="yes">✓</span>{% elif cell.completed is false %}<span class="no">○</span>{% else %}<span class="na">—</span>{% endif %}</td>{% endfor %}
