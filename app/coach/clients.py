@@ -2473,21 +2473,21 @@ def action_history_debug(request: Request, client_id: int):
     for checkin in checkins:
         checkin["week_number"] = week_for(checkin.get("call_date"))
 
-    return JSONResponse(
-        {
-            "client_id": client_id,
-            "client_name": client.get("name"),
-            "start_date": start_date.isoformat() if start_date else None,
-            "action_plans": plans,
-            "weekly_checkins": checkins,
-            "how_to_read": {
-                "plan_start_week": "week currently stored on the action-plan row",
-                "linked_call_week": "week of the coaching check-in attached to this row",
-                "first_log_week": "first week where the client actually logged this commitment",
-            },
+    # Let FastAPI encode date/datetime values in the returned dict.
+    # JSONResponse does not accept Python's json.dumps(default=...) keyword,
+    # which caused the diagnostic endpoint to return HTTP 500.
+    return {
+        "client_id": client_id,
+        "client_name": client.get("name"),
+        "start_date": start_date.isoformat() if start_date else None,
+        "action_plans": plans,
+        "weekly_checkins": checkins,
+        "how_to_read": {
+            "plan_start_week": "week currently stored on the action-plan row",
+            "linked_call_week": "week of the coaching check-in attached to this row",
+            "first_log_week": "first week where the client actually logged this commitment",
         },
-        default=str,
-    )
+    }
 
 
 @router.post("/dashboard/clients/{client_id}/weekly/current")
