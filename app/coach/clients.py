@@ -868,10 +868,18 @@ def _replace_week_actions(
                         _normalize_action_name(row.get("action_name"))
                     )
                 )
+                # Stable identity wins for BOTH library and custom actions.
+                # Previously custom:* keys were discarded here and custom rows
+                # were matched by name instead. That caused edits to create
+                # duplicate rows and removed custom actions to reappear.
                 identity = (
-                    f"key:{library_key}"
-                    if library_key
-                    else "name:" + _normalize_action_name(row.get("action_name"))
+                    f"key:{stable_key}"
+                    if stable_key
+                    else (
+                        f"key:{library_key}"
+                        if library_key
+                        else "name:" + _normalize_action_name(row.get("action_name"))
+                    )
                 )
                 existing_by_identity.setdefault(identity, row)
 
@@ -1019,6 +1027,44 @@ def _replace_week_actions(
                         "DELETE FROM client_action_plans WHERE id=%s",
                         (row["id"],),
                     )
+
+
+def _active_exact_week_actions(
+    client_id: int,
+    week_start: date,
+    week_end: date,
+) -> list[dict]:
+    """
+    Return the exact active plan currently saved for one coaching week.
+
+    Weekly Coaching uses this for form defaults so removed/completed historical
+    rows (which the Data history may still retain) do not reappear in the
+    editable commitment builder.
+    """
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    action_name,
+                    action_key,
+                    target_count,
+                    target_unit,
+                    start_date,
+                    end_date,
+                    status,
+                    checkin_id
+                FROM client_action_plans
+                WHERE client_id = %s
+                  AND start_date = %s
+                  AND end_date = %s
+                  AND status = 'active'
+                ORDER BY id
+                """,
+                (client_id, week_start, week_end),
+            )
+            return [dict(row) for row in (cursor.fetchall() or [])]
 
 
 def _submitted_assignments(
@@ -1576,15 +1622,25 @@ def client_profile(
                 coach_week_checkin = saved_checkin
                 break
 
-        # Current commitments must use the exact same week review source as
-        # the Coach Data tab. This is especially important for historical
-        # weeks: older action rows can have legacy status/date combinations
-        # that make a generic ClientService.actions(...) query miss them even
-        # though the Data tab correctly shows them for that week.
-        current_week_actions = [
-            dict(action)
-            for action in (week_review.get("actions") or [])
-        ]
+        # Editable Weekly Coaching defaults come from the exact ACTIVE week
+        # plan. The Data/history review may intentionally retain removed rows
+        # that had past logs, and must not repopulate those rows in this form.
+        #
+        # If there is no explicit plan for this week at all, fall back to the
+        # recovered/carry-forward week review (needed for historical gaps such
+        # as Suganthi's original Week 2).
+        exact_current_actions = _active_exact_week_actions(
+            client_id,
+            coach_week_start,
+            coach_week_end,
+        )
+        if exact_current_actions:
+            current_week_actions = exact_current_actions
+        else:
+            current_week_actions = [
+                dict(action)
+                for action in (week_review.get("actions") or [])
+            ]
 
         # The next-week planning section disappears on the final program week.
         has_next_program_week = (
@@ -1595,11 +1651,10 @@ def client_profile(
             next_week_number = coach_week_number + 1
             next_week_start = coach_week_end + timedelta(days=1)
             next_week_end = next_week_start + timedelta(days=6)
-            next_week_actions = ClientService.actions(
+            next_week_actions = _active_exact_week_actions(
                 client_id,
-                status=None,
-                start_date=next_week_start,
-                end_date=next_week_end,
+                next_week_start,
+                next_week_end,
             )
 
     client_questions = get_client_questions(
