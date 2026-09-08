@@ -52,6 +52,10 @@ from app.services.coaching_insights_service import (
     get_client_progress_charts,
 )
 
+from app.services.coaching_workflow_service import (
+    get_weekly_reflection,
+)
+
 from app.services.client_portal_service import (
     create_portal_tables,
     ensure_portal_access,
@@ -1218,6 +1222,7 @@ def client_profile(
     next_week_end = None
     next_week_actions = []
     coach_week_checkin = None
+    client_weekly_reflection = None
 
     if week_start and week_end:
         # Overview remains anchored to the real current week.
@@ -1238,6 +1243,13 @@ def client_profile(
             client_id,
             coach_week_start,
             coach_week_end,
+        )
+
+        # Pull the exact same weekly reflection row that the client portal
+        # saves/reads for this coaching week.
+        client_weekly_reflection = get_weekly_reflection(
+            client_id,
+            coach_week_start,
         )
 
         # Find the saved coaching conversation for the selected week.
@@ -1407,6 +1419,7 @@ def client_profile(
             "portal_activity": portal_activity,
             "week_review": week_review,
             "call_prep": call_prep,
+            "client_weekly_reflection": client_weekly_reflection,
             "client_questions": client_questions,
             "open_client_questions": open_client_questions,
             "coach_week_number": coach_week_number,
