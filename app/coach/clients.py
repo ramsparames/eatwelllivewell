@@ -1730,10 +1730,17 @@ def client_profile(
     # Coaching intelligence for the current client workspace.
     # These are computed before TemplateResponse so the Jinja context never
     # references undefined variables.
-    coaching_week_summary = get_client_weekly_summary(
-        client_id,
-        week_start=week_start,
-    )
+    # A newly-created client has no coaching week until Setup saves a start date.
+    # Do not call weekly-summary logic with week_start=None; that route must still
+    # render so the coach can complete Setup.
+    if week_start is not None:
+        coaching_week_summary = get_client_weekly_summary(
+            client_id,
+            week_start=week_start,
+        )
+    else:
+        coaching_week_summary = {}
+
     progress_charts = get_client_progress_charts(
         client_id,
         weeks=12,
