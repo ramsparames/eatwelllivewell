@@ -750,33 +750,6 @@
     
 
   </div>
-
-
-
-
-
-
-
-    <section class="cp-question-card" id="ask-sushma">
-      <p class="cp-kicker">FOR OUR NEXT CALL</p>
-      <h2>Anything you want to ask me?</h2>
-      <p>Pop your question here whenever it comes to you. I’ll see it when I prepare for our next coaching call.</p>
-
-      {% if request.query_params.get("question_saved") == "1" %}
-      <div class="cp-question-success"><strong>✓ Question saved.</strong> It’s on my list for our next call.</div>
-      {% elif request.query_params.get("question_error") == "1" %}
-      <div class="cp-question-error">Please type a question before sending.</div>
-      {% endif %}
-
-      <form class="cp-question-form" method="post" action="/client/{{ access_token }}/questions">
-        <textarea name="question_text" maxlength="1000" required placeholder="e.g. How should I handle my protein on travel days?"></textarea>
-        <div class="cp-question-actions">
-          <small>You can send more than one question during the week.</small>
-          <button type="submit">Send to Sushma →</button>
-        </div>
-      </form>
-    </section>
-
 </section>
 
 <script>

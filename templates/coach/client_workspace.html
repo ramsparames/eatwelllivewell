@@ -1714,6 +1714,26 @@
           <div class="nw-grid2" style="margin-top:16px">
             <div class="nw-goal"><span>This week</span><strong>{{ current_macro.days_logged }}/7 days logged</strong></div>
             <div class="nw-goal"><span>Average protein</span><strong>{{ current_macro.avg_protein if current_macro.avg_protein is not none else "—" }}{% if current_macro.avg_protein is not none %} g{% endif %}</strong></div>
+
+            {# Fibre is already stored in each daily macro row.  Calculate the
+               current coaching-week average here from the exact Data-grid rows,
+               so no backend/service change is needed. #}
+            {% set fibre_ns = namespace(total=0.0, count=0) %}
+            {% for fibre_week in history_weeks %}
+              {% if fibre_week.is_current_week %}
+                {% for fibre_row in fibre_week.rows %}
+                  {% if fibre_row.macro and fibre_row.macro.fibre_g is not none %}
+                    {% set fibre_ns.total = fibre_ns.total + (fibre_row.macro.fibre_g | float) %}
+                    {% set fibre_ns.count = fibre_ns.count + 1 %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+            <div class="nw-goal">
+              <span>Average fibre</span>
+              <strong>{% if fibre_ns.count %}{{ (fibre_ns.total / fibre_ns.count) | round(1) }} g{% else %}—{% endif %}</strong>
+            </div>
+
             <div class="nw-goal"><span>Average calories</span><strong>{{ current_macro.avg_calories if current_macro.avg_calories is not none else "—" }}{% if current_macro.avg_calories is not none %} kcal{% endif %}</strong></div>
           </div>
           {% endif %}
