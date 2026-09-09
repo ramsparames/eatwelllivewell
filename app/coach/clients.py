@@ -55,6 +55,7 @@ from app.services.coaching_insights_service import (
 
 from app.services.coaching_workflow_service import (
     get_weekly_reflection,
+    save_coach_weekly_feedback,
 )
 
 from app.services.client_portal_service import (
@@ -1540,25 +1541,6 @@ def client_profile(
     profile["current_week_start"] = week_start
     profile["current_week_end"] = week_end
 
-    # SETUP STATE:
-    # A brand-new client has no intake/start date yet. The template already
-    # has a dedicated setup screen (`{% if not intake %}`), so return it now
-    # instead of running the normal coaching-workspace services. Several of
-    # those services assume an established coaching week and are irrelevant
-    # until intake/setup has been completed.
-    if not profile.get("intake"):
-        return templates.TemplateResponse(
-            "coach/client_workspace.html",
-            {
-                "request": request,
-                "active_nav": "clients",
-                "action_library": ACTION_LIBRARY,
-                "call_time_slots": CALL_TIME_SLOTS,
-                "custom_action_slot_count": 5,
-                **profile,
-            },
-        )
-
     # Weekly Check-in can browse the client's coaching history using the
     # exact same week boundaries as the Client Portal.
     requested_week = request.query_params.get("week")
@@ -1749,13 +1731,9 @@ def client_profile(
     # Coaching intelligence for the current client workspace.
     # These are computed before TemplateResponse so the Jinja context never
     # references undefined variables.
-    coaching_week_summary = (
-        get_client_weekly_summary(
-            client_id,
-            week_start=week_start,
-        )
-        if week_start is not None
-        else {}
+    coaching_week_summary = get_client_weekly_summary(
+        client_id,
+        week_start=week_start,
     )
     progress_charts = get_client_progress_charts(
         client_id,
@@ -2451,6 +2429,16 @@ def save_current_week_coaching(
         coach_support=coach_support.strip() or None,
         client_feedback=weekly_client_feedback.strip() or None,
         private_coach_note=weekly_private_note.strip() or None,
+    )
+
+    # Keep the client-visible weekly note in the dedicated feedback table.
+    # The client Home and Progress pages read from this table.
+    save_coach_weekly_feedback(
+        client_id=client_id,
+        week_start=week_start,
+        client_feedback=weekly_client_feedback.strip() or None,
+        private_note=weekly_private_note.strip() or None,
+        checkin_id=saved_checkin_id,
     )
 
     assignments = _submitted_assignments(
