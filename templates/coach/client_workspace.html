@@ -248,6 +248,200 @@
     border-top: 2px solid var(--coach-border) !important;
 }
 </style>
+
+<style>
+/* ===== Coach Data grid — mirror the client My Data visual language ===== */
+.nw-data-week {
+    border: 1px solid #dccfe3 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    margin-bottom: 28px !important;
+    padding: 0 !important;
+}
+
+.nw-data-week + .nw-data-week {
+    margin-top: 28px !important;
+    padding-top: 0 !important;
+    border-top: 1px solid #dccfe3 !important;
+}
+
+.nw-data-week-head {
+    padding: 14px 18px !important;
+    background: #fbf8fc !important;
+    border-bottom: 1px solid #e6dce9 !important;
+}
+
+.nw-data-week-head > div {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 10px !important;
+}
+
+.nw-data-week-head strong {
+    font-size: 16px !important;
+    color: #2d2730 !important;
+}
+
+.nw-data-week-head span {
+    color: #756d79 !important;
+}
+
+.nw-data-week-head .nw-cell-state.done {
+    color: #2d7a4c !important;
+    background: #e8f5ed !important;
+}
+
+.nw-transposed-wrap {
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+.nw-excel.nw-transposed {
+    border-collapse: collapse !important;
+    width: 100% !important;
+}
+
+.nw-excel.nw-transposed th,
+.nw-excel.nw-transposed td {
+    border: 1px solid #e6dce9 !important;
+    height: 62px !important;
+}
+
+.nw-excel.nw-transposed thead th {
+    background: #f8f0fa !important;
+    color: #514a55 !important;
+    text-align: center !important;
+    padding: 12px 8px !important;
+}
+
+.nw-excel.nw-transposed thead th:first-child {
+    text-align: left !important;
+    padding-left: 16px !important;
+    text-transform: uppercase !important;
+    letter-spacing: .08em !important;
+    font-size: 12px !important;
+}
+
+.nw-date-head {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
+}
+
+.nw-date-head .nw-day {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    letter-spacing: .08em !important;
+    text-transform: uppercase !important;
+}
+
+.nw-date-head .nw-date {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+.nw-excel.nw-transposed .nw-metric-head {
+    width: 28% !important;
+    min-width: 255px !important;
+    text-align: left !important;
+    padding: 12px 16px !important;
+    background: #fcfafc !important;
+    color: #2d2730 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+}
+
+.nw-excel.nw-transposed .nw-row-section .nw-metric-head,
+.nw-excel.nw-transposed .nw-row-section td {
+    background: #f8f0fa !important;
+    height: 44px !important;
+}
+
+.nw-excel.nw-transposed .nw-row-section .nw-metric-head {
+    color: #6812a3 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .08em !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+
+.nw-excel.nw-transposed tbody td {
+    text-align: center !important;
+    vertical-align: middle !important;
+    background: #fff !important;
+    padding: 10px 8px !important;
+}
+
+.nw-readonly-value {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 78px !important;
+    min-height: 36px !important;
+    padding: 6px 12px !important;
+    border: 1px solid #ddd3e1 !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    color: #201b22 !important;
+    font-weight: 500 !important;
+}
+
+.nw-calorie-cell strong {
+    font-weight: 800 !important;
+    color: #282229 !important;
+}
+
+.nw-commitment-label {
+    text-align: left !important;
+}
+
+.nw-commitment-name {
+    display: block !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+}
+
+.nw-commitment-target {
+    display: block !important;
+    margin: 5px 0 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #7b717d !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+}
+
+.nw-action-cell .yes {
+    color: #6812a3 !important;
+    font-size: 22px !important;
+    font-weight: 900 !important;
+}
+.nw-action-cell .no {
+    color: #8d878f !important;
+    font-size: 20px !important;
+}
+.nw-action-cell .na {
+    color: #b5adb8 !important;
+}
+
+.nw-week-measurements {
+    padding: 14px 18px 16px !important;
+    background: #fff !important;
+    border-top: 1px solid #e6dce9 !important;
+}
+
+.nw-measurement-title {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+}
+</style>
+
 <style>
 .nw,.nw *{box-sizing:border-box}.nw{max-width:1180px;margin:0 auto;color:var(--coach-text)}
 .nw-top{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:22px}
@@ -1761,15 +1955,15 @@
               </thead>
               <tbody>
                 <tr><th class="nw-metric-head">Check-in</th>{% for row in week.rows %}<td>{% if row.submitted %}<span class="yes">✓</span>{% else %}<span class="na">—</span>{% endif %}</td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Steps</th>{% for row in week.rows %}<td>{{ "{:,}".format(row.steps) if row.steps is not none else "—" }}</td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Weight</th>{% for row in week.rows %}<td>{% if row.weight_kg is not none %}{{ row.weight_kg }} kg{% else %}—{% endif %}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Steps</th>{% for row in week.rows %}<td><span class="nw-readonly-value">{{ "{:,}".format(row.steps) if row.steps is not none else "—" }}</span></td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Weight</th>{% for row in week.rows %}<td><span class="nw-readonly-value">{% if row.weight_kg is not none %}{{ row.weight_kg }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
                 {% if macro_settings.enabled %}
                 <tr class="nw-row-section"><th class="nw-metric-head">Nutrition</th>{% for row in week.rows %}<td></td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Protein</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Carbs</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Fat</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Fibre</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.fibre_g is not none %}{{ macro.fibre_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Calories</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Protein</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.protein_g is not none %}{{ macro.protein_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Carbs</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Fat</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.fat_g is not none %}{{ macro.fat_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Fibre</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.fibre_g is not none %}{{ macro.fibre_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Calories</th>{% for row in week.rows %}{% set macro=row.macro %}<td class="nw-calorie-cell">{% if macro and macro.calories is not none %}<strong>{{ macro.calories }}</strong>{% else %}—{% endif %}</td>{% endfor %}</tr>
                 {% endif %}
                 {% set week_actions = (week.rows[0].week_actions if week.rows and week.rows[0].week_actions is defined else []) %}
                 {% if week_actions %}
