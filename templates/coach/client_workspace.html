@@ -26,32 +26,14 @@
 .nw-data-week-head>div{display:flex;align-items:baseline;gap:9px}.nw-data-week-head strong{font-size:13px}.nw-data-week-head span{font-size:10px;color:var(--coach-muted)}
 .nw-transposed-wrap{border:0;border-radius:0;max-height:none!important}
 .nw-excel.nw-transposed{min-width:760px;width:100%;font-size:10px!important}
-.nw-excel.nw-transposed thead th{min-width:88px;text-align:center}.nw-excel.nw-transposed thead th small{display:block;margin-top:3px;font-size:8px;text-transform:none;letter-spacing:0}
+.nw-excel.nw-transposed thead th{min-width:88px;text-align:center!important;vertical-align:middle!important}.nw-excel.nw-transposed .nw-day-label{display:block;font-size:10px!important;font-weight:900;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}.nw-excel.nw-transposed .nw-date-label{display:block;margin-top:4px;font-size:10px!important;font-weight:800;letter-spacing:.02em;text-transform:uppercase;line-height:1.1}
 .nw-excel.nw-transposed .nw-metric-head{position:sticky;left:0;z-index:5;min-width:190px;max-width:240px;text-align:left;background:#faf7fb;white-space:normal}
-.nw-excel.nw-transposed thead .nw-metric-head{z-index:8}.nw-excel.nw-transposed tbody td{text-align:center}
+.nw-excel.nw-transposed thead .nw-metric-head{z-index:8}.nw-excel.nw-transposed tbody td{text-align:center!important;vertical-align:middle!important}.nw-excel.nw-transposed .nw-action-cell{text-align:center!important;vertical-align:middle!important}.nw-excel.nw-transposed tbody td .yes,.nw-excel.nw-transposed tbody td .no,.nw-excel.nw-transposed tbody td .na{display:inline-flex;align-items:center;justify-content:center;min-width:22px;min-height:22px;margin:0 auto}
 .nw-excel.nw-transposed .nw-note-cell{min-width:110px;white-space:normal;text-align:left;line-height:1.35}
 .nw-excel.nw-transposed .nw-row-section th,.nw-excel.nw-transposed .nw-row-section td{background:#f5eff7;font-size:8px;text-transform:uppercase;letter-spacing:.05em;font-weight:900;color:var(--coach-purple)}
 .nw-excel.nw-transposed .nw-metric-head small{display:block;margin-top:2px;color:var(--coach-muted);font-size:8px;font-weight:700}
 .nw-week-measurements{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:#fff;border-top:1px solid var(--coach-border);font-size:9px;color:var(--coach-muted)}.nw-week-measurements strong{color:var(--coach-purple)}
 .nw-data-orientation-note{font-size:9px;font-weight:800;color:var(--coach-muted);padding:8px 10px;border:1px solid var(--coach-border);border-radius:9px;background:#fff}
-
-.nw-week-context-grid-single{grid-template-columns:1fr}
-
-/* Split weekly coaching: selected week vs following-week plan */
-.nw-week-split{display:grid;gap:18px}
-.nw-week-part{border:1px solid var(--coach-border);border-radius:18px;background:#fff;overflow:hidden}
-.nw-week-part-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;padding:18px 20px;border-bottom:1px solid var(--coach-border);background:#fbf8fc}
-.nw-week-part-head.current{background:#faf5fc}
-.nw-week-part-head.next{background:#f8fbf7}
-.nw-week-part-head h2{margin:2px 0 0;font-size:20px}
-.nw-week-part-head p{margin:5px 0 0;color:var(--coach-muted);font-size:12px}
-.nw-week-part-badge{white-space:nowrap;padding:6px 9px;border-radius:999px;background:#fff;border:1px solid var(--coach-border);color:var(--coach-purple);font-size:10px;font-weight:850}
-.nw-week-part-body{padding:20px}
-.nw-section-save{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:18px;padding-top:16px;border-top:1px solid var(--coach-border)}
-.nw-section-save p{margin:0;color:var(--coach-muted);font-size:11px}
-.nw-final-week{padding:18px 20px;border:1px solid #e6dbea;border-radius:14px;background:#fbf8fc}
-.nw-final-week h3{margin:0;font-size:16px}.nw-final-week p{margin:5px 0 0;color:var(--coach-muted);font-size:11px}
-
 </style>
 
 <style>
@@ -59,150 +41,6 @@
 .nw-progress-intro h2{margin:0;font-size:21px}
 .nw-progress-intro p:last-child{margin:5px 0 0;color:var(--coach-muted);font-size:13px}
 .nw-progress-moved{margin-bottom:12px}
-</style>
-
-
-<style>
-/* FINAL COACH DATA GRID FIX */
-.nw-transposed-history{
-  display:grid !important;
-  gap:26px !important;
-  margin-top:18px !important;
-}
-.nw-data-week{
-  overflow:hidden !important;
-  border:1px solid var(--coach-border) !important;
-  border-radius:14px !important;
-  background:#fff !important;
-}
-.nw-data-week-head{
-  padding:13px 15px !important;
-}
-.nw-excel.nw-transposed{
-  width:100% !important;
-  min-width:760px !important;
-}
-.nw-excel.nw-transposed th,
-.nw-excel.nw-transposed td{
-  vertical-align:middle !important;
-}
-.nw-excel.nw-transposed thead th{
-  min-width:88px !important;
-  text-align:center !important;
-  vertical-align:middle !important;
-  white-space:nowrap !important;
-}
-.nw-excel.nw-transposed .nw-metric-head{
-  min-width:210px !important;
-  max-width:270px !important;
-  text-align:center !important;
-  vertical-align:middle !important;
-  white-space:normal !important;
-}
-.nw-excel.nw-transposed tbody td,
-.nw-excel.nw-transposed td.nw-action-cell,
-.nw-excel.nw-transposed td.nw-note-cell{
-  text-align:center !important;
-  vertical-align:middle !important;
-}
-.nw-excel.nw-transposed td.nw-note-cell{
-  white-space:normal !important;
-  line-height:1.35 !important;
-}
-.nw-date-head{
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:4px !important;
-  line-height:1.05 !important;
-}
-.nw-date-head .nw-day{
-  display:block !important;
-  font-size:10px !important;
-  font-weight:900 !important;
-  letter-spacing:.07em !important;
-  text-transform:uppercase !important;
-}
-.nw-date-head .nw-date{
-  display:block !important;
-  font-size:9px !important;
-  font-weight:800 !important;
-  letter-spacing:.02em !important;
-  text-transform:uppercase !important;
-}
-.nw-excel.nw-transposed .yes,
-.nw-excel.nw-transposed .no,
-.nw-excel.nw-transposed .na{
-  display:inline-flex !important;
-  min-width:22px !important;
-  min-height:22px !important;
-  margin:0 auto !important;
-  align-items:center !important;
-  justify-content:center !important;
-  text-align:center !important;
-}
-.nw-excel.nw-transposed .nw-metric-head > strong,
-.nw-excel.nw-transposed .nw-metric-head > span{
-  display:block !important;
-  text-align:center !important;
-}
-.nw-excel.nw-transposed .nw-metric-head small{
-  display:block !important;
-  margin-top:4px !important;
-  text-align:center !important;
-  color:var(--coach-muted) !important;
-  font-size:8px !important;
-  font-weight:750 !important;
-}
-
-/* Measurements are a distinct footer card, not a sentence between weeks. */
-.nw-week-measurements{
-  display:block !important;
-  padding:14px 16px !important;
-  border-top:1px solid var(--coach-border) !important;
-  background:#fcfafc !important;
-  font-size:10px !important;
-}
-.nw-measurement-title{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-  gap:10px !important;
-  margin-bottom:9px !important;
-}
-.nw-measurement-title strong{
-  color:var(--coach-ink) !important;
-  font-size:11px !important;
-}
-.nw-measurement-date{
-  color:var(--coach-purple) !important;
-  font-size:9px !important;
-  font-weight:850 !important;
-}
-.nw-measurement-values{
-  display:flex !important;
-  flex-wrap:wrap !important;
-  gap:7px !important;
-}
-.nw-measurement-chip{
-  display:inline-flex !important;
-  align-items:center !important;
-  padding:6px 9px !important;
-  border:1px solid var(--coach-border) !important;
-  border-radius:999px !important;
-  background:#fff !important;
-  color:var(--coach-ink) !important;
-  font-size:9px !important;
-  font-weight:750 !important;
-}
-.nw-measurement-empty{
-  padding:9px 11px !important;
-  border-radius:9px !important;
-  background:#f5f2f6 !important;
-  color:var(--coach-muted) !important;
-  font-size:10px !important;
-}
 </style>
 
 {% endblock %}
@@ -1289,7 +1127,17 @@
       {% endif %}
     </section>
 
-    <div class="nw-week-context-grid nw-week-context-grid-single">
+    <div class="nw-week-context-grid">
+      <div class="nw-week-context-card">
+        <h3>Client notes / reflection</h3>
+        {% if call_prep.client_notes %}
+          {% for note in call_prep.client_notes[-3:] %}
+          <div class="nw-review-client-note"><strong>{{ note.date.strftime("%d %b") }}</strong><p>{{ note.note }}</p></div>
+          {% endfor %}
+        {% else %}
+          <p class="nw-helper">No client notes entered this week.</p>
+        {% endif %}
+      </div>
       <div class="nw-week-context-card">
         <h3>Needs attention</h3>
         {% if call_prep.attention %}
@@ -1322,104 +1170,7 @@
 
 </section>
 
-
 <section class="nw-panel-tab" data-panel="weekly">
-
-{% macro commitment_builder(prefix, defaults, custom_actions, custom_slots, week_number, carry_label=false) %}
-  <p class="nw-helper nw-action-help">
-    <strong>{% if carry_label %}Current commitments are carried forward by default.{% else %}These are the commitments for Week {{ week_number }}.{% endif %}</strong>
-    Check what should stay active, change targets, uncheck what should stop, or add a new action.
-  </p>
-  <div class="nw-library">
-    {% for category in action_library %}
-    <details class="nw-library-group">
-      <summary class="nw-library-summary">{{ category["category"] }}</summary>
-      <div class="nw-levels">
-        {% for level in category["levels"] %}
-        <div class="nw-level">
-          <div class="nw-level-title">{{ level["level"] }}</div>
-          <div class="nw-library-items">
-            {% for action in level["items"] %}
-            {% set saved=defaults.get(action["key"]) %}
-            <div class="nw-action-row {% if saved %}carried-forward{% endif %}">
-              <label class="nw-action-choice">
-                <input type="checkbox"
-                       name="{{ prefix }}_action_keys"
-                       value="{{ action["key"] }}"
-                       {% if saved %}checked{% endif %}>
-                <input type="hidden" name="{{ prefix }}_action_all_keys" value="{{ action["key"] }}">
-                <span>
-                  <strong>{{ action["name"] }}</strong>
-                  <small>{{ action["habit"] }}{% if saved %} · saved for Week {{ week_number }}{% endif %}</small>
-                </span>
-              </label>
-              <div class="nw-action-frequency">
-                <select class="nw-select nw-frequency-count" name="{{ prefix }}_action_target_counts">
-                  <option value="">Target</option>
-                  {% for n in range(1,8) %}
-                  <option value="{{ n }}" {% if saved and saved["target_count"] == n %}selected{% endif %}>{{ n }}</option>
-                  {% endfor %}
-                </select>
-                <select class="nw-select nw-frequency-unit" name="{{ prefix }}_action_target_units">
-                  {% set selected_unit = saved["target_unit"] if saved else action["target_unit"] %}
-                  <option value="days" {% if selected_unit=="days" %}selected{% endif %}>days</option>
-                  <option value="sessions" {% if selected_unit=="sessions" %}selected{% endif %}>sessions</option>
-                  <option value="times" {% if selected_unit=="times" %}selected{% endif %}>times</option>
-                </select>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-    </details>
-    {% endfor %}
-  </div>
-
-  <details class="nw-custom">
-    <summary>Custom actions{% if custom_actions %} · {{ custom_actions|length }} saved{% endif %}</summary>
-    <p class="nw-helper" style="margin:8px 0">Keep, edit, remove with ×, or add a custom commitment.</p>
-    <div class="nw-custom-list">
-      {% for custom_index in range(custom_slots) %}
-      {% set saved_custom = custom_actions[custom_index] if custom_index < custom_actions|length else none %}
-      <div class="nw-custom-row {% if saved_custom %}carried-forward{% endif %}">
-        <input type="hidden"
-               name="{{ prefix }}_custom_action_keys"
-               value="{{ saved_custom['action_key'] if saved_custom and saved_custom.get('action_key') else '' }}">
-        <input class="nw-input"
-               name="{{ prefix }}_custom_action_names"
-               value="{{ saved_custom['name'] if saved_custom else '' }}"
-               placeholder="Custom action {{ custom_index + 1 }}">
-        <select class="nw-select" name="{{ prefix }}_custom_target_counts">
-          <option value="">Target</option>
-          {% for n in range(1,8) %}
-          <option value="{{ n }}" {% if saved_custom and saved_custom["target_count"] == n %}selected{% endif %}>{{ n }}</option>
-          {% endfor %}
-        </select>
-        <select class="nw-select" name="{{ prefix }}_custom_target_units">
-          {% set custom_unit = saved_custom["target_unit"] if saved_custom else "days" %}
-          <option value="days" {% if custom_unit=="days" %}selected{% endif %}>days</option>
-          <option value="sessions" {% if custom_unit=="sessions" %}selected{% endif %}>sessions</option>
-          <option value="times" {% if custom_unit=="times" %}selected{% endif %}>times</option>
-        </select>
-        <button class="nw-remove-custom" type="button" title="Remove this action"
-          onclick="
-            var r=this.closest('.nw-custom-row');
-            if(r){
-              var inputs=r.querySelectorAll('input');
-              var s=r.querySelectorAll('select');
-              inputs.forEach(function(i){i.value='';});
-              if(s[0])s[0].selectedIndex=0;
-              if(s[1])s[1].selectedIndex=0;
-              r.classList.remove('carried-forward');
-            }
-          ">×</button>
-      </div>
-      {% endfor %}
-    </div>
-  </details>
-{% endmacro %}
 
   <header class="nw-weekly-page-head">
     <div>
@@ -1430,215 +1181,250 @@
     <a href="/dashboard/clients/{{ client.id }}">← Back to Overview</a>
   </header>
 
-  <div class="nw-coach-week-browser">
-    {% if coach_week_can_previous %}
-      <a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number - 1 }}">←</a>
-    {% else %}
-      <span class="nw-coach-week-nav disabled">←</span>
-    {% endif %}
-    <div class="nw-coach-week-main">
-      <strong>Week {{ coach_week_number }}</strong>
-      <span>{{ coach_week_start.strftime("%d %b") }} – {{ coach_week_end.strftime("%d %b %Y") }}</span>
-      {% if coach_week_is_current %}
-        <span class="nw-coach-week-mode">Current week</span>
-      {% elif coach_week_is_past %}
-        <span class="nw-coach-week-mode readonly">Saved coaching week · editable</span>
-      {% else %}
-        <span class="nw-coach-week-mode future">Upcoming week</span>
-      {% endif %}
-    </div>
-    {% if coach_week_can_next %}
-      <a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number + 1 }}">→</a>
-    {% else %}
-      <span class="nw-coach-week-nav disabled">→</span>
-    {% endif %}
+<div class="nw-coach-week-browser">
+    {% if coach_week_can_previous %}<a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number - 1 }}">←</a>{% else %}<span class="nw-coach-week-nav disabled">←</span>{% endif %}
+    <div class="nw-coach-week-main"><strong>Week {{ coach_week_number }}</strong><span>{{ coach_week_start.strftime("%d %b") }} – {{ coach_week_end.strftime("%d %b %Y") }}</span>{% if coach_week_is_current %}<span class="nw-coach-week-mode">Current week</span>{% elif coach_week_is_past %}<span class="nw-coach-week-mode readonly">Saved coaching week · editable</span>{% else %}<span class="nw-coach-week-mode future">Upcoming week</span>{% endif %}</div>
+    {% if coach_week_can_next %}<a class="nw-coach-week-nav" href="/dashboard/clients/{{ client.id }}?tab=weekly&week={{ coach_week_number + 1 }}">→</a>{% else %}<span class="nw-coach-week-nav disabled">→</span>{% endif %}
   </div>
 
   <div class="nw-review">
-  {% if not coach_week_is_future %}
-    <div class="nw-week-split">
-
-      <!-- PART 1: SELECTED/CURRENT WEEK -->
-      <section class="nw-week-part">
-        <div class="nw-week-part-head current">
-          <div>
-            <p class="nw-kicker" style="margin:0 0 4px">CURRENT WEEK</p>
-            <h2>Week {{ coach_week_number }} — Review & commitments</h2>
-            <p>Everything in this section belongs to Week {{ coach_week_number }} only.</p>
-          </div>
-          <span class="nw-week-part-badge">{{ coach_week_start.strftime("%d %b") }} – {{ coach_week_end.strftime("%d %b") }}</span>
-        </div>
-
-        <form method="post"
-              action="/dashboard/clients/{{ client.id }}/weekly/current"
-              class="nw-week-part-body nw-call">
-          <input type="hidden" name="selected_week_number" value="{{ coach_week_number }}">
-
-          <div style="max-width:360px">
-            <label>
-              <span class="nw-label">Coaching date</span>
-              <input class="nw-input" type="date" name="call_date"
-                     value="{{ coach_week_checkin.call_date if coach_week_checkin else coach_week_end }}" required>
-              {% if coach_week_checkin %}
-              <input type="hidden" name="checkin_id" value="{{ coach_week_checkin.id }}">
-              {% endif %}
-            </label>
-            <p class="nw-helper">The date of this coaching conversation.</p>
-          </div>
-
-          <div class="nw-call-notes">
-            <label><span class="nw-label">Wins</span><textarea class="nw-textarea" name="wins">{{ coach_week_checkin.wins or "" if coach_week_checkin else "" }}</textarea></label>
-            <label><span class="nw-label">Struggles</span><textarea class="nw-textarea" name="struggles">{{ coach_week_checkin.struggles or "" if coach_week_checkin else "" }}</textarea></label>
-            <label><span class="nw-label">Agreed focus</span><textarea class="nw-textarea" name="improvements_needed">{{ coach_week_checkin.improvements_needed or "" if coach_week_checkin else "" }}</textarea></label>
-            <label><span class="nw-label">Coach notes / support</span><textarea class="nw-textarea" name="coach_support">{{ coach_week_checkin.coach_support or "" if coach_week_checkin else "" }}</textarea></label>
-          </div>
-
-          <div class="nw-next">
-            <p class="nw-kicker" style="margin:0 0 4px">WEEK {{ coach_week_number }} COMMITMENTS</p>
-            <h3>Commitments for this week</h3>
-            <p>Adjust the commitments that belong to Week {{ coach_week_number }}. Saving here never changes Week {{ next_week_number if next_week_number else coach_week_number + 1 }}.</p>
-            {{ commitment_builder("current", current_action_defaults, current_custom_actions, current_custom_action_slot_count, coach_week_number, false) }}
-          </div>
-
-          <section class="nw-workflow-card">
-            <div class="nw-workflow-head">
-              <div>
-                <p class="nw-kicker" style="margin:0 0 4px">COACHING NOTE</p>
-                <h3>What the client should take from Week {{ coach_week_number }}</h3>
-              </div>
-            </div>
-            <div class="nw-grid2">
-              <label>
-                <span class="nw-label">Note for client <small style="font-weight:600;text-transform:none">· visible in her portal</small></span>
-                <textarea class="nw-input nw-textarea" name="weekly_client_feedback"
-                  placeholder="What should she feel proud of, and what should she focus on?">{{ coach_week_checkin.client_feedback or "" if coach_week_checkin else "" }}</textarea>
-              </label>
-              <label>
-                <span class="nw-label">Private coach note <small style="font-weight:600;text-transform:none">· only Sushma can see this</small></span>
-                <textarea class="nw-input nw-textarea" name="weekly_private_note"
-                  placeholder="Only Sushma can see this.">{{ coach_week_checkin.private_coach_note or "" if coach_week_checkin else "" }}</textarea>
-              </label>
-            </div>
-          </section>
-
-          <div class="nw-section-save">
-            <p>Saves only the Week {{ coach_week_number }} coaching record and Week {{ coach_week_number }} commitments.</p>
-            <button class="nw-btn nw-primary" type="submit">Save Week {{ coach_week_number }}</button>
-          </div>
-        </form>
-      </section>
-
-      <!-- PART 2: FOLLOWING WEEK -->
-      {% if has_next_program_week and next_week_number %}
-      <section class="nw-week-part">
-        <div class="nw-week-part-head next">
-          <div>
-            <p class="nw-kicker" style="margin:0 0 4px">NEXT WEEK</p>
-            <h2>Week {{ next_week_number }} — Plan</h2>
-            <p>This section saves directly into Week {{ next_week_number }}, even when you are viewing Week {{ coach_week_number }}.</p>
-          </div>
-          <span class="nw-week-part-badge">{{ next_week_start.strftime("%d %b") }} – {{ next_week_end.strftime("%d %b") }}</span>
-        </div>
-
-        <form method="post"
-              action="/dashboard/clients/{{ client.id }}/weekly/next"
-              class="nw-week-part-body">
-          <input type="hidden" name="source_week_number" value="{{ coach_week_number }}">
-          <input type="hidden" name="plan_week_number" value="{{ next_week_number }}">
-
-          <div class="nw-next">
-            <p class="nw-kicker" style="margin:0 0 4px">WEEK {{ next_week_number }} COMMITMENTS</p>
-            <h3>Plan the following week</h3>
-            <p>Week {{ coach_week_number }} commitments are used as the starting point when Week {{ next_week_number }} has not yet been planned.</p>
-            {{ commitment_builder("next", next_action_defaults, next_custom_actions, next_custom_action_slot_count, next_week_number, true) }}
-          </div>
-
-          <section class="nw-workflow-card" style="margin-top:16px">
-            <div class="nw-workflow-head">
-              <div>
-                <p class="nw-kicker" style="margin:0 0 4px">WEEKLY PLAN BUILDER</p>
-                <h3>Workouts for Week {{ next_week_number }}</h3>
-                <p class="nw-helper">Choose the strength sessions to publish with Week {{ next_week_number }}.</p>
-              </div>
-            </div>
-            {% if available_workouts %}
-            <div class="nw-workout-plan-grid">
-              {% for workout in available_workouts if workout.active %}
-              <label class="nw-plan-workout">
-                <input type="checkbox" name="workout_ids" value="{{ workout.id }}">
-                <span>
-                  <strong>{{ workout.title }}</strong>
-                  <small>{{ workout.exercise_count or 0 }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}</small>
-                </span>
-              </label>
-              {% endfor %}
-            </div>
-            {% else %}
-            <p class="nw-helper">No active workouts in the library yet.</p>
+{% if not coach_week_is_future %}
+      <form method="post" action="/dashboard/clients/{{ client.id }}/checkin" class="nw-panel nw-pad nw-call">
+        <div class="nw-heading"><div><p class="nw-kicker" style="margin-top:0">COACH</p><h2>Capture the conversation</h2><p>Record what came out of the coaching conversation.</p></div></div>
+        <div style="max-width:360px">
+          <label>
+            <span class="nw-label">Coaching date</span>
+            <input class="nw-input" type="date" name="call_date"
+                   value="{{ coach_week_checkin.call_date if coach_week_checkin else coach_week_end }}" required>
+            {% if coach_week_checkin %}
+            <input type="hidden" name="checkin_id" value="{{ coach_week_checkin.id }}">
             {% endif %}
-          </section>
+          </label>
+          <p class="nw-helper">The date of this coaching conversation.</p>
+        </div>
+        <div class="nw-call-notes">
+          <label><span class="nw-label">Wins</span><textarea class="nw-textarea" name="wins">{{ coach_week_checkin.wins or "" if coach_week_checkin else "" }}</textarea></label>
+          <label><span class="nw-label">Struggles</span><textarea class="nw-textarea" name="struggles">{{ coach_week_checkin.struggles or "" if coach_week_checkin else "" }}</textarea></label>
+          <label><span class="nw-label">Agreed focus</span><textarea class="nw-textarea" name="improvements_needed">{{ coach_week_checkin.improvements_needed or "" if coach_week_checkin else "" }}</textarea></label>
+          <label><span class="nw-label">Coach notes / support</span><textarea class="nw-textarea" name="coach_support">{{ coach_week_checkin.coach_support or "" if coach_week_checkin else "" }}</textarea></label>
+        </div>
 
-          <div class="nw-section-save">
-            <p>Saves only the Week {{ next_week_number }} commitments{% if available_workouts %} and selected workouts{% endif %}. Week {{ coach_week_number }} stays unchanged.</p>
-            <button class="nw-btn nw-primary" type="submit">Save Week {{ next_week_number }} Commitments</button>
+        <div class="nw-next"><p class="nw-kicker" style="margin:0 0 4px">PLAN</p><h3>Week {{ next_week_number }} commitments</h3><p>{{ next_week_start.strftime("%d %b %Y") }} – {{ next_week_end.strftime("%d %b %Y") }} · Current commitments are carried forward by default. Change only what should be different.</p>
+
+          <p class="nw-helper nw-action-help"><strong>Current actions are selected by default.</strong> Leave them checked to carry them into Week {{ next_week_number }}, uncheck anything you want to stop, adjust the target if needed, and add any new actions.</p>
+          <div class="nw-library">
+            {% for category in action_library %}
+            <details class="nw-library-group">
+              <summary class="nw-library-summary">{{ category["category"] }}</summary>
+              <div class="nw-levels">
+                {% for level in category["levels"] %}
+                <div class="nw-level">
+                  <div class="nw-level-title">{{ level["level"] }}</div>
+                  <div class="nw-library-items">
+                    {% for action in level["items"] %}
+                    {% set already=action["name"] in next_week_action_names %}
+                    {% set carried=carry_forward_action_defaults.get(action["key"]) %}
+                    <div class="nw-action-row {% if already %}disabled{% elif carried %}carried-forward{% endif %}">
+                      <label class="nw-action-choice">
+                        <input
+                          type="checkbox"
+                          name="action_keys"
+                          value="{{ action["key"] }}"
+                          {% if carried or already %}checked{% endif %}>
+                        <input type="hidden" name="action_all_keys" value="{{ action["key"] }}">
+                        <span>
+                          <strong>{{ action["name"] }}</strong>
+                          <small>
+                            {{ action["habit"] }}
+                            {% if already %}
+                              · saved for Week {{ next_week_number }}
+                            {% elif carried %}
+                              · carrying forward
+                            {% endif %}
+                          </small>
+                        </span>
+                      </label>
+                      <div class="nw-action-frequency">
+                        <select class="nw-select nw-frequency-count" name="action_target_counts">
+                          <option value="">Target</option>
+                          {% for n in range(1,8) %}
+                          <option value="{{ n }}"
+                            {% if carried and carried["target_count"] == n %}selected{% endif %}>
+                            {{ n }}
+                          </option>
+                          {% endfor %}
+                        </select>
+                        <select class="nw-select nw-frequency-unit" name="action_target_units">
+                          {% set selected_unit = carried["target_unit"] if carried else action["target_unit"] %}
+                          <option value="days" {% if selected_unit=="days" %}selected{% endif %}>days</option>
+                          <option value="sessions" {% if selected_unit=="sessions" %}selected{% endif %}>sessions</option>
+                          <option value="times" {% if selected_unit=="times" %}selected{% endif %}>times</option>
+                        </select>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </details>
+            {% endfor %}
           </div>
-        </form>
-      </section>
+
+          <details class="nw-custom">
+        <summary>Custom actions for next week{% if carry_forward_custom_actions %} · {{ carry_forward_custom_actions|length }} carried forward{% endif %}</summary>
+        <p class="nw-helper" style="margin:8px 0">These custom actions are part of the standing plan too. Keep them, edit them, remove them with ×, or add new ones for this week's exception.</p>
+        <div class="nw-custom-list">
+          {% for custom_index in range(custom_action_slot_count) %}
+          {% set carried_custom = carry_forward_custom_actions[custom_index] if custom_index < carry_forward_custom_actions|length else none %}
+          <div class="nw-custom-row {% if carried_custom %}carried-forward{% endif %}">
+            <input type="hidden"
+                   name="custom_action_keys"
+                   value="{{ carried_custom['action_key'] if carried_custom and carried_custom.get('action_key') else '' }}">
+            <input class="nw-input"
+                   name="custom_action_names"
+                   value="{{ carried_custom['name'] if carried_custom else '' }}"
+                   placeholder="Custom action {{ custom_index + 1 }}">
+            <select class="nw-select" name="custom_target_counts">
+              <option value="">Target</option>
+              {% for n in range(1,8) %}
+              <option value="{{ n }}" {% if carried_custom and carried_custom["target_count"] == n %}selected{% endif %}>{{ n }}</option>
+              {% endfor %}
+            </select>
+            <select class="nw-select" name="custom_target_units">
+              {% set custom_unit = carried_custom["target_unit"] if carried_custom else "days" %}
+              <option value="days" {% if custom_unit=="days" %}selected{% endif %}>days</option>
+              <option value="sessions" {% if custom_unit=="sessions" %}selected{% endif %}>sessions</option>
+              <option value="times" {% if custom_unit=="times" %}selected{% endif %}>times</option>
+            </select>
+            <button
+              class="nw-remove-custom"
+              type="reset"
+              title="Remove this action"
+              onclick="
+                var r=this.closest('.nw-custom-row');
+                if(r){
+                  var i=r.querySelector('input');
+                  var s=r.querySelectorAll('select');
+                  if(i)i.value='';
+                  if(s[0])s[0].selectedIndex=0;
+                  if(s[1])s[1].selectedIndex=0;
+                  r.classList.remove('carried-forward');
+                }
+                return false;
+              "
+            >×</button>
+          </div>
+          {% endfor %}
+        </div>
+      </details>
+        </div>
+
+        
+        
+        <section class="nw-workflow-card">
+          <div class="nw-workflow-head">
+            <div>
+              <p class="nw-kicker" style="margin:0 0 4px">Weekly plan builder</p>
+              <h3>Workouts for Week {{ next_week_number }}</h3>
+              <p class="nw-helper">Choose the strength sessions to publish with next week's actions.</p>
+            </div>
+          </div>
+          {% if available_workouts %}
+          <div class="nw-workout-plan-grid">
+            {% for workout in available_workouts if workout.active %}
+            <label class="nw-plan-workout">
+              <input type="checkbox" name="workout_ids" value="{{ workout.id }}">
+              <span>
+                <strong>{{ workout.title }}</strong>
+                <small>{{ workout.exercise_count or 0 }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}</small>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="nw-helper">No active workouts in the library yet.</p>
+          {% endif %}
+        </section>
+
+        <section class="nw-workflow-card">
+          <div class="nw-workflow-head">
+            <div>
+              <p class="nw-kicker" style="margin:0 0 4px">PUBLISH</p>
+              <h3>Note to client</h3>
+            </div>
+          </div>
+          <div class="nw-grid2">
+            <label>
+              <span class="nw-label">Note for client <small style="font-weight:600;text-transform:none">· visible in her portal</small></span>
+              <textarea class="nw-input nw-textarea" name="weekly_client_feedback"
+                placeholder="What should she feel proud of, and what should she focus on next?">{{ coach_week_checkin.client_feedback or "" if coach_week_checkin else "" }}</textarea>
+            </label>
+            <label>
+              <span class="nw-label">Private coach note <small style="font-weight:600;text-transform:none">· only Sushma can see this</small></span>
+              <textarea class="nw-input nw-textarea" name="weekly_private_note"
+                placeholder="Only Sushma can see this.">{{ coach_week_checkin.private_coach_note or "" if coach_week_checkin else "" }}</textarea>
+            </label>
+          </div>
+        </section>
+
+<section class="nw-next-call">
+          <div class="nw-next-call-copy">
+            <p class="nw-kicker" style="margin:0 0 4px">Before you finish</p>
+            <h3>Set the next coaching call</h3>
+            <p>Agree on the next weekly meeting with the client now. Synamate remains the scheduling source of truth.</p>
+          </div>
+
+          {% if next_synced_call and next_synced_call.local_start_time %}
+          <div class="nw-next-call-status">
+            <span>Next call already scheduled</span>
+            <strong>{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}</strong>
+            <small>Synced with Synamate</small>
+          </div>
+          {% if coaching_booking_url %}
+          <a class="nw-btn nw-soft nw-next-call-btn"
+             href="{{ coaching_booking_url }}"
+             target="_blank"
+             rel="noopener">
+            Reschedule in Synamate ↗
+          </a>
+          {% endif %}
+          {% elif coaching_booking_url %}
+          <div class="nw-next-call-status is-empty">
+            <span>Next call</span>
+            <strong>Not scheduled yet</strong>
+            <small>Choose the next slot together before ending the call. Client details are passed from NourisHer.</small>
+          </div>
+          <a class="nw-btn nw-primary nw-next-call-btn"
+             href="{{ coaching_booking_url }}"
+             target="_blank"
+             rel="noopener">
+            Schedule next call in Synamate ↗
+          </a>
+          {% else %}
+          <div class="nw-next-call-status is-empty">
+            <span>Next call</span>
+            <strong>Scheduling link not configured</strong>
+            <small>Add SYNAMATE_COACHING_CALL_URL to enable this button.</small>
+          </div>
+          {% endif %}
+
+          <p class="nw-next-call-note">Synamate opens in a new tab, so the notes and next-week actions on this page stay intact. After booking, publish the weekly plan; the webhook will sync the appointment automatically.</p>
+        </section>
+
+        <div class="nw-save"><p>Publish makes the Week {{ next_week_number }} commitments, workouts and coach note live for the client.</p><button class="nw-btn nw-primary" type="submit">{% if coach_week_checkin %}Save Week {{ coach_week_number }} changes{% else %}Publish Week {{ next_week_number }} →{% endif %}</button></div>
+      </form>
       {% else %}
-      <section class="nw-final-week">
-        <h3>Final program week</h3>
-        <p>Week {{ coach_week_number }} is the final week, so there is no following-week plan to create.</p>
+      <section class="nw-panel nw-pad">
+        <div class="nw-heading">
+          <div><p class="nw-kicker" style="margin-top:0">Upcoming</p><h2>Next coaching week</h2><p>Use the current week to complete the review and assign the action plan for this upcoming week.</p></div>
+        </div>
       </section>
       {% endif %}
-
-      <section class="nw-next-call">
-        <div class="nw-next-call-copy">
-          <p class="nw-kicker" style="margin:0 0 4px">Before you finish</p>
-          <h3>Set the next coaching call</h3>
-          <p>{% if has_next_program_week %}Agree on the next weekly meeting with the client now.{% else %}This is the final program week; schedule a wrap-up call only if needed.{% endif %} Synamate remains the scheduling source of truth.</p>
-        </div>
-
-        {% if next_synced_call and next_synced_call.local_start_time %}
-        <div class="nw-next-call-status">
-          <span>Next call already scheduled</span>
-          <strong>{{ next_synced_call.local_start_time.strftime("%d %b %Y · %I:%M %p") }}</strong>
-          <small>Synced with Synamate</small>
-        </div>
-        {% if coaching_booking_url %}
-        <a class="nw-btn nw-soft nw-next-call-btn" href="{{ coaching_booking_url }}" target="_blank" rel="noopener">Reschedule in Synamate ↗</a>
-        {% endif %}
-        {% elif coaching_booking_url %}
-        <div class="nw-next-call-status is-empty">
-          <span>Next call</span>
-          <strong>Not scheduled yet</strong>
-          <small>Client details are passed from NourisHer.</small>
-        </div>
-        <a class="nw-btn nw-primary nw-next-call-btn" href="{{ coaching_booking_url }}" target="_blank" rel="noopener">Schedule next call in Synamate ↗</a>
-        {% else %}
-        <div class="nw-next-call-status is-empty">
-          <span>Next call</span>
-          <strong>Scheduling link not configured</strong>
-          <small>Add SYNAMATE_COACHING_CALL_URL to enable this button.</small>
-        </div>
-        {% endif %}
-      </section>
-
     </div>
-  {% else %}
-    <section class="nw-panel nw-pad">
-      <div class="nw-heading">
-        <div>
-          <p class="nw-kicker" style="margin-top:0">Upcoming</p>
-          <h2>Next coaching week</h2>
-          <p>Open the current week to complete the review and prepare this upcoming week.</p>
-        </div>
-      </div>
-    </section>
-  {% endif %}
-  </div>
-</section>
+  </section>
 
-<section class="nw-panel-tab" data-panel="clientdata">
+  <section class="nw-panel-tab" data-panel="clientdata">
     <section class="nw-panel nw-pad">
       <div class="nw-grid-toolbar">
         <div>
@@ -1695,7 +1481,7 @@
               <thead>
                 <tr>
                   <th class="nw-metric-head">Data</th>
-                  {% for row in week.rows %}<th><div class="nw-date-head"><span class="nw-day">{{ row.date.strftime("%a") }}</span><span class="nw-date">{{ row.date.strftime("%d %b") }}</span></div></th>{% endfor %}
+                  {% for row in week.rows %}<th><span class="nw-day-label">{{ row.date.strftime("%a") }}</span><span class="nw-date-label">{{ row.date.strftime("%d %b") }}</span></th>{% endfor %}
                 </tr>
               </thead>
               <tbody>
@@ -1707,14 +1493,14 @@
                 <tr><th class="nw-metric-head">Protein</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.protein_g is not none %}{{ macro.protein_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
                 <tr><th class="nw-metric-head">Carbs</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
                 <tr><th class="nw-metric-head">Fat</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.fat_g is not none %}{{ macro.fat_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head">Fibre</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.fibre_g is not none %}{{ macro.fibre_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
                 <tr><th class="nw-metric-head">Calories</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</td>{% endfor %}</tr>
                 {% endif %}
-                {% set week_actions = (week.rows[0].week_actions if week.rows and week.rows[0].week_actions is defined else []) %}
-                {% if week_actions %}
+                {% if coach_history_grid.action_columns %}
                 <tr class="nw-row-section"><th class="nw-metric-head">Commitments</th>{% for row in week.rows %}<td></td>{% endfor %}</tr>
-                {% for action in week_actions %}
+                {% for action in coach_history_grid.action_columns %}
                 <tr>
-                  <th class="nw-metric-head"><strong>{{ action.name }}</strong>{% if action.target_count %}<small>{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}</th>
+                  <th class="nw-metric-head nw-commitment-label"><strong>{{ action.name }}</strong>{% if action.target_count %}<small class="nw-commitment-target">{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}</th>
                   {% for row in week.rows %}{% set cell=row.actions.get(action.id) %}<td class="nw-action-cell">{% if not cell or not cell.eligible %}<span class="na">·</span>{% elif cell.completed is true %}<span class="yes">✓</span>{% elif cell.completed is false %}<span class="no">○</span>{% else %}<span class="na">—</span>{% endif %}</td>{% endfor %}
                 </tr>
                 {% endfor %}
@@ -1724,22 +1510,16 @@
             </table>
           </div>
           <div class="nw-week-measurements">
-            <div class="nw-measurement-title">
-              <strong>Weekly measurements</strong>
-              {% if week.measurement %}<span class="nw-measurement-date">{{ week.measurement.measured_on.strftime("%d %b %Y") }}</span>{% endif %}
-            </div>
+            <strong>Weekly measurements</strong>
             {% if week.measurement %}
-            <div class="nw-measurement-values">
-              {% if week.measurement.upper_arm_cm is not none %}<span class="nw-measurement-chip">Arm · {{ week.measurement.upper_arm_cm }} cm</span>{% endif %}
-              {% if week.measurement.chest_cm is not none %}<span class="nw-measurement-chip">Chest · {{ week.measurement.chest_cm }} cm</span>{% endif %}
-              {% if week.measurement.waist_cm is not none %}<span class="nw-measurement-chip">Waist · {{ week.measurement.waist_cm }} cm</span>{% endif %}
-              {% if week.measurement.lower_abdomen_cm is not none %}<span class="nw-measurement-chip">Lower abdomen · {{ week.measurement.lower_abdomen_cm }} cm</span>{% endif %}
-              {% if week.measurement.hip_cm is not none %}<span class="nw-measurement-chip">Hip · {{ week.measurement.hip_cm }} cm</span>{% endif %}
-              {% if week.measurement.thigh_cm is not none %}<span class="nw-measurement-chip">Thigh · {{ week.measurement.thigh_cm }} cm</span>{% endif %}
-            </div>
-            {% else %}
-            <div class="nw-measurement-empty">No measurements entered for this week.</div>
-            {% endif %}
+              <span>{{ week.measurement.measured_on.strftime("%d %b %Y") }}</span>
+              {% if week.measurement.upper_arm_cm is not none %}<span>Arm {{ week.measurement.upper_arm_cm }} cm</span>{% endif %}
+              {% if week.measurement.chest_cm is not none %}<span>Chest {{ week.measurement.chest_cm }} cm</span>{% endif %}
+              {% if week.measurement.waist_cm is not none %}<span>Waist {{ week.measurement.waist_cm }} cm</span>{% endif %}
+              {% if week.measurement.lower_abdomen_cm is not none %}<span>Lower abdomen {{ week.measurement.lower_abdomen_cm }} cm</span>{% endif %}
+              {% if week.measurement.hip_cm is not none %}<span>Hip {{ week.measurement.hip_cm }} cm</span>{% endif %}
+              {% if week.measurement.thigh_cm is not none %}<span>Thigh {{ week.measurement.thigh_cm }} cm</span>{% endif %}
+            {% else %}<span>No measurements entered.</span>{% endif %}
           </div>
         </section>
         {% endfor %}
@@ -2014,3 +1794,30 @@
 .nw-timeline-date,.nw-timeline-copy p{font-size:11px!important}.nw-timeline-copy strong{font-size:13px!important;}
 </style>
 {% endblock %}
+
+
+<style>
+/* Coach Data grid polish */
+.nw-data-week {
+    margin-bottom: 30px;
+    padding-bottom: 26px;
+    border-bottom: 2px solid var(--coach-border);
+}
+.nw-data-week:last-child { border-bottom: 0; }
+
+.nw-transposed-history th:not(.nw-metric-head),
+.nw-transposed-history td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.nw-commitment-target {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #f3eef7;
+    white-space: nowrap;
+    font-weight: 650;
+}
+</style>
