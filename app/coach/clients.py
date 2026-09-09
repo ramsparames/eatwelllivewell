@@ -1768,6 +1768,29 @@ def client_profile(
     available_resources = list_resources()
     client_workouts = get_client_workouts(client_id)
     available_workouts = list_workouts()
+
+    # Weekly Coaching workout views are week-specific. Legacy assignments with
+    # an exact "Week N coaching plan" note are supported until they are
+    # normalized by the next weekly-plan save.
+    current_week_workouts = _week_workout_assignments(
+        client_id,
+        coach_week_start,
+        coach_week_number,
+    )
+    next_week_workouts = (
+        _week_workout_assignments(
+            client_id,
+            next_week_start,
+            next_week_number,
+        )
+        if next_week_start and next_week_number
+        else []
+    )
+    next_week_workout_ids = {
+        int(row["workout_id"])
+        for row in next_week_workouts
+        if row.get("status") != "unassigned"
+    }
     client_timeline = build_client_timeline(profile["client"])
     coach_summary = build_coach_summary(call_prep, progress_summary)
 
@@ -1824,6 +1847,9 @@ def client_profile(
             "available_resources": available_resources,
             "client_workouts": client_workouts,
             "available_workouts": available_workouts,
+            "current_week_workouts": current_week_workouts,
+            "next_week_workouts": next_week_workouts,
+            "next_week_workout_ids": next_week_workout_ids,
             "resource_categories": RESOURCE_CATEGORIES,
             "resource_types": RESOURCE_TYPES,
             "next_synced_call": next_synced_call,
@@ -1968,6 +1994,54 @@ def coach_client_workout_detail(
             "client": profile["client"],
             "workout": workout,
         },
+    )
+
+
+
+@router.post("/dashboard/clients/{client_id}/weekly/workouts/deassign")
+def deassign_week_workout(
+    request: Request,
+    client_id: int,
+    assignment_id: int = Form(...),
+    selected_week_number: int = Form(...),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, status
+                FROM client_workout_assignments
+                WHERE id = %s
+                  AND client_id = %s
+                LIMIT 1
+            """, (assignment_id, client_id))
+            assignment = cursor.fetchone()
+
+            if not assignment:
+                raise HTTPException(status_code=404, detail="Workout assignment not found")
+
+            # Preserve completed workout history. Mid-week removal is intended
+            # for an assigned/in-progress workout that should no longer appear
+            # in the client's active weekly plan.
+            if assignment.get("status") == "completed":
+                raise HTTPException(
+                    status_code=400,
+                    detail="A completed workout cannot be de-assigned",
+                )
+
+            cursor.execute("""
+                UPDATE client_workout_assignments
+                SET status = 'unassigned',
+                    updated_at = NOW()
+                WHERE id = %s
+                  AND client_id = %s
+            """, (assignment_id, client_id))
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=weekly&week={selected_week_number}&workout_removed=1",
+        status_code=303,
     )
 
 
@@ -2376,6 +2450,149 @@ def save_client_tracking(
 
 
 
+
+def _week_workout_assignments(
+    client_id: int,
+    week_start: date,
+    week_number: int,
+    *,
+    include_unassigned: bool = False,
+):
+    """Return workouts belonging to one coaching week.
+
+    New assignments use planned_week_start.  Legacy weekly-plan assignments
+    created before that field was populated are recognised by their exact
+    'Week N coaching plan' coach note, so existing Week 5 plans still render
+    correctly without pulling in unrelated old assigned workouts.
+    """
+    statuses_sql = "" if include_unassigned else "AND COALESCE(a.status, 'assigned') <> 'unassigned'"
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+                SELECT
+                    a.id AS assignment_id,
+                    a.client_id,
+                    a.workout_id,
+                    a.assigned_on,
+                    a.due_date,
+                    a.coach_note,
+                    a.status,
+                    a.started_at,
+                    a.completed_at,
+                    a.workout_date,
+                    a.planned_week_start,
+                    w.title,
+                    w.description,
+                    w.category,
+                    w.duration_minutes,
+                    w.equipment
+                FROM client_workout_assignments a
+                JOIN coach_workouts w ON w.id = a.workout_id
+                WHERE a.client_id = %s
+                  AND (
+                        a.planned_week_start = %s
+                        OR (
+                            a.planned_week_start IS NULL
+                            AND a.coach_note = %s
+                        )
+                  )
+                  {statuses_sql}
+                ORDER BY
+                    CASE WHEN a.status = 'completed' THEN 1 ELSE 0 END,
+                    a.created_at,
+                    a.id
+            """, (
+                client_id,
+                week_start,
+                f"Week {week_number} coaching plan",
+            ))
+            return [dict(row) for row in cursor.fetchall()]
+
+
+def _replace_week_workouts(
+    client_id: int,
+    week_start: date,
+    week_number: int,
+    workout_ids: list[int],
+):
+    """Make the selected workout ids the plan for exactly one coaching week.
+
+    Removing a checkbox soft-deassigns that week's assignment rather than
+    deleting history. Re-selecting it reactivates the same assignment.
+    """
+    desired_ids = {int(workout_id) for workout_id in workout_ids}
+    note = f"Week {week_number} coaching plan"
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            # First normalize legacy assignments that were clearly created by
+            # the weekly plan builder before planned_week_start was populated.
+            cursor.execute("""
+                UPDATE client_workout_assignments
+                SET planned_week_start = %s,
+                    updated_at = NOW()
+                WHERE client_id = %s
+                  AND planned_week_start IS NULL
+                  AND coach_note = %s
+            """, (week_start, client_id, note))
+
+            cursor.execute("""
+                SELECT id, workout_id, status
+                FROM client_workout_assignments
+                WHERE client_id = %s
+                  AND planned_week_start = %s
+                ORDER BY id
+            """, (client_id, week_start))
+            existing = [dict(row) for row in cursor.fetchall()]
+
+            by_workout: dict[int, dict] = {}
+            for row in existing:
+                by_workout.setdefault(int(row["workout_id"]), row)
+
+            # Soft-deassign workouts removed from the plan. Completed workouts
+            # stay completed so genuine completion history is never erased.
+            for workout_id, row in by_workout.items():
+                if workout_id not in desired_ids and row.get("status") != "completed":
+                    cursor.execute("""
+                        UPDATE client_workout_assignments
+                        SET status = 'unassigned',
+                            updated_at = NOW()
+                        WHERE id = %s
+                    """, (row["id"],))
+
+            # Add/reactivate selected workouts.
+            for workout_id in sorted(desired_ids):
+                row = by_workout.get(workout_id)
+                if row:
+                    if row.get("status") == "unassigned":
+                        cursor.execute("""
+                            UPDATE client_workout_assignments
+                            SET status = 'assigned',
+                                coach_note = %s,
+                                assigned_on = COALESCE(assigned_on, CURRENT_DATE),
+                                updated_at = NOW()
+                            WHERE id = %s
+                        """, (note, row["id"]))
+                    continue
+
+                cursor.execute("""
+                    INSERT INTO client_workout_assignments (
+                        client_id,
+                        workout_id,
+                        assigned_on,
+                        coach_note,
+                        status,
+                        planned_week_start
+                    )
+                    VALUES (%s, %s, CURRENT_DATE, %s, 'assigned', %s)
+                """, (
+                    client_id,
+                    workout_id,
+                    note,
+                    week_start,
+                ))
+
+
 @router.post("/dashboard/clients/{client_id}/weekly/current")
 def save_current_week_coaching(
     request: Request,
@@ -2517,14 +2734,15 @@ def save_next_week_commitments(
         checkin_id=None,
     )
 
-    # Preserve the existing workout-library behaviour: selected workouts are
-    # assigned to the client. (Workout assignments are not week-dated today.)
-    for workout_id in workout_ids:
-        assign_workout(
-            workout_id=workout_id,
-            client_ids=[client_id],
-            coach_note=f"Week {plan_week_number} coaching plan",
-        )
+    # Workouts are part of the exact Week N plan, just like commitments.
+    # Re-saving replaces that week's workout selection rather than appending
+    # duplicate/global assignments.
+    _replace_week_workouts(
+        client_id=client_id,
+        week_start=plan_start,
+        week_number=plan_week_number,
+        workout_ids=workout_ids,
+    )
 
     return RedirectResponse(
         f"/dashboard/clients/{client_id}?tab=weekly&week={source_week_number}&next_saved=1",

@@ -209,6 +209,63 @@
 {% block content %}
 
 <style>
+.nw-panel-tab[data-panel="weekly"] .nw-current-workout-list {
+    display:grid !important;
+    gap:8px !important;
+    margin-top:12px !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-current-workout-row {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:14px !important;
+    padding:10px 12px !important;
+    border:1px solid #e6dce9 !important;
+    border-radius:11px !important;
+    background:#fff !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-current-workout-copy {
+    min-width:0 !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-current-workout-copy strong {
+    display:block !important;
+    font-size:11px !important;
+    line-height:1.3 !important;
+    color:#2d2730 !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-current-workout-copy small {
+    display:block !important;
+    margin-top:3px !important;
+    font-size:9px !important;
+    color:#7c7480 !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-workout-remove {
+    flex:0 0 auto !important;
+    border:1px solid #d8c8de !important;
+    border-radius:9px !important;
+    background:#fff !important;
+    padding:6px 9px !important;
+    color:#6b397a !important;
+    font-size:9px !important;
+    font-weight:800 !important;
+    cursor:pointer !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-workout-remove:hover {
+    background:#faf5fb !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-workout-completed {
+    flex:0 0 auto !important;
+    font-size:9px !important;
+    font-weight:800 !important;
+    color:#2f7652 !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-empty-week-workouts {
+    margin:10px 0 0 !important;
+}
+</style>
+
+
+<style>
 /* =========================================================
    WEEKLY COACHING — compact, clearly separated working view
    Uses the same smaller type scale as the Coach Data tab.
@@ -2204,6 +2261,47 @@
             {{ commitment_builder("current", current_action_defaults, current_custom_actions, current_custom_action_slot_count, coach_week_number, false) }}
           </div>
 
+          <section class="nw-workflow-card nw-current-workouts-card">
+            <div class="nw-workflow-head">
+              <div>
+                <p class="nw-kicker" style="margin:0 0 4px">WEEK {{ coach_week_number }} WORKOUTS</p>
+                <h3>Workouts assigned this week</h3>
+                <p class="nw-helper">These are the workouts currently published to the client for Week {{ coach_week_number }}.</p>
+              </div>
+            </div>
+
+            {% if current_week_workouts %}
+            <div class="nw-current-workout-list">
+              {% for workout in current_week_workouts %}
+              <div class="nw-current-workout-row">
+                <div class="nw-current-workout-copy">
+                  <strong>{{ workout.title }}</strong>
+                  <small>
+                    {{ workout.status|replace("_", " ")|title }}
+                    {% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}
+                  </small>
+                </div>
+                {% if workout.status != "completed" %}
+                <button
+                  class="nw-workout-remove"
+                  type="submit"
+                  formaction="/dashboard/clients/{{ client.id }}/weekly/workouts/deassign"
+                  formmethod="post"
+                  name="assignment_id"
+                  value="{{ workout.assignment_id }}"
+                  onclick="return confirm('Remove {{ workout.title|e }} from Week {{ coach_week_number }} for this client?');"
+                >De-assign</button>
+                {% else %}
+                <span class="nw-workout-completed">Completed</span>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="nw-helper nw-empty-week-workouts">No workouts assigned specifically to Week {{ coach_week_number }}.</p>
+            {% endif %}
+          </section>
+
           <section class="nw-workflow-card">
             <div class="nw-workflow-head">
               <div>
@@ -2267,14 +2365,14 @@
               <div>
                 <p class="nw-kicker" style="margin:0 0 4px">WEEKLY PLAN BUILDER</p>
                 <h3>Workouts for Week {{ next_week_number }}</h3>
-                <p class="nw-helper">Choose the strength sessions to publish with Week {{ next_week_number }}.</p>
+                <p class="nw-helper">Choose the strength sessions to publish with Week {{ next_week_number }}. Re-saving this plan updates that week only.</p>
               </div>
             </div>
             {% if available_workouts %}
             <div class="nw-workout-plan-grid">
               {% for workout in available_workouts if workout.active %}
               <label class="nw-plan-workout">
-                <input type="checkbox" name="workout_ids" value="{{ workout.id }}">
+                <input type="checkbox" name="workout_ids" value="{{ workout.id }}" {% if workout.id in next_week_workout_ids %}checked{% endif %}>
                 <span>
                   <strong>{{ workout.title }}</strong>
                   <small>{{ workout.exercise_count or 0 }} exercises{% if workout.duration_minutes %} · {{ workout.duration_minutes }} min{% endif %}</small>
