@@ -1540,6 +1540,24 @@ def client_profile(
     profile["current_week_start"] = week_start
     profile["current_week_end"] = week_end
 
+    # SETUP STATE:
+    # A brand-new client has no intake/start date yet. The template already
+    # has a dedicated setup screen (`{% if not intake %}`), so return it now
+    # instead of running the normal coaching-workspace services. Several of
+    # those services assume an established coaching week and are irrelevant
+    # until intake/setup has been completed.
+    if not profile.get("intake"):
+        return templates.TemplateResponse(
+            "coach/client_workspace.html",
+            {
+                "request": request,
+                "active_nav": "clients",
+                "action_library": ACTION_LIBRARY,
+                "call_time_slots": CALL_TIME_SLOTS,
+                **profile,
+            },
+        )
+
     # Weekly Check-in can browse the client's coaching history using the
     # exact same week boundaries as the Client Portal.
     requested_week = request.query_params.get("week")
@@ -1730,17 +1748,14 @@ def client_profile(
     # Coaching intelligence for the current client workspace.
     # These are computed before TemplateResponse so the Jinja context never
     # references undefined variables.
-    # A newly-created client has no coaching week until Setup saves a start date.
-    # Do not call weekly-summary logic with week_start=None; that route must still
-    # render so the coach can complete Setup.
-    if week_start is not None:
-        coaching_week_summary = get_client_weekly_summary(
+    coaching_week_summary = (
+        get_client_weekly_summary(
             client_id,
             week_start=week_start,
         )
-    else:
-        coaching_week_summary = {}
-
+        if week_start is not None
+        else {}
+    )
     progress_charts = get_client_progress_charts(
         client_id,
         weeks=12,
