@@ -856,6 +856,13 @@
 
 {% set setup_incomplete = (not intake) or (not client.start_date) %}
 
+{# Compatibility aliases for the current split-save backend context.
+   The cosmetic Data-grid update must not reintroduce legacy variable names. #}
+{% set carry_forward_action_defaults = next_action_defaults if next_action_defaults is defined else {} %}
+{% set carry_forward_custom_actions = next_custom_actions if next_custom_actions is defined else [] %}
+{% set custom_action_slot_count = next_custom_action_slot_count if next_custom_action_slot_count is defined else (custom_action_slot_count if custom_action_slot_count is defined else 5) %}
+{% set next_week_action_names = [] %}
+
 {% if setup_incomplete %}
 <div class="nw nw-setup">
   <div class="nw-setup-hero">
