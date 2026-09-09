@@ -207,6 +207,152 @@
 
 {% endblock %}
 {% block content %}
+
+<style>
+/* ===== Coach Data grid compact pass: match client My Data proportions ===== */
+.nw-transposed-wrap {
+    overflow-x: visible !important;
+}
+
+.nw-excel.nw-transposed {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+    font-size: 11px !important;
+}
+
+.nw-excel.nw-transposed th,
+.nw-excel.nw-transposed td {
+    padding: 9px 7px !important;
+    font-size: 11px !important;
+}
+
+/* Left label column mirrors client portal proportions. */
+.nw-excel.nw-transposed .nw-metric-head {
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+    padding: 10px 12px !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+}
+
+/* The seven day columns share the remaining width equally. */
+.nw-excel.nw-transposed thead th:not(.nw-metric-head),
+.nw-excel.nw-transposed tbody td {
+    width: auto !important;
+}
+
+/* Same compact day/date typography as the client portal. */
+.nw-date-head {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.nw-date-head .nw-day {
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: .07em !important;
+    line-height: 1.1 !important;
+    text-transform: uppercase !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+.nw-date-head .nw-date {
+    display: block !important;
+    margin-top: 4px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: .02em !important;
+    line-height: 1.1 !important;
+    text-transform: uppercase !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Read-only values stay compact, rather than looking like editable inputs. */
+.nw-readonly-value {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    width: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+
+/* Section and commitment typography follows client grid sizing. */
+.nw-excel.nw-transposed .nw-row-section .nw-metric-head {
+    font-size: 10px !important;
+    letter-spacing: .07em !important;
+}
+
+.nw-commitment-name {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+}
+
+.nw-commitment-target {
+    display: block !important;
+    margin-top: 3px !important;
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    color: #8c828f !important;
+}
+
+/* Keep status marks compact, like the client grid. */
+.nw-action-cell .yes,
+.nw-action-cell .no {
+    font-size: 17px !important;
+}
+
+/* Slightly tighter week header to maximise usable width. */
+.nw-data-week-head {
+    padding: 11px 14px !important;
+}
+
+.nw-data-week-head strong {
+    font-size: 14px !important;
+}
+
+.nw-data-week-head span {
+    font-size: 11px !important;
+}
+
+@media (max-width: 1050px) {
+    .nw-excel.nw-transposed .nw-metric-head {
+        width: 190px !important;
+        min-width: 190px !important;
+        max-width: 190px !important;
+    }
+    .nw-excel.nw-transposed th,
+    .nw-excel.nw-transposed td {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+}
+</style>
+
 <style>
 /* Coach Data grid polish — layered onto the known-good split-save template */
 .nw-excel.nw-transposed tbody td {
@@ -1975,7 +2121,6 @@
                 </tr>
                 {% endfor %}
                 {% endif %}
-                <tr><th class="nw-metric-head">Client note</th>{% for row in week.rows %}<td class="nw-note-cell">{{ row.note or "—" }}</td>{% endfor %}</tr>
               </tbody>
             </table>
           </div>
