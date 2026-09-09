@@ -209,6 +209,29 @@
 {% block content %}
 
 <style>
+/* Coach Data: keep long commitment labels inside the left column. */
+.nw-excel.nw-transposed .nw-metric-head,
+.nw-excel.nw-transposed .nw-commitment-label,
+.nw-commitment-name {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
+}
+.nw-commitment-name {
+    display: block !important;
+    line-height: 1.35 !important;
+}
+.nw-commitment-target {
+    display: block !important;
+    clear: both !important;
+    margin-top: 5px !important;
+}
+</style>
+
+
+<style>
 /* ===== Coach Data grid compact pass: match client My Data proportions ===== */
 .nw-transposed-wrap {
     overflow-x: visible !important;
@@ -2027,7 +2050,7 @@
           <h2>Detailed client tracking</h2>
           <p>Use this when you want to investigate the evidence behind the Overview summary. All weeks and dates remain available here.</p>
         </div>
-        <div class="nw-data-orientation-note">Dates → across the top · Actions ↓ down the side</div>
+        
       </div>
 
       <section class="nw-panel nw-pad" style="margin-bottom:16px">
@@ -2081,6 +2104,7 @@
       </section>
 
       {% if history_weeks %}
+      <div class="nw-data-orientation-note">Dates → across the top · Actions ↓ down the side</div>
       <div class="nw-transposed-history">
         {% for week in history_weeks %}
         <section class="nw-data-week {% if week.is_current_week %}current-week{% endif %}" data-history-week="{{ week.week_number }}">
