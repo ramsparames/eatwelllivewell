@@ -46,6 +46,76 @@
 {% endblock %}
 {% block content %}
 <style>
+/* ===== Coach Data grid: effective polish (inside content block) ===== */
+.nw-excel.nw-transposed tbody td {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.nw-excel.nw-transposed thead th:not(.nw-metric-head) {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.nw-excel.nw-transposed .nw-day-label,
+.nw-excel.nw-transposed .nw-date-label {
+    display: block !important;
+    text-align: center !important;
+}
+
+.nw-excel.nw-transposed .nw-date-label {
+    margin-top: 3px !important;
+}
+
+.nw-commitment-label {
+    text-align: left !important;
+}
+
+.nw-commitment-name {
+    display: inline;
+}
+
+.nw-commitment-target {
+    display: inline-block !important;
+    margin-left: 9px !important;
+    padding: 2px 7px !important;
+    border-radius: 999px !important;
+    background: #f3eef7 !important;
+    color: var(--coach-purple) !important;
+    font-size: 10px !important;
+    font-weight: 750 !important;
+    line-height: 1.35 !important;
+    white-space: nowrap !important;
+}
+
+.nw-transposed-history {
+    gap: 28px !important;
+}
+
+.nw-data-week {
+    overflow: hidden;
+    border: 1px solid var(--coach-border) !important;
+    border-radius: 14px !important;
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(70,45,80,.03);
+}
+
+.nw-data-week + .nw-data-week {
+    position: relative;
+    margin-top: 12px !important;
+}
+
+.nw-data-week + .nw-data-week::before {
+    content: "";
+    position: absolute;
+    top: -21px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #d9cddd;
+}
+</style>
+<style>
 .nw,.nw *{box-sizing:border-box}.nw{max-width:1180px;margin:0 auto;color:var(--coach-text)}
 .nw-top{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:22px}
 .nw-back{color:var(--coach-purple);text-decoration:none;font-size:14px;font-weight:750}
@@ -1503,11 +1573,17 @@
                 <tr><th class="nw-metric-head">Fibre</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.fibre_g is not none %}{{ macro.fibre_g }} g{% else %}—{% endif %}</td>{% endfor %}</tr>
                 <tr><th class="nw-metric-head">Calories</th>{% for row in week.rows %}{% set macro=row.macro %}<td>{% if macro and macro.calories is not none %}{{ macro.calories }}{% else %}—{% endif %}</td>{% endfor %}</tr>
                 {% endif %}
-                {% if coach_history_grid.action_columns %}
+                {% set week_actions = (week.rows[0].week_actions if week.rows and week.rows[0].week_actions is defined else []) %}
+                {% if week_actions %}
                 <tr class="nw-row-section"><th class="nw-metric-head">Commitments</th>{% for row in week.rows %}<td></td>{% endfor %}</tr>
-                {% for action in coach_history_grid.action_columns %}
+                {% for action in week_actions %}
                 <tr>
-                  <th class="nw-metric-head nw-commitment-label"><strong>{{ action.name }}</strong>{% if action.target_count %}<small class="nw-commitment-target">{{ action.target_count }} {{ action.target_unit or "" }}</small>{% endif %}</th>
+                  <th class="nw-metric-head nw-commitment-label">
+                    <span class="nw-commitment-name">{{ action.name }}</span>
+                    {% if action.target_count %}
+                    <span class="nw-commitment-target">{{ action.target_count }} {{ action.target_unit or "" }}</span>
+                    {% endif %}
+                  </th>
                   {% for row in week.rows %}{% set cell=row.actions.get(action.id) %}<td class="nw-action-cell">{% if not cell or not cell.eligible %}<span class="na">·</span>{% elif cell.completed is true %}<span class="yes">✓</span>{% elif cell.completed is false %}<span class="no">○</span>{% else %}<span class="na">—</span>{% endif %}</td>{% endfor %}
                 </tr>
                 {% endfor %}
@@ -1801,30 +1877,3 @@
 .nw-timeline-date,.nw-timeline-copy p{font-size:11px!important}.nw-timeline-copy strong{font-size:13px!important;}
 </style>
 {% endblock %}
-
-
-<style>
-/* Coach Data grid polish */
-.nw-data-week {
-    margin-bottom: 30px;
-    padding-bottom: 26px;
-    border-bottom: 2px solid var(--coach-border);
-}
-.nw-data-week:last-child { border-bottom: 0; }
-
-.nw-transposed-history th:not(.nw-metric-head),
-.nw-transposed-history td {
-    text-align: center;
-    vertical-align: middle;
-}
-
-.nw-commitment-target {
-    display: inline-block;
-    margin-left: 8px;
-    padding: 2px 7px;
-    border-radius: 999px;
-    background: #f3eef7;
-    white-space: nowrap;
-    font-weight: 650;
-}
-</style>
