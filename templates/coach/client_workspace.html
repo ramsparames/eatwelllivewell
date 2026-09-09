@@ -209,6 +209,306 @@
 {% block content %}
 
 <style>
+/* =========================================================
+   WEEKLY COACHING — compact, clearly separated working view
+   Uses the same smaller type scale as the Coach Data tab.
+   ========================================================= */
+.nw-panel-tab[data-panel="weekly"] {
+    --wk-purple:#5b0e91;
+    --wk-ink:#2d2730;
+    --wk-muted:#7c7480;
+    --wk-line:#e6dce9;
+    --wk-soft:#fbf8fc;
+    --wk-soft2:#f7f0fa;
+    --wk-green:#2f7652;
+    font-size:11px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-coach-week-bar {
+    margin-bottom:18px !important;
+    padding:12px 14px !important;
+    border:1px solid var(--wk-line) !important;
+    border-radius:14px !important;
+    background:#fff !important;
+    box-shadow:none !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-coach-week-main strong {
+    font-size:14px !important;
+    color:var(--wk-ink) !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-coach-week-main > span:not(.nw-coach-week-mode) {
+    font-size:10px !important;
+    color:var(--wk-muted) !important;
+}
+.nw-panel-tab[data-panel="weekly"] .nw-coach-week-mode {
+    font-size:9px !important;
+    padding:5px 8px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-split {
+    display:block !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-part {
+    overflow:hidden !important;
+    border:1px solid var(--wk-line) !important;
+    border-radius:18px !important;
+    background:#fff !important;
+    box-shadow:0 7px 22px rgba(54,34,63,.035) !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-current-card {
+    border-top:4px solid #6d2499 !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-next-card {
+    margin-top:0 !important;
+    border-top:4px solid #b78bc9 !important;
+    background:#fdfbfe !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-part-head {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:16px !important;
+    padding:16px 18px 14px !important;
+    border-bottom:1px solid var(--wk-line) !important;
+    background:var(--wk-soft) !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-part-head.next {
+    background:#f7f0fa !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-part-head .nw-kicker {
+    margin:0 0 3px !important;
+    font-size:9px !important;
+    letter-spacing:.10em !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-part-head h2 {
+    margin:0 !important;
+    font-size:17px !important;
+    letter-spacing:-.015em !important;
+    color:var(--wk-ink) !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-part-head p {
+    margin:4px 0 0 !important;
+    font-size:10px !important;
+    line-height:1.35 !important;
+    color:var(--wk-muted) !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-part-badge {
+    flex:0 0 auto !important;
+    padding:6px 9px !important;
+    border-radius:999px !important;
+    background:#fff !important;
+    border:1px solid #dccfe3 !important;
+    color:#5f5663 !important;
+    font-size:9px !important;
+    font-weight:800 !important;
+    white-space:nowrap !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-part-body {
+    padding:18px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-label {
+    font-size:9px !important;
+    letter-spacing:.035em !important;
+    font-weight:800 !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-helper,
+.nw-panel-tab[data-panel="weekly"] .nw-next > p,
+.nw-panel-tab[data-panel="weekly"] .nw-workflow-head p {
+    font-size:10px !important;
+    line-height:1.4 !important;
+    color:var(--wk-muted) !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-input,
+.nw-panel-tab[data-panel="weekly"] .nw-textarea,
+.nw-panel-tab[data-panel="weekly"] select {
+    font-size:11px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-textarea {
+    min-height:76px !important;
+    line-height:1.4 !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-call-notes {
+    gap:10px !important;
+    margin-top:14px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-next,
+.nw-panel-tab[data-panel="weekly"] .nw-workflow-card {
+    margin-top:18px !important;
+    padding:15px !important;
+    border:1px solid #e8deeb !important;
+    border-radius:14px !important;
+    background:#fcfafc !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-next-card .nw-next,
+.nw-panel-tab[data-panel="weekly"] .nw-week-next-card .nw-workflow-card {
+    background:#fff !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-next h3,
+.nw-panel-tab[data-panel="weekly"] .nw-workflow-head h3,
+.nw-panel-tab[data-panel="weekly"] .nw-next-call h3 {
+    margin:0 !important;
+    font-size:14px !important;
+    color:var(--wk-ink) !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-library-summary,
+.nw-panel-tab[data-panel="weekly"] .nw-level-title,
+.nw-panel-tab[data-panel="weekly"] .nw-action-row,
+.nw-panel-tab[data-panel="weekly"] .nw-custom-row,
+.nw-panel-tab[data-panel="weekly"] .nw-plan-workout {
+    font-size:10px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-action-row,
+.nw-panel-tab[data-panel="weekly"] .nw-custom-row {
+    padding-top:8px !important;
+    padding-bottom:8px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-section-save {
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:18px !important;
+    margin:20px -18px -18px !important;
+    padding:13px 18px !important;
+    border-top:1px solid var(--wk-line) !important;
+    background:#faf7fb !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-section-save p {
+    margin:0 !important;
+    max-width:680px !important;
+    font-size:9px !important;
+    color:var(--wk-muted) !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-section-save .nw-btn {
+    min-width:150px !important;
+    font-size:10px !important;
+    padding:9px 13px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-transition {
+    display:grid !important;
+    grid-template-columns:1fr auto 1fr !important;
+    align-items:center !important;
+    gap:12px !important;
+    margin:30px 8px !important;
+    color:#8a748f !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-transition span {
+    height:1px !important;
+    background:#ddd0e2 !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-week-transition strong {
+    font-size:9px !important;
+    letter-spacing:.15em !important;
+    font-weight:900 !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-next-call {
+    margin-top:28px !important;
+    padding:15px 17px !important;
+    border:1px solid var(--wk-line) !important;
+    border-radius:15px !important;
+    background:#fff !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-next-call-copy p,
+.nw-panel-tab[data-panel="weekly"] .nw-next-call-status span,
+.nw-panel-tab[data-panel="weekly"] .nw-next-call-status small {
+    font-size:9px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-next-call-status strong {
+    font-size:11px !important;
+}
+
+.nw-panel-tab[data-panel="weekly"] .nw-final-week {
+    margin-top:28px !important;
+    padding:15px 17px !important;
+    border:1px solid var(--wk-line) !important;
+    border-radius:15px !important;
+    background:#fbf8fc !important;
+}
+
+/* Keep the action builder readable and compact on desktop. */
+@media (min-width: 900px) {
+    .nw-panel-tab[data-panel="weekly"] .nw-call-notes {
+        grid-template-columns:1fr 1fr !important;
+    }
+    .nw-panel-tab[data-panel="weekly"] .nw-grid2 {
+        gap:10px !important;
+    }
+}
+
+/* On narrower screens, preserve the existing responsive behavior. */
+@media (max-width: 760px) {
+    .nw-panel-tab[data-panel="weekly"] .nw-week-part-head,
+    .nw-panel-tab[data-panel="weekly"] .nw-section-save {
+        align-items:flex-start !important;
+        flex-direction:column !important;
+    }
+    .nw-panel-tab[data-panel="weekly"] .nw-week-part-badge {
+        align-self:flex-start !important;
+    }
+    .nw-panel-tab[data-panel="weekly"] .nw-section-save .nw-btn {
+        width:100% !important;
+    }
+}
+</style>
+
+
+<style>
+/* Coach Data: align orientation helper and Current week badge like client portal. */
+.nw-data-orientation-note {
+    text-align: right !important;
+    width: 100% !important;
+    padding-right: 2px !important;
+}
+
+/* Keep week title/date on the left and Current week on the right. */
+.nw-data-week-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+}
+
+.nw-data-week-head > div {
+    flex: 1 1 auto !important;
+}
+
+.nw-data-week-head .nw-cell-state {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+}
+</style>
+
+
+<style>
 /* Coach Data: keep long commitment labels inside the left column. */
 .nw-excel.nw-transposed .nw-metric-head,
 .nw-excel.nw-transposed .nw-commitment-label,
@@ -1863,7 +2163,7 @@
     <div class="nw-week-split">
 
       <!-- PART 1: SELECTED/CURRENT WEEK -->
-      <section class="nw-week-part">
+      <section class="nw-week-part nw-week-current-card">
         <div class="nw-week-part-head current">
           <div>
             <p class="nw-kicker" style="margin:0 0 4px">CURRENT WEEK</p>
@@ -1934,7 +2234,12 @@
 
       <!-- PART 2: FOLLOWING WEEK -->
       {% if has_next_program_week and next_week_number %}
-      <section class="nw-week-part">
+      <div class="nw-week-transition" aria-hidden="true">
+        <span></span>
+        <strong>PLAN AHEAD</strong>
+        <span></span>
+      </div>
+      <section class="nw-week-part nw-week-next-card">
         <div class="nw-week-part-head next">
           <div>
             <p class="nw-kicker" style="margin:0 0 4px">NEXT WEEK</p>
