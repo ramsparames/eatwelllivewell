@@ -1554,6 +1554,7 @@ def client_profile(
                 "active_nav": "clients",
                 "action_library": ACTION_LIBRARY,
                 "call_time_slots": CALL_TIME_SLOTS,
+                "custom_action_slot_count": 5,
                 **profile,
             },
         )
