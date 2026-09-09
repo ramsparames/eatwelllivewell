@@ -1170,6 +1170,7 @@ def get_coach_week_review(
                     p.start_date,
                     p.end_date,
                     p.checkin_id,
+                    p.status,
                     wc.call_date AS linked_call_date,
                     FALSE AS carried_forward_history,
                     EXISTS (
@@ -1247,6 +1248,7 @@ def get_coach_week_review(
                             p.start_date,
                             p.end_date,
                             p.checkin_id,
+                            p.status,
                             NULL::DATE AS linked_call_date,
                             FALSE AS has_log_in_week,
                             TRUE AS carried_forward_history
@@ -1574,6 +1576,13 @@ def build_call_prep(client_id: int, week_start: date, week_end: date):
     target_total = 0
     achieved_total = 0
     for action in review['actions']:
+        # Overview > Current commitments must show only commitments that are
+        # currently active for this coaching week. Historical/removed rows can
+        # still be returned by get_coach_week_review for recovery and log
+        # integrity, but they should not reappear as current commitments.
+        if action.get('status') not in (None, 'active'):
+            continue
+
         target = action.get('target_count') or action.get('eligible_days') or 0
         completed = action.get('completed_count') or 0
         target = int(target)
