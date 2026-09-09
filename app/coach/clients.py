@@ -2045,6 +2045,53 @@ def deassign_week_workout(
     )
 
 
+
+@router.post("/dashboard/clients/{client_id}/resources/workouts/{assignment_id}/remove")
+def remove_client_workout_from_resources(
+    request: Request,
+    client_id: int,
+    assignment_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, status
+                FROM client_workout_assignments
+                WHERE id = %s
+                  AND client_id = %s
+                LIMIT 1
+            """, (assignment_id, client_id))
+            assignment = cursor.fetchone()
+
+            if not assignment:
+                raise HTTPException(status_code=404, detail="Workout assignment not found")
+
+            # Preserve completed history. For anything still assigned/in
+            # progress, Resources can remove it from the client's active
+            # content without deleting the assignment row.
+            if assignment.get("status") == "completed":
+                raise HTTPException(
+                    status_code=400,
+                    detail="A completed workout cannot be de-assigned",
+                )
+
+            cursor.execute("""
+                UPDATE client_workout_assignments
+                SET status = 'unassigned',
+                    updated_at = NOW()
+                WHERE id = %s
+                  AND client_id = %s
+            """, (assignment_id, client_id))
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}?tab=resources&workout_removed=1",
+        status_code=303,
+    )
+
+
 @router.post("/dashboard/clients/{client_id}/workouts")
 def assign_client_workout_route(
     request: Request,
