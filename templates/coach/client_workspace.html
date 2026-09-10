@@ -207,6 +207,7 @@
 
 {% endblock %}
 {% block content %}
+<style>.nw-panel-tab[data-panel="data"] .nw-metric-head small{display:block!important;margin-top:2px!important;font-size:9px!important;line-height:1.2!important;font-weight:600!important;color:#8a818d!important}</style>
 
 <style>
 .nw-panel-tab[data-panel="weekly"] .nw-current-workout-list {
@@ -2532,11 +2533,11 @@
                 <tr><th class="nw-metric-head">Weight</th>{% for row in week.rows %}<td><span class="nw-readonly-value">{% if row.weight_kg is not none %}{{ row.weight_kg }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
                 {% if macro_settings.enabled %}
                 <tr class="nw-row-section"><th class="nw-metric-head">Nutrition</th>{% for row in week.rows %}<td></td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Protein</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.protein_g is not none %}{{ macro.protein_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Carbs</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Fat</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.fat_g is not none %}{{ macro.fat_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head"><strong>Protein</strong>{% if macro_settings.protein_target_g is not none %}<small>{{ macro_settings.protein_target_g }} g target</small>{% endif %}</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.protein_g is not none %}{{ macro.protein_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head"><strong>Carbs</strong>{% if macro_settings.carbs_target_g is not none %}<small>{{ macro_settings.carbs_target_g }} g target</small>{% endif %}</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.carbs_g is not none %}{{ macro.carbs_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head"><strong>Fat</strong>{% if macro_settings.fat_target_g is not none %}<small>{{ macro_settings.fat_target_g }} g target</small>{% endif %}</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.fat_g is not none %}{{ macro.fat_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
                 <tr><th class="nw-metric-head">Fibre</th>{% for row in week.rows %}{% set macro=row.macro %}<td><span class="nw-readonly-value">{% if macro and macro.fibre_g is not none %}{{ macro.fibre_g }}{% else %}—{% endif %}</span></td>{% endfor %}</tr>
-                <tr><th class="nw-metric-head">Calories</th>{% for row in week.rows %}{% set macro=row.macro %}<td class="nw-calorie-cell">{% if macro and macro.calories is not none %}<strong>{{ macro.calories }}</strong>{% else %}—{% endif %}</td>{% endfor %}</tr>
+                <tr><th class="nw-metric-head"><strong>Calories</strong>{% if macro_settings.calorie_target is not none %}<small>{{ macro_settings.calorie_target }} kcal target</small>{% endif %}</th>{% for row in week.rows %}{% set macro=row.macro %}<td class="nw-calorie-cell">{% if macro and macro.calories is not none %}<strong>{{ macro.calories }}</strong>{% else %}—{% endif %}</td>{% endfor %}</tr>
                 {% endif %}
                 {% set week_actions = (week.rows[0].week_actions if week.rows and week.rows[0].week_actions is defined else []) %}
                 {% if week_actions %}
