@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Let’s Keep the Conversation Going | Eat Well Live Well</title>
+  <meta name="description" content="Share a few details for a short 1:1 conversation with Sushma about your health and NourisHer.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=Sacramento&display=swap" rel="stylesheet">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X7W88NSPRV"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-X7W88NSPRV');
+  </script>
+
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-KNKJ86HL');</script>
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "yf0ibw8ayg");
+  </script>
+
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1097733882755104');
+    fbq('track', 'PageView');
+  </script>
+
+  <style>
+    :root{
+      --cream:#fbf7ef;
+      --paper:#fffdf8;
+      --green:#123f35;
+      --green2:#5f774a;
+      --rose:#f5c8ca;
+      --rose2:#8a2342;
+      --ink:#26322e;
+      --muted:#65706b;
+      --line:#e8e1d8;
+      --shadow:0 20px 55px rgba(37,55,47,.11);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Manrope,system-ui,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%,rgba(154,176,117,.18),transparent 25%),
+        radial-gradient(circle at 90% 8%,rgba(245,200,202,.32),transparent 25%),
+        var(--cream);
+    }
+    .shell{max-width:560px;margin:0 auto;padding:22px 16px 42px}
+    .brand{text-align:center;margin:5px 0 20px}
+    .brand-mark{font-size:28px;line-height:.95;font-weight:800;color:var(--green)}
+    .brand-mark em{font-family:Sacramento,cursive;font-size:34px;font-weight:400}
+    .brand-sub{font-size:10px;letter-spacing:.22em;margin-top:8px;color:var(--green)}
+    .card{
+      background:rgba(255,253,248,.96);
+      border:1px solid rgba(18,63,53,.08);
+      border-radius:28px;
+      padding:26px 20px 22px;
+      box-shadow:var(--shadow);
+    }
+    .eyebrow{text-align:center;text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:800;color:var(--rose2)}
+    h1{
+      font-family:"Cormorant Garamond",serif;
+      font-size:38px;
+      line-height:1;
+      margin:8px auto 10px;
+      max-width:430px;
+      color:var(--green);
+      text-align:center;
+    }
+    .intro{text-align:center;font-size:15px;line-height:1.55;margin:0 auto 22px;max-width:430px;color:var(--muted)}
+    .intro strong{color:var(--ink)}
+    label.legend{display:block;font-size:13px;font-weight:800;margin:18px 0 8px;color:var(--green)}
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:white;
+      padding:14px 14px;
+      font:inherit;
+      font-size:16px;
+      color:var(--ink);
+      outline:none;
+    }
+    input:focus,select:focus,textarea:focus{border-color:#8ba175;box-shadow:0 0 0 3px rgba(139,161,117,.16)}
+    .hint{font-size:11px;color:#7c837f;margin-top:5px}
+    .choices{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .choice{position:relative}
+    .choice input{position:absolute;opacity:0;pointer-events:none}
+    .choice span{
+      display:flex;align-items:center;min-height:54px;
+      border:1px solid var(--line);border-radius:14px;padding:10px 11px;
+      font-size:13px;font-weight:600;background:#fff;cursor:pointer;
+    }
+    .choice input:checked + span{
+      border-color:#d895a4;background:#fff2f3;color:#72213a;
+      box-shadow:0 0 0 2px rgba(216,149,164,.12);
+    }
+    .consent{display:flex;gap:10px;align-items:flex-start;margin:18px 0 15px;font-size:11px;line-height:1.45;color:var(--muted)}
+    .consent input{width:18px;height:18px;margin-top:1px;flex:0 0 auto}
+    .consent a{color:var(--green);font-weight:700}
+    button{
+      width:100%;border:0;border-radius:999px;padding:16px 18px;
+      font:inherit;font-weight:800;font-size:15px;color:white;background:var(--green);
+      cursor:pointer;box-shadow:0 9px 22px rgba(18,63,53,.18);
+    }
+    button:disabled{opacity:.6;cursor:wait}
+    .micro{text-align:center;font-size:11px;color:#7b837f;margin:12px 4px 0}
+    .success{display:none;text-align:center;padding:24px 4px 10px}
+    .success .tick{
+      width:64px;height:64px;border-radius:50%;margin:0 auto 14px;
+      display:grid;place-items:center;background:#edf4e8;color:var(--green);font-size:30px;font-weight:800;
+    }
+    .success h2{font-family:"Cormorant Garamond",serif;font-size:32px;color:var(--green);margin:0 0 8px}
+    .success p{color:var(--muted);line-height:1.6}
+    .success a{display:inline-block;margin-top:8px;color:var(--green);font-weight:800}
+    .error{display:none;margin:12px 0 0;padding:11px 12px;border-radius:12px;background:#fff0f1;color:#8c273e;font-size:12px}
+    footer{text-align:center;font-size:11px;color:#69736e;margin-top:18px}
+    @media (max-width:390px){
+      .choices{grid-template-columns:1fr}
+      h1{font-size:34px}
+      .card{padding:24px 16px 20px}
+    }
+  </style>
+</head>
+<body>
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KNKJ86HL"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+  <main class="shell">
+    <div class="brand">
+      <div class="brand-mark">Eat <em>well</em> Live <em>well</em></div>
+      <div class="brand-sub">NUTRITION · MOVEMENT · MINDSET</div>
+    </div>
+
+    <section class="card">
+      <div id="formWrap">
+        <div class="eyebrow">Lovely meeting you</div>
+        <h1>Let’s keep the conversation going.</h1>
+        <p class="intro">Share a few details and <strong>Sushma will get in touch for a short 1:1 conversation</strong> about your health and whether NourisHer could support you.</p>
+
+        <form id="eventLeadForm">
+          <label class="legend" for="name">Your name</label>
+          <input id="name" name="name" autocomplete="name" required placeholder="How should I address you?">
+
+          <label class="legend" for="phone">WhatsApp / mobile number</label>
+          <input id="phone" name="phone" autocomplete="tel" inputmode="tel" required placeholder="+91 …">
+
+          <label class="legend" for="email">Email <span style="font-weight:500;color:#7c837f">(optional)</span></label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com">
+
+          <label class="legend" for="age">Your age range</label>
+          <select id="age" name="age_range" required>
+            <option value="">Choose one</option>
+            <option>40–44</option>
+            <option>45–49</option>
+            <option>50–54</option>
+            <option>55–59</option>
+            <option>60+</option>
+          </select>
+
+          <label class="legend">What would you most like help with?</label>
+          <div class="choices">
+            <label class="choice"><input type="checkbox" name="interest" value="Sustainable weight loss"><span>Sustainable weight loss</span></label>
+            <label class="choice"><input type="checkbox" name="interest" value="Low energy"><span>Low energy</span></label>
+            <label class="choice"><input type="checkbox" name="interest" value="Sleep"><span>Better sleep</span></label>
+            <label class="choice"><input type="checkbox" name="interest" value="Stress and overwhelm"><span>Stress &amp; overwhelm</span></label>
+            <label class="choice"><input type="checkbox" name="interest" value="Perimenopause or menopause changes"><span>Perimenopause / menopause</span></label>
+            <label class="choice"><input type="checkbox" name="interest" value="Strength and fitness"><span>Strength &amp; fitness</span></label>
+          </div>
+
+          <label class="legend" for="other">Anything else? <span style="font-weight:500;color:#7c837f">(optional)</span></label>
+          <textarea id="other" name="other_interest" rows="2" placeholder="A few words is enough"></textarea>
+
+          <label class="consent">
+            <input id="consent" type="checkbox" required>
+            <span>I’m happy for Eat Well Live Well / Sushma to contact me about this enquiry. I understand this is wellness coaching, not medical care. <a href="/privacy-policy" target="_blank">Privacy Policy</a>.</span>
+          </label>
+
+          <button id="submitBtn" type="submit">Yes, I’d like to chat with Sushma →</button>
+          <div id="formError" class="error"></div>
+          <p class="micro">No obligation. Just a short conversation to understand where you are and what support might help.</p>
+        </form>
+      </div>
+
+      <div id="success" class="success">
+        <div class="tick">✓</div>
+        <h2>Thank you.</h2>
+        <p>Your details are with Sushma. She’ll get in touch for a short conversation soon.</p>
+        <p><strong>In the meantime, take care of you too. ♡</strong></p>
+        <a href="/">Explore Eat Well Live Well →</a>
+      </div>
+    </section>
+
+    <footer>Eat Well Live Well · NourisHer · Chennai, India</footer>
+  </main>
+
+  <script>
+    const form = document.getElementById('eventLeadForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorBox = document.getElementById('formError');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      errorBox.style.display = 'none';
+
+      const interests = [...document.querySelectorAll('input[name="interest"]:checked')]
+        .map(el => el.value);
+
+      const emailValue = document.getElementById('email').value.trim();
+
+      const payload = {
+        name: document.getElementById('name').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        email: emailValue || null,
+        age_range: document.getElementById('age').value,
+        interests,
+        other_interest: document.getElementById('other').value.trim(),
+        consent: document.getElementById('consent').checked
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving…';
+
+      try {
+        const response = await fetch('/event-lead', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (!response.ok || data.status !== 'saved') {
+          throw new Error(data.message || 'Please check your details and try again.');
+        }
+
+        if (window.gtag) {
+          gtag('event', 'generate_lead', {lead_source: 'weekend_stall'});
+        }
+        if (window.fbq) {
+          fbq('track', 'Lead');
+        }
+
+        document.getElementById('formWrap').style.display = 'none';
+        document.getElementById('success').style.display = 'block';
+        window.scrollTo({top:0, behavior:'smooth'});
+      } catch (error) {
+        errorBox.textContent = error.message || 'Something went wrong. Please try again.';
+        errorBox.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Yes, I’d like to chat with Sushma →';
+      }
+    });
+  </script>
+</body>
+</html>

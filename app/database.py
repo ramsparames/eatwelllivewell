@@ -631,7 +631,9 @@ def get_all_leads() -> list[dict[str, Any]]:
                     a.submitted_at AS application_submitted_at,
 
                     CASE
-                        WHEN a.id IS NOT NULL THEN TRUE
+                        WHEN a.id IS NOT NULL
+                         AND COALESCE(a.application_data->>'form_type', '') <> 'event_lead'
+                        THEN TRUE
                         ELSE FALSE
                     END AS has_application
 
@@ -676,7 +678,11 @@ def get_all_leads() -> list[dict[str, Any]]:
                     a.follow_up_date AS application_follow_up_date,
                     a.submitted_at AS application_submitted_at,
 
-                    TRUE AS has_application
+                    CASE
+                        WHEN COALESCE(a.application_data->>'form_type', '') = 'event_lead'
+                        THEN FALSE
+                        ELSE TRUE
+                    END AS has_application
 
                 FROM transformation_applications AS a
 
