@@ -60,6 +60,43 @@ fbq('track', 'PageView');
 <link href="/static/styles.css" rel="stylesheet"/>
 
 
+
+<style>
+  .journal-preview .home-journal-reels{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:24px;
+    align-items:start;
+  }
+  .journal-preview .home-reel-card{min-width:0;}
+  .journal-preview .home-reel-frame{
+    overflow:hidden;
+    border-radius:22px;
+    background:#fff;
+    border:1px solid rgba(73,61,68,.10);
+    box-shadow:0 14px 34px rgba(73,61,68,.08);
+  }
+  .journal-preview .home-reel-frame iframe{
+    display:block;
+    width:100%;
+    height:620px;
+    border:0;
+    background:#fff;
+  }
+  .journal-preview .home-reel-link{
+    display:inline-flex;
+    margin-top:12px;
+    font-weight:700;
+    text-decoration:none;
+  }
+  @media (max-width:1000px){
+    .journal-preview .home-journal-reels{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+  @media (max-width:650px){
+    .journal-preview .home-journal-reels{grid-template-columns:1fr;gap:28px;}
+    .journal-preview .home-reel-frame iframe{height:680px;}
+  }
+</style>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -414,19 +451,76 @@ src="https://www.facebook.com/tr?id=1097733882755104&ev=PageView&noscript=1"
 </a>
 </div>
 </div>
-</section><section class="section journal-preview" id="journal">
+</section>
+<section class="section journal-preview" id="journal">
 <div class="wrap">
 <div class="sec-head center reveal">
 <p class="eyebrow">From Sushma’s Journal</p>
 <h2 class="section-title">Practical conversations for women over 40.</h2>
 <p class="section-lead">Nutrition, strength, menopause, mindset and the small changes that help you feel more like yourself again.</p>
 </div>
-<div class="reel-grid">
-<article class="reel-card reveal"><div class="reel-placeholder"><span class="reel-index">01</span><span class="play-button">▶</span><small>Reel coming soon</small></div><div class="reel-copy"><span>Strength</span><h3>Why strength training changes everything after 40</h3><p>How muscle supports metabolism, confidence and healthy ageing.</p></div></article>
-<article class="reel-card reveal"><div class="reel-placeholder"><span class="reel-index">02</span><span class="play-button">▶</span><small>Reel coming soon</small></div><div class="reel-copy"><span>Recovery</span><h3>Why you feel tired even when you sleep</h3><p>A simple look at sleep quality, stress and midlife recovery.</p></div></article>
-<article class="reel-card reveal"><div class="reel-placeholder"><span class="reel-index">03</span><span class="play-button">▶</span><small>Reel coming soon</small></div><div class="reel-copy"><span>Nutrition</span><h3>Protein isn’t just about muscles</h3><p>Why protein matters for hunger, strength and everyday energy.</p></div></article>
+<div class="home-journal-reels">
+
+<article class="home-reel-card reveal">
+  <div class="home-reel-frame">
+    <iframe
+      src="https://www.instagram.com/reel/Db5ppWnw_jj/embed/captioned/"
+      title="Sushma Rams Instagram Reel 1"
+      loading="lazy"
+      allowtransparency="true"
+      allowfullscreen="true"
+      scrolling="no">
+    </iframe>
+  </div>
+  <a class="instagram home-reel-link"
+     href="https://www.instagram.com/reel/Db5ppWnw_jj/?stkn=ejU5NTRwbHNlZXRk"
+     target="_blank"
+     rel="noopener noreferrer">
+    Watch reel 01 on Instagram ↗
+  </a>
+</article>
+
+<article class="home-reel-card reveal">
+  <div class="home-reel-frame">
+    <iframe
+      src="https://www.instagram.com/reel/DbqJRfEPR28/embed/captioned/"
+      title="Sushma Rams Instagram Reel 2"
+      loading="lazy"
+      allowtransparency="true"
+      allowfullscreen="true"
+      scrolling="no">
+    </iframe>
+  </div>
+  <a class="instagram home-reel-link"
+     href="https://www.instagram.com/reel/DbqJRfEPR28/?stkn=M2ZzODM3MXJ4aGk5"
+     target="_blank"
+     rel="noopener noreferrer">
+    Watch reel 02 on Instagram ↗
+  </a>
+</article>
+
+<article class="home-reel-card reveal">
+  <div class="home-reel-frame">
+    <iframe
+      src="https://www.instagram.com/reel/Dau6mHGyIy3/embed/captioned/"
+      title="Sushma Rams Instagram Reel 3"
+      loading="lazy"
+      allowtransparency="true"
+      allowfullscreen="true"
+      scrolling="no">
+    </iframe>
+  </div>
+  <a class="instagram home-reel-link"
+     href="https://www.instagram.com/reel/Dau6mHGyIy3/?stkn=dnMyd252YzI2Z3Fx"
+     target="_blank"
+     rel="noopener noreferrer">
+    Watch reel 03 on Instagram ↗
+  </a>
+</article>
 </div>
-<div class="section-actions center reveal"><a class="btn btn-primary" href="/journal">View all journal entries <span class="btn-arrow">→</span></a></div>
+<div class="section-actions center reveal">
+  <a class="btn btn-primary" href="/journal">View all journal entries <span class="btn-arrow">→</span></a>
+</div>
 </div>
 </section><section class="promise-band">
 <div class="wrap promise-inner reveal"><p class="eyebrow eyebrow-light">The NourisHer Promise</p><h2>No guilt. No extremes. No starting over.</h2><p>Just sustainable progress, one habit at a time.</p></div>
