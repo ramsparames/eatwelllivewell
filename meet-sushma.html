@@ -185,6 +185,10 @@
         <p class="intro">Share a few details and <strong>Sushma will get in touch for a short 1:1 conversation</strong> about your health and whether NourisHer could support you.</p>
 
         <form id="eventLeadForm">
+          <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">
+            <label for="website">Website</label>
+            <input id="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
           <label class="legend" for="name">Your name</label>
           <input id="name" name="name" autocomplete="name" required placeholder="How should I address you?">
 
@@ -244,6 +248,12 @@
     const form = document.getElementById('eventLeadForm');
     const submitBtn = document.getElementById('submitBtn');
     const errorBox = document.getElementById('formError');
+    let eventFormToken = '';
+
+    fetch('/form-token/event', {credentials:'same-origin'})
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('token')))
+      .then(data => { eventFormToken = data.token || ''; })
+      .catch(() => { eventFormToken = ''; });
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -261,7 +271,9 @@
         age_range: document.getElementById('age').value,
         interests,
         other_interest: document.getElementById('other').value.trim(),
-        consent: document.getElementById('consent').checked
+        consent: document.getElementById('consent').checked,
+        form_token: eventFormToken,
+        website: document.getElementById('website').value || ''
       };
 
       submitBtn.disabled = true;
