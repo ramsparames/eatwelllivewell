@@ -80,7 +80,7 @@ def _rate_limit(key: str, *, limit: int, window_seconds: int) -> bool:
 
 @router.get("/form-token/{purpose}")
 def issue_form_token(purpose: str):
-    if purpose not in {"application", "event"}:
+    if purpose not in {"application", "event", "assessment"}:
         raise HTTPException(status_code=404, detail="Unknown form")
     return {
         "token": _sign_form_token(int(time.time()), purpose),

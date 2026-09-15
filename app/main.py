@@ -3,7 +3,7 @@ from app.coach.clients import router as clients_router
 from app.coach.leads import router as leads_router
 from app.dashboard import set_templates
 from starlette.middleware.sessions import SessionMiddleware
-from app.application import router as application_router
+from app.application import router as application_router, _verify_form_token, _rate_limit, _client_ip
 from app.auth import router as auth_router
 from app.auth import set_templates as set_auth_templates
 from app.config import SESSION_SECRET, validate_required_settings
@@ -35,10 +35,6 @@ create_database()
 
 app = FastAPI()
 validate_required_settings()
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
-
 
 app.add_middleware(
     SessionMiddleware,
@@ -123,6 +119,8 @@ class SnapshotSubmission(BaseModel):
     name: str
     phone: str
     answers: dict[str, str]
+    form_token: str
+    website: str = ""
 
 from fastapi.responses import FileResponse
 from pathlib import Path
@@ -139,7 +137,25 @@ def health():
     return {"status": "healthy"}
 
 @app.post("/snapshot")
-def receive_snapshot(submission: SnapshotSubmission):
+def receive_snapshot(request: Request, submission: SnapshotSubmission):
+    # Same invisible protection used by Transformation and Meet Sushma.
+    if submission.website.strip():
+        raise HTTPException(status_code=400, detail="Submission rejected.")
+
+    if not _verify_form_token(submission.form_token, "assessment"):
+        raise HTTPException(
+            status_code=400,
+            detail="Please refresh the assessment page and try again.",
+        )
+
+    # Generous enough for genuine retakes, but blocks automated flooding.
+    ip = _client_ip(request)
+    if not _rate_limit(f"assessment-ip:{ip}", limit=10, window_seconds=3600):
+        raise HTTPException(
+            status_code=429,
+            detail="Too many assessments. Please try again later.",
+        )
+
     result = calculate_score(submission.answers)
 
     submission_id = save_snapshot(

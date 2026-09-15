@@ -3,6 +3,14 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
 (async () => {
     "use strict";
 
+    let assessmentFormToken = "";
+    if (document.querySelector("[data-snapshot-intro]")) {
+        fetch("/form-token/assessment", { credentials: "same-origin" })
+            .then(response => response.ok ? response.json() : Promise.reject(new Error("token")))
+            .then(data => { assessmentFormToken = data.token || ""; })
+            .catch(() => { assessmentFormToken = ""; });
+    }
+
     const ASSESSMENT_KEY = "nourisherAssessment";
     const APPLICATION_KEY = "nourisherApplication";
     const LEAD_KEY = "nourisherLead";
@@ -108,7 +116,13 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
         const response = await fetch("/snapshot", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, phone, answers }),
+            body: JSON.stringify({
+                name,
+                phone,
+                answers,
+                form_token: assessmentFormToken,
+                website: document.getElementById("assessment-website")?.value || "",
+            }),
         });
 
         const data = await response.json();
