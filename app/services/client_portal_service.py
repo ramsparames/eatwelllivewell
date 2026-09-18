@@ -1229,18 +1229,19 @@ def get_coach_week_review(
             )
 
             if has_direct_week_evidence:
+                # Once this coaching week has its own dated plan, that plan is
+                # authoritative for the week's commitment labels. Historical
+                # logs may still exist for older action IDs, but they must not
+                # make those old commitments reappear in this week's Data grid.
                 action_plan_rows = [
                     row
                     for row in action_plan_rows
                     if (
-                        (
-                            row["start_date"] <= week_end
-                            and (
-                                row["end_date"] is None
-                                or row["end_date"] >= week_start
-                            )
+                        row["start_date"] <= week_end
+                        and (
+                            row["end_date"] is None
+                            or row["end_date"] >= week_start
                         )
-                        or bool(row.get("has_log_in_week"))
                     )
                 ]
 
