@@ -1213,6 +1213,37 @@ def get_coach_week_review(
             ))
             action_plan_rows = cursor.fetchall()
 
+            # Prefer exact dated/log evidence whenever this coaching week already
+            # has its own saved commitment plan.  The legacy previous-check-in
+            # recovery exists only for older weeks whose dates were historically
+            # stored against the prior coaching call.  Without this guard, those
+            # prior-week rows get added on top of a valid current-week plan and
+            # appear as duplicate/old commitments in the Data grid.
+            has_direct_week_evidence = any(
+                (
+                    row["start_date"] <= week_end
+                    and (row["end_date"] is None or row["end_date"] >= week_start)
+                )
+                or bool(row.get("has_log_in_week"))
+                for row in action_plan_rows
+            )
+
+            if has_direct_week_evidence:
+                action_plan_rows = [
+                    row
+                    for row in action_plan_rows
+                    if (
+                        (
+                            row["start_date"] <= week_end
+                            and (
+                                row["end_date"] is None
+                                or row["end_date"] >= week_start
+                            )
+                        )
+                        or bool(row.get("has_log_in_week"))
+                    )
+                ]
+
             # Missing historical week = standing-plan carry-forward.
             #
             # The database can legitimately have no action-plan rows for an
