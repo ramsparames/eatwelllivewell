@@ -1876,17 +1876,12 @@
       </div>
 
       
-          <div class="nw-standing-plan">
-            <strong>Automatic weekly carry-forward is on</strong>
-            <span>If you make no changes, the same actions and targets continue into the next coaching week. Change the selections below only when Week {{ next_week_number }} needs a different plan.</span>
-          </div>
-
 <details class="nw-custom">
         <summary>+ Add custom actions</summary>
-        <p class="nw-helper" style="margin:8px 0">Add as many custom actions as needed. Leave unused rows blank.</p>
+        <p class="nw-helper" style="margin:8px 0">Add up to 5 custom actions for Week 1. Leave unused rows blank.</p>
         <div class="nw-custom-list">
-          {% for custom_index in range(custom_action_slot_count) %}
-          {% set carried_custom = carry_forward_custom_actions[custom_index] if custom_index < carry_forward_custom_actions|length else none %}
+          {% for custom_index in range(5) %}
+          {% set carried_custom = none %}
           <div class="nw-custom-row {% if carried_custom %}carried-forward{% endif %}">
             <input type="hidden"
                    name="custom_action_keys"
