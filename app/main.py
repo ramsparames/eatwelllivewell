@@ -23,6 +23,7 @@ from app.database import (
 from app.scoring import calculate_score
 from fastapi import Request
 from fastapi.responses import HTMLResponse
+from fastapi.responses import Response
 from fastapi import HTTPException
 from fastapi.templating import Jinja2Templates
 
@@ -38,9 +39,59 @@ app = FastAPI()
 
 from fastapi.responses import FileResponse
 
+# Project root: /opt/render/project/src in production.
+BASE_DIR = Path(__file__).resolve().parent.parent
+SITE_URL = "https://eatwelllivewell.in"
+
 @app.get("/sitemap.xml", include_in_schema=False)
 async def sitemap():
-    return FileResponse("app/static/sitemap.xml", media_type="application/xml")
+    """Generate the public sitemap dynamically so deployment does not depend on a
+    separate app/static/sitemap.xml file being present."""
+    public_pages = [
+        ("/", "index.html"),
+        ("/transformation", "transformation.html"),
+        ("/foundations", "foundations.html"),
+        ("/success-stories", "success-stories.html"),
+        ("/journal", "journal.html"),
+        ("/assessment", "assessment.html"),
+        ("/results", "results.html"),
+        ("/join-form", "join-form.html"),
+        ("/join", "join.html"),
+        ("/thank-you", "thank-you.html"),
+        ("/welcome", "welcome.html"),
+        ("/menopause-coach-india", "menopause-coach-india.html"),
+        ("/belly-fat-after-40", "belly-fat-after-40.html"),
+        ("/nourisher", "nourisher.html"),
+        ("/nourisher-training", "nourisher-training.html"),
+        ("/nourisher-clarity", "nourisher-clarity.html"),
+    ]
+
+    urls = []
+    for path, filename in public_pages:
+        file_path = BASE_DIR / filename
+        if not file_path.is_file():
+            continue
+        lastmod = __import__("datetime").datetime.fromtimestamp(
+            file_path.stat().st_mtime, tz=__import__("datetime").timezone.utc
+        ).date().isoformat()
+        urls.append(
+            f"  <url><loc>{SITE_URL}{path}</loc><lastmod>{lastmod}</lastmod></url>"
+        )
+
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(urls)
+        + '\n</urlset>\n'
+    )
+    return Response(content=xml, media_type="application/xml")
+
+@app.get("/robots.txt", include_in_schema=False)
+async def robots():
+    return Response(
+        content=f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n",
+        media_type="text/plain",
+    )
 
 validate_required_settings()
 
@@ -52,7 +103,6 @@ app.add_middleware(
     max_age=60 * 60 * 12,
 )
 
-BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(
     directory=str(BASE_DIR / "templates")
 )
@@ -131,9 +181,6 @@ class SnapshotSubmission(BaseModel):
     website: str = ""
 
 from fastapi.responses import FileResponse
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 @app.get("/")
@@ -193,12 +240,6 @@ def receive_snapshot(request: Request, submission: SnapshotSubmission):
         "name": submission.name,
         "result": result,
     }
-
-from pathlib import Path
-from fastapi import HTTPException
-from fastapi.responses import FileResponse
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 app.include_router(auth_router)
 app.include_router(dashboard_router)
