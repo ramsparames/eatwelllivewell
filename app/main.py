@@ -1,8 +1,3 @@
-from fastapi.responses import FileResponse
-
-@app.get("/sitemap.xml", include_in_schema=False)
-async def sitemap():
-    return FileResponse("app/static/sitemap.xml", media_type="application/xml")
 
 from app.dashboard import router as dashboard_router
 from app.coach.clients import router as clients_router
@@ -40,6 +35,13 @@ from app.database import create_database
 create_database()
 
 app = FastAPI()
+
+from fastapi.responses import FileResponse
+
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap():
+    return FileResponse("app/static/sitemap.xml", media_type="application/xml")
+
 validate_required_settings()
 
 app.add_middleware(
