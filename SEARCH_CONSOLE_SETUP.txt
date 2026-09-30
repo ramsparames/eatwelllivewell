@@ -1,0 +1,50 @@
+EAT WELL LIVE WELL — GOOGLE SEARCH SETUP
+
+Files
+-----
+sitemap.xml
+robots.txt
+
+Confirmed indexable URLs included in this starter sitemap:
+- https://eatwelllivewell.in/
+- https://eatwelllivewell.in/nourisher
+- https://eatwelllivewell.in/menopause-coach-india
+- https://eatwelllivewell.in/belly-fat-after-40
+
+Do NOT put the NourisHer VSL funnel's intermediate conversion pages in this
+sitemap unless you specifically want them indexed. Those pages are primarily
+for Meta-ad traffic and conversion, not organic discovery.
+
+DEPLOY
+------
+Put sitemap.xml and robots.txt at the website root so these resolve to:
+https://eatwelllivewell.in/sitemap.xml
+https://eatwelllivewell.in/robots.txt
+
+SEARCH CONSOLE
+--------------
+1. Open Google Search Console.
+2. Add/choose the domain property for eatwelllivewell.in.
+3. Verify ownership if it is not already verified.
+4. Open Sitemaps.
+5. Enter:
+   sitemap.xml
+6. Submit.
+7. Use URL Inspection for each new indexable URL:
+   /menopause-coach-india
+   /belly-fat-after-40
+8. Click Request Indexing for each page after confirming Google can access it.
+9. Later, monitor Pages > Indexing and Search results > Performance.
+
+IMPORTANT
+---------
+A sitemap helps discovery; it does not guarantee indexing or ranking.
+Google recommends submitting a sitemap and using URL Inspection after new
+pages are deployed. Google also notes that crawling/indexing can take time.
+
+BEFORE DEPLOYMENT
+-----------------
+If your production site has additional public pages that should be indexed
+(e.g. About, Success Stories, Privacy Policy, Terms), add their canonical
+URLs to the sitemap before finalizing it. I have intentionally not invented
+those URLs here.
