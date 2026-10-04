@@ -31,6 +31,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.email import send_assessment_notification
 from app.webhooks import router as webhook_router
+from app.transformation_interest import router as transformation_interest_router
 from app.database import create_database
 
 create_database()
@@ -116,7 +117,7 @@ app.mount(
 @app.get("/transformation")
 def foundations():
     return FileResponse(BASE_DIR / "transformation.html")
-    
+
 @app.get("/foundations")
 def foundations():
     return FileResponse(BASE_DIR / "foundations.html")
@@ -144,7 +145,12 @@ def results():
 @app.get("/join-form")
 def join_form():
     return FileResponse(BASE_DIR / "join-form.html")
-    
+
+
+@app.get("/transformation-interest")
+def transformation_interest():
+    return FileResponse(BASE_DIR / "transformation-interest.html")
+
 @app.get("/join")
 def join():
     return FileResponse(BASE_DIR / "join.html")
@@ -158,7 +164,9 @@ def thank_you():
 @app.get("/welcome")
 def welcome():
     return FileResponse(BASE_DIR / "welcome.html")
-    
+
+app.include_router(transformation_interest_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -172,7 +180,7 @@ app.add_middleware(
 @app.on_event("startup")
 def startup():
     create_database()
-    
+
 class SnapshotSubmission(BaseModel):
     name: str
     phone: str

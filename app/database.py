@@ -114,6 +114,35 @@ def create_database() -> None:
             )
             cursor.execute(
                 """
+                CREATE TABLE IF NOT EXISTS transformation_interest_leads (
+                    id BIGSERIAL PRIMARY KEY,
+
+                    snapshot_id BIGINT REFERENCES snapshot_submissions(id)
+                        ON DELETE SET NULL,
+
+                    name TEXT NOT NULL,
+                    phone TEXT NOT NULL,
+                    occupation TEXT NOT NULL,
+
+                    goals JSONB NOT NULL DEFAULT '[]'::jsonb,
+                    frustration TEXT NOT NULL,
+                    readiness TEXT NOT NULL,
+                    timeline TEXT NOT NULL,
+                    why_now TEXT NOT NULL,
+
+                    source TEXT NOT NULL DEFAULT 'direct',
+
+                    status TEXT NOT NULL DEFAULT 'new',
+                    coach_notes TEXT,
+
+                    submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+                """
+            )
+
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS clarity_call_appointments (
                     id BIGSERIAL PRIMARY KEY,
             
@@ -804,6 +833,101 @@ def get_lead_by_id(lead_id: int) -> dict[str, Any] | None:
             )
 
             return cursor.fetchone()
+def save_transformation_interest(
+    *,
+    snapshot_id: int | None,
+    name: str,
+    phone: str,
+    occupation: str,
+    goals: list[str],
+    frustration: str,
+    readiness: str,
+    timeline: str,
+    why_now: str,
+    source: str,
+) -> int:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+
+            linked_snapshot_id = snapshot_id
+
+            # Preserve the exact assessment relationship when valid.
+            if linked_snapshot_id is not None:
+                cursor.execute(
+                    """
+                    SELECT id
+                    FROM snapshot_submissions
+                    WHERE id = %s
+                    """,
+                    (linked_snapshot_id,),
+                )
+
+                if cursor.fetchone() is None:
+                    linked_snapshot_id = None
+
+            # If the browser did not provide a valid assessment ID,
+            # try the latest assessment for the same phone number.
+            if linked_snapshot_id is None:
+                cursor.execute(
+                    """
+                    SELECT id
+                    FROM snapshot_submissions
+                    WHERE phone = %s
+                    ORDER BY submitted_at DESC
+                    LIMIT 1
+                    """,
+                    (phone,),
+                )
+
+                snapshot = cursor.fetchone()
+
+                if snapshot:
+                    linked_snapshot_id = snapshot["id"]
+
+            cursor.execute(
+                """
+                INSERT INTO transformation_interest_leads (
+                    snapshot_id,
+                    name,
+                    phone,
+                    occupation,
+                    goals,
+                    frustration,
+                    readiness,
+                    timeline,
+                    why_now,
+                    source
+                )
+                VALUES (
+                    %s, %s, %s, %s, %s::jsonb,
+                    %s, %s, %s, %s, %s
+                )
+                RETURNING id
+                """,
+                (
+                    linked_snapshot_id,
+                    name,
+                    phone,
+                    occupation,
+                    json.dumps(goals),
+                    frustration,
+                    readiness,
+                    timeline,
+                    why_now,
+                    source,
+                ),
+            )
+
+            row = cursor.fetchone()
+
+            if not row:
+                raise RuntimeError(
+                    "Transformation interest enquiry could not be saved"
+                )
+
+            return int(row["id"])
+
+
 def save_application(
     *,
     snapshot_id: int | None,

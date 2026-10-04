@@ -502,3 +502,118 @@ def send_application_confirmation(
     except Exception:
         logger.exception("Applicant confirmation email could not be sent")
         return None
+
+def send_transformation_interest_notification(
+    *,
+    interest_id: int,
+    name: str,
+    phone: str,
+    occupation: str,
+    goals: list[str],
+    frustration: str,
+    readiness: str,
+    timeline: str,
+    why_now: str,
+    source: str,
+) -> str | None:
+    clean_name = name.strip() or "New enquiry"
+
+    body = f"""
+    <div style="
+        margin-bottom:18px;
+        padding:18px;
+        border-left:4px solid #f5c518;
+        border-radius:12px;
+        background:#fffaf0;
+    ">
+        <div style="
+            margin-bottom:7px;
+            color:#725400;
+            font-size:11px;
+            font-weight:800;
+            letter-spacing:1px;
+            text-transform:uppercase;
+        ">
+            New Transformation Interest
+        </div>
+
+        <div style="
+            color:#3b343f;
+            font-size:15px;
+            line-height:1.7;
+        ">
+            {html.escape(clean_name)} has expressed serious interest
+            in exploring NourisHer Transformation.
+        </div>
+    </div>
+
+    <table
+        role="presentation"
+        width="100%"
+        cellpadding="0"
+        cellspacing="0"
+        style="
+            border:1px solid #eee7f1;
+            border-radius:14px;
+            border-collapse:separate;
+            border-spacing:0;
+            overflow:hidden;
+        "
+    >
+        {_detail_row("Name", clean_name)}
+        {_detail_row("WhatsApp", phone)}
+        {_detail_row("Occupation", occupation)}
+        {_detail_row("Looking to change", ", ".join(goals))}
+        {_detail_row("Main frustration", frustration)}
+        {_detail_row("Readiness", readiness)}
+        {_detail_row("Ideal start", timeline)}
+        {_detail_row("Why now", why_now)}
+        {_detail_row("Source", source)}
+        {_detail_row("Interest ID", interest_id)}
+    </table>
+
+    <div style="
+        margin-top:20px;
+        padding:16px;
+        border-radius:12px;
+        background:#f7effc;
+        color:#4d4352;
+        font-size:14px;
+        line-height:1.6;
+    ">
+        <strong>Next step:</strong>
+        Review this enquiry and decide whether to send her the full
+        NourisHer Transformation application.
+    </div>
+    """
+
+    email_html = _email_layout(
+        title="New NourisHer Transformation Interest",
+        intro=(
+            f"{clean_name} has expressed interest in NourisHer Transformation. "
+            "Review her details before deciding whether to send the full application."
+        ),
+        body=body,
+        button_text="Open NourisHer",
+        button_url=f"{APP_BASE_URL.rstrip('/')}/transformation",
+    )
+
+    text_content = (
+        "New NourisHer Transformation Interest\n\n"
+        f"Name: {clean_name}\n"
+        f"WhatsApp: {phone}\n"
+        f"Occupation: {occupation}\n"
+        f"Looking to change: {', '.join(goals)}\n"
+        f"Main frustration: {frustration}\n"
+        f"Readiness: {readiness}\n"
+        f"Ideal start: {timeline}\n"
+        f"Why now: {why_now}\n"
+        f"Source: {source}\n"
+        f"Interest ID: {interest_id}\n"
+    )
+
+    return send_email(
+        subject=f"🌿 New NourisHer Transformation Interest — {clean_name}",
+        html_content=email_html,
+        text_content=text_content,
+    )
