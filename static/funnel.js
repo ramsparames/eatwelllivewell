@@ -638,6 +638,24 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 phone = applicationPhoneWidget.getNumber();
             }
 
+            const checkedValues = (name) =>
+                [...applicationForm.querySelectorAll(`input[name="${name}"]:checked`)]
+                    .map((input) => input.value);
+
+            const triedValues = checkedValues("triedOptions");
+            const supportValues = checkedValues("coachNeeds");
+
+            const triedField = document.getElementById("tried");
+            const supportField = document.getElementById("support");
+
+            if (triedField) {
+                triedField.value = triedValues.join(", ");
+            }
+
+            if (supportField) {
+                supportField.value = supportValues.join(", ");
+            }
+
             const payload = {
                 snapshot_id: savedLead.snapshotId || null,
                 name: nameField?.value.trim() || "",
