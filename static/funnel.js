@@ -639,7 +639,34 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 const data = await response.json();
 
                 if (!response.ok || data.status !== "saved") {
-                    throw new Error(data.message || data.detail || "The application could not be submitted.");
+                    let message = data.message || "";
+
+                    if (!message && Array.isArray(data.detail)) {
+                        message = data.detail
+                            .map((item) => {
+                                if (typeof item === "string") return item;
+
+                                const location = Array.isArray(item.loc)
+                                    ? item.loc.filter(Boolean).join(" → ")
+                                    : "";
+
+                                return location
+                                    ? `${location}: ${item.msg || "Invalid value"}`
+                                    : (item.msg || JSON.stringify(item));
+                            })
+                            .join("\n");
+                    }
+
+                    if (!message && data.detail) {
+                        message =
+                            typeof data.detail === "string"
+                                ? data.detail
+                                : JSON.stringify(data.detail, null, 2);
+                    }
+
+                    throw new Error(
+                        message || "The application could not be submitted."
+                    );
                 }
 
                 save(APPLICATION_KEY, {
