@@ -227,7 +227,7 @@
 
     <div class="attention-list">
 
-      {% for item in transformation_interests %}
+      {% for item in transformation_interests|selectattr("status","equalto","new")|sort(attribute="submitted_at", reverse=true) %}
         {% if (item.status or "new") == "new" %}
         <article class="attention-row">
           <div class="attention-name">
@@ -250,7 +250,7 @@
         {% endif %}
       {% endfor %}
 
-      {% for item in new_applications %}
+      {% for item in new_applications|sort(attribute="submitted_at", reverse=true) %}
         <article class="attention-row">
           <div class="attention-name">
             <strong>{{ item.name or "Lead" }}</strong>
@@ -267,7 +267,7 @@
         </article>
       {% endfor %}
 
-      {% for item in today_followups %}
+      {% for item in today_followups|sort(attribute="follow_up_date") %}
         <article class="attention-row">
           <div class="attention-name">
             <strong>{{ item.name or "Lead" }}</strong>
@@ -285,7 +285,7 @@
       {% endfor %}
 
       {# New assessment leads are useful, but sit below enquiries/applications/follow-ups. #}
-      {% for item in new_lead_items|sort(attribute="submitted_at", reverse=true) %}
+      {% for item in new_lead_items|selectattr("lead_type","equalto","assessment")|sort(attribute="submitted_at", reverse=true) %}
         {% if item.lead_type == "assessment" %}
         <article class="attention-row">
           <div class="attention-name">
