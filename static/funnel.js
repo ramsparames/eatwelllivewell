@@ -457,6 +457,134 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
             });
         }
 
+        // Seven-step application navigation.
+        // Steps 1–6 advance with Continue; only Step 7 submits the form.
+        const applicationSteps = [...applicationForm.querySelectorAll("[data-application-step]")];
+        const applicationStepLabel = document.querySelector("[data-application-step-label]");
+        const applicationProgress = document.querySelector("[data-application-progress]");
+
+        let currentApplicationStep = Math.max(
+            0,
+            applicationSteps.findIndex((step) => step.classList.contains("active"))
+        );
+
+        const updateApplicationStep = (index, behavior = "smooth") => {
+            if (!applicationSteps.length) return;
+
+            currentApplicationStep = Math.max(
+                0,
+                Math.min(index, applicationSteps.length - 1)
+            );
+
+            applicationSteps.forEach((step, stepIndex) => {
+                step.classList.toggle(
+                    "active",
+                    stepIndex === currentApplicationStep
+                );
+            });
+
+            const stepNumber = currentApplicationStep + 1;
+            const progress =
+                (stepNumber / applicationSteps.length) * 100;
+
+            if (applicationStepLabel) {
+                applicationStepLabel.textContent =
+                    `Step ${stepNumber} of ${applicationSteps.length}`;
+            }
+
+            if (applicationProgress) {
+                applicationProgress.style.width = `${progress}%`;
+            }
+
+            requestAnimationFrame(() => {
+                const activeStep =
+                    applicationSteps[currentApplicationStep];
+
+                if (!activeStep) return;
+
+                const header =
+                    document.querySelector(".journey-header");
+
+                const progressBar =
+                    document.querySelector(".application-progress");
+
+                const offset =
+                    (header?.offsetHeight || 0) +
+                    (progressBar?.offsetHeight || 0) +
+                    24;
+
+                const targetTop =
+                    activeStep.getBoundingClientRect().top +
+                    window.scrollY -
+                    offset;
+
+                window.scrollTo({
+                    top: Math.max(0, targetTop),
+                    behavior
+                });
+            });
+        };
+
+        const validateCurrentApplicationStep = () => {
+            const activeStep =
+                applicationSteps[currentApplicationStep];
+
+            if (!activeStep) return true;
+
+            const fields = [
+                ...activeStep.querySelectorAll(
+                    "input, select, textarea"
+                )
+            ].filter(
+                (field) =>
+                    !field.disabled &&
+                    field.type !== "hidden"
+            );
+
+            for (const field of fields) {
+                if (!field.checkValidity()) {
+                    field.reportValidity();
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        applicationForm
+            .querySelectorAll("[data-application-next]")
+            .forEach((button) => {
+                button.addEventListener("click", () => {
+                    if (!validateCurrentApplicationStep()) return;
+
+                    if (
+                        currentApplicationStep <
+                        applicationSteps.length - 1
+                    ) {
+                        updateApplicationStep(
+                            currentApplicationStep + 1
+                        );
+                    }
+                });
+            });
+
+        applicationForm
+            .querySelectorAll("[data-application-back]")
+            .forEach((button) => {
+                button.addEventListener("click", () => {
+                    if (currentApplicationStep > 0) {
+                        updateApplicationStep(
+                            currentApplicationStep - 1
+                        );
+                    }
+                });
+            });
+
+        updateApplicationStep(
+            currentApplicationStep,
+            "auto"
+        );
+
         applicationForm.addEventListener("submit", async (event) => {
             event.preventDefault();
 
