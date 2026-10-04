@@ -181,7 +181,9 @@
           else lead.follow_up_date
       %}
       <a class="lead-row"
-         {% if lead.snapshot_id %}
+         {% if lead.lead_type == "interest" %}
+           href="/dashboard/leads/interest/{{ lead.interest_id }}"
+         {% elif lead.snapshot_id %}
            href="/dashboard/leads/assessment/{{ lead.snapshot_id }}"
          {% else %}
            href="/dashboard/leads/application/{{ lead.application_id }}"
@@ -190,7 +192,13 @@
           <strong>{{ lead.name }}</strong>
           <span>{{ lead.email or "No email" }} · {{ lead.phone or "No phone" }}</span>
           <small class="lead-badge">
-            {{ "Transformation application" if lead.has_application else "Assessment" }}
+            {% if lead.lead_type == "interest" %}
+              Transformation enquiry
+            {% elif lead.has_application %}
+              Transformation application
+            {% else %}
+              Assessment
+            {% endif %}
           </small>
         </div>
 

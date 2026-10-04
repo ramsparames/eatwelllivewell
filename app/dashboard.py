@@ -231,13 +231,41 @@ def dashboard(
 
     follow_ups_due = len(today_followups)
 
+    # Transformation interest enquiries are stored separately from
+    # assessment/application leads, but should also appear in All Leads.
+    interest_lead_rows = []
+
+    for interest in transformation_interests:
+        interest_lead_rows.append(
+            {
+                "snapshot_id": None,
+                "application_id": None,
+                "interest_id": interest.get("id"),
+                "lead_type": "interest",
+                "name": interest.get("name") or "Lead",
+                "email": None,
+                "phone": interest.get("phone"),
+                "total_score": None,
+                "opportunity": None,
+                "strength": None,
+                "status": interest.get("status") or "new",
+                "application_status": None,
+                "has_application": False,
+                "follow_up_date": None,
+                "application_follow_up_date": None,
+                "submitted_at": interest.get("submitted_at"),
+            }
+        )
+
+    display_leads = all_leads + interest_lead_rows
+
     search_query = q.strip().lower()
-    leads = all_leads
+    leads = display_leads
 
     if search_query:
         filtered_leads = []
 
-        for lead in all_leads:
+        for lead in display_leads:
             searchable_values = [
                 lead.get("name"),
                 lead.get("phone"),
