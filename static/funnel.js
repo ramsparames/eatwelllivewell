@@ -548,6 +548,35 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 }
             }
 
+            // Checkbox groups need custom "at least one" validation.
+            const checkboxGroups = [
+                {
+                    name: "triedOptions",
+                    message: "Please choose at least one thing you have already tried."
+                },
+                {
+                    name: "coachNeeds",
+                    message: "Please choose at least one type of support you are looking for."
+                }
+            ];
+
+            for (const group of checkboxGroups) {
+                const checkboxes = [
+                    ...activeStep.querySelectorAll(
+                        `input[type="checkbox"][name="${group.name}"]`
+                    )
+                ];
+
+                if (
+                    checkboxes.length > 0 &&
+                    !checkboxes.some((checkbox) => checkbox.checked)
+                ) {
+                    alert(group.message);
+                    checkboxes[0].focus();
+                    return false;
+                }
+            }
+
             return true;
         };
 
