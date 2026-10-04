@@ -98,6 +98,68 @@
   margin-bottom: 52px;
 }
 
+
+/* Final thank-you state */
+.interest-success-card {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 76px 72px 82px;
+  text-align: center;
+  border-radius: 28px;
+  background: #eef5ef;
+  border: 1px solid rgba(62, 94, 74, 0.12);
+}
+
+.interest-success-card .eyebrow {
+  margin-bottom: 18px;
+}
+
+.interest-success-card h2 {
+  margin: 0 auto 24px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(42px, 5vw, 64px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.interest-success-card p {
+  max-width: 720px;
+  margin: 0 auto 16px;
+  color: var(--ink-soft);
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.interest-success-card .success-lead {
+  font-size: 21px;
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+
+.interest-success-card .success-note {
+  margin-top: 30px;
+  color: #35624d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 650px) {
+  .interest-success-card {
+    padding: 52px 24px 58px;
+    border-radius: 22px;
+  }
+
+  .interest-success-card p {
+    font-size: 16px;
+  }
+
+  .interest-success-card .success-lead {
+    font-size: 18px;
+  }
+}
+
 </style>
 </head>
 <body class="journey-page">
@@ -203,12 +265,16 @@
 <p class="interest-footnote">By submitting, you agree that Sushma may contact you about NourisHer Transformation. Your information is handled according to our Privacy Policy.</p>
 </form>
 
-<section id="interest-success" class="interest-success hidden" aria-live="polite"><div class="interest-success-card">
-<p class="eyebrow">Thank you</p><h2>Thank you, <span id="success-name">there</span>. ❤️</h2>
-<p>Sushma has received your details. She personally reviews every Transformation enquiry and will reach out to you on WhatsApp about the next step.</p>
-<p>If she feels Transformation is a good fit for what you're looking for, she'll send you the full application before your Clarity Call.</p>
-<a class="btn btn-primary" href="/transformation">Explore Transformation →</a>
-</div></section>
+<section id="interest-success" class="interest-success hidden" aria-live="polite">
+  <div class="interest-success-card">
+    <p class="eyebrow">Thank you</p>
+    <h2>Thank you, <span id="success-name">there</span>. <span aria-hidden="true">❤️</span></h2>
+    <p class="success-lead">Sushma has received your details and will personally review your Transformation enquiry.</p>
+    <p>She’ll reach out to you on WhatsApp about the next step.</p>
+    <p>If she feels NourisHer Transformation is a good fit for what you’re looking for, she’ll send you the full application before your Clarity Call.</p>
+    <p class="success-note">There is no obligation to enrol.</p>
+  </div>
+</section>
 </div></main>
 
 <footer class="footer">
