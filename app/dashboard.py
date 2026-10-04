@@ -198,6 +198,23 @@ def dashboard(
         if lead.get("has_application"):
             application_leads.append(item)
 
+    # Transformation interest enquiries are also treated as new leads.
+    # They remain stored in transformation_interest_leads and are not
+    # duplicated in the main leads table.
+    for interest in transformation_interests:
+        if (interest.get("status") or "new") == "new":
+            new_lead_items.append(
+                {
+                    "name": interest.get("name") or "Lead",
+                    "email": None,
+                    "phone": interest.get("phone"),
+                    "status": "new",
+                    "lead_type": "interest",
+                    "lead_id": interest.get("id"),
+                    "submitted_at": interest.get("submitted_at"),
+                }
+            )
+
     # Overdue follow-ups appear before today's follow-ups.
     today_followups.sort(
         key=lambda item: item["follow_up_date"]
