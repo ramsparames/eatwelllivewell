@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 from app.auth import coach_is_logged_in
 from app.database import (
+    get_transformation_interests,
     get_all_leads,
     get_lead_profile,
     get_lead_events,
@@ -53,6 +54,7 @@ def dashboard(
         raise RuntimeError("Templates are not configured")
 
     all_leads = get_all_leads()
+    transformation_interests = get_transformation_interests()
     today = date.today()
 
     total_leads = len(all_leads)
@@ -280,11 +282,48 @@ def dashboard(
             "today_followups": today_followups,
             "new_applications": new_applications,
             "priority_applicants": priority_applicants,
+            "transformation_interests": transformation_interests,
             "new_lead_items": new_lead_items,
             "application_leads": application_leads,
         },
     )
     
+@router.get(
+    "/dashboard/leads/interest/{interest_id}",
+    response_class=HTMLResponse,
+)
+def transformation_interest_profile(
+    request: Request,
+    interest_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse(
+            "/coach/login",
+            status_code=303,
+        )
+
+    if templates is None:
+        raise RuntimeError("Templates are not configured")
+
+    from app.database import get_transformation_interest_by_id
+
+    interest = get_transformation_interest_by_id(interest_id)
+
+    if interest is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Transformation enquiry not found",
+        )
+
+    return templates.TemplateResponse(
+        "transformation_interest.html",
+        {
+            "request": request,
+            "interest": interest,
+        },
+    )
+
+
 @router.get(
     "/dashboard/leads/{lead_type}/{lead_id}",
     response_class=HTMLResponse,

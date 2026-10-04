@@ -2547,3 +2547,61 @@ def get_previous_measurement_before(client_id: int, before_date):
                 (client_id, before_date),
             )
             return cursor.fetchone()
+
+def get_transformation_interests() -> list[dict[str, Any]]:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    snapshot_id,
+                    name,
+                    phone,
+                    occupation,
+                    goals,
+                    frustration,
+                    readiness,
+                    timeline,
+                    why_now,
+                    source,
+                    status,
+                    coach_notes,
+                    submitted_at,
+                    updated_at
+                FROM transformation_interest_leads
+                ORDER BY submitted_at DESC
+                """
+            )
+            return cursor.fetchall()
+
+
+def get_transformation_interest_by_id(
+    interest_id: int,
+) -> dict[str, Any] | None:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    snapshot_id,
+                    name,
+                    phone,
+                    occupation,
+                    goals,
+                    frustration,
+                    readiness,
+                    timeline,
+                    why_now,
+                    source,
+                    status,
+                    coach_notes,
+                    submitted_at,
+                    updated_at
+                FROM transformation_interest_leads
+                WHERE id = %s
+                """,
+                (interest_id,),
+            )
+            return cursor.fetchone()

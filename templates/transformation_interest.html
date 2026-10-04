@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Transformation Enquiry — {{ interest.name }}</title>
+  <link rel="stylesheet" href="/static/dashboard.css">
+  <style>
+    .interest-review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .interest-review-card{padding:22px;border:1px solid var(--border,#e7e1da);border-radius:18px;background:#fff}
+    .interest-review-card.full{grid-column:1/-1}
+    .interest-review-card span{display:block;color:var(--muted,#73706c);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+    .interest-review-card p{margin:0;color:var(--text,#222);line-height:1.65}
+    .interest-review-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+    @media(max-width:760px){.interest-review-grid{grid-template-columns:1fr}.interest-review-card.full{grid-column:auto}}
+  </style>
+</head>
+<body>
+<main class="container">
+  <section class="dashboard-panel">
+    <p class="eyebrow">NourisHer Transformation™</p>
+    <h1>{{ interest.name }}</h1>
+    <p>This woman has completed the short Transformation interest form. This is the qualification step before the full application.</p>
+
+    <div class="interest-review-grid">
+      <article class="interest-review-card"><span>WhatsApp</span><p>{{ interest.phone }}</p></article>
+      <article class="interest-review-card"><span>Occupation</span><p>{{ interest.occupation }}</p></article>
+      <article class="interest-review-card"><span>Looking to change</span><p>{{ interest.goals|join(', ') }}</p></article>
+      <article class="interest-review-card"><span>Readiness</span><p>{{ interest.readiness }}</p></article>
+      <article class="interest-review-card"><span>Ideal start</span><p>{{ interest.timeline }}</p></article>
+      <article class="interest-review-card"><span>Source</span><p>{{ interest.source }}</p></article>
+      <article class="interest-review-card full"><span>Main frustration</span><p>{{ interest.frustration }}</p></article>
+      <article class="interest-review-card full"><span>Why now</span><p>{{ interest.why_now }}</p></article>
+    </div>
+
+    <div class="interest-review-actions">
+      <a class="mini-action primary" href="https://wa.me/{{ interest.phone|replace('+','')|replace(' ','')|replace('-','') }}" target="_blank" rel="noopener">WhatsApp {{ interest.name }}</a>
+      {% if interest.snapshot_id %}
+      <a class="mini-action" href="/dashboard/leads/assessment/{{ interest.snapshot_id }}">View assessment</a>
+      {% endif %}
+      <a class="mini-action" href="/dashboard/leads">← Back to leads</a>
+    </div>
+  </section>
+</main>
+</body>
+</html>

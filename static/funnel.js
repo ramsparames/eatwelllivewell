@@ -352,7 +352,7 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 "Several areas appear to be interacting at once. A personalised strategy may help you stop guessing and focus on what matters most.",
                 ["Individual review of your routines and priorities", "A strategy tailored to your body and real life", "Private accountability and adjustments"],
                 "Apply to Transformation →",
-                "/join",
+                "/transformation-interest?source=assessment",
                 "Explore Foundations",
                 "/foundations",
             ];
@@ -462,7 +462,6 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
         const applicationSteps = [...applicationForm.querySelectorAll("[data-application-step]")];
         const applicationStepLabel = document.querySelector("[data-application-step-label]");
         const applicationProgress = document.querySelector("[data-application-progress]");
-
         let currentApplicationStep = Math.max(
             0,
             applicationSteps.findIndex((step) => step.classList.contains("active"))
@@ -477,19 +476,14 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
             );
 
             applicationSteps.forEach((step, stepIndex) => {
-                step.classList.toggle(
-                    "active",
-                    stepIndex === currentApplicationStep
-                );
+                step.classList.toggle("active", stepIndex === currentApplicationStep);
             });
 
             const stepNumber = currentApplicationStep + 1;
-            const progress =
-                (stepNumber / applicationSteps.length) * 100;
+            const progress = (stepNumber / applicationSteps.length) * 100;
 
             if (applicationStepLabel) {
-                applicationStepLabel.textContent =
-                    `Step ${stepNumber} of ${applicationSteps.length}`;
+                applicationStepLabel.textContent = `Step ${stepNumber} of ${applicationSteps.length}`;
             }
 
             if (applicationProgress) {
@@ -497,49 +491,34 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
             }
 
             requestAnimationFrame(() => {
-                const activeStep =
-                    applicationSteps[currentApplicationStep];
-
-                if (!activeStep) return;
-
-                const header =
-                    document.querySelector(".journey-header");
-
-                const progressBar =
-                    document.querySelector(".application-progress");
-
+                const activeStep = applicationSteps[currentApplicationStep];
+                const header = document.querySelector(".journey-header");
+                const progressBar = document.querySelector(".application-progress");
                 const offset =
                     (header?.offsetHeight || 0) +
                     (progressBar?.offsetHeight || 0) +
                     24;
 
-                const targetTop =
-                    activeStep.getBoundingClientRect().top +
-                    window.scrollY -
-                    offset;
+                if (activeStep) {
+                    const targetTop =
+                        activeStep.getBoundingClientRect().top +
+                        window.scrollY -
+                        offset;
 
-                window.scrollTo({
-                    top: Math.max(0, targetTop),
-                    behavior
-                });
+                    window.scrollTo({
+                        top: Math.max(0, targetTop),
+                        behavior,
+                    });
+                }
             });
         };
 
         const validateCurrentApplicationStep = () => {
-            const activeStep =
-                applicationSteps[currentApplicationStep];
-
+            const activeStep = applicationSteps[currentApplicationStep];
             if (!activeStep) return true;
 
-            const fields = [
-                ...activeStep.querySelectorAll(
-                    "input, select, textarea"
-                )
-            ].filter(
-                (field) =>
-                    !field.disabled &&
-                    field.type !== "hidden"
-            );
+            const fields = [...activeStep.querySelectorAll("input, select, textarea")]
+                .filter((field) => !field.disabled && field.type !== "hidden");
 
             for (const field of fields) {
                 if (!field.checkValidity()) {
@@ -548,71 +527,28 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 }
             }
 
-            // Checkbox groups need custom "at least one" validation.
-            const checkboxGroups = [
-                {
-                    name: "triedOptions",
-                    message: "Please choose at least one thing you have already tried."
-                },
-                {
-                    name: "coachNeeds",
-                    message: "Please choose at least one type of support you are looking for."
-                }
-            ];
-
-            for (const group of checkboxGroups) {
-                const checkboxes = [
-                    ...activeStep.querySelectorAll(
-                        `input[type="checkbox"][name="${group.name}"]`
-                    )
-                ];
-
-                if (
-                    checkboxes.length > 0 &&
-                    !checkboxes.some((checkbox) => checkbox.checked)
-                ) {
-                    alert(group.message);
-                    checkboxes[0].focus();
-                    return false;
-                }
-            }
-
             return true;
         };
 
-        applicationForm
-            .querySelectorAll("[data-application-next]")
-            .forEach((button) => {
-                button.addEventListener("click", () => {
-                    if (!validateCurrentApplicationStep()) return;
+        applicationForm.querySelectorAll("[data-application-next]").forEach((button) => {
+            button.addEventListener("click", () => {
+                if (!validateCurrentApplicationStep()) return;
 
-                    if (
-                        currentApplicationStep <
-                        applicationSteps.length - 1
-                    ) {
-                        updateApplicationStep(
-                            currentApplicationStep + 1
-                        );
-                    }
-                });
+                if (currentApplicationStep < applicationSteps.length - 1) {
+                    updateApplicationStep(currentApplicationStep + 1);
+                }
             });
+        });
 
-        applicationForm
-            .querySelectorAll("[data-application-back]")
-            .forEach((button) => {
-                button.addEventListener("click", () => {
-                    if (currentApplicationStep > 0) {
-                        updateApplicationStep(
-                            currentApplicationStep - 1
-                        );
-                    }
-                });
+        applicationForm.querySelectorAll("[data-application-back]").forEach((button) => {
+            button.addEventListener("click", () => {
+                if (currentApplicationStep > 0) {
+                    updateApplicationStep(currentApplicationStep - 1);
+                }
             });
+        });
 
-        updateApplicationStep(
-            currentApplicationStep,
-            "auto"
-        );
+        updateApplicationStep(currentApplicationStep, "auto");
 
         applicationForm.addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -648,13 +584,8 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
             const triedField = document.getElementById("tried");
             const supportField = document.getElementById("support");
 
-            if (triedField) {
-                triedField.value = triedValues.join(", ");
-            }
-
-            if (supportField) {
-                supportField.value = supportValues.join(", ");
-            }
+            if (triedField) triedField.value = triedValues.join(", ");
+            if (supportField) supportField.value = supportValues.join(", ");
 
             const payload = {
                 snapshot_id: savedLead.snapshotId || null,
@@ -686,34 +617,7 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 const data = await response.json();
 
                 if (!response.ok || data.status !== "saved") {
-                    let message = data.message || "";
-
-                    if (!message && Array.isArray(data.detail)) {
-                        message = data.detail
-                            .map((item) => {
-                                if (typeof item === "string") return item;
-
-                                const location = Array.isArray(item.loc)
-                                    ? item.loc.filter(Boolean).join(" → ")
-                                    : "";
-
-                                return location
-                                    ? `${location}: ${item.msg || "Invalid value"}`
-                                    : (item.msg || JSON.stringify(item));
-                            })
-                            .join("\n");
-                    }
-
-                    if (!message && data.detail) {
-                        message =
-                            typeof data.detail === "string"
-                                ? data.detail
-                                : JSON.stringify(data.detail, null, 2);
-                    }
-
-                    throw new Error(
-                        message || "The application could not be submitted."
-                    );
+                    throw new Error(data.message || data.detail || "The application could not be submitted.");
                 }
 
                 save(APPLICATION_KEY, {

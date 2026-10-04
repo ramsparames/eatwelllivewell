@@ -118,6 +118,31 @@
     </div>
 
     <div class="leads-panel lead-action-panel">
+      <div class="leads-tools">
+        <h2>Transformation enquiries</h2>
+        <span>{{ transformation_interests|length }}</span>
+      </div>
+
+      <div class="lead-mini-list">
+        {% for item in transformation_interests %}
+          <a class="lead-mini" href="/dashboard/leads/interest/{{ item.id }}">
+            <div>
+              <strong>{{ item.name }}</strong>
+              <span>
+                {{ item.occupation }}
+                ·
+                {{ item.readiness }}
+              </span>
+            </div>
+            <b>→</b>
+          </a>
+        {% else %}
+          <div class="lead-empty">No Transformation enquiries yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="leads-panel lead-action-panel">
       <div class="leads-tools"><h2>Priority applications</h2><span>{{ priority_applicants|length }}</span></div>
       <div class="lead-mini-list">
       {% for item in priority_applicants %}
