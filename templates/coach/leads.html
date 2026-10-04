@@ -3,62 +3,169 @@
 
 {% block content %}
 <style>
-.leads-page{display:grid;gap:18px}
+/* =========================================================
+   NourisHer Leads — workflow-first dashboard
+   ========================================================= */
+.leads-page{display:grid;gap:22px}
 .leads-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
 .leads-heading h1{margin:0;font-size:34px;letter-spacing:-.035em}
-.leads-heading p{margin:6px 0 0;color:var(--coach-muted);font-size:14px}
-.lead-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.lead-summary-card,.leads-panel{
-  border:1px solid var(--coach-border);border-radius:17px;background:#fff;
+.leads-heading p{margin:6px 0 0;color:var(--coach-muted);font-size:14px;max-width:680px}
+
+.lead-summary{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px
+}
+.lead-summary-card{
+  border:1px solid var(--coach-border);
+  border-radius:16px;
+  background:#fff;
+  padding:16px 18px;
+  text-decoration:none;
+  color:inherit;
+  transition:.15s ease;
+}
+.lead-summary-card:hover{transform:translateY(-1px);border-color:#cfb7db;background:#fdfafd}
+.lead-summary-card span{
+  display:block;color:var(--coach-muted);font-size:11px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.07em
+}
+.lead-summary-card strong{
+  display:block;margin-top:5px;font-size:28px;line-height:1;color:var(--coach-purple)
+}
+.lead-summary-card small{
+  display:block;margin-top:7px;color:var(--coach-muted);font-size:10px
+}
+
+.leads-panel{
+  border:1px solid var(--coach-border);
+  border-radius:18px;
+  background:#fff;
   box-shadow:0 5px 18px rgba(45,25,54,.04)
 }
-.lead-summary-card{padding:18px 19px;text-decoration:none;color:inherit;display:block;transition:.15s ease}.lead-summary-card:hover{transform:translateY(-1px);border-color:#cfb7db;background:#fdfafd}.lead-summary-card span{display:block;color:var(--coach-muted);font-size:12px;font-weight:700}.lead-summary-card strong{display:block;margin-top:5px;font-size:30px;color:var(--coach-purple)}.lead-summary-card small{display:block;margin-top:5px;color:var(--coach-purple);font-size:9px;font-weight:800}
-.lead-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lead-action-panel{scroll-margin-top:18px}.lead-mini-list{display:grid;gap:7px}.lead-mini{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 11px;border:1px solid #eee8f0;border-radius:10px;text-decoration:none;color:inherit}.lead-mini:hover{border-color:#cfb7db;background:#fdfafd}.lead-mini strong{display:block;font-size:12px}.lead-mini span{display:block;margin-top:2px;color:var(--coach-muted);font-size:10px}.lead-mini b{color:var(--coach-purple);font-size:13px}
-.leads-panel{padding:20px}
-.leads-tools{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px}
-.leads-tools h2{margin:0;font-size:21px}
+
+/* Needs attention */
+.attention-panel{padding:22px}
+.panel-heading{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:14px;
+  margin-bottom:16px
+}
+.panel-heading h2{margin:0;font-size:22px;letter-spacing:-.02em}
+.panel-heading p{margin:5px 0 0;color:var(--coach-muted);font-size:12px}
+.panel-count{
+  min-width:30px;height:30px;padding:0 9px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:#f5eef8;color:var(--coach-purple);font-size:12px;font-weight:850
+}
+.attention-list{display:grid;gap:9px}
+.attention-row{
+  display:grid;
+  grid-template-columns:minmax(220px,1.1fr) minmax(180px,1fr) auto;
+  gap:18px;align-items:center;
+  padding:13px 14px;
+  border:1px solid #eee8f0;border-radius:12px;
+  background:#fff
+}
+.attention-row:hover{border-color:#cfb7db;background:#fdfafd}
+.attention-name strong{display:block;font-size:14px}
+.attention-name span{display:block;margin-top:3px;color:var(--coach-muted);font-size:11px}
+.attention-why strong{display:block;font-size:12px}
+.attention-why span{display:block;margin-top:3px;color:var(--coach-muted);font-size:11px}
+.attention-actions{display:flex;gap:7px;align-items:center;justify-content:flex-end}
+.lead-button{
+  min-height:34px;padding:0 12px;border-radius:9px;
+  display:inline-flex;align-items:center;justify-content:center;
+  text-decoration:none;font-size:11px;font-weight:850;white-space:nowrap
+}
+.lead-button.primary{background:var(--coach-purple);color:#fff}
+.lead-button.secondary{background:#f5eef8;color:var(--coach-purple)}
+.attention-empty{
+  padding:24px;text-align:center;border:1px dashed #ddd2e1;border-radius:12px;
+  color:var(--coach-muted);font-size:13px;background:#fcfbfd
+}
+
+/* All leads */
+.all-leads-panel{padding:22px}
+.all-leads-toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  margin-bottom:14px
+}
+.all-leads-title h2{margin:0;font-size:22px;letter-spacing:-.02em}
+.all-leads-title p{margin:5px 0 0;color:var(--coach-muted);font-size:12px}
 .lead-search{display:flex;gap:7px;align-items:center;min-width:min(100%,470px)}
 .lead-search input{
-  width:100%;height:42px;padding:0 11px;border:1px solid var(--coach-border);
-  border-radius:10px;background:#fff;color:var(--coach-text);font-size:13px;outline:none
+  width:100%;height:40px;padding:0 11px;
+  border:1px solid var(--coach-border);border-radius:10px;
+  background:#fff;color:var(--coach-text);font-size:13px;outline:none
 }
 .lead-search button,.lead-search a{
-  min-height:42px;display:inline-flex;align-items:center;padding:0 13px;border:0;border-radius:10px;
-  text-decoration:none;font-size:12px;font-weight:800;white-space:nowrap
+  min-height:40px;display:inline-flex;align-items:center;
+  padding:0 13px;border:0;border-radius:10px;text-decoration:none;
+  font-size:12px;font-weight:800;white-space:nowrap
 }
 .lead-search button{background:var(--coach-purple);color:#fff;cursor:pointer}
 .lead-search a{background:#f5eef8;color:var(--coach-purple)}
-.lead-list{display:grid;gap:8px}
+
+.lead-filters{
+  display:flex;gap:7px;flex-wrap:wrap;
+  padding:4px 0 15px;border-bottom:1px solid #eee8f0;margin-bottom:12px
+}
+.lead-filter{
+  appearance:none;border:1px solid #e7dfea;background:#fff;color:#706778;
+  border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;cursor:pointer
+}
+.lead-filter:hover{border-color:#cfb7db;color:var(--coach-purple)}
+.lead-filter.is-active{background:#f5eef8;color:var(--coach-purple);border-color:#d8c2e0}
+
+.lead-list{display:grid;gap:7px}
 .lead-row{
   display:grid;
-  grid-template-columns:minmax(260px,1.4fr) minmax(170px,.8fr) minmax(170px,.8fr) minmax(150px,.7fr) 115px;
-  gap:17px;align-items:center;padding:14px 16px;border:1px solid #eee8f0;
-  border-radius:12px;text-decoration:none;background:#fff
+  grid-template-columns:minmax(230px,1.35fr) minmax(160px,.8fr) minmax(150px,.8fr) 120px;
+  gap:16px;align-items:center;
+  padding:13px 15px;border:1px solid #eee8f0;border-radius:12px;
+  text-decoration:none;background:#fff;color:inherit
 }
 .lead-row:hover{border-color:#cfb7db;background:#fdfafd}
-.lead-name strong{display:block;font-size:15px}
-.lead-name span,.lead-cell span{display:block;color:var(--coach-muted);font-size:12px}
-.lead-cell strong{display:block;margin-top:3px;font-size:14px}
+.lead-name strong{display:block;font-size:14px}
+.lead-name span{display:block;color:var(--coach-muted);font-size:11px;margin-top:3px}
+.lead-badge{
+  display:inline-block;margin-top:6px;padding:3px 7px;border-radius:999px;
+  background:#faf6fc;color:var(--coach-purple);font-size:9px;font-weight:850
+}
+.lead-cell span{display:block;color:var(--coach-muted);font-size:10px;font-weight:700}
+.lead-cell strong{display:block;margin-top:3px;font-size:12px}
 .lead-status{
-  min-width:88px;justify-self:end;text-align:center;padding:6px 10px;border-radius:999px;
-  background:#f5eff7;color:var(--coach-purple);font-size:11px;font-weight:800;white-space:nowrap
+  justify-self:end;min-width:80px;text-align:center;padding:6px 9px;
+  border-radius:999px;background:#f5eff7;color:var(--coach-purple);
+  font-size:10px;font-weight:850;white-space:nowrap
 }
-.lead-badge{display:inline-block;margin-top:5px;padding:3px 6px;border-radius:999px;background:#faf6fc;color:var(--coach-purple);font-size:9px;font-weight:800}
 .lead-empty{padding:28px;text-align:center;color:var(--coach-muted);font-size:13px}
+
+/* Hide filterable rows */
+.lead-row.is-hidden{display:none!important}
+
 @media(max-width:1050px){
-  .lead-row{grid-template-columns:1.3fr .8fr .8fr .7fr 100px;gap:11px}
+  .attention-row{grid-template-columns:1fr auto}
+  .attention-why{display:none}
+  .lead-row{grid-template-columns:1.2fr .8fr .8fr 100px;gap:11px}
 }
-@media(max-width:800px){.lead-action-grid{grid-template-columns:1fr}
+@media(max-width:800px){
   .lead-summary{grid-template-columns:1fr 1fr}
-  .leads-tools{display:block}.lead-search{margin-top:12px}
+  .all-leads-toolbar{display:block}
+  .lead-search{margin-top:12px}
+  .attention-row{grid-template-columns:1fr auto}
   .lead-row{grid-template-columns:1fr 1fr}
   .lead-status{justify-self:start}
 }
 @media(max-width:560px){
-  .lead-summary,.lead-row{grid-template-columns:1fr}
   .leads-heading{display:block}
+  .lead-summary{grid-template-columns:1fr 1fr}
   .lead-search{display:grid;grid-template-columns:1fr auto}
   .lead-search a{grid-column:1/-1;justify-content:center}
+  .attention-row{grid-template-columns:1fr}
+  .attention-actions{justify-content:flex-start}
+  .lead-row{grid-template-columns:1fr}
+  .lead-status{justify-self:start}
 }
 </style>
 
@@ -67,163 +174,294 @@
 {% set computed_apps = total_applications if total_applications is defined else 0 %}
 {% set computed_followups = follow_ups_due if follow_ups_due is defined else 0 %}
 
+{# Count the items currently shown in Needs your attention. #}
+{% set new_interest_count = transformation_interests|selectattr("status","equalto","new")|list|length %}
+{% set new_assessment_count = new_lead_items|selectattr("lead_type","equalto","assessment")|list|length %}
+{% set attention_count = (today_followups|length) + (new_applications|length) + new_interest_count + new_assessment_count %}
+
 <div class="leads-page">
+
   <header class="leads-heading">
     <div>
-      <p style="margin:0 0 5px;color:var(--coach-purple);font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase">Lead management</p>
+      <p style="margin:0 0 5px;color:var(--coach-purple);font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase">
+        Lead management
+      </p>
       <h1>Leads</h1>
-      <p>Review assessments and applications, follow up, and move the right women into coaching.</p>
+      <p>One place to see who needs your attention, manage the pipeline, and open the full history of any lead.</p>
     </div>
   </header>
 
+  <!-- Simple at-a-glance numbers -->
   <section class="lead-summary">
-    <a class="lead-summary-card" href="#all-leads"><span>Total leads</span><strong>{{ computed_total }}</strong><small>View all ↓</small></a>
-    <a class="lead-summary-card" href="#new-leads-detail"><span>New leads</span><strong>{{ computed_new }}</strong><small>See names ↓</small></a>
-    <a class="lead-summary-card" href="#applications-detail"><span>Applications</span><strong>{{ computed_apps }}</strong><small>See applications ↓</small></a>
-    <a class="lead-summary-card" href="#followups-detail"><span>Follow-ups due</span><strong>{{ computed_followups }}</strong><small>See follow-ups ↓</small></a>
+    <a class="lead-summary-card" href="#all-leads">
+      <span>Total leads</span>
+      <strong>{{ computed_total }}</strong>
+      <small>View pipeline ↓</small>
+    </a>
+    <a class="lead-summary-card" href="#needs-attention">
+      <span>New</span>
+      <strong>{{ computed_new }}</strong>
+      <small>Need a first action ↓</small>
+    </a>
+    <a class="lead-summary-card" href="#all-leads">
+      <span>Applications</span>
+      <strong>{{ computed_apps }}</strong>
+      <small>View applications ↓</small>
+    </a>
+    <a class="lead-summary-card" href="#needs-attention">
+      <span>Follow-ups due</span>
+      <strong>{{ computed_followups }}</strong>
+      <small>See today's actions ↓</small>
+    </a>
   </section>
 
-  <section class="lead-action-grid">
-    <div class="leads-panel lead-action-panel" id="new-leads-detail">
-      <div class="leads-tools"><h2>New leads</h2><span>{{ computed_new }}</span></div>
-      <div class="lead-mini-list">
-      {% for item in new_lead_items %}
-        <a class="lead-mini" href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}"><div><strong>{{ item.name }}</strong><span>{{ item.email or item.phone or "No contact details" }}</span></div><b>→</b></a>
-      {% else %}
-        <div class="lead-empty">No new leads waiting.</div>
-      {% endfor %}
+  <!-- Main working area -->
+  <section class="leads-panel attention-panel" id="needs-attention">
+    <div class="panel-heading">
+      <div>
+        <h2>Needs your attention</h2>
+        <p>Start here. Once you've dealt with something, update the lead and it will move out of this view.</p>
       </div>
+      <span class="panel-count">{{ attention_count }}</span>
     </div>
 
-    <div class="leads-panel lead-action-panel" id="applications-detail">
-      <div class="leads-tools"><h2>Applications</h2><span>{{ computed_apps }}</span></div>
-      <div class="lead-mini-list">
-      {% for item in application_leads %}
-        <a class="lead-mini" href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}"><div><strong>{{ item.name }}</strong><span>{{ item.status|replace("_"," ")|title }}</span></div><b>→</b></a>
-      {% else %}
-        <div class="lead-empty">No applications yet.</div>
-      {% endfor %}
-      </div>
-    </div>
+    <div class="attention-list">
 
-    <div class="leads-panel lead-action-panel" id="followups-detail">
-      <div class="leads-tools"><h2>Follow-ups due</h2><span>{{ computed_followups }}</span></div>
-      <div class="lead-mini-list">
+      {% for item in transformation_interests %}
+        {% if (item.status or "new") == "new" %}
+        <article class="attention-row">
+          <div class="attention-name">
+            <strong>{{ item.name or "Lead" }}</strong>
+            <span>{{ item.occupation or "Transformation enquiry" }} · {{ item.readiness or "New enquiry" }}</span>
+          </div>
+          <div class="attention-why">
+            <strong>Transformation enquiry</strong>
+            <span>{{ item.why_now or item.frustration or "New enquiry received" }}</span>
+          </div>
+          <div class="attention-actions">
+            {% if item.phone %}
+              <a class="lead-button primary"
+                 href="https://wa.me/{{ item.phone|replace("+","")|replace(" ","")|replace("-","")|replace("(","")|replace(")","") }}"
+                 target="_blank" rel="noopener">WhatsApp</a>
+            {% endif %}
+            <a class="lead-button secondary" href="/dashboard/leads/interest/{{ item.id }}">Review</a>
+          </div>
+        </article>
+        {% endif %}
+      {% endfor %}
+
+      {% for item in new_applications %}
+        <article class="attention-row">
+          <div class="attention-name">
+            <strong>{{ item.name or "Lead" }}</strong>
+            <span>{{ item.email or item.phone or "No contact details" }}</span>
+          </div>
+          <div class="attention-why">
+            <strong>Transformation application</strong>
+            <span>Application received and ready for review.</span>
+          </div>
+          <div class="attention-actions">
+            <a class="lead-button primary"
+               href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}">Review</a>
+          </div>
+        </article>
+      {% endfor %}
+
       {% for item in today_followups %}
-        <a class="lead-mini" href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}"><div><strong>{{ item.name }}</strong><span>{{ "Overdue" if item.is_overdue else "Due today" }} · {{ item.follow_up_date.strftime("%d %b %Y") }}</span></div><b>→</b></a>
-      {% else %}
-        <div class="lead-empty">No follow-ups due.</div>
+        <article class="attention-row">
+          <div class="attention-name">
+            <strong>{{ item.name or "Lead" }}</strong>
+            <span>{{ item.phone or "No contact details" }}</span>
+          </div>
+          <div class="attention-why">
+            <strong>{{ "Overdue" if item.is_overdue else "Follow-up due today" }}</strong>
+            <span>{{ item.follow_up_date.strftime("%d %b %Y") }}</span>
+          </div>
+          <div class="attention-actions">
+            <a class="lead-button primary"
+               href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}">Open lead</a>
+          </div>
+        </article>
       {% endfor %}
-      </div>
-    </div>
 
-    <div class="leads-panel lead-action-panel">
-      <div class="leads-tools">
-        <h2>Transformation enquiries</h2>
-        <span>{{ transformation_interests|length }}</span>
-      </div>
-
-      <div class="lead-mini-list">
-        {% for item in transformation_interests %}
-          <a class="lead-mini" href="/dashboard/leads/interest/{{ item.id }}">
-            <div>
-              <strong>{{ item.name }}</strong>
-              <span>
-                {{ item.occupation }}
-                ·
-                {{ item.readiness }}
-              </span>
-            </div>
-            <b>→</b>
-          </a>
-        {% else %}
-          <div class="lead-empty">No Transformation enquiries yet.</div>
-        {% endfor %}
-      </div>
-    </div>
-
-    <div class="leads-panel lead-action-panel">
-      <div class="leads-tools"><h2>Priority applications</h2><span>{{ priority_applicants|length }}</span></div>
-      <div class="lead-mini-list">
-      {% for item in priority_applicants %}
-        <a class="lead-mini" href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}"><div><strong>{{ item.name }}</strong><span>Assessment score {{ item.total_score }}</span></div><b>→</b></a>
-      {% else %}
-        <div class="lead-empty">No priority applications right now.</div>
+      {# New assessment leads are useful, but sit below enquiries/applications/follow-ups. #}
+      {% for item in new_lead_items|sort(attribute="submitted_at", reverse=true) %}
+        {% if item.lead_type == "assessment" %}
+        <article class="attention-row">
+          <div class="attention-name">
+            <strong>{{ item.name or "Lead" }}</strong>
+            <span>{{ item.phone or item.email or "No contact details" }}</span>
+          </div>
+          <div class="attention-why">
+            <strong>Assessment completed</strong>
+            <span>New assessment lead to review.</span>
+          </div>
+          <div class="attention-actions">
+            <a class="lead-button secondary"
+               href="/dashboard/leads/assessment/{{ item.lead_id }}">Open</a>
+          </div>
+        </article>
+        {% endif %}
       {% endfor %}
-      </div>
+
+      {% if attention_count == 0 %}
+        <div class="attention-empty">
+          You're all caught up. 🎉 There are no enquiries, applications or follow-ups waiting for attention.
+        </div>
+      {% endif %}
+
     </div>
   </section>
 
-  <section class="leads-panel" id="all-leads">
-    <div class="leads-tools">
-      <h2>All leads</h2>
+  <!-- Master pipeline -->
+  <section class="leads-panel all-leads-panel" id="all-leads">
+    <div class="all-leads-toolbar">
+      <div class="all-leads-title">
+        <h2>All leads</h2>
+        <p>Search the full pipeline or filter by where someone is in the journey.</p>
+      </div>
+
       <form class="lead-search" method="get" action="/dashboard/leads">
-        <input type="search" name="q" value="{{ search_query or '' if search_query is defined else '' }}"
+        <input type="search"
+               name="q"
+               value="{{ search_query or '' if search_query is defined else '' }}"
                placeholder="Search name, phone, email or status">
         <button type="submit">Search</button>
         {% if search_query is defined and search_query %}
-        <a href="/dashboard/leads">Clear</a>
+          <a href="/dashboard/leads">Clear</a>
         {% endif %}
       </form>
     </div>
 
-    {% if leads %}
-    <div class="lead-list">
-      {% for lead in leads %}
-      {% set display_status =
-          lead.application_status
-          if lead.has_application and lead.application_status
-          else (lead.status or "new")
-      %}
-      {% set follow_up =
-          lead.application_follow_up_date
-          if lead.has_application and lead.application_follow_up_date
-          else lead.follow_up_date
-      %}
-      <a class="lead-row"
-         {% if lead.lead_type == "interest" %}
-           href="/dashboard/leads/interest/{{ lead.interest_id }}"
-         {% elif lead.snapshot_id %}
-           href="/dashboard/leads/assessment/{{ lead.snapshot_id }}"
-         {% else %}
-           href="/dashboard/leads/application/{{ lead.application_id }}"
-         {% endif %}>
-        <div class="lead-name">
-          <strong>{{ lead.name }}</strong>
-          <span>{{ lead.email or "No email" }} · {{ lead.phone or "No phone" }}</span>
-          <small class="lead-badge">
-            {% if lead.lead_type == "interest" %}
-              Transformation enquiry
-            {% elif lead.has_application %}
-              Transformation application
-            {% else %}
-              Assessment
-            {% endif %}
-          </small>
-        </div>
-
-        <div class="lead-cell">
-          <span>Biggest opportunity</span>
-          <strong>{{ lead.opportunity|replace("_"," ")|title if lead.opportunity else "—" }}</strong>
-        </div>
-
-        <div class="lead-cell">
-          <span>Strongest area</span>
-          <strong>{{ lead.strength|replace("_"," ")|title if lead.strength else "—" }}</strong>
-        </div>
-
-        <div class="lead-cell">
-          <span>Follow-up</span>
-          <strong>{% if follow_up %}{{ follow_up.strftime("%d %b %Y") }}{% else %}Not scheduled{% endif %}</strong>
-        </div>
-
-        <span class="lead-status">{{ display_status|replace("_"," ")|title }}</span>
-      </a>
-      {% endfor %}
+    <div class="lead-filters" aria-label="Lead filters">
+      <button type="button" class="lead-filter is-active" data-filter="all">All</button>
+      <button type="button" class="lead-filter" data-filter="interest">Enquiries</button>
+      <button type="button" class="lead-filter" data-filter="assessment">Assessments</button>
+      <button type="button" class="lead-filter" data-filter="application">Applications</button>
+      <button type="button" class="lead-filter" data-filter="followup">Follow-ups</button>
     </div>
+
+    {% if leads %}
+      <div class="lead-list" id="lead-list">
+
+        {% for lead in leads %}
+          {% set display_status =
+              lead.application_status
+              if lead.has_application and lead.application_status
+              else (lead.status or "new")
+          %}
+
+          {% if lead.lead_type == "interest" %}
+            {% set row_type = "interest" %}
+            {% set row_followup = false %}
+          {% elif lead.has_application %}
+            {% set row_type = "application" %}
+            {% set row_followup = lead.application_follow_up_date %}
+          {% else %}
+            {% set row_type = "assessment" %}
+            {% set row_followup = lead.follow_up_date %}
+          {% endif %}
+
+          {% if row_followup %}
+            {% set row_followup_filter = " followup" %}
+          {% else %}
+            {% set row_followup_filter = "" %}
+          {% endif %}
+
+          <a class="lead-row"
+             data-lead-type="{{ row_type }}{{ row_followup_filter }}"
+             {% if row_type == "interest" %}
+               href="/dashboard/leads/interest/{{ lead.interest_id }}"
+             {% elif lead.snapshot_id %}
+               href="/dashboard/leads/assessment/{{ lead.snapshot_id }}"
+             {% else %}
+               href="/dashboard/leads/application/{{ lead.application_id }}"
+             {% endif %}>
+
+            <div class="lead-name">
+              <strong>{{ lead.name }}</strong>
+              <span>{{ lead.email or "No email" }} · {{ lead.phone or "No phone" }}</span>
+              <small class="lead-badge">
+                {% if row_type == "interest" %}
+                  Transformation enquiry
+                {% elif lead.has_application %}
+                  Transformation application
+                {% else %}
+                  Assessment
+                {% endif %}
+              </small>
+            </div>
+
+            <div class="lead-cell">
+              <span>Current stage</span>
+              <strong>
+                {% if row_type == "interest" %}
+                  Enquiry
+                {% elif lead.has_application %}
+                  Application
+                {% else %}
+                  Assessment
+                {% endif %}
+              </strong>
+            </div>
+
+            <div class="lead-cell">
+              <span>Status</span>
+              <strong>{{ display_status|replace("_"," ")|title }}</strong>
+            </div>
+
+            <span class="lead-status">
+              {% if row_followup %}
+                Follow-up
+              {% else %}
+                {{ display_status|replace("_"," ")|title }}
+              {% endif %}
+            </span>
+          </a>
+        {% endfor %}
+
+      </div>
+      <div class="lead-empty" id="filter-empty" style="display:none">
+        No leads match this filter.
+      </div>
     {% else %}
-    <div class="lead-empty">No leads found.</div>
+      <div class="lead-empty">No leads found.</div>
     {% endif %}
   </section>
+
 </div>
+
+<script>
+(function () {
+  const buttons = Array.from(document.querySelectorAll(".lead-filter"));
+  const rows = Array.from(document.querySelectorAll(".lead-row"));
+  const empty = document.getElementById("filter-empty");
+
+  if (!buttons.length || !rows.length) return;
+
+  buttons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      const filter = button.dataset.filter;
+
+      buttons.forEach(function (item) {
+        item.classList.toggle("is-active", item === button);
+      });
+
+      let visible = 0;
+
+      rows.forEach(function (row) {
+        const type = row.dataset.leadType || "";
+        const show = filter === "all" || type.split(" ").includes(filter);
+
+        row.classList.toggle("is-hidden", !show);
+        if (show) visible += 1;
+      });
+
+      if (empty) {
+        empty.style.display = visible ? "none" : "";
+      }
+    });
+  });
+})();
+</script>
 {% endblock %}
