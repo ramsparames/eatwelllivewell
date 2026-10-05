@@ -4341,3 +4341,23 @@ button {
         padding: 30px 24px;
     }
 }
+
+/* =========================================================
+   NOURISHER TRANSFORMATION INTEREST — THANK YOU STATE
+   ========================================================= */
+
+/* =========================================================
+   NOURISHER TRANSFORMATION INTEREST — THANK YOU STATE
+   ========================================================= */
+
+.transformation-interest-page:has(#interest-success:not(.hidden)) .interest-hero {
+    display: none;
+}
+
+.transformation-interest-page:has(#interest-success:not(.hidden)) .journey-wrap {
+    padding-top: 70px;
+}
+
+.transformation-interest-page:has(#interest-success:not(.hidden)) .interest-success {
+    margin-top: 0;
+}
