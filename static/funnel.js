@@ -739,7 +739,26 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 const data = await response.json();
 
                 if (!response.ok || data.status !== "saved") {
-                    throw new Error(data.message || data.detail || "The application could not be submitted.");
+                    let message = data.message || "";
+
+                    if (!message && Array.isArray(data.detail)) {
+                        message = data.detail
+                            .map((item) => {
+                                const field = Array.isArray(item.loc)
+                                    ? item.loc.join(".")
+                                    : "form";
+                                return `${field}: ${item.msg}`;
+                            })
+                            .join("\n");
+                    }
+
+                    if (!message && typeof data.detail === "string") {
+                        message = data.detail;
+                    }
+
+                    throw new Error(
+                        message || "The application could not be submitted."
+                    );
                 }
 
                 save(APPLICATION_KEY, {
