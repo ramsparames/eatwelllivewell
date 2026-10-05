@@ -4149,3 +4149,195 @@ button {
    ========================================================= */
 
 .interest-hero{max-width:780px;margin:0 auto 34px;text-align:center}.interest-hero h1{margin-bottom:18px}.interest-hero>p{max-width:680px;margin:0 auto;color:#52605a;font-size:18px}.interest-note{margin:26px auto 0;padding:15px 18px;border:1px solid #e8e5dd;border-radius:14px;background:#f7faf7;font-size:14px;color:#52605a;max-width:640px}.interest-form{max-width:760px;margin:0 auto}.interest-question{padding:30px 0;border-bottom:1px solid #e8e5dd}.interest-question:first-child{padding-top:0}.interest-question:last-of-type{border-bottom:0}.interest-question h2{margin:0 0 8px;font-size:28px}.interest-question .helper{margin:0 0 18px;color:#6d776f;font-size:14px}.interest-options{display:grid;gap:10px}.interest-option{display:flex;align-items:flex-start;gap:11px;padding:14px 16px;border:1px solid #ddd9d0;border-radius:12px;background:#fff;cursor:pointer}.interest-option:has(input:checked){border-color:#226e59;background:#f2f7f3}.interest-option input{margin-top:4px;accent-color:#226e59}.interest-option span{font-size:15px}.interest-actions{display:flex;justify-content:flex-end;padding-top:28px}.interest-footnote{text-align:center;color:#717b72;font-size:12px;margin:18px 0 0}.interest-success{max-width:760px;margin:0 auto;text-align:center}.interest-success-card{padding:42px 30px;border-radius:20px;background:#f2f6f2;border:1px solid #e8e5dd}.interest-success-card h2{margin-top:0}.hidden{display:none!important}@media(max-width:650px){.interest-hero h1{font-size:42px}.interest-question{padding:24px 0}.interest-question h2{font-size:25px}}
+
+/* =========================================================
+   NOURISHER TRANSFORMATION INTEREST — PURPLE EDITORIAL STYLE
+   ========================================================= */
+
+.transformation-interest-page {
+    background:
+        radial-gradient(
+            circle at 88% 12%,
+            rgba(247, 239, 252, 0.95),
+            transparent 34%
+        ),
+        linear-gradient(
+            180deg,
+            #fcfaf8 0%,
+            #ffffff 52%,
+            #faf6fc 100%
+        );
+    color: #3b343f;
+}
+
+/* Keep the existing site header, but give this page the
+   softer Transformation-page treatment. */
+.transformation-interest-page .journey-header {
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom: 1px solid #eee5f1;
+}
+
+.transformation-interest-page .interest-hero {
+    max-width: 900px;
+    margin: 0 auto 48px;
+    padding-top: 72px;
+    text-align: center;
+}
+
+.transformation-interest-page .interest-hero .eyebrow {
+    color: #5b0e91;
+    letter-spacing: 2.8px;
+}
+
+.transformation-interest-page .interest-hero h1 {
+    color: #3b343f;
+    font-size: clamp(46px, 6vw, 68px);
+    line-height: 1.08;
+    letter-spacing: -1.8px;
+    margin-bottom: 22px;
+}
+
+.transformation-interest-page .interest-hero h1 em {
+    color: #5b0e91;
+}
+
+.transformation-interest-page .interest-hero > p {
+    color: #6f6572;
+    line-height: 1.65;
+}
+
+.transformation-interest-page .interest-note {
+    max-width: 720px;
+    margin: 32px auto 0;
+    padding: 18px 24px;
+    border: 1px solid #e8dcef;
+    border-radius: 16px;
+    background: #faf6fc;
+    color: #625769;
+    box-shadow: 0 10px 30px rgba(91, 14, 145, 0.05);
+}
+
+.transformation-interest-page .interest-note strong {
+    color: #4b4050;
+}
+
+/* Main interest form */
+.transformation-interest-page .interest-form {
+    max-width: 860px;
+    margin: 0 auto;
+    overflow: hidden;
+    border: 1px solid #e7ddec;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow:
+        0 24px 65px rgba(91, 14, 145, 0.08),
+        0 2px 8px rgba(40, 30, 45, 0.03);
+}
+
+/* Individual questions */
+.transformation-interest-page .interest-question {
+    padding: 38px 46px;
+    border-bottom: 1px solid #eee7f1;
+}
+
+.transformation-interest-page .interest-question:first-child {
+    padding-top: 42px;
+}
+
+.transformation-interest-page .interest-question:last-of-type {
+    border-bottom: 0;
+}
+
+.transformation-interest-page .interest-question .eyebrow {
+    color: #5b0e91;
+    letter-spacing: 2.2px;
+}
+
+.transformation-interest-page .interest-question h2 {
+    color: #3b343f;
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.15;
+    letter-spacing: -0.7px;
+}
+
+.transformation-interest-page .interest-question .helper {
+    color: #7a707d;
+}
+
+/* Text fields */
+.transformation-interest-page .form-field input,
+.transformation-interest-page .form-field textarea,
+.transformation-interest-page .form-field select {
+    border-color: #ded5e2;
+    border-radius: 13px;
+    background: #fff;
+    color: #3b343f;
+}
+
+.transformation-interest-page .form-field input:focus,
+.transformation-interest-page .form-field textarea:focus,
+.transformation-interest-page .form-field select:focus {
+    border-color: #8a3bb3;
+    box-shadow: 0 0 0 4px rgba(91, 14, 145, 0.08);
+    outline: none;
+}
+
+/* Answer choices */
+.transformation-interest-page .interest-option {
+    border-color: #ded5e2;
+    border-radius: 14px;
+    background: #fff;
+    color: #433a47;
+    transition:
+        border-color .2s ease,
+        background .2s ease,
+        box-shadow .2s ease,
+        transform .2s ease;
+}
+
+.transformation-interest-page .interest-option:hover {
+    border-color: #b88acb;
+    transform: translateY(-1px);
+}
+
+.transformation-interest-page .interest-option:has(input:checked) {
+    border-color: #7b239f;
+    background: #f7effc;
+    box-shadow: 0 8px 22px rgba(91, 14, 145, 0.08);
+}
+
+.transformation-interest-page .interest-option input {
+    accent-color: #5b0e91;
+}
+
+/* Buttons */
+.transformation-interest-page .btn-primary {
+    background: #5b0e91;
+    border-color: #5b0e91;
+    box-shadow: 0 10px 24px rgba(91, 14, 145, 0.16);
+}
+
+.transformation-interest-page .btn-primary:hover {
+    background: #481071;
+    border-color: #481071;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .transformation-interest-page .interest-hero {
+        padding-top: 52px;
+    }
+
+    .transformation-interest-page .interest-hero h1 {
+        font-size: 42px;
+        letter-spacing: -1px;
+    }
+
+    .transformation-interest-page .interest-form {
+        border-radius: 22px;
+    }
+
+    .transformation-interest-page .interest-question {
+        padding: 30px 24px;
+    }
+}
