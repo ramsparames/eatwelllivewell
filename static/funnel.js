@@ -718,6 +718,7 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 tried: document.getElementById("tried")?.value.trim() || "",
                 success_goal: document.getElementById("success")?.value.trim() || "",
                 support_needed: document.getElementById("support")?.value || "",
+                application_data: {},
                 consent: Boolean(consentField?.checked),
                 form_token: applicationFormToken,
                 website: document.getElementById("website")?.value || "",
