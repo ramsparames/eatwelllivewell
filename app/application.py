@@ -222,6 +222,20 @@ def receive_application(
             "message": "Consent is required.",
         }
 
+    interest_id = None
+    linked_snapshot_id = submission.snapshot_id
+
+    if submission.interest_token:
+        interest_id = read_interest_application_token(submission.interest_token)
+        interest = get_transformation_interest_by_id(interest_id)
+        if not interest:
+            raise HTTPException(
+                status_code=404,
+                detail="Transformation enquiry not found.",
+            )
+        if interest.get("snapshot_id"):
+            linked_snapshot_id = interest["snapshot_id"]
+
     application_id = save_application(
         snapshot_id=linked_snapshot_id,
         interest_id=interest_id,
