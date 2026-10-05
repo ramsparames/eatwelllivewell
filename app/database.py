@@ -928,6 +928,22 @@ def save_transformation_interest(
             return int(row["id"])
 
 
+
+
+
+def _ensure_interest_application_link_column() -> None:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                ALTER TABLE transformation_applications
+                ADD COLUMN IF NOT EXISTS interest_id BIGINT
+                    REFERENCES transformation_interest_leads(id)
+                    ON DELETE SET NULL
+                """
+            )
+        connection.commit()
+
 def save_application(
     *,
     snapshot_id: int | None,
@@ -941,7 +957,10 @@ def save_application(
     support_needed: str,
     consent: bool,
     application_data: dict[str, Any] | None = None,
+    interest_id: int | None = None,
 ) -> int:
+    _ensure_interest_application_link_column()
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
             linked_snapshot_id = snapshot_id
@@ -984,6 +1003,7 @@ def save_application(
                 """
                 INSERT INTO transformation_applications (
                     snapshot_id,
+                    interest_id,
                     name,
                     email,
                     phone,
@@ -997,13 +1017,14 @@ def save_application(
                 )
                 VALUES (
                     %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s,
                     %s
                 )
                 RETURNING id
                 """,
                 (
                     linked_snapshot_id,
+                    interest_id,
                     name,
                     email,
                     phone,

@@ -589,6 +589,7 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
 
             const payload = {
                 snapshot_id: savedLead.snapshotId || null,
+                interest_token: document.getElementById("interest-token")?.value || null,
                 name: nameField?.value.trim() || "",
                 email: emailField?.value.trim() || "",
                 phone,

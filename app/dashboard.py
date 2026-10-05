@@ -28,6 +28,9 @@ from app.services.client_nudge_service import (
     whatsapp_prefilled_url,
 )
 from fastapi import Form
+from app.config import APP_BASE_URL
+from app.database import get_transformation_interest_by_id
+from app.transformation_interest import make_interest_application_token
 
 router = APIRouter()
 
@@ -1060,3 +1063,53 @@ def synamate_calendar_diagnostic(request: Request):
     return HTMLResponse(html)
 
 
+
+
+
+@router.get(
+    "/dashboard/leads/interest/{interest_id}/application-link",
+    response_class=HTMLResponse,
+)
+def transformation_interest_application_link(
+    request: Request,
+    interest_id: int,
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    interest = get_transformation_interest_by_id(interest_id)
+    if not interest:
+        raise HTTPException(status_code=404, detail="Transformation enquiry not found")
+
+    token = make_interest_application_token(interest_id)
+    base_url = (APP_BASE_URL or str(request.base_url)).rstrip("/")
+    application_url = f"{base_url}/join?start=1&interest_token={token}"
+    name = interest.get("name") or "this prospect"
+    safe_url = application_url.replace("&", "&amp;").replace('"', "&quot;")
+    safe_name = str(name).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    return HTMLResponse(f"""
+    <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Send Transformation Application | NourisHer</title>
+    <style>
+      body{{margin:0;background:#faf8fb;color:#302a33;font-family:Arial,sans-serif}}
+      .wrap{{max-width:720px;margin:70px auto;padding:0 22px}}
+      .card{{background:#fff;border:1px solid #eadfeb;border-radius:22px;padding:34px;box-shadow:0 12px 35px rgba(52,18,67,.08)}}
+      h1{{margin:0 0 10px;color:#4a0872;font-size:30px}} p{{line-height:1.7;color:#665e69}}
+      .box{{margin:22px 0;padding:18px;background:#f7effc;border-radius:14px;word-break:break-all;font-size:13px}}
+      button,a{{display:inline-block;border:0;border-radius:999px;padding:13px 19px;font-weight:700;text-decoration:none;cursor:pointer}}
+      button{{background:#5b0e91;color:#fff}} a{{background:#f2e9f6;color:#5b0e91;margin-left:8px}}
+      .done{{margin-top:14px;color:#226e59;font-size:13px;min-height:20px}}
+    </style></head><body><main class="wrap"><section class="card">
+      <p style="color:#5b0e91;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:11px">NourisHer Transformation</p>
+      <h1>Send the application to {safe_name}</h1>
+      <p>The application link below is tied to this enquiry. When {safe_name} opens it, the details already shared with Sushma will be filled in automatically.</p>
+      <div class="box" id="application-link">{safe_url}</div>
+      <button type="button" onclick="copyLink()">Copy application link</button>
+      <a href="{safe_url}" target="_blank" rel="noopener">Open application</a>
+      <div class="done" id="done" aria-live="polite"></div>
+      <p style="font-size:12px;margin-top:24px">Send this link to the prospect on WhatsApp. They will complete the full application before booking a Clarity Call.</p>
+    </section></main>
+    <script>function copyLink(){{navigator.clipboard.writeText(document.getElementById('application-link').innerText).then(function(){{document.getElementById('done').textContent='Application link copied.'}}).catch(function(){{document.getElementById('done').textContent='Copy failed. Select the link and copy it manually.'}})}}</script>
+    </body></html>
+    """)

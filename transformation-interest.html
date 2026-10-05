@@ -8,199 +8,21 @@
 <link rel="stylesheet" href="/static/styles.css">
 <style>
 .interest-hero{max-width:780px;margin:0 auto 34px;text-align:center}.interest-hero h1{margin-bottom:18px}.interest-hero>p{max-width:680px;margin:0 auto;color:#52605a;font-size:18px}.interest-note{margin:26px auto 0;padding:15px 18px;border:1px solid #e8e5dd;border-radius:14px;background:#f7faf7;font-size:14px;color:#52605a;max-width:640px}.interest-form{max-width:760px;margin:0 auto}.interest-question{padding:30px 0;border-bottom:1px solid #e8e5dd}.interest-question:first-child{padding-top:0}.interest-question:last-of-type{border-bottom:0}.interest-question h2{margin:0 0 8px;font-size:28px}.interest-question .helper{margin:0 0 18px;color:#6d776f;font-size:14px}.interest-options{display:grid;gap:10px}.interest-option{display:flex;align-items:flex-start;gap:11px;padding:14px 16px;border:1px solid #ddd9d0;border-radius:12px;background:#fff;cursor:pointer}.interest-option:has(input:checked){border-color:#226e59;background:#f2f7f3}.interest-option input{margin-top:4px;accent-color:#226e59}.interest-option span{font-size:15px}.interest-actions{display:flex;justify-content:flex-end;padding-top:28px}.interest-footnote{text-align:center;color:#717b72;font-size:12px;margin:18px 0 0}.interest-success{max-width:760px;margin:0 auto;text-align:center}.interest-success-card{padding:42px 30px;border-radius:20px;background:#f2f6f2;border:1px solid #e8e5dd}.interest-success-card h2{margin-top:0}.hidden{display:none!important}@media(max-width:650px){.interest-hero h1{font-size:42px}.interest-question{padding:24px 0}.interest-question h2{font-size:25px}}
-
-/* Transformation interest page — aligned with the main Eat Well Live Well design system */
-.interest-hero {
-  margin-bottom: 42px;
-}
-
-.interest-hero h1 {
-  margin-top: 14px;
-}
-
-.interest-form {
-  overflow: hidden;
-}
-
-.interest-question {
-  padding: 34px 42px;
-}
-
-.interest-question:first-child {
-  padding-top: 38px;
-}
-
-.interest-question h2 {
-  color: var(--ink);
-  font-family: var(--serif);
-  font-size: clamp(28px, 3vw, 36px);
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.01em;
-}
-
-.interest-option {
-  transition: border-color .2s ease, background .2s ease, transform .2s ease;
-}
-
-.interest-option:hover {
-  border-color: var(--green-500);
-  transform: translateY(-1px);
-}
-
-.interest-actions {
-  padding: 34px 42px 8px;
-}
-
-.interest-footnote {
-  padding: 0 42px 36px;
-}
-
-@media (max-width: 900px) {
-  .interest-question {
-    padding: 30px;
-  }
-
-  .interest-actions {
-    padding: 30px 30px 8px;
-  }
-
-  .interest-footnote {
-    padding: 0 30px 30px;
-  }
-}
-
-@media (max-width: 650px) {
-  .interest-question {
-    padding: 26px 22px;
-  }
-
-  .interest-actions {
-    padding: 26px 22px 8px;
-  }
-
-  .interest-footnote {
-    padding: 0 22px 26px;
-  }
-}
-
-
-/* Final spacing alignment with the NourisHer Transformation application */
-.journey-shell {
-  padding-top: 105px;
-  padding-bottom: 96px;
-}
-
-.interest-hero {
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 52px;
-}
-
-
-/* Final thank-you state */
-.interest-success-card {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 76px 72px 82px;
-  text-align: center;
-  border-radius: 28px;
-  background: #eef5ef;
-  border: 1px solid rgba(62, 94, 74, 0.12);
-}
-
-.interest-success-card .eyebrow {
-  margin-bottom: 18px;
-}
-
-.interest-success-card h2 {
-  margin: 0 auto 24px;
-  color: var(--ink);
-  font-family: var(--serif);
-  font-size: clamp(42px, 5vw, 64px);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-}
-
-.interest-success-card p {
-  max-width: 720px;
-  margin: 0 auto 16px;
-  color: var(--ink-soft);
-  font-size: 18px;
-  line-height: 1.65;
-}
-
-.interest-success-card .success-lead {
-  font-size: 21px;
-  line-height: 1.55;
-  margin-bottom: 18px;
-}
-
-.interest-success-card .success-note {
-  margin-top: 30px;
-  color: #35624d;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-@media (max-width: 650px) {
-  .interest-success-card {
-    padding: 52px 24px 58px;
-    border-radius: 22px;
-  }
-
-  .interest-success-card p {
-    font-size: 16px;
-  }
-
-  .interest-success-card .success-lead {
-    font-size: 18px;
-  }
-}
-
 </style>
 </head>
 <body class="journey-page">
-<a class="skip-link" href="#main">Skip to content</a>
+<header class="journey-header"><div class="journey-header-inner">
+<a class="wordmark" href="/index" aria-label="Eat Well Live Well home"><span>Eat</span><span class="script">well</span><span>Live</span><span class="script">well</span></a>
+<nav class="journey-nav" aria-label="Journey navigation"><a href="/index#how">How it works</a><a href="/index#pillars">Pillars</a><a href="/foundations">Foundations</a><a href="/index#stories">Stories</a><a href="/index#bio">About Sushma</a></nav>
+<a class="btn btn-primary" href="/transformation">See Transformation <span class="btn-arrow">→</span></a>
+</div></header>
 
-<header class="site-header" data-header>
-  <div class="site-header-inner">
-    <a class="wordmark" href="/" aria-label="Eat Well Live Well — home">
-      <span>Eat</span>
-      <span class="script">well</span>
-      <span>Live</span>
-      <span class="script">well</span>
-    </a>
-
-    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-menu-toggle>
-      <span class="sr-only">Open navigation</span>
-      <span></span><span></span><span></span>
-    </button>
-
-    <nav class="site-nav" id="site-nav" aria-label="Primary" data-nav>
-      <a href="/#familiar">Is this you?</a>
-      <a href="/#how">How it works</a>
-      <a href="/#pillars">Pillars</a>
-      <a href="/#programmes">Programmes</a>
-      <a href="/#stories">Stories</a>
-      <a href="/#bio">About</a>
-    </nav>
-
-    <a class="btn btn-primary header-cta" href="/assessment">
-      Take the Assessment
-      <span class="btn-arrow" aria-hidden="true">→</span>
-    </a>
-  </div>
-</header>
-
-<main id="main" class="journey-shell"><div class="journey-wrap">
-<section id="interest-hero" class="journey-title interest-hero">
-  <p class="eyebrow">NourisHer Transformation™</p>
-  <h1>Ready to stop <em>starting over?</em></h1>
-  <p>If you're seriously considering personalised support, start here. This quick check-in helps Sushma understand where you are and decide whether the full Transformation application is the right next step.</p>
-  <div class="interest-note"><strong>Takes about 2 minutes.</strong> Sushma personally reviews every enquiry. There is no obligation to enrol.</div>
+<main class="journey-shell"><div class="journey-wrap">
+<section class="interest-hero">
+<p class="eyebrow">NourisHer Transformation™</p>
+<h1>Ready to stop <em>starting over?</em></h1>
+<p>If you're seriously considering personalised support, start here. This quick check-in helps Sushma understand where you are and decide whether the full Transformation application is the right next step.</p>
+<div class="interest-note"><strong>Takes about 2 minutes.</strong> Sushma personally reviews every enquiry. There is no obligation to enrol.</div>
 </section>
 
 <form id="transformation-interest" class="interest-form journey-card" novalidate>
@@ -265,54 +87,13 @@
 <p class="interest-footnote">By submitting, you agree that Sushma may contact you about NourisHer Transformation. Your information is handled according to our Privacy Policy.</p>
 </form>
 
-<section id="interest-success" class="interest-success hidden" aria-live="polite">
-  <div class="interest-success-card">
-    <p class="eyebrow">Thank you</p>
-    <h2>Thank you, <span id="success-name">there</span>. <span aria-hidden="true">❤️</span></h2>
-    <p class="success-lead">Sushma has received your details and will personally review your Transformation enquiry.</p>
-    <p>She’ll reach out to you on WhatsApp about the next step.</p>
-    <p>If she feels NourisHer Transformation is a good fit for what you’re looking for, she’ll send you the full application before your Clarity Call.</p>
-    <p class="success-note">There is no obligation to enrol.</p>
-  </div>
-</section>
+<section id="interest-success" class="interest-success hidden" aria-live="polite"><div class="interest-success-card">
+<p class="eyebrow">Thank you</p><h2>Thank you, <span id="success-name">there</span>. ❤️</h2>
+<p>Sushma has received your details. She personally reviews every Transformation enquiry and will reach out to you on WhatsApp about the next step.</p>
+<p>If she feels Transformation is a good fit for what you're looking for, she'll send you the full application before your Clarity Call.</p>
+<a class="btn btn-primary" href="/transformation">Explore Transformation →</a>
+</div></section>
 </div></main>
-
-<footer class="footer">
-  <div class="wrap">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-logo">Eat <em>well</em> Live <em>well</em></div>
-        <p>Wellness coaching for women 35+ navigating perimenopause and menopause. No guilt. No extremes. Just sustainable progress.</p>
-        <a class="instagram" href="https://www.instagram.com/sush_rams/" target="_blank" rel="noopener noreferrer">◎ @sush_rams</a>
-      </div>
-
-      <div>
-        <h3>Explore</h3>
-        <a href="/#familiar">Is this you?</a>
-        <a href="/#how">How it works</a>
-        <a href="/#pillars">Pillars</a>
-        <a href="/success-stories">Success Stories</a>
-        <a href="/foundations">NourisHer Foundations</a>
-        <a href="/#bio">About Sushma</a>
-        <a href="/journal">Sushma’s Journal</a>
-      </div>
-
-      <div>
-        <h3>Get started</h3>
-        <a href="/assessment">NourisHer Assessment™</a>
-        <a href="/transformation-interest">Explore Transformation</a>
-        <a href="mailto:hello@eatwelllivewell.in">Contact Sushma</a>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <span>© 2026 Eat Well Live Well · Coaching by Sushma</span>
-      <span>Made with care · Bengaluru, India</span>
-    </div>
-  </div>
-</footer>
-
-<script src="/static/script.js"></script>
-<script src="/static/transformation-interest.js?v=3"></script>
+<script src="/static/transformation-interest.js?v=1"></script>
 </body>
 </html>

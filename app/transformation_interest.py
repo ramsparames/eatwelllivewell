@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+from app.config import SESSION_SECRET
 from pydantic import BaseModel, Field
 from app.database import save_transformation_interest
 from app.email import send_transformation_interest_notification
@@ -50,3 +52,56 @@ def receive_transformation_interest(request: Request, submission: Transformation
     )
 
     return {"status": "saved", "interest_id": interest_id, "name": submission.name.strip()}
+
+
+_APPLICATION_TOKEN_MAX_AGE = 60 * 60 * 24 * 90
+
+
+def _application_link_serializer():
+    return URLSafeTimedSerializer(
+        SESSION_SECRET,
+        salt="nourisher-transformation-application",
+    )
+
+
+def make_interest_application_token(interest_id: int) -> str:
+    return _application_link_serializer().dumps({"interest_id": int(interest_id)})
+
+
+def read_interest_application_token(token: str) -> int:
+    try:
+        payload = _application_link_serializer().loads(
+            token,
+            max_age=_APPLICATION_TOKEN_MAX_AGE,
+        )
+    except (BadSignature, SignatureExpired) as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="This application link is invalid or has expired.",
+        ) from exc
+
+    try:
+        return int(payload["interest_id"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail="This application link is invalid.") from exc
+
+
+
+@router.get("/transformation-interest/application-prefill")
+def transformation_interest_application_prefill(token: str):
+    from app.database import get_transformation_interest_by_id
+
+    interest_id = read_interest_application_token(token)
+    interest = get_transformation_interest_by_id(interest_id)
+    if not interest:
+        raise HTTPException(status_code=404, detail="Transformation enquiry not found.")
+
+    return {
+        "interest_id": interest["id"],
+        "snapshot_id": interest.get("snapshot_id"),
+        "name": interest.get("name") or "",
+        "phone": interest.get("phone") or "",
+        "occupation": interest.get("occupation") or "",
+        "goals": interest.get("goals") or [],
+        "why_now": interest.get("why_now") or "",
+    }

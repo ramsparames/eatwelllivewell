@@ -17,6 +17,8 @@ from app.database import (
     add_lead_event,
 )
 from app.synamate import sync_transformation_applicant
+from app.transformation_interest import read_interest_application_token
+from app.database import get_transformation_interest_by_id
 
 router = APIRouter()
 
@@ -90,6 +92,7 @@ def issue_form_token(purpose: str):
 
 class TransformationApplicationSubmission(BaseModel):
     snapshot_id: int | None = None
+    interest_token: str | None = None
 
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
@@ -146,6 +149,17 @@ def receive_event_lead(request: Request, submission: EventLeadSubmission):
         interests.append(submission.other_interest.strip())
 
     concern_summary = ", ".join(interests) if interests else "General health conversation"
+
+    interest_id = None
+    linked_snapshot_id = submission.snapshot_id
+
+    if submission.interest_token:
+        interest_id = read_interest_application_token(submission.interest_token)
+        interest = get_transformation_interest_by_id(interest_id)
+        if not interest:
+            raise HTTPException(status_code=404, detail="Transformation enquiry not found.")
+        if interest.get("snapshot_id"):
+            linked_snapshot_id = interest["snapshot_id"]
 
     application_id = save_application(
         snapshot_id=None,
@@ -209,7 +223,8 @@ def receive_application(
         }
 
     application_id = save_application(
-        snapshot_id=submission.snapshot_id,
+        snapshot_id=linked_snapshot_id,
+        interest_id=interest_id,
         name=submission.name.strip(),
         email=str(submission.email).strip().lower(),
         phone=submission.phone.strip(),
@@ -219,10 +234,13 @@ def receive_application(
         success_goal=submission.success_goal.strip(),
         support_needed=submission.support_needed.strip(),
         consent=submission.consent,
-        application_data=submission.application_data,
+        application_data={
+            **submission.application_data,
+            **({"interest_id": interest_id} if interest_id else {}),
+        },
     )
     add_lead_event(
-    snapshot_id=submission.snapshot_id,
+    snapshot_id=linked_snapshot_id,
     application_id=application_id,
     event_type="application_submitted",
     title="Transformation application submitted",

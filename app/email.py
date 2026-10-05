@@ -505,101 +505,59 @@ def send_application_confirmation(
 
 def send_transformation_interest_notification(
     *,
-    interest_id: int,
-    name: str,
-    phone: str,
-    occupation: str,
-    goals: list[str],
-    frustration: str,
-    readiness: str,
-    timeline: str,
-    why_now: str,
-    source: str,
+    interest_id,
+    name,
+    phone,
+    occupation,
+    goals,
+    frustration,
+    readiness,
+    timeline,
+    why_now,
+    source,
 ) -> str | None:
+    """Notify Sushma and point her to the next operational action."""
     clean_name = name.strip() or "New enquiry"
+    dashboard_url = (
+        f"{APP_BASE_URL.rstrip('/')}"
+        f"/dashboard/leads/interest/{interest_id}/application-link"
+    )
 
     body = f"""
-    <div style="
-        margin-bottom:18px;
-        padding:18px;
-        border-left:4px solid #f5c518;
-        border-radius:12px;
-        background:#fffaf0;
-    ">
-        <div style="
-            margin-bottom:7px;
-            color:#725400;
-            font-size:11px;
-            font-weight:800;
-            letter-spacing:1px;
-            text-transform:uppercase;
-        ">
-            New Transformation Interest
-        </div>
-
-        <div style="
-            color:#3b343f;
-            font-size:15px;
-            line-height:1.7;
-        ">
-            {html.escape(clean_name)} has expressed serious interest
-            in exploring NourisHer Transformation.
-        </div>
-    </div>
-
-    <table
-        role="presentation"
-        width="100%"
-        cellpadding="0"
-        cellspacing="0"
-        style="
-            border:1px solid #eee7f1;
-            border-radius:14px;
-            border-collapse:separate;
-            border-spacing:0;
-            overflow:hidden;
-        "
-    >
-        {_detail_row("Name", clean_name)}
-        {_detail_row("WhatsApp", phone)}
-        {_detail_row("Occupation", occupation)}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+           style="border:1px solid #eee7f1;border-radius:14px;border-collapse:separate;border-spacing:0;overflow:hidden;">
+        {_detail_row("Name", clean_name)}}
+        {_detail_row("WhatsApp", phone)}}
+        {_detail_row("Occupation", occupation)}}
         {_detail_row("Looking to change", ", ".join(goals))}
-        {_detail_row("Main frustration", frustration)}
-        {_detail_row("Readiness", readiness)}
-        {_detail_row("Ideal start", timeline)}
-        {_detail_row("Why now", why_now)}
-        {_detail_row("Source", source)}
-        {_detail_row("Interest ID", interest_id)}
+        {_detail_row("Main frustration", frustration)}}
+        {_detail_row("Readiness", readiness)}}
+        {_detail_row("Ideal start", timeline)}}
+        {_detail_row("Why now", why_now)}}
+        {_detail_row("Source", source)}}
+        {_detail_row("Enquiry ID", interest_id)}}
     </table>
 
-    <div style="
-        margin-top:20px;
-        padding:16px;
-        border-radius:12px;
-        background:#f7effc;
-        color:#4d4352;
-        font-size:14px;
-        line-height:1.6;
-    ">
-        <strong>Next step:</strong>
-        Review this enquiry and decide whether to send her the full
-        NourisHer Transformation application.
+    <div style="margin-top:20px;padding:18px;border-radius:14px;background:#f7effc;">
+        <div style="color:#5b0e91;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">Your next step</div>
+        <p style="margin:8px 0 0;color:#3b343f;font-size:14px;line-height:1.7;">
+            Review this enquiry. If she is serious and NourisHer Transformation may be a good fit,
+            prepare an application link. The application will automatically carry over the information
+            she has already shared.
+        </p>
     </div>
     """
 
     email_html = _email_layout(
-        title="New NourisHer Transformation Interest",
-        intro=(
-            f"{clean_name} has expressed interest in NourisHer Transformation. "
-            "Review her details before deciding whether to send the full application."
-        ),
+        title="New NourisHer Transformation enquiry",
+        intro=f"{clean_name} has expressed interest in NourisHer Transformation.",
         body=body,
-        button_text="Open NourisHer",
-        button_url=f"{APP_BASE_URL.rstrip('/')}/transformation",
+        button_text="Prepare application link",
+        button_url=dashboard_url,
     )
 
     text_content = (
-        "New NourisHer Transformation Interest\n\n"
+        "New NourisHer Transformation enquiry\n\n"
         f"Name: {clean_name}\n"
         f"WhatsApp: {phone}\n"
         f"Occupation: {occupation}\n"
@@ -608,12 +566,12 @@ def send_transformation_interest_notification(
         f"Readiness: {readiness}\n"
         f"Ideal start: {timeline}\n"
         f"Why now: {why_now}\n"
-        f"Source: {source}\n"
-        f"Interest ID: {interest_id}\n"
+        f"Source: {source}\n\n"
+        f"Prepare application link: {dashboard_url}"
     )
 
     return send_email(
-        subject=f"🌿 New NourisHer Transformation Interest — {clean_name}",
+        subject=f"New NourisHer Transformation enquiry — {clean_name}",
         html_content=email_html,
         text_content=text_content,
     )
