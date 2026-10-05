@@ -3943,11 +3943,6 @@ button {
   display: none !important;
 }
 
-.application-progress {
-  position: static;
-  width: 100%;
-  margin: 0 0 28px;
-}
 
 
 /* =========================================================
