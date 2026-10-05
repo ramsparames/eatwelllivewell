@@ -724,6 +724,20 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 website: document.getElementById("website")?.value || "",
             };
 
+            console.log("APPLICATION PAYLOAD CHECK", {
+                why_now: payload.why_now,
+                success_goal: payload.success_goal,
+                why_now_length: payload.why_now.length,
+                success_goal_length: payload.success_goal.length,
+            });
+
+            console.log("APPLICATION PAYLOAD CHECK", {
+                why_now: payload.why_now,
+                success_goal: payload.success_goal,
+                why_now_length: payload.why_now.length,
+                success_goal_length: payload.success_goal.length,
+            });
+
             try {
                 if (submitButton) {
                     submitButton.disabled = true;
