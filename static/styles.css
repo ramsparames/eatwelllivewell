@@ -4172,14 +4172,14 @@ button {
     font-family: var(--sans, "Manrope", system-ui, sans-serif);
 }
 
-/* The application page is deliberately distraction-free.
-   Keep the interest form in the same visual family. */
+/* Keep the normal Eat Well Live Well header on the interest page. */
 .transformation-interest-page .journey-header {
-    display: none;
+    display: block;
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom: 1px solid #e8e5dd;
 }
 
 .transformation-interest-page .journey-shell {
-    padding-top: 0;
     background: transparent;
 }
 
@@ -4277,12 +4277,12 @@ button {
 }
 
 .transformation-interest-page .interest-question {
-    padding: 44px 52px;
+    padding: 38px 48px;
     border-bottom: 1px solid var(--l, #e8e5dd);
 }
 
 .transformation-interest-page .interest-question:first-child {
-    padding-top: 48px;
+    padding-top: 42px;
 }
 
 .transformation-interest-page .interest-question:last-of-type {
@@ -4303,9 +4303,9 @@ button {
     margin: 0 0 12px;
     color: var(--i, #1c2521);
     font-family: var(--serif, "Cormorant Garamond", Georgia, serif);
-    font-size: clamp(34px, 4.2vw, 52px);
+    font-size: clamp(30px, 3.2vw, 42px);
     font-weight: 600;
-    letter-spacing: -0.8px;
+    letter-spacing: -0.5px;
     line-height: 1.05;
 }
 
@@ -4314,7 +4314,7 @@ button {
     color: #717b72;
     font-family: var(--sans, "Manrope", system-ui, sans-serif);
     font-size: 14px;
-    line-height: 1.65;
+    line-height: 1.55;
 }
 
 /* ---------------------------------------------------------
@@ -4510,7 +4510,7 @@ button {
     }
 
     .transformation-interest-page .interest-question h2 {
-        font-size: 38px;
+        font-size: 32px;
     }
 
     .transformation-interest-page .interest-actions {
@@ -4532,5 +4532,51 @@ button {
 
     .transformation-interest-page .interest-success-card p {
         font-size: 16px;
+    }
+}
+
+/* =========================================================
+   INTEREST PAGE — APPLICATION STYLE FOOTER
+   ========================================================= */
+/* =========================================================
+   INTEREST PAGE — APPLICATION STYLE FOOTER
+   ========================================================= */
+
+.transformation-interest-page .journey-footer {
+    margin-top: 0;
+    border-top: 1px solid #e8e5dd;
+    background: rgba(255, 255, 255, 0.82);
+    color: #7b857e;
+}
+
+.transformation-interest-page .journey-footer-inner {
+    max-width: 1180px;
+    min-height: 105px;
+    margin: 0 auto;
+    padding: 28px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.transformation-interest-page .journey-footer-inner span {
+    color: #7b857e;
+    font-family: var(--sans, "Manrope", system-ui, sans-serif);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+    .transformation-interest-page .journey-footer-inner {
+        min-height: auto;
+        padding: 26px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .transformation-interest-page .journey-footer-inner span {
+        font-size: 13px;
     }
 }
