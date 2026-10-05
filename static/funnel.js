@@ -740,6 +740,8 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
 
             try {
                 if (submitButton) {
+                    console.log("WHY NOW VALUE:", JSON.stringify(payload.why_now));
+                    console.log("SUCCESS GOAL VALUE:", JSON.stringify(payload.success_goal));
                     submitButton.disabled = true;
                     submitButton.textContent = "Submitting…";
                 }
