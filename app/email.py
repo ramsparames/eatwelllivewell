@@ -526,16 +526,16 @@ def send_transformation_interest_notification(
     body = f"""
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
            style="border:1px solid #eee7f1;border-radius:14px;border-collapse:separate;border-spacing:0;overflow:hidden;">
-        {_detail_row("Name", clean_name)}}
-        {_detail_row("WhatsApp", phone)}}
-        {_detail_row("Occupation", occupation)}}
+        {_detail_row("Name", clean_name)}
+        {_detail_row("WhatsApp", phone)}
+        {_detail_row("Occupation", occupation)}
         {_detail_row("Looking to change", ", ".join(goals))}
-        {_detail_row("Main frustration", frustration)}}
-        {_detail_row("Readiness", readiness)}}
-        {_detail_row("Ideal start", timeline)}}
-        {_detail_row("Why now", why_now)}}
-        {_detail_row("Source", source)}}
-        {_detail_row("Enquiry ID", interest_id)}}
+        {_detail_row("Main frustration", frustration)}
+        {_detail_row("Readiness", readiness)}
+        {_detail_row("Ideal start", timeline)}
+        {_detail_row("Why now", why_now)}
+        {_detail_row("Source", source)}
+        {_detail_row("Enquiry ID", interest_id)}
     </table>
 
     <div style="margin-top:20px;padding:18px;border-radius:14px;background:#f7effc;">
