@@ -422,7 +422,11 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
     }
 
     if (applicationForm) {
-        const savedLead = load(LEAD_KEY);
+        const hasInterestToken = new URLSearchParams(window.location.search).has("interest_token");
+        // When an application is opened from a secure interest link,
+        // the token-prefill script is authoritative. Do not let an
+        // older browser localStorage lead overwrite the current enquiry.
+        const savedLead = hasInterestToken ? {} : load(LEAD_KEY);
         const nameField = document.getElementById("name");
         const phoneField = document.getElementById("phone");
         const emailField = document.getElementById("email");

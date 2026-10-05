@@ -128,36 +128,10 @@
         hiddenInterest.value = data.interest_id || "";
       }
 
-      // Keep current lead storage aligned with this enquiry.
-      // This prevents later application code from restoring
-      // the previous test person's name or phone.
-      try {
-        const existing = JSON.parse(
-          localStorage.getItem("nourisherLead") || "{}"
-        );
-
-        localStorage.setItem(
-          "nourisherLead",
-          JSON.stringify({
-            ...existing,
-            name: data.name || existing.name || "",
-            phone: data.phone || existing.phone || "",
-            interestId:
-              data.interest_id ||
-              existing.interestId ||
-              null,
-            snapshotId:
-              data.snapshot_id ||
-              existing.snapshotId ||
-              null,
-          })
-        );
-      } catch (storageError) {
-        console.warn(
-          "Could not update saved lead data:",
-          storageError
-        );
-      }
+      // Do not write this enquiry back into the generic lead storage.
+      // The interest token remains the authoritative source for this
+      // application, so a later page visit cannot contaminate it with
+      // another browser/test person's localStorage.
     } catch (error) {
       console.error(
         "Transformation application prefill failed:",
