@@ -461,6 +461,122 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
             });
         }
 
+        // Prefill from a secure Transformation interest link.
+        // The interest token is authoritative for this application.
+        const interestToken = new URLSearchParams(
+            window.location.search
+        ).get("interest_token");
+
+        if (interestToken) {
+            fetch(
+                `/transformation-interest/application-prefill?token=${encodeURIComponent(interestToken)}`,
+                {
+                    credentials: "same-origin",
+                    cache: "no-store",
+                }
+            )
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(
+                            `Interest prefill failed (${response.status})`
+                        );
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (nameField && data.name) {
+                        nameField.value = data.name;
+                        nameField.dispatchEvent(
+                            new Event("input", { bubbles: true })
+                        );
+                    }
+
+                    if (
+                        phoneField &&
+                        data.phone &&
+                        applicationPhoneWidget
+                    ) {
+                        applicationPhoneWidget.setNumber(data.phone);
+                    }
+
+                    const occupationField =
+                        document.getElementById("occupation");
+
+                    if (occupationField && data.occupation) {
+                        occupationField.value = data.occupation;
+                        occupationField.dispatchEvent(
+                            new Event("change", { bubbles: true })
+                        );
+                    }
+
+                    const whyNowField =
+                        document.getElementById("why-now");
+
+                    if (whyNowField && data.why_now) {
+                        whyNowField.value = data.why_now;
+                        whyNowField.dispatchEvent(
+                            new Event("input", { bubbles: true })
+                        );
+                    }
+
+                    const priorityMap = {
+                        "Lose weight and reduce belly fat":
+                            "Sustainable fat loss",
+                        "Feel better through perimenopause / menopause":
+                            "Hormonal wellbeing",
+                        "Improve eating habits without dieting":
+                            "Confidence and consistency",
+                        "Get stronger and feel fitter":
+                            "Strength and fitness",
+                        "Improve energy, sleep and wellbeing":
+                            ["Better energy", "Better sleep"],
+                        "Feel confident and comfortable in my body":
+                            "Confidence and consistency",
+                    };
+
+                    const mappedPriorities = [];
+
+                    (data.goals || []).forEach((goal) => {
+                        const value = priorityMap[goal];
+
+                        if (Array.isArray(value)) {
+                            mappedPriorities.push(...value);
+                        } else if (value) {
+                            mappedPriorities.push(value);
+                        }
+                    });
+
+                    document
+                        .querySelectorAll('input[name="priorities"]')
+                        .forEach((input) => {
+                            input.checked =
+                                mappedPriorities.includes(input.value);
+                        });
+
+                    const hiddenToken =
+                        document.getElementById("interest-token");
+
+                    if (hiddenToken) {
+                        hiddenToken.value = interestToken;
+                    }
+
+                    const hiddenInterest =
+                        document.getElementById("interest-id");
+
+                    if (hiddenInterest) {
+                        hiddenInterest.value =
+                            data.interest_id || "";
+                    }
+                })
+                .catch((error) => {
+                    console.error(
+                        "Transformation application prefill failed:",
+                        error
+                    );
+                });
+        }
+
+
         // Seven-step application navigation.
         // Steps 1–6 advance with Continue; only Step 7 submits the form.
         const applicationSteps = [...applicationForm.querySelectorAll("[data-application-step]")];
