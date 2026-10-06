@@ -20,10 +20,11 @@
   <section class="dashboard-panel">
     <p class="eyebrow">NourisHer Transformation™</p>
     <h1>{{ interest.name }}</h1>
-    <p>This woman has completed the short Transformation interest form. This is the qualification step before the full application.</p>
+    <p>This person has completed the short Transformation interest form. This is the qualification step before the full application.</p>
 
     <div class="interest-review-grid">
       <article class="interest-review-card"><span>WhatsApp</span><p>{{ interest.phone }}</p></article>
+      <article class="interest-review-card"><span>Age group</span><p>{{ interest.age_range or "Not provided" }}</p></article>
       <article class="interest-review-card"><span>Occupation</span><p>{{ interest.occupation }}</p></article>
       <article class="interest-review-card"><span>Looking to change</span><p>{{ interest.goals|join(', ') }}</p></article>
       <article class="interest-review-card"><span>Readiness</span><p>{{ interest.readiness }}</p></article>

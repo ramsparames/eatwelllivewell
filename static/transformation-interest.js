@@ -44,6 +44,7 @@
     const payload = {
       name: nameField?.value.trim() || "",
       phone: phoneField?.value.trim() || "",
+      age_range: form.querySelector('[name="age_range"]:checked')?.value || "",
       occupation: form.querySelector('[name="occupation"]:checked')?.value || "",
       goals: goalBoxes.filter((item) => item.checked).map((item) => item.value),
       frustration: form.querySelector('[name="frustration"]:checked')?.value || "",

@@ -10,6 +10,7 @@ router = APIRouter()
 class TransformationInterestSubmission(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     phone: str = Field(min_length=7, max_length=30)
+    age_range: str = Field(min_length=1, max_length=30)
     occupation: str = Field(min_length=1, max_length=120)
     goals: list[str] = Field(min_length=1, max_length=2)
     frustration: str = Field(min_length=1, max_length=500)
@@ -29,6 +30,7 @@ def receive_transformation_interest(request: Request, submission: Transformation
         snapshot_id=submission.snapshot_id,
         name=submission.name.strip(),
         phone=submission.phone.strip(),
+        age_range=submission.age_range.strip(),
         occupation=submission.occupation.strip(),
         goals=submission.goals,
         frustration=submission.frustration.strip(),

@@ -112,6 +112,7 @@ def create_database() -> None:
                     NOT NULL DEFAULT '{}'::jsonb
                 """
             )
+
             cursor.execute(
                 """
                 CREATE TABLE IF NOT EXISTS transformation_interest_leads (
@@ -122,6 +123,7 @@ def create_database() -> None:
 
                     name TEXT NOT NULL,
                     phone TEXT NOT NULL,
+                    age_range TEXT NOT NULL DEFAULT '',
                     occupation TEXT NOT NULL,
 
                     goals JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -138,6 +140,13 @@ def create_database() -> None:
                     submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
+                """
+            )
+
+            cursor.execute(
+                """
+                ALTER TABLE transformation_interest_leads
+                ADD COLUMN IF NOT EXISTS age_range TEXT NOT NULL DEFAULT ''
                 """
             )
 
@@ -843,6 +852,7 @@ def save_transformation_interest(
     snapshot_id: int | None,
     name: str,
     phone: str,
+    age_range: str,
     occupation: str,
     goals: list[str],
     frustration: str,
@@ -895,6 +905,7 @@ def save_transformation_interest(
                     snapshot_id,
                     name,
                     phone,
+                    age_range,
                     occupation,
                     goals,
                     frustration,
@@ -904,7 +915,7 @@ def save_transformation_interest(
                     source
                 )
                 VALUES (
-                    %s, %s, %s, %s, %s::jsonb,
+                    %s, %s, %s, %s, %s, %s::jsonb,
                     %s, %s, %s, %s, %s
                 )
                 RETURNING id
@@ -913,6 +924,7 @@ def save_transformation_interest(
                     linked_snapshot_id,
                     name,
                     phone,
+                    age_range,
                     occupation,
                     json.dumps(goals),
                     frustration,
@@ -2584,6 +2596,7 @@ def get_transformation_interests() -> list[dict[str, Any]]:
                     i.snapshot_id,
                     i.name,
                     i.phone,
+                    i.age_range,
                     i.occupation,
                     i.goals,
                     i.frustration,
