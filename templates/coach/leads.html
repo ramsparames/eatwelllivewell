@@ -174,11 +174,6 @@
 {% set computed_apps = total_applications if total_applications is defined else 0 %}
 {% set computed_followups = follow_ups_due if follow_ups_due is defined else 0 %}
 
-{# Count the items currently shown in Needs your attention. #}
-{% set new_interest_count = transformation_interests|selectattr("status","equalto","new")|list|length %}
-{% set new_assessment_count = new_lead_items|selectattr("lead_type","equalto","assessment")|list|length %}
-{% set attention_count = (today_followups|length) + (new_applications|length) + new_interest_count + new_assessment_count %}
-
 <div class="leads-page">
 
   <header class="leads-heading">
@@ -198,7 +193,7 @@
       <strong>{{ computed_total }}</strong>
       <small>View pipeline ↓</small>
     </a>
-    <a class="lead-summary-card" href="#needs-attention">
+    <a class="lead-summary-card" href="#all-leads">
       <span>New</span>
       <strong>{{ computed_new }}</strong>
       <small>Need a first action ↓</small>
@@ -213,99 +208,6 @@
       <strong>{{ computed_followups }}</strong>
       <small>See today's actions ↓</small>
     </a>
-  </section>
-
-  <!-- Main working area -->
-  <section class="leads-panel attention-panel" id="needs-attention">
-    <div class="panel-heading">
-      <div>
-        <h2>Needs your attention</h2>
-        <p>Start here. Once you've dealt with something, update the lead and it will move out of this view.</p>
-      </div>
-      <span class="panel-count">{{ attention_count }}</span>
-    </div>
-
-    <div class="attention-list">
-
-      {% for item in transformation_interests|selectattr("status","equalto","new")|sort(attribute="submitted_at", reverse=true) %}
-        {% if (item.status or "new") == "new" %}
-        <article class="attention-row">
-          <div class="attention-name">
-            <strong>{{ item.name or "Lead" }}</strong>
-            <span>{{ item.occupation or "Transformation enquiry" }} · {{ item.readiness or "New enquiry" }}</span>
-          </div>
-          <div class="attention-why">
-            <strong>Transformation enquiry</strong>
-            <span>{{ item.why_now or item.frustration or "New enquiry received" }}</span>
-          </div>
-          <div class="attention-actions">
-            <a class="lead-button secondary" href="/dashboard/leads/interest/{{ item.id }}">Review</a>
-          </div>
-        </article>
-        {% endif %}
-      {% endfor %}
-
-      {% for item in new_applications|sort(attribute="submitted_at", reverse=true) %}
-        <article class="attention-row">
-          <div class="attention-name">
-            <strong>{{ item.name or "Lead" }}</strong>
-            <span>{{ item.email or item.phone or "No contact details" }}</span>
-          </div>
-          <div class="attention-why">
-            <strong>Transformation application</strong>
-            <span>Application received and ready for review.</span>
-          </div>
-          <div class="attention-actions">
-            <a class="lead-button primary"
-               href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}">Review</a>
-          </div>
-        </article>
-      {% endfor %}
-
-      {% for item in today_followups|sort(attribute="follow_up_date") %}
-        <article class="attention-row">
-          <div class="attention-name">
-            <strong>{{ item.name or "Lead" }}</strong>
-            <span>{{ item.phone or "No contact details" }}</span>
-          </div>
-          <div class="attention-why">
-            <strong>{{ "Overdue" if item.is_overdue else "Follow-up due today" }}</strong>
-            <span>{{ item.follow_up_date.strftime("%d %b %Y") }}</span>
-          </div>
-          <div class="attention-actions">
-            <a class="lead-button primary"
-               href="/dashboard/leads/{{ item.lead_type }}/{{ item.lead_id }}">Open lead</a>
-          </div>
-        </article>
-      {% endfor %}
-
-      {# New assessment leads are useful, but sit below enquiries/applications/follow-ups. #}
-      {% for item in new_lead_items|selectattr("lead_type","equalto","assessment")|sort(attribute="submitted_at", reverse=true) %}
-        {% if item.lead_type == "assessment" %}
-        <article class="attention-row">
-          <div class="attention-name">
-            <strong>{{ item.name or "Lead" }}</strong>
-            <span>{{ item.phone or item.email or "No contact details" }}</span>
-          </div>
-          <div class="attention-why">
-            <strong>Assessment completed</strong>
-            <span>New assessment lead to review.</span>
-          </div>
-          <div class="attention-actions">
-            <a class="lead-button secondary"
-               href="/dashboard/leads/assessment/{{ item.lead_id }}">Open</a>
-          </div>
-        </article>
-        {% endif %}
-      {% endfor %}
-
-      {% if attention_count == 0 %}
-        <div class="attention-empty">
-          You're all caught up. 🎉 There are no enquiries, applications or follow-ups waiting for attention.
-        </div>
-      {% endif %}
-
-    </div>
   </section>
 
   <!-- Master pipeline -->

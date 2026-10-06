@@ -294,6 +294,29 @@ def dashboard(
 
     display_leads = all_leads + interest_lead_rows
 
+    # Unified pipeline: summary counts must match the leads shown below.
+    total_leads = len(display_leads)
+
+    total_applications = sum(
+        1
+        for lead in display_leads
+        if lead.get("has_application")
+    )
+
+    new_leads = sum(
+        1
+        for lead in display_leads
+        if (
+            (
+                lead.get("application_status")
+                if lead.get("has_application")
+                and lead.get("application_status")
+                else lead.get("status")
+            )
+            or "new"
+        ) == "new"
+    )
+
     search_query = q.strip().lower()
     leads = display_leads
 
