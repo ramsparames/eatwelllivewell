@@ -194,6 +194,8 @@ def dashboard(
             else:
                 application_source = "direct"
 
+        lead["application_source"] = application_source
+
         item = {
             "name": lead.get("name") or "Lead",
             "email": lead.get("email"),
