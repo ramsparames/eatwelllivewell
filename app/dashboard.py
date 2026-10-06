@@ -182,6 +182,18 @@ def dashboard(
             lead_type = "application"
             lead_id = lead.get("application_id")
 
+        application_source = None
+
+        if lead.get("has_application"):
+            if lead.get("application_data", {}).get("form_type") == "event_lead":
+                application_source = "event"
+            elif lead.get("interest_id"):
+                application_source = "enquiry"
+            elif lead.get("snapshot_id"):
+                application_source = "assessment"
+            else:
+                application_source = "direct"
+
         item = {
             "name": lead.get("name") or "Lead",
             "email": lead.get("email"),
@@ -189,6 +201,7 @@ def dashboard(
             "status": status,
             "lead_type": lead_type,
             "lead_id": lead_id,
+            "application_source": application_source,
             "submitted_at": (
                 lead.get("application_submitted_at")
                 or lead.get("assessment_submitted_at")
@@ -267,6 +280,7 @@ def dashboard(
                 ),
                 "application_status": interest.get("application_status"),
                 "has_application": has_application,
+                "application_source": "enquiry" if has_application else None,
                 "follow_up_date": None,
                 "application_follow_up_date": None,
                 "submitted_at": (

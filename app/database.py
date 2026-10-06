@@ -654,6 +654,8 @@ def get_all_leads() -> list[dict[str, Any]]:
                     s.submitted_at AS assessment_submitted_at,
 
                     a.id AS application_id,
+                    a.interest_id,
+                    a.application_data,
                     a.email,
                     a.age_range,
                     a.status,
@@ -701,6 +703,8 @@ def get_all_leads() -> list[dict[str, Any]]:
                     NULL::TIMESTAMPTZ AS assessment_submitted_at,
 
                     a.id AS application_id,
+                    a.interest_id,
+                    a.application_data,
                     a.email,
                     a.age_range,
                     a.status AS application_status,

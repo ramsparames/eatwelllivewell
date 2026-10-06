@@ -386,6 +386,9 @@
                   Transformation enquiry
                 {% elif lead.has_application %}
                   Transformation application
+                  {% if lead.application_source %}
+                    · Source: {{ lead.application_source|title }}
+                  {% endif %}
                 {% else %}
                   Assessment
                 {% endif %}
