@@ -239,11 +239,6 @@
             <span>{{ item.why_now or item.frustration or "New enquiry received" }}</span>
           </div>
           <div class="attention-actions">
-            {% if item.phone %}
-              <a class="lead-button primary"
-                 href="https://wa.me/{{ item.phone|replace("+","")|replace(" ","")|replace("-","")|replace("(","")|replace(")","") }}"
-                 target="_blank" rel="noopener">WhatsApp</a>
-            {% endif %}
             <a class="lead-button secondary" href="/dashboard/leads/interest/{{ item.id }}">Review</a>
           </div>
         </article>
