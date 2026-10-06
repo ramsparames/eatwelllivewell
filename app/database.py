@@ -716,6 +716,7 @@ def get_all_leads() -> list[dict[str, Any]]:
                 FROM transformation_applications AS a
 
                 WHERE a.snapshot_id IS NULL
+                  AND a.interest_id IS NULL
 
                 ORDER BY a.submitted_at DESC
                 """
@@ -2575,23 +2576,44 @@ def get_transformation_interests() -> list[dict[str, Any]]:
             cursor.execute(
                 """
                 SELECT
-                    id,
-                    snapshot_id,
-                    name,
-                    phone,
-                    occupation,
-                    goals,
-                    frustration,
-                    readiness,
-                    timeline,
-                    why_now,
-                    source,
-                    status,
-                    coach_notes,
-                    submitted_at,
-                    updated_at
-                FROM transformation_interest_leads
-                ORDER BY submitted_at DESC
+                    i.id,
+                    i.snapshot_id,
+                    i.name,
+                    i.phone,
+                    i.occupation,
+                    i.goals,
+                    i.frustration,
+                    i.readiness,
+                    i.timeline,
+                    i.why_now,
+                    i.source,
+                    i.status,
+                    i.coach_notes,
+                    i.submitted_at,
+                    i.updated_at,
+
+                    a.id AS application_id,
+                    a.name AS application_name,
+                    a.phone AS application_phone,
+                    a.email AS application_email,
+                    a.status AS application_status,
+                    a.submitted_at AS application_submitted_at
+
+                FROM transformation_interest_leads AS i
+
+                LEFT JOIN LATERAL (
+                    SELECT *
+                    FROM transformation_applications
+                    WHERE interest_id = i.id
+                      AND COALESCE(
+                          application_data->>'form_type',
+                          ''
+                      ) <> 'event_lead'
+                    ORDER BY submitted_at DESC
+                    LIMIT 1
+                ) AS a ON TRUE
+
+                ORDER BY i.submitted_at DESC
                 """
             )
             return cursor.fetchall()

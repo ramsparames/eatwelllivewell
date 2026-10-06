@@ -239,24 +239,40 @@ def dashboard(
     interest_lead_rows = []
 
     for interest in transformation_interests:
+        has_application = bool(interest.get("application_id"))
+
         interest_lead_rows.append(
             {
                 "snapshot_id": None,
-                "application_id": None,
+                "application_id": interest.get("application_id"),
                 "interest_id": interest.get("id"),
-                "lead_type": "interest",
-                "name": interest.get("name") or "Lead",
-                "email": None,
-                "phone": interest.get("phone"),
+                "lead_type": "application" if has_application else "interest",
+                "name": (
+                    interest.get("application_name")
+                    or interest.get("name")
+                    or "Lead"
+                ),
+                "email": interest.get("application_email"),
+                "phone": (
+                    interest.get("application_phone")
+                    or interest.get("phone")
+                ),
                 "total_score": None,
                 "opportunity": None,
                 "strength": None,
-                "status": interest.get("status") or "new",
-                "application_status": None,
-                "has_application": False,
+                "status": (
+                    interest.get("application_status")
+                    or interest.get("status")
+                    or "new"
+                ),
+                "application_status": interest.get("application_status"),
+                "has_application": has_application,
                 "follow_up_date": None,
                 "application_follow_up_date": None,
-                "submitted_at": interest.get("submitted_at"),
+                "submitted_at": (
+                    interest.get("application_submitted_at")
+                    or interest.get("submitted_at")
+                ),
             }
         )
 
