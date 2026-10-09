@@ -139,6 +139,7 @@ h3{font-weight:600!important}
 .training-case-card>p strong{color:var(--ink)}
 .training-case-card blockquote{border-top:1px solid var(--line);padding-top:13px;margin:15px 0 0;font:italic 14px/1.5 Georgia,serif;color:var(--ink)}
 .proof-after-training{background:#fff}
+.proof-note{text-align:center;font-size:11px;line-height:1.5;font-weight:400;color:var(--muted);margin:18px auto 0;max-width:720px}
 @media(max-width:900px){.training-case-grid{grid-template-columns:1fr}.training-case-card{max-width:720px;margin:auto}}
 </style>
 
@@ -156,6 +157,34 @@ h3{font-weight:600!important}
 }
 @media(max-width:620px){
   .training-proof-grid{grid-template-columns:1fr}
+}
+</style>
+
+
+<style>
+/* Match the landing-page journey introduction exactly */
+.training-proof-head{
+  max-width:720px;
+  margin:0 auto 30px;
+  text-align:center;
+}
+.training-proof-head h2{
+  font-family:var(--serif);
+  font-size:42px;
+  line-height:1.15;
+  margin:8px 0 10px;
+  font-weight:400;
+}
+.training-proof-lead{
+  font-family:var(--sans);
+  font-size:19px;
+  line-height:1.55;
+  color:#53615b;
+  max-width:760px;
+  margin:auto;
+}
+.training-proof-head .eyebrow{
+  margin:0;
 }
 </style>
 
@@ -225,7 +254,7 @@ h3{font-weight:600!important}
 
 <section class="section proof-after-training">
   <div class="wrap">
-    <div class="proof-head"><p class="eyebrow">A few real journeys</p><h2>Different women. Different starting points. One approach.</h2><p class="lead">The NourisHer approach is personalised because the woman in front of us is never exactly the same as the woman before her.</p></div>
+    <div class="training-proof-head"><p class="eyebrow">A FEW REAL JOURNEYS</p><h2>Different women. Different starting points. One approach.</h2><p class="training-proof-lead">The NourisHer approach is personalised because the woman in front of us is never exactly the same as the woman before her.</p></div>
     <div class="training-case-grid">
       <article class="training-case-card">
         <div class="training-case-top"><img src="/static/nourisher/parvathy-before-after.jpeg" alt="Parvathy before and after"><div><div class="proof-name">Parvathy · 12 kg</div><p class="case-label">From intense workouts to a broader view of health</p></div></div>
