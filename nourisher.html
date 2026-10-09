@@ -66,7 +66,6 @@ h3{font-weight:600!important}
 <p class="lead">What worked before may not fit your body, your schedule or your health priorities now. In this short training, Sushma explains a simpler approach to nutrition, strength, sleep, stress and consistency that works with real Indian life.</p>
 
 </div>
-</div>
 </section>
 
 <section class="section soft">
@@ -105,7 +104,7 @@ h3{font-weight:600!important}
       Watch Sushma's free training and see why the approach that worked before may need to change after 40.
     </p>
     <div class="cta">
-      <a class="button" href="/nourisher-training">Watch the Free Training →</a>
+      <button id="watchAfterSushma" class="button" type="button">Watch the Free Training →</button>
       <p class="micro">A short, practical training. No diet chart required.</p>
     </div>
   </div>
@@ -214,14 +213,33 @@ h3{font-weight:600!important}
 </div>
 <script>
 const modal=document.getElementById('modal');
-document.getElementById('watch').addEventListener('click',()=>modal.classList.add('open'));
-document.getElementById('watchBottom').addEventListener('click',()=>modal.classList.add('open'));
+const openModal=()=>modal.classList.add('open');
+
+const watch=document.getElementById('watch');
+const watchAfterSushma=document.getElementById('watchAfterSushma');
+const watchBottom=document.getElementById('watchBottom');
+
+if(watch) watch.addEventListener('click',openModal);
+if(watchAfterSushma) watchAfterSushma.addEventListener('click',openModal);
+if(watchBottom) watchBottom.addEventListener('click',openModal);
+
 document.getElementById('close').addEventListener('click',()=>modal.classList.remove('open'));
 modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
+
 document.getElementById('leadForm').addEventListener('submit',e=>{
   e.preventDefault();
-  // TEST MODE: intentionally bypass validation and database submission.
-  if(window.gtag) gtag('event','test_lead_form_continue',{event_category:'NourisHer VSL Test'});
+
+  const form=e.currentTarget;
+  const lead={
+    name:form.elements.name.value.trim(),
+    email:form.elements.email.value.trim(),
+    phone:form.elements.phone.value.trim(),
+    occupation:form.elements.occupation.value.trim()
+  };
+
+  sessionStorage.setItem('nourisherVslLead',JSON.stringify(lead));
+
+  if(window.gtag) gtag('event','vsl_lead_form_continue',{event_category:'NourisHer VSL'});
   location.href='/nourisher-training';
 });
 </script>
