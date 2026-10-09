@@ -7,6 +7,14 @@
 :root{--cream:#fbfaf7;--warm:#f5efe8;--ink:#263c34;--muted:#66736d;--green:#365c4e;--sage:#e7eee9;--rose:#b86f79;--white:#fff;--line:#dfe4df;--shadow:0 18px 50px rgba(38,60,52,.10)}
 *{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);line-height:1.55}.wrap{width:min(1040px,calc(100% - 36px));margin:auto}.top{padding:12px 0;border-bottom:1px solid #e7e7e3}.logo{display:block;width:190px}.hero{text-align:center;padding:60px 0 36px}.eyebrow{color:var(--rose);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}.hero h1,h2,h3{font-family:var(--serif)}.hero h1{font-size:clamp(40px,6vw,66px);line-height:1.05;max-width:900px;margin:12px auto 18px}.lead{font-size:19px;color:#53615b;max-width:760px;margin:auto}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:21px}.card h3{margin:0 0 9px;font-size:23px;line-height:1.18}.card p{margin:0;color:var(--muted);font-size:15px;line-height:1.55}.section{padding:58px 0}.soft{background:var(--warm)}.center{text-align:center}.button{display:inline-flex;border:0;border-radius:999px;background:var(--rose);color:white;text-decoration:none;padding:16px 25px;font-weight:700;font-size:15px;cursor:pointer}.button:hover{filter:brightness(.96)}.cta{margin-top:30px}.micro{font-size:12px;color:var(--muted)}.modal{position:fixed;inset:0;background:rgba(22,34,29,.66);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.open{display:flex}.modalbox{background:#fff;width:min(570px,100%);max-height:92vh;overflow:auto;border-radius:22px;padding:28px;box-shadow:var(--shadow);position:relative}.close{position:absolute;right:16px;top:12px;border:0;background:none;font-size:28px;cursor:pointer}.field{margin:0 0 13px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}.field input,.field textarea{width:100%;padding:12px;border:1px solid #d7ddd8;border-radius:10px;font:inherit}.consent{display:flex;gap:9px;font-size:12px;color:var(--muted);margin:13px 0}.error{display:none;background:#f8e6e8;color:#8a3c46;padding:10px;border-radius:9px;margin:10px 0}.video{background:#fff;border-radius:20px;padding:12px;box-shadow:var(--shadow);max-width:930px;margin:auto}.video video{display:block;width:100%;border-radius:13px;background:#17231e;aspect-ratio:16/9}.explore{max-width:760px;margin:25px auto 0;background:var(--cream);border:1px solid var(--line);border-radius:20px;padding:27px;text-align:center}.explore h2{font-size:36px;margin:0 0 9px}.progress{text-align:center;color:var(--rose);text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:700;margin-bottom:25px}.meet{display:grid;grid-template-columns:250px 1fr;gap:34px;align-items:center;max-width:850px;margin:auto}.meet img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center 30%;border-radius:20px}.meet h1{font:600 42px/1.08 var(--serif);margin:0 0 12px}.meet p{color:var(--muted)}.form{max-width:850px;margin:auto}.q{background:#fff;border:1px solid var(--line);border-radius:15px;padding:20px;margin-bottom:12px}.q strong{display:block;margin-bottom:12px;font-size:16px;line-height:1.4}.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.choice{border:1px solid #e0e4e1;border-radius:9px;padding:11px;font-size:14px;display:flex;gap:8px}.choice:has(input:checked){background:#f1f6f3;border-color:#91aa9f}.q textarea{width:100%;min-height:90px;border:1px solid #d7ddd8;border-radius:9px;padding:11px;font:inherit}.booking{display:none;background:var(--sage);border-radius:18px;padding:26px;text-align:center;margin-top:20px}footer{text-align:center;border-top:1px solid #e6e7e4;padding:26px;font-size:12px;color:var(--muted)}footer img{width:145px}.honeypot{position:absolute!important;left:-10000px!important}
 @media(max-width:720px){.grid,.opts,.meet{grid-template-columns:1fr}.meet img{max-width:330px;margin:auto}.meet{text-align:center}.hero{padding-top:42px}.hero h1{font-size:40px}.logo{margin:auto}}
+
+.video-cta-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.75fr);gap:22px;align-items:center;max-width:1040px;margin:auto}
+.video-cta-grid .video{max-width:none}
+.video-next-step{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:var(--shadow)}
+.video-next-step h2{font:600 32px/1.12 var(--serif);margin:7px 0 12px}
+.video-next-step p{color:var(--muted);margin:0 0 18px}
+.video-next-step .button{margin-bottom:10px}
+@media(max-width:820px){.video-cta-grid{grid-template-columns:1fr}.video-next-step{padding:24px}}
 </style><style>
 /* === Eat Well Live Well master brand system === */
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700;800&family=Sacramento&display=swap");
@@ -34,47 +42,210 @@ h3{font-weight:600!important}
 .eyebrow{color:var(--rose-600)!important;font-family:var(--sans)!important;font-weight:800!important}
 .ewlw-footer-wordmark{font-size:22px;margin:0 auto 12px}
 @media(max-width:520px){.ewlw-wordmark{font-size:clamp(20px,6vw,26px)}}
-</style></head><body>
-<header class="top ewlw-brand-header"><div class="wrap"><a class="ewlw-wordmark" href="/" aria-label="Eat Well Live Well — home"><span>Eat</span><span class="ewlw-script">well</span><span>Live</span><span class="ewlw-script">well</span></a></div></header>
-<section class="hero" style="padding-bottom:25px">
-<div class="wrap">
-<p class="eyebrow">Your free NourisHer training</p>
-<h1>Why your old health strategies may not be enough anymore</h1>
-<p class="lead">In this training, Sushma explains why food alone is not the whole picture, what changes after 40, and how nutrition, strength, sleep, stress and consistency can work together.</p>
-</div>
+
+/* VSL conversion layer. Uses the existing brand system. */
+.learn-box{max-width:900px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:22px;padding:34px 38px;box-shadow:0 12px 35px rgba(38,60,52,.06)}
+.learn-box h2{font-size:40px;line-height:1.08;margin:8px auto 12px;max-width:720px}
+.section-copy{max-width:700px;margin:0 auto;color:var(--muted);font-size:16px;line-height:1.65}
+.learn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
+.learn-grid article{padding:20px;border:1px solid var(--line);border-radius:15px;background:var(--cream)}
+.learn-grid strong{font-family:var(--serif);font-size:25px;color:var(--ink)}
+.learn-grid p{margin:7px 0 0;color:var(--muted);font-size:14px}
+.video-stage{position:relative}
+.video-poster{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:13px;cursor:pointer;overflow:hidden;background:linear-gradient(90deg,rgba(20,62,51,.95),rgba(20,62,51,.60)),url('/static/nourisher/sushma-rams.jpeg') center 28%/cover no-repeat;color:#fff;display:flex;align-items:center;justify-content:center;gap:30px;text-align:left;padding:34px}
+.video-poster.hidden{display:none}
+.poster-copy{display:flex;flex-direction:column;max-width:650px}
+.poster-copy small{font:800 11px/1.2 var(--sans);letter-spacing:.15em;color:#f6d6dd;margin-bottom:10px}
+.poster-copy strong{font:600 clamp(28px,4vw,48px)/1.05 var(--serif);color:#fff}
+.poster-copy span{font:600 15px var(--sans);margin-top:12px}
+.play-circle{width:72px;height:72px;border-radius:50%;background:#fff;color:var(--green-700);display:flex;align-items:center;justify-content:center;font-size:25px;padding-left:4px;flex:0 0 auto;box-shadow:0 10px 30px rgba(0,0,0,.20)}
+.watch-note{text-align:center;margin-top:10px}
+.watch-note .micro{margin:0}
+.fit-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:900px;margin:auto}
+.fit-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px}
+.fit-card h3{font-size:28px;margin:0 0 14px}
+.fit-card ul{margin:0;padding-left:20px;color:var(--muted)}
+.fit-card li{padding:6px 0;font-size:15px}
+.case-label{margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:var(--rose-600)}
+.case-text{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5}
+.faq{max-width:820px;margin:auto}
+.faq details{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:10px}
+.faq summary{cursor:pointer;font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink)}
+.faq p{margin:12px 0 0;color:var(--muted);font-size:15px;line-height:1.65}
+.final-cta{background:var(--cream)}
+.final-cta h2{font-size:46px;line-height:1.08;margin:8px auto 12px}
+.final-cta .button{margin-top:20px}
+@media(max-width:720px){
+  .learn-box{padding:25px 20px}
+  .learn-box h2{font-size:34px}
+  .learn-grid,.fit-grid{grid-template-columns:1fr}
+  .video-poster{padding:22px;gap:15px}
+  .poster-copy strong{font-size:30px}
+  .play-circle{width:58px;height:58px;font-size:20px}
+  .final-cta h2{font-size:36px}
+}
+</style>
+<style>
+/* Video first, then an immediate CTA styled like the final CTA */
+.video-cta-grid{
+  display:block !important;
+  max-width:1100px !important;
+  margin:0 auto !important;
+}
+.video-cta-grid > .video{
+  width:100%;
+  max-width:none !important;
+}
+.video-next-step{
+  background:var(--cream) !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  padding:38px 20px 8px !important;
+  margin:0 !important;
+  text-align:center !important;
+}
+.video-next-step h2{
+  font-size:46px !important;
+  line-height:1.08 !important;
+  margin:8px auto 12px !important;
+  max-width:820px;
+}
+.video-next-step p:not(.eyebrow):not(.micro){
+  color:var(--muted);
+  max-width:760px;
+  margin:0 auto;
+}
+.video-next-step .button{
+  margin-top:20px;
+  margin-bottom:8px;
+}
+.video-next-step .micro{
+  margin:0 auto;
+  max-width:760px;
+}
+@media(max-width:820px){
+  .video-next-step{padding:30px 12px 6px !important}
+  .video-next-step h2{font-size:36px !important}
+}
+</style>
+</head><body>
+ class="top ewlw-brand-header"><div class="wrap"><a class="ewlw-wordmark" href="/" aria-label="Eat Well Live Well home"><span>Eat</span><span class="ewlw-script">well</span><span>Live</span><span class="ewlw-script">well</span></a></div></header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Free training for Indian women 40+</p>
+    <h1>Why your old health strategies may not be enough anymore</h1>
+    <p class="lead">What worked before may not fit your body, your schedule or your health priorities now. In this training, Sushma explains what can change after 40 and how nutrition, strength, sleep, stress and consistency can work together.</p>
+  </div>
 </section>
-<section class="section" style="padding-top:5px"><div class="wrap"><div class="video"><video id="v" controls playsinline preload="metadata"><source src="/static/nourisher/sushma-vsl.mp4" type="video/mp4"></video></div>
-<div class="explore">
-<p class="eyebrow">What NourisHer works on</p>
-<h2>It is not just about food.</h2>
-<p style="color:var(--muted)">NourisHer looks at nutrition, strength and movement, sleep and recovery, stress and emotional eating, and the routines that help you stay consistent when real life gets busy.</p>
-<div class="grid" style="text-align:left;margin-top:20px">
-<div class="card"><h3>Nutrition</h3><p>Build balanced meals around the food you already eat.</p></div>
-<div class="card"><h3>Movement</h3><p>Support muscle, strength and everyday movement.</p></div>
-<div class="card"><h3>Sleep</h3><p>Support recovery, energy and better daily routines.</p></div>
-<div class="card"><h3>Stress</h3><p>Understand how stress can affect your habits and food choices.</p></div>
-<div class="card"><h3>Connection</h3><p>Build a kinder, more trusting relationship with your body.</p></div>
-<div class="card"><h3>Consistency</h3><p>Turn healthy actions into routines that can survive real life.</p></div>
-</div>
-<div style="margin-top:24px">
-<h2>Would you like to see what this could look like for you?</h2>
-<p style="color:var(--muted)">If the approach resonates, tell Sushma a little more about where you are today.</p>
-<button id="explore" class="button">Yes, I’d like to explore NourisHer →</button>
-</div>
-</div></div></section>
-<footer><a class="ewlw-wordmark ewlw-footer-wordmark" href="/" aria-label="Eat Well Live Well — home"><span>Eat</span><span class="ewlw-script">well</span><span>Live</span><span class="ewlw-script">well</span></a><div>© 2026 Eat Well Live Well · Coaching by Sushma</div></footer>
+
+<section class="section" style="padding-top:8px">
+  <div class="wrap">
+    <div class="learn-box">
+      <div class="center">
+        <p class="eyebrow">What you will learn</p>
+        <h2>There is a reason the old approach may not be working anymore.</h2>
+        <p class="section-copy">This training will help you understand what may need to change and where to focus instead.</p>
+      </div>
+      <div class="learn-grid">
+        <article><strong>Why</strong><p>Eating less is not always the smartest first move after 40.</p></article>
+        <article><strong>What</strong><p>Nutrition, strength, sleep and stress have to do with each other.</p></article>
+        <article><strong>How</strong><p>Small changes can become habits that fit around work, family, travel and everyday life.</p></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" style="padding-top:5px">
+  <div class="wrap">
+    <div class="video-cta-grid">
+      <div class="video">
+      <div class="video-stage" id="videoStage">
+        <video id="v" controls playsinline preload="metadata" poster="/static/nourisher/sushma-rams.jpeg">
+          <source src="/static/nourisher/sushma-vsl.mp4" type="video/mp4">
+        </video>
+        <button class="video-poster" id="videoPoster" type="button" aria-label="Play the free NourisHer training">
+          <span class="poster-copy">
+            <small>FREE NOURISHER TRAINING</small>
+            <strong>Why your body responds differently after 40</strong>
+            <span>with Sushma</span>
+          </span>
+          <span class="play-circle">▶</span>
+        </button>
+      </div>
+      <div class="video-next-step">
+        <p class="eyebrow">Your next step</p>
+        <h2>Ready to see if NourisHer is right for you?</h2>
+        <p>If what you hear feels familiar and you would like support, you can apply for a Clarity Call with Sushma.</p>
+        <a class="button" href="/nourisher-clarity">Apply for a NourisHer Clarity Call →</a>
+        <p class="micro">Answer a few questions first. If it looks like a good fit, the next step is a Clarity Call with Sushma.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+<section class="section soft">
+  <div class="wrap">
+    <div class="center" style="max-width:760px;margin:0 auto 28px">
+      <p class="eyebrow">A few common questions</p>
+      <h2>Before you decide what to do next</h2>
+    </div>
+    <div class="faq">
+      <details><summary>Do I have to follow a strict diet?</summary><p>No. NourisHer is built around balanced eating and familiar food rather than a rigid diet.</p></details>
+      <details><summary>Is NourisHer only for women in menopause?</summary><p>NourisHer is designed for women 40+ and can support women through perimenopause, menopause and the years around it.</p></details>
+      <details><summary>Do I need to already be exercising?</summary><p>No. The approach starts from where you are and builds movement and strength gradually.</p></details>
+      <details><summary>Will I have to cook separate meals for my family?</summary><p>No. The goal is to help you make changes that can work with your family meals and your real life.</p></details>
+      <details><summary>What happens if I want to take the next step?</summary><p>You can apply to explore NourisHer Transformation. Sushma will look at where you are now and whether the program is a good fit for you.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="section final-cta">
+  <div class="wrap center">
+    <p class="eyebrow">Ready to take the next step?</p>
+    <h2>See if NourisHer is right for you.</h2>
+    <p class="section-copy">Answer a few questions about where you are today. If NourisHer looks like the right fit, the next step is a Clarity Call with Sushma.</p>
+    <a class="button" href="/nourisher-clarity">Apply for a NourisHer Clarity Call →</a>
+  </div>
+</section>
+
+<footer><a class="ewlw-wordmark ewlw-footer-wordmark" href="/" aria-label="Eat Well Live Well home"><span>Eat</span><span class="ewlw-script">well</span><span>Live</span><span class="ewlw-script">well</span></a><div>© 2026 Eat Well Live Well · Coaching by Sushma</div></footer>
+
 <script>
 const v=document.getElementById('v');
+const poster=document.getElementById('videoPoster');
 let started=false,q25=false,q50=false,q75=false;
-v.addEventListener('play',()=>{if(!started){started=true;if(window.gtag)gtag('event','vsl_start');if(window.fbq)fbq('trackCustom','VSLStart')}});
-v.addEventListener('timeupdate',()=>{if(!v.duration)return;const p=v.currentTime/v.duration;
-if(p>=.25&&!q25){q25=true;if(window.gtag)gtag('event','vsl_25_percent')}
-if(p>=.50&&!q50){q50=true;if(window.gtag)gtag('event','vsl_50_percent')}
-if(p>=.75&&!q75){q75=true;if(window.gtag)gtag('event','vsl_75_percent')}
+
+poster.addEventListener('click',()=>{
+  poster.classList.add('hidden');
+  v.play().catch(()=>{});
 });
-v.addEventListener('ended',()=>{if(window.gtag)gtag('event','vsl_complete');if(window.fbq)fbq('trackCustom','VSLComplete')});
-document.getElementById('explore').addEventListener('click',()=>{
-if(window.gtag)gtag('event','vsl_explore_click');
-location.href='/nourisher-clarity';
+
+v.addEventListener('play',()=>{
+  if(!started){
+    started=true;
+    if(window.gtag)gtag('event','vsl_start');
+    if(window.fbq)fbq('trackCustom','VSLStart');
+  }
+});
+v.addEventListener('timeupdate',()=>{
+  if(!v.duration)return;
+  const p=v.currentTime/v.duration;
+  if(p>=.25&&!q25){q25=true;if(window.gtag)gtag('event','vsl_25_percent')}
+  if(p>=.50&&!q50){q50=true;if(window.gtag)gtag('event','vsl_50_percent')}
+  if(p>=.75&&!q75){q75=true;if(window.gtag)gtag('event','vsl_75_percent')}
+});
+v.addEventListener('ended',()=>{
+  if(window.gtag)gtag('event','vsl_complete');
+  if(window.fbq)fbq('trackCustom','VSLComplete');
 });
 </script></body></html>
