@@ -129,6 +129,36 @@ h3{font-weight:600!important}
   .video-next-step h2{font-size:36px !important}
 }
 </style>
+<style>
+.training-case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1040px;margin:0 auto}
+.training-case-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 12px 35px rgba(38,60,52,.06)}
+.training-case-top{display:grid;grid-template-columns:92px 1fr;gap:14px;align-items:center;margin-bottom:16px}
+.training-case-top img{width:92px;height:92px;object-fit:cover;border-radius:14px}
+.training-case-top .proof-name{font-size:23px;margin-bottom:5px}
+.training-case-card>p{font-size:14px;line-height:1.55;color:var(--muted);margin:0 0 10px}
+.training-case-card>p strong{color:var(--ink)}
+.training-case-card blockquote{border-top:1px solid var(--line);padding-top:13px;margin:15px 0 0;font:italic 14px/1.5 Georgia,serif;color:var(--ink)}
+.proof-after-training{background:#fff}
+@media(max-width:900px){.training-case-grid{grid-template-columns:1fr}.training-case-card{max-width:720px;margin:auto}}
+</style>
+
+<style>
+/* Training page: keep the three selected journeys as three cards */
+.training-proof-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:20px;
+  max-width:1000px;
+  margin:0 auto;
+}
+@media(max-width:900px){
+  .training-proof-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+  .training-proof-grid{grid-template-columns:1fr}
+}
+</style>
+
 </head><body>
 <header class="top ewlw-brand-header"><div class="wrap"><a class="ewlw-wordmark" href="/" aria-label="Eat Well Live Well home"><span>Eat</span><span class="ewlw-script">well</span><span>Live</span><span class="ewlw-script">well</span></a></div></header>
 
@@ -192,6 +222,36 @@ h3{font-weight:600!important}
 
 
 
+
+<section class="section proof-after-training">
+  <div class="wrap">
+    <div class="proof-head"><p class="eyebrow">A few real journeys</p><h2>Different women. Different starting points. One approach.</h2><p class="lead">The NourisHer approach is personalised because the woman in front of us is never exactly the same as the woman before her.</p></div>
+    <div class="training-case-grid">
+      <article class="training-case-card">
+        <div class="training-case-top"><img src="/static/nourisher/parvathy-before-after.jpeg" alt="Parvathy before and after"><div><div class="proof-name">Parvathy · 12 kg</div><p class="case-label">From intense workouts to a broader view of health</p></div></div>
+        <p><strong>Where she began:</strong> She believed intense gym workouts were the main way to create meaningful weight loss.</p>
+        <p><strong>What changed:</strong> Practical food changes, alongside a better understanding of sleep, nutrition and movement.</p>
+        <p><strong>The result:</strong> 12 kg lost over six months and a more sustainable understanding of health.</p>
+        <blockquote>“The journey was enriching—not just for achieving the goal, but for understanding the importance of sleep, healthy food and movement.”</blockquote>
+      </article>
+      <article class="training-case-card">
+        <div class="training-case-top"><img src="/static/nourisher/anupama-before-after.jpeg" alt="Anupama before and after"><div><div class="proof-name">Anupama · 9.7 kg</div><p class="case-label">From repeated effort to a routine she wanted to keep</p></div></div>
+        <p><strong>Where she began:</strong> Consistent workouts and diets had not helped her reach the results she wanted.</p>
+        <p><strong>What changed:</strong> Personalised nutrition, workout and progress tracking, with a focus on muscle building and inch loss.</p>
+        <p><strong>The result:</strong> From 75 kg to 65.3 kg in five months, with the changes becoming part of her lifestyle.</p>
+        <blockquote>“I started with the aim to lose a few kilos, but it has now turned into a lifestyle routine.”</blockquote>
+      </article>
+      <article class="training-case-card">
+        <div class="training-case-top"><img src="/static/nourisher/deepa-before-after.jpeg" alt="Deepa before and after"><div><div class="proof-name">Deepa</div><p class="case-label">Weight loss without giving up familiar food</p></div></div>
+        <p><strong>Where she began:</strong> She was active and fitness-focused, but weight loss was not happening and she feared having to give up foods she loved.</p>
+        <p><strong>What changed:</strong> Balanced meals without separate cooking, less binge eating and continued enjoyment of familiar foods.</p>
+        <p><strong>The result:</strong> She reported weight loss, better running, steadier energy and a healthier relationship with food.</p>
+        <blockquote>“I ate everything and yet lost weight.”</blockquote>
+      </article>
+    </div>
+    <p class="proof-note">These stories are based on client feedback from the original Eat Well Live Well website. Individual experiences vary and are not guarantees of future outcomes.</p>
+  </div>
+</section>
 
 <section class="section soft">
   <div class="wrap">
