@@ -1138,14 +1138,14 @@ def transformation_interest_application_link(
 
     token = make_interest_application_token(interest_id)
     base_url = (APP_BASE_URL or str(request.base_url)).rstrip("/")
-    application_url = f"{base_url}/join?start=1&interest_token={token}"
+    application_url = "https://forms.gle/CZi1paoJbsUUPsko9"
     name = interest.get("name") or "this prospect"
     safe_url = application_url.replace("&", "&amp;").replace('"', "&quot;")
     safe_name = str(name).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     return HTMLResponse(f"""
     <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Send Transformation Application | NourisHer</title>
+    <title>Send NourisHer Application Form | NourisHer</title>
     <style>
       body{{margin:0;background:#faf8fb;color:#302a33;font-family:Arial,sans-serif}}
       .wrap{{max-width:720px;margin:70px auto;padding:0 22px}}
@@ -1157,14 +1157,14 @@ def transformation_interest_application_link(
       .done{{margin-top:14px;color:#226e59;font-size:13px;min-height:20px}}
     </style></head><body><main class="wrap"><section class="card">
       <p style="color:#5b0e91;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:11px">NourisHer Transformation</p>
-      <h1>Send the application to {safe_name}</h1>
-      <p>The application link below is tied to this enquiry. When {safe_name} opens it, the details already shared with Sushma will be filled in automatically.</p>
+      <h1>Send the application form to {safe_name}</h1>
+      <p>Use the Google Form below to send {safe_name} the full NourisHer application. The prospect will complete the form directly in Google Forms.</p>
       <div class="box" id="application-link">{safe_url}</div>
-      <button type="button" onclick="copyLink()">Copy application link</button>
-      <a href="{safe_url}" target="_blank" rel="noopener">Open application</a>
+      <button type="button" onclick="copyLink()">Copy application form link</button>
+      <a href="{safe_url}" target="_blank" rel="noopener">Open application form</a>
       <div class="done" id="done" aria-live="polite"></div>
-      <p style="font-size:12px;margin-top:24px">Send this link to the prospect on WhatsApp. They will complete the full application before booking a Clarity Call.</p>
+      <p style="font-size:12px;margin-top:24px">Send this form link to the prospect on WhatsApp. They will complete the full application before booking a Clarity Call.</p>
     </section></main>
-    <script>function copyLink(){{navigator.clipboard.writeText(document.getElementById('application-link').innerText).then(function(){{document.getElementById('done').textContent='Application link copied.'}}).catch(function(){{document.getElementById('done').textContent='Copy failed. Select the link and copy it manually.'}})}}</script>
+    <script>function copyLink(){{navigator.clipboard.writeText(document.getElementById('application-link').innerText).then(function(){{document.getElementById('done').textContent='Application form link copied.'}}).catch(function(){{document.getElementById('done').textContent='Copy failed. Select the link and copy it manually.'}})}}</script>
     </body></html>
     """)
