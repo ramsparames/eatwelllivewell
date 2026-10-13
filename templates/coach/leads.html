@@ -281,6 +281,11 @@
               <small class="lead-badge">
                 {% if row_type == "interest" %}
                   Transformation enquiry
+{% if lead.source == "assessment" %}
+<span class="lead-source">Via assessment</span>
+{% else %}
+<span class="lead-source">Direct enquiry</span>
+{% endif %}
                 {% elif lead.has_application %}
                   Transformation application
                   {% if lead.application_source %}
