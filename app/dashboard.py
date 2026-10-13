@@ -292,7 +292,7 @@ def dashboard(
 
         interest_lead_rows.append(
             {
-                "snapshot_id": None,
+                "snapshot_id": interest.get("snapshot_id"),
                 "application_id": interest.get("application_id"),
                 "interest_id": interest.get("id"),
                 "lead_type": "application" if has_application else "interest",
@@ -317,6 +317,7 @@ def dashboard(
                 "application_status": interest.get("application_status"),
                 "has_application": has_application,
                 "application_source": "enquiry" if has_application else None,
+                "source": interest.get("source") or "direct",
                 "follow_up_date": None,
                 "application_follow_up_date": None,
                 "submitted_at": (
@@ -326,7 +327,25 @@ def dashboard(
             }
         )
 
-    display_leads = all_leads + interest_lead_rows
+    # Once an assessment lead submits a Transformation enquiry, the enquiry
+    # is the current pipeline stage. Keep the assessment record in the
+    # database, but don't display it as a second current lead.
+    interest_snapshot_ids = {
+        row.get("snapshot_id")
+        for row in interest_lead_rows
+        if row.get("snapshot_id")
+    }
+
+    current_assessment_leads = [
+        lead
+        for lead in all_leads
+        if not (
+            lead.get("snapshot_id")
+            and lead.get("snapshot_id") in interest_snapshot_ids
+        )
+    ]
+
+    display_leads = current_assessment_leads + interest_lead_rows
 
     # Unified pipeline: summary counts must match the leads shown below.
     total_leads = len(display_leads)
