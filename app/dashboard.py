@@ -60,7 +60,24 @@ def dashboard(
     transformation_interests = get_transformation_interests()
     today = date.today()
 
-    total_leads = len(all_leads)
+    interest_lead_items = []
+    for interest in transformation_interests:
+        interest_lead_items.append({
+            "lead_type": "interest",
+            "interest_id": interest.get("id"),
+            "snapshot_id": interest.get("snapshot_id"),
+            "name": interest.get("name") or "Lead",
+            "phone": interest.get("phone"),
+            "email": None,
+            "source": interest.get("source") or "direct",
+            "status": interest.get("status") or "new",
+            "submitted_at": interest.get("submitted_at"),
+            "follow_up_date": None,
+            "has_application": False,
+        })
+
+    pipeline_leads = all_leads + interest_lead_items
+    total_leads = len(pipeline_leads)
 
     total_applications = sum(
         1

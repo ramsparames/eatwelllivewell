@@ -364,7 +364,7 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 "Explore Foundations →",
                 "/foundations",
                 "See Transformation",
-                "/transformation",
+                "/transformation-interest?source=assessment",
             ];
         } else if (band === "building") {
             recommendation = [
@@ -372,7 +372,7 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 "You have useful strengths, but one or two areas may need focused attention. Foundations builds structure; Transformation offers deeper personalisation.",
                 ["Focus on one or two high-impact areas", "Choose group structure or 1:1 coaching", "Build on what is already working"],
                 "Explore Transformation →",
-                "/transformation",
+                "/transformation-interest?source=assessment",
                 "See Foundations",
                 "/foundations",
             ];
@@ -384,7 +384,7 @@ import intlTelInput from "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.2/+es
                 "Explore Foundations →",
                 "/foundations",
                 "Explore Transformation",
-                "/transformation",
+                "/transformation-interest?source=assessment",
             ];
         }
 
