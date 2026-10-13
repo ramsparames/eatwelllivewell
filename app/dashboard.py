@@ -316,7 +316,7 @@ def dashboard(
                 ),
                 "application_status": interest.get("application_status"),
                 "has_application": has_application,
-                "application_source": "enquiry" if has_application else None,
+                "application_source": ("enquiry" if has_application else (interest.get("source") or "direct")),
                 "source": interest.get("source") or "direct",
                 "follow_up_date": None,
                 "application_follow_up_date": None,
