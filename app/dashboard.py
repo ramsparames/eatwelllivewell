@@ -76,7 +76,24 @@ def dashboard(
             "has_application": False,
         })
 
-    pipeline_leads = all_leads + interest_lead_items
+    # If an assessment lead subsequently submits a Transformation enquiry,
+    # the enquiry is the current pipeline stage. Keep the assessment record
+    # intact, but do not present the older assessment row as the current lead.
+    interest_snapshot_ids = {
+        item.get("snapshot_id")
+        for item in interest_lead_items
+        if item.get("snapshot_id")
+    }
+
+    pipeline_leads = [
+        lead
+        for lead in all_leads
+        if not (
+            lead.get("snapshot_id")
+            and lead.get("snapshot_id") in interest_snapshot_ids
+        )
+    ] + interest_lead_items
+
     total_leads = len(pipeline_leads)
 
     total_applications = sum(
