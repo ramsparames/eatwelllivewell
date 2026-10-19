@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Thank You — NourisHer Transformation™</title>
+
+  <link rel="stylesheet" href="/static/styles.css">
+
+  <style>
+    .enquiry-thank-wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 72px 0 90px;
+    }
+
+    .enquiry-thank-card {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 82px 42px 88px;
+      text-align: center;
+      background: #f2f6f2;
+      border: 1px solid #e8e5dd;
+      border-radius: 32px;
+    }
+
+    .enquiry-thank-card .eyebrow {
+      color: #31584a;
+      letter-spacing: .18em;
+      margin-bottom: 22px;
+    }
+
+    .enquiry-thank-card h1 {
+      margin: 0 auto 24px;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: clamp(46px, 6vw, 76px);
+      font-weight: 600;
+      line-height: 1.04;
+      letter-spacing: -.025em;
+    }
+
+    .thank-heart {
+      font-size: 48px;
+      line-height: 1;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .enquiry-thank-card p {
+      max-width: 850px;
+      margin: 0 auto 20px;
+      color: var(--ink-soft);
+      font-size: clamp(17px, 2vw, 21px);
+      line-height: 1.65;
+    }
+
+    @media (max-width: 650px) {
+      .enquiry-thank-wrap {
+        padding: 42px 0 58px;
+      }
+
+      .enquiry-thank-card {
+        padding: 54px 22px 58px;
+        border-radius: 24px;
+      }
+
+      .enquiry-thank-card h1 {
+        font-size: 42px;
+      }
+
+      .thank-heart {
+        font-size: 34px;
+      }
+
+      .enquiry-thank-card p {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body class="journey-page">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header" data-header>
+  <div class="site-header-inner">
+
+    <a class="wordmark" href="/" aria-label="Eat Well Live Well — home">
+      <span>Eat</span>
+      <span class="script">well</span>
+      <span>Live</span>
+      <span class="script">well</span>
+    </a>
+
+    <button
+      class="menu-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      data-menu-toggle
+    >
+      <span class="sr-only">Open navigation</span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="site-nav" id="site-nav" aria-label="Primary" data-nav>
+      <a href="/#familiar">Is this you?</a>
+      <a href="/#how">How it works</a>
+      <a href="/#pillars">Pillars</a>
+      <a href="/#programmes">Programmes</a>
+      <a href="/#stories">Stories</a>
+      <a href="/#bio">About</a>
+    </nav>
+
+    <a class="btn btn-primary header-cta" href="/assessment">
+      Take the Assessment
+      <span class="btn-arrow" aria-hidden="true">→</span>
+    </a>
+
+  </div>
+</header>
+
+
+<main id="main" class="journey-shell">
+
+  <div class="enquiry-thank-wrap">
+
+    <section class="enquiry-thank-card">
+
+      <p class="eyebrow">THANK YOU</p>
+
+      <h1>
+        Thank you, <span id="enquiry-name">there</span>.
+        <span class="thank-heart" aria-hidden="true">❤️</span>
+      </h1>
+
+      <p>
+        Sushma has received your details. She personally reviews every
+        Transformation enquiry and will reach out to you on WhatsApp
+        about the next step.
+      </p>
+
+      <p>
+        If she feels Transformation is a good fit for what you’re looking
+        for, she’ll send you the full application before your Clarity Call.
+      </p>
+
+    </section>
+
+  </div>
+
+</main>
+
+
+<footer class="footer">
+  <div class="wrap">
+
+    <div class="footer-bottom">
+      <span>© 2026 Eat Well Live Well · Coaching by Sushma</span>
+      <span>Made with care · Bengaluru, India</span>
+    </div>
+
+  </div>
+</footer>
+
+
+<script>
+(() => {
+  const name = sessionStorage.getItem("transformation_interest_name");
+
+  if (name) {
+    document.getElementById("enquiry-name").textContent = name;
+    sessionStorage.removeItem("transformation_interest_name");
+  }
+})();
+</script>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>

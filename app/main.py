@@ -160,6 +160,9 @@ def join():
 def thank_you():
     return FileResponse(BASE_DIR / "thank-you.html")
 
+@app.get("/transformation-interest-thank-you")
+def transformation_interest_thank_you():
+    return FileResponse(BASE_DIR / "transformation-interest-thank-you.html")
 
 @app.get("/welcome")
 def welcome():
