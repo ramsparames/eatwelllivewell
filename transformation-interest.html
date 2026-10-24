@@ -114,6 +114,104 @@ src="https://www.facebook.com/tr?id=1097733882755104&ev=PageView&noscript=1"/>
   line-height: 1.65;
 }
 
+
+.interest-testimonials {
+  max-width: 1080px;
+  margin: 58px auto 64px;
+}
+.interest-testimonials-head {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 34px;
+}
+.interest-testimonials-head h2 {
+  margin: 10px 0 12px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(36px, 4.5vw, 52px);
+  font-weight: 600;
+  line-height: 1.06;
+}
+.interest-testimonials-head p:last-child {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 17px;
+  line-height: 1.6;
+}
+.interest-testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.interest-testimonial-card {
+  padding: 30px 28px 28px;
+  background: #fff;
+  border: 1px solid #e8e5dd;
+  border-radius: 20px;
+}
+.interest-testimonial-card.featured {
+  background: #f2f6f2;
+}
+.interest-quote-mark {
+  display: block;
+  color: #b86f79;
+  font-family: Georgia, serif;
+  font-size: 44px;
+  line-height: .7;
+  margin-bottom: 18px;
+}
+.interest-testimonial-card blockquote {
+  margin: 0 0 24px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 25px;
+  line-height: 1.2;
+}
+.interest-testimonial-client {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.interest-testimonial-avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e8f0eb;
+  color: #31584a;
+  font-size: 14px;
+  font-weight: 800;
+}
+.interest-testimonial-client strong,
+.interest-testimonial-client small {
+  display: block;
+}
+.interest-testimonial-client strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+.interest-testimonial-client small {
+  color: var(--ink-soft);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.interest-testimonial-note {
+  max-width: 760px;
+  margin: 22px auto 0;
+  text-align: center;
+  color: #717b72;
+  font-size: 12px;
+  line-height: 1.55;
+}
+@media (max-width: 850px) {
+  .interest-testimonial-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .interest-testimonial-grid { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 700px) {
   .pain-grid {
     grid-template-columns: 1fr;
@@ -134,7 +232,6 @@ src="https://www.facebook.com/tr?id=1097733882755104&ev=PageView&noscript=1"/>
 <header class="journey-header"><div class="journey-header-inner">
 <a class="wordmark" href="/index" aria-label="Eat Well Live Well home"><span>Eat</span><span class="script">well</span><span>Live</span><span class="script">well</span></a>
 <nav class="journey-nav" aria-label="Journey navigation"><a href="/index#how">How it works</a><a href="/index#pillars">Pillars</a><a href="/foundations">Foundations</a><a href="/index#stories">Stories</a><a href="/index#bio">About Sushma</a></nav>
-<a class="btn btn-primary" href="/transformation">See Transformation <span class="btn-arrow">→</span></a>
 </div></header>
 
 <main class="journey-shell"><div class="journey-wrap">
@@ -192,6 +289,48 @@ src="https://www.facebook.com/tr?id=1097733882755104&ev=PageView&noscript=1"/>
 <div class="interest-note"><strong>Before we talk about Transformation,</strong> tell Sushma a little about where you are right now. This takes about 2 minutes.</div>
 </div>
 
+</section>
+
+
+<section class="interest-testimonials">
+  <div class="interest-testimonials-head">
+    <p class="eyebrow">Client stories</p>
+    <h2>Real women. Meaningful, lasting change.</h2>
+    <p>The scale may change, but the deeper wins are often confidence, consistency and finally feeling in control again.</p>
+  </div>
+
+  <div class="interest-testimonial-grid">
+    <article class="interest-testimonial-card">
+      <span class="interest-quote-mark" aria-hidden="true">“</span>
+      <blockquote>It was my strong conviction that hitting the gym was the only way to reduce your weight in bulk.</blockquote>
+      <div class="interest-testimonial-client">
+        <span class="interest-testimonial-avatar" aria-hidden="true">P</span>
+        <span><strong>Parvathy, 48</strong><small>Perimenopause transformation</small></span>
+      </div>
+    </article>
+
+    <article class="interest-testimonial-card featured">
+      <span class="interest-quote-mark" aria-hidden="true">“</span>
+      <blockquote>I’m 14 kgs down, but this journey was never just about the weight.</blockquote>
+      <div class="interest-testimonial-client">
+        <span class="interest-testimonial-avatar" aria-hidden="true">N</span>
+        <span><strong>Nithya, 52</strong><small>Fat loss transformation</small></span>
+      </div>
+    </article>
+
+    <article class="interest-testimonial-card">
+      <span class="interest-quote-mark" aria-hidden="true">“</span>
+      <blockquote>When I joined NourisHer, I thought my goal was simple. I just wanted to lose weight. At 80.5 kg, I was frustrated with how I felt.</blockquote>
+      <div class="interest-testimonial-client">
+        <span class="interest-testimonial-avatar" aria-hidden="true">K</span>
+        <span><strong>Kavitha, 36</strong><small>Energy and sleep transformation</small></span>
+      </div>
+    </article>
+  </div>
+
+  <p class="interest-testimonial-note">
+    Individual experiences vary. Coaching focuses on sustainable habits and health supportive behaviours rather than guaranteed outcomes.
+  </p>
 </section>
 
 <form id="transformation-interest" class="interest-form journey-card" novalidate>
