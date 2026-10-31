@@ -1343,6 +1343,15 @@ def clients_page(request: Request):
                 else "low_adherence"
             )
 
+        if client.get("status") == "completed":
+            client["health_key"] = "completed"
+            client["health_label"] = "Completed"
+            client["client_status_note"] = (
+                f"Completed {client['end_date'].strftime('%d %b %Y')}"
+                if client.get("end_date")
+                else "Transformation completed"
+            )
+
         # Values used by the browser-side table sorter.
         client["sort_name"] = (
             client.get("name")
@@ -2282,6 +2291,31 @@ def update_client_macro_settings(
     )
     return RedirectResponse(
         f"/dashboard/clients/{client_id}?tab=clientdata&macro_saved=1",
+        status_code=303,
+    )
+
+
+@router.post(
+    "/dashboard/clients/{client_id}/status"
+)
+def save_client_status(
+    request: Request,
+    client_id: int,
+    status: str = Form(...),
+):
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    if status not in {"active", "paused", "completed"}:
+        raise HTTPException(status_code=400, detail="Invalid client status")
+
+    if not ClientService.get(client_id):
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    ClientService.set_status(client_id, status)
+
+    return RedirectResponse(
+        f"/dashboard/clients/{client_id}",
         status_code=303,
     )
 

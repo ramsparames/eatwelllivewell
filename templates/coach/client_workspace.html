@@ -1977,6 +1977,27 @@
           </form>
         </div>
         <div class="nw-profile-detail-wide">
+          <span>Coaching status</span>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <strong>{{ (client.status or "active")|title }}</strong>
+            {% if (client.status or "active") == "completed" %}
+              {% if client.end_date %}
+                <small style="color:var(--coach-muted)">Completed {{ client.end_date.strftime("%d %b %Y") }}</small>
+              {% endif %}
+              <form method="post" action="/dashboard/clients/{{ client.id }}/status">
+                <input type="hidden" name="status" value="active">
+                <button class="nw-btn nw-soft" type="submit">Reactivate</button>
+              </form>
+            {% else %}
+              <form method="post" action="/dashboard/clients/{{ client.id }}/status"
+                    onsubmit="return confirm('Mark this client as completed? Their full NourisHer history will be kept, but they will no longer be treated as an active coaching client.');">
+                <input type="hidden" name="status" value="completed">
+                <button class="nw-btn nw-soft" type="submit">Mark as Completed</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+        <div class="nw-profile-detail-wide">
           <span>Client portal</span>
           {% if portal_access %}
           <div class="nw-profile-copy"><input class="nw-input" type="text" readonly value="{{ request.base_url }}client/{{ portal_access.access_token }}" data-client-link><button class="nw-btn nw-soft" type="button" data-copy>Copy</button></div>

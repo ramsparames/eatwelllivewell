@@ -1652,6 +1652,32 @@ def update_client_phone(client_id: int, phone: str | None) -> bool:
             return cursor.rowcount > 0
 
 
+
+def update_client_status(client_id: int, status: str) -> bool:
+    """Update a client's coaching status without deleting their history."""
+    allowed = {"active", "paused", "completed"}
+    if status not in allowed:
+        raise ValueError(f"Invalid client status: {status}")
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE clients
+                SET status = %s,
+                    end_date = CASE
+                        WHEN %s = 'completed' THEN CURRENT_DATE
+                        WHEN %s = 'active' THEN NULL
+                        ELSE end_date
+                    END,
+                    updated_at = NOW()
+                WHERE id = %s
+                """,
+                (status, status, status, client_id),
+            )
+            return cursor.rowcount > 0
+
+
 def create_weekly_checkin(
     client_id: int,
     call_date,

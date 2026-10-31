@@ -139,6 +139,7 @@
           <button type="button" data-client-filter="review">Ready for review</button>
           <button type="button" data-client-filter="on_track">On track</button>
           <button type="button" data-client-filter="setup">Setup</button>
+          <button type="button" data-client-filter="completed">Completed</button>
         </div>
       </div>
     </div>
@@ -198,7 +199,8 @@
         (filter === "attention" && h === "attention") ||
         (filter === "review" && h === "review") ||
         (filter === "on_track" && h === "on_track") ||
-        (filter === "setup" && h === "setup");
+        (filter === "setup" && h === "setup") ||
+        (filter === "completed" && h === "completed");
       const show=healthMatch&&(!q||row.dataset.name.includes(q));
       row.hidden=!show;row.classList.toggle("is-filter-hidden",!show);if(show)visible++;
     });

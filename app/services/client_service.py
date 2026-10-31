@@ -21,6 +21,7 @@ from app.database import (
     get_client_measurements,
     update_client_start_date,
     update_client_phone,
+    update_client_status,
 )
 
 
@@ -47,6 +48,15 @@ class ClientService:
             client_id,
             phone,
         )
+
+
+    @staticmethod
+    def set_status(client_id, status):
+        return update_client_status(
+            client_id,
+            status,
+        )
+
 
     @staticmethod
     def create(
