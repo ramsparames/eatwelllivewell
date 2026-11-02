@@ -221,6 +221,66 @@ fbq('track', 'PageView');
     margin-top: 38px;
   }
 }
+
+
+.interest-next-step {
+  max-width: 760px;
+  margin: 34px auto 0;
+  padding: 34px 30px;
+  border: 1px solid #e8e5dd;
+  border-radius: 22px;
+  background: #f7f4ed;
+  text-align: center;
+}
+.interest-next-step h3 {
+  margin: 8px 0 12px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 32px;
+  line-height: 1.15;
+}
+.interest-next-step p {
+  max-width: 620px;
+  margin: 0 auto 18px;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.interest-next-step .payment-note {
+  margin-top: 12px;
+  font-size: 13px;
+}
+.interest-next-step .step-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  max-width: 620px;
+  margin: 22px auto 0;
+}
+.interest-next-step .step-card {
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #e8e5dd;
+  border-radius: 16px;
+}
+.interest-next-step .step-card strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.interest-next-step .step-card span {
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.interest-next-step .btn {
+  display: inline-block;
+  text-decoration: none;
+}
+@media (max-width: 600px) {
+  .interest-next-step { padding: 28px 20px; }
+  .interest-next-step .step-row { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body class="journey-page transformation-interest-page">
@@ -305,7 +365,6 @@ fbq('track', 'PageView');
     Individual experiences vary. Coaching focuses on sustainable habits and health supportive behaviours rather than guaranteed outcomes.
   </p>
 </section><div class="interest-note"><strong>Before we talk about Transformation,</strong> tell Sushma a little about where you are right now. This takes about 2 minutes.</div>
-<div style="max-width:760px;margin:18px auto 0;text-align:center;color:var(--ink-soft);font-size:14px;line-height:1.6;">This is for women who are seriously considering personalised coaching and are ready to invest in their health if NourisHer is the right fit.</div>
 <form class="interest-form journey-card" id="transformation-interest" style="margin-top: 34px;" novalidate="">
 <section class="interest-question"><p class="eyebrow">1 · About you</p><h2>What should Sushma call you?</h2>
 <div class="field-grid"><div class="form-field"><label for="interest-name">Your name</label><input autocomplete="name" id="interest-name" maxlength="120" name="name" required=""/></div>
@@ -368,31 +427,21 @@ fbq('track', 'PageView');
 <div class="interest-actions"><button class="btn btn-primary" type="submit">I'd like to explore NourisHer →</button></div>
 <p class="interest-footnote">By submitting, you agree that Sushma may contact you about NourisHer Transformation. Your information is handled according to our Privacy Policy.</p>
 </form>
-<section aria-live="polite" class="interest-success hidden" id="interest-success">
-<div class="interest-success-card">
-<p class="eyebrow">Your next step</p>
-<h2>Thank you, <span id="success-name">there</span>. ❤️</h2>
-<p>Your answers have been received. If you are serious about exploring NourisHer Transformation, the next step is to make a small ₹499 commitment for your Clarity Call with Sushma.</p>
-<div style="margin:28px 0;padding:24px;border:1px solid #e8e5dd;border-radius:18px;background:#f7f4ef;">
-<p style="margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#b86f79;">₹499 Clarity Call</p>
-<h3 style="margin:0 0 10px;font-family:var(--serif);font-size:28px;color:var(--ink);">A focused conversation with Sushma</h3>
-<p style="margin:0;color:var(--ink-soft);line-height:1.65;">We'll use the call to understand where you are, what you want to change and whether NourisHer Transformation is the right fit for you.</p>
-</div>
-<a class="btn btn-primary" id="razorpayLink" href="https://rzp.io/rzp/VXkrWEf" target="_blank" rel="noopener">Pay ₹499 to continue →</a>
-<p style="margin:14px 0 0;color:#717b72;font-size:13px;line-height:1.55;">After completing the ₹499 payment, book your Clarity Call with Sushma using the button below.</p>
-<div style="margin-top:22px;padding-top:22px;border-top:1px solid #e8e5dd;">
-<a class="btn btn-secondary" id="clarityBookingLink" href="https://share.synamate.com/widget/booking/IBwI80BhwMVqhD9qvMXF" target="_blank" rel="noopener">Book my Clarity Call →</a>
+<section aria-live="polite" class="interest-success hidden" id="interest-success"><div class="interest-success-card">
+<p class="eyebrow">Next step</p><h2>Thank you, <span id="success-name">there</span>. ❤️</h2>
+<p>Your details have been received. If you are ready to explore personalised NourisHer coaching with Sushma, the next step is to make a ₹499 commitment for your Clarity Call.</p>
+<div class="interest-next-step">
+  <p class="eyebrow">NourisHer Clarity Call</p>
+  <h3>Ready to speak with Sushma?</h3>
+  <p>The ₹499 Clarity Call is a focused conversation about where you are now, what you want to change and whether NourisHer Transformation is the right fit for you.</p>
+  <div class="step-row">
+    <div class="step-card"><strong>Step 1 · ₹499</strong><span>Make your commitment through Razorpay.</span><br><a class="btn btn-primary" href="https://rzp.io/rzp/VXkrWEf" target="_blank" rel="noopener">Pay ₹499 →</a></div>
+    <div class="step-card"><strong>Step 2 · Book</strong><span>After payment, choose a convenient time to speak with Sushma.</span><br><a class="btn btn-secondary" href="https://share.synamate.com/widget/booking/IBwI80BhwMVqhD9qvMXF" target="_blank" rel="noopener">Book Clarity Call →</a></div>
+  </div>
+  <p class="payment-note">Please complete the ₹499 payment before booking your Clarity Call.</p>
 </div>
 </div></section>
 </div></main>
 <script src="/static/transformation-interest.js?v=1"></script>
-<script>
-(function(){
-  const pay=document.getElementById('razorpayLink');
-  const book=document.getElementById('clarityBookingLink');
-  if(pay) pay.addEventListener('click',()=>{ if(window.fbq) fbq('track','InitiateCheckout',{content_name:'₹499 NourisHer Clarity Call'}); });
-  if(book) book.addEventListener('click',()=>{ if(window.fbq) fbq('track','Schedule',{content_name:'Clarity Call with Sushma'}); });
-})();
-</script>
 </body>
 </html>

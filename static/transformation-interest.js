@@ -78,7 +78,13 @@
       }
 
       sessionStorage.setItem("transformation_interest_name", payload.name);
-      window.location.href = "/transformation-interest-thank-you";
+      if (successName) successName.textContent = payload.name || "there";
+      form.classList.add("hidden");
+      if (hero) hero.classList.add("hidden");
+      if (success) {
+        success.classList.remove("hidden");
+        success.scrollIntoView({behavior: "smooth", block: "start"});
+      }
     } catch (error) {
       console.error("Transformation interest submission failed:", error);
       alert(error.message || "We couldn't send your enquiry. Please try again.");
