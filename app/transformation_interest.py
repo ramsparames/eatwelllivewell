@@ -2,8 +2,14 @@ from fastapi import APIRouter, Request, HTTPException
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from app.config import SESSION_SECRET, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, APP_BASE_URL
 from pydantic import BaseModel, Field
-from app.database import save_transformation_interest, get_transformation_interest_payment, create_transformation_interest_payment_record
+from app.database import (
+    save_transformation_interest,
+    get_transformation_interest_payment,
+    create_transformation_interest_payment_record,
+    mark_transformation_interest_paid,
+)
 from app.email import send_transformation_interest_notification
+import os
 import requests
 
 router = APIRouter()
@@ -21,6 +27,7 @@ class TransformationInterestSubmission(BaseModel):
     source: str = Field(default="direct", max_length=120)
     snapshot_id: int | None = None
     website: str = ""
+
 
 @router.post("/transformation-interest")
 def receive_transformation_interest(request: Request, submission: TransformationInterestSubmission):
@@ -89,7 +96,6 @@ def read_interest_application_token(token: str) -> int:
         raise HTTPException(status_code=400, detail="This application link is invalid.") from exc
 
 
-
 @router.get("/transformation-interest/application-prefill")
 def transformation_interest_application_prefill(token: str):
     from app.database import get_transformation_interest_by_id
@@ -110,6 +116,41 @@ def transformation_interest_application_prefill(token: str):
     }
 
 
+def _sync_payment_from_razorpay(payment: dict) -> bool:
+    """Ask Razorpay for the authoritative Payment Link status and sync our DB."""
+    link_id = payment.get("razorpay_payment_link_id")
+    if not link_id or not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
+        return payment.get("status") == "paid"
+
+    try:
+        response = requests.get(
+            f"https://api.razorpay.com/v1/payment_links/{link_id}",
+            auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET),
+            timeout=15,
+        )
+        if not response.ok:
+            return payment.get("status") == "paid"
+
+        data = response.json()
+        if str(data.get("status", "")).lower() != "paid":
+            return payment.get("status") == "paid"
+
+        marked = mark_transformation_interest_paid(
+            payment_link_id=link_id,
+            reference_id=payment.get("reference_id"),
+            payment_id=data.get("payments", [{}])[0].get("id") if isinstance(data.get("payments"), list) and data.get("payments") else None,
+            amount=data.get("amount"),
+        )
+        return marked or payment.get("status") == "paid"
+    except Exception:
+        return payment.get("status") == "paid"
+
+
+def _payment_amount_paise() -> int:
+    """Use ₹1 only when explicitly enabled for testing; otherwise use ₹499."""
+    return 100 if os.getenv("RAZORPAY_TEST_MODE", "").strip().lower() == "true" else 49900
+
+
 @router.post("/transformation-interest/payment-link")
 def create_transformation_interest_payment(interest_id: int):
     from app.database import get_transformation_interest_by_id
@@ -120,16 +161,27 @@ def create_transformation_interest_payment(interest_id: int):
 
     existing = get_transformation_interest_payment(interest_id)
     if existing and existing.get("status") == "paid":
-        return {"status": "paid", "payment_url": existing.get("payment_url"), "interest_id": interest_id}
+        return {
+            "status": "paid",
+            "payment_url": existing.get("payment_url"),
+            "interest_id": interest_id,
+            "amount_rupees": int(existing.get("amount") or 49900) / 100,
+        }
     if existing and existing.get("status") in {"created", "issued"} and existing.get("payment_url"):
-        return {"status": existing.get("status"), "payment_url": existing.get("payment_url"), "interest_id": interest_id}
+        return {
+            "status": existing.get("status"),
+            "payment_url": existing.get("payment_url"),
+            "interest_id": interest_id,
+            "amount_rupees": int(existing.get("amount") or _payment_amount_paise()) / 100,
+        }
 
     if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
         raise HTTPException(status_code=500, detail="Razorpay API credentials are not configured on the server.")
 
+    amount_paise = _payment_amount_paise()
     reference_id = f"nourisher_interest_{interest_id}"
     payload = {
-        "amount": 49900,
+        "amount": amount_paise,
         "currency": "INR",
         "accept_partial": False,
         "description": "NourisHer Clarity Call with Sushma",
@@ -167,7 +219,33 @@ def create_transformation_interest_payment(interest_id: int):
         reference_id=reference_id,
     )
 
-    return {"status": "created", "payment_url": data["short_url"], "interest_id": interest_id}
+    # Keep the stored amount aligned with the actual Razorpay amount when the DB
+    # function uses its default value for the initial insert.
+    try:
+        from app.database import get_connection
+        with get_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE transformation_interest_payments
+                    SET amount = %s, updated_at = NOW()
+                    WHERE interest_id = %s
+                    """,
+                    (amount_paise, interest_id),
+                )
+            connection.commit()
+    except Exception:
+        # The payment link was created successfully; don't turn that into a
+        # false frontend failure. The amount returned below still reflects the
+        # actual Razorpay link.
+        pass
+
+    return {
+        "status": "created",
+        "payment_url": data["short_url"],
+        "interest_id": interest_id,
+        "amount_rupees": amount_paise / 100,
+    }
 
 
 @router.get("/transformation-interest/payment-status")
@@ -175,17 +253,43 @@ def transformation_interest_payment_status(interest_id: int):
     payment = get_transformation_interest_payment(interest_id)
     if not payment:
         raise HTTPException(status_code=404, detail="Payment record not found.")
+
+    paid = _sync_payment_from_razorpay(payment)
     return {
-        "status": payment.get("status"),
-        "paid": payment.get("status") == "paid",
+        "status": "paid" if paid else payment.get("status"),
+        "paid": paid,
         "payment_url": payment.get("payment_url"),
         "interest_id": interest_id,
     }
 
 
 @router.get("/transformation-interest/payment-callback")
-def transformation_interest_payment_callback(interest_id: int):
+def transformation_interest_payment_callback(
+    interest_id: int,
+    razorpay_payment_id: str | None = None,
+    razorpay_payment_link_id: str | None = None,
+    razorpay_payment_link_reference_id: str | None = None,
+    razorpay_payment_link_status: str | None = None,
+    razorpay_signature: str | None = None,
+):
+    """Confirm the Razorpay payment server-side.
+
+    Razorpay opens this URL in the payment tab. The original enquiry tab
+    polls /payment-status, so it can unlock booking without relying on
+    cross-tab browser communication.
+    """
     payment = get_transformation_interest_payment(interest_id)
-    if payment and payment.get("status") == "paid":
-        return {"status": "paid", "message": "Payment received. Return to the original Eat Well Live Well tab to book your Clarity Call."}
-    return {"status": "received", "message": "Payment is being confirmed. Return to the original Eat Well Live Well tab; it will unlock once Razorpay confirms payment."}
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment record not found.")
+
+    paid = _sync_payment_from_razorpay(payment)
+    if paid:
+        return {
+            "status": "paid",
+            "message": "Payment received. Return to the original Eat Well Live Well tab to book your Clarity Call.",
+        }
+
+    return {
+        "status": "received",
+        "message": "Payment is being confirmed. Return to the original Eat Well Live Well tab; it will unlock once Razorpay confirms payment.",
+    }

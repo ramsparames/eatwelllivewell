@@ -378,15 +378,25 @@ fbq('track', 'PageView');
 <p>Sushma has received your details.</p>
 <p><strong>Ready to take the next step?</strong></p>
 <p>The Clarity Call with Sushma is a focused conversation to understand where you are, what you are looking for and whether NourisHer Transformation is the right fit for you.</p>
+
 <div id="payment-step" style="margin:28px 0 12px;">
-  <a class="btn btn-primary" href="#" id="pay-499" target="_blank" rel="noopener">Pay ₹499</a>
+  <a class="btn btn-primary" href="#" id="pay-button" target="_blank" rel="noopener">Pay ₹499</a>
 </div>
-<p id="payment-wait" style="font-size:0.95em;">Complete the payment in the new tab. This page will automatically confirm your payment.</p>
-<div id="booking-step" class="hidden" style="margin-top:18px;">
-  <p><strong>✓ Payment received</strong></p>
-  <p style="font-size:0.95em;">You can now book your Clarity Call with Sushma.</p>
+
+<p id="payment-wait" style="font-size:0.95em;"><span id="payment-copy">Complete the payment in the new tab. This page will automatically confirm your payment.</span></p>
+
+<div id="payment-confirming" class="hidden" style="margin:28px 0 12px;">
+  <p><strong>Confirming your payment…</strong></p>
+  <p style="font-size:0.95em;">This usually takes a few moments.</p>
+</div>
+
+<div id="booking-step" class="hidden" style="margin-top:28px;">
+  <p><strong>Payment received ✓</strong></p>
+  <p id="booking-amount" style="font-size:0.95em;">Your ₹499 commitment has been received.</p>
+  <p style="font-size:0.95em;">You're ready to book your Clarity Call with Sushma.</p>
   <a class="btn btn-secondary" href="https://share.synamate.com/widget/booking/IBwI80BhwMVqhD9qvMXF" target="_blank" rel="noopener">Book my Clarity Call →</a>
 </div>
+
 <p id="payment-error" class="hidden" style="color:#a34b58;"></p>
 </div></section>
 </div></main>
