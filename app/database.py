@@ -2745,11 +2745,11 @@ def mark_transformation_interest_paid(*, payment_link_id: str | None, reference_
                 SET status = 'paid', payment_id = COALESCE(%s, payment_id),
                     amount = COALESCE(%s, amount), paid_at = COALESCE(paid_at, NOW()),
                     updated_at = NOW()
-                WHERE (razorpay_payment_link_id = %s AND %s IS NOT NULL)
-                   OR (reference_id = %s AND %s IS NOT NULL)
+                WHERE razorpay_payment_link_id = %s
+                   OR reference_id = %s
                 RETURNING interest_id
                 """,
-                (payment_id, amount, payment_link_id, payment_link_id, reference_id, reference_id),
+                (payment_id, amount, payment_link_id, reference_id),
             )
             row = cursor.fetchone()
         connection.commit()
