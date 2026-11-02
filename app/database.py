@@ -152,6 +152,26 @@ def create_database() -> None:
 
             cursor.execute(
                 """
+                CREATE TABLE IF NOT EXISTS transformation_interest_payments (
+                    id BIGSERIAL PRIMARY KEY,
+                    interest_id BIGINT NOT NULL UNIQUE
+                        REFERENCES transformation_interest_leads(id)
+                        ON DELETE CASCADE,
+                    razorpay_payment_link_id TEXT UNIQUE,
+                    payment_url TEXT,
+                    reference_id TEXT UNIQUE,
+                    status TEXT NOT NULL DEFAULT 'created',
+                    amount INTEGER NOT NULL DEFAULT 49900,
+                    payment_id TEXT,
+                    paid_at TIMESTAMPTZ,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+                """
+            )
+
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS clarity_call_appointments (
                     id BIGSERIAL PRIMARY KEY,
             
@@ -1652,32 +1672,6 @@ def update_client_phone(client_id: int, phone: str | None) -> bool:
             return cursor.rowcount > 0
 
 
-
-def update_client_status(client_id: int, status: str) -> bool:
-    """Update a client's coaching status without deleting their history."""
-    allowed = {"active", "paused", "completed"}
-    if status not in allowed:
-        raise ValueError(f"Invalid client status: {status}")
-
-    with get_connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                UPDATE clients
-                SET status = %s,
-                    end_date = CASE
-                        WHEN %s = 'completed' THEN CURRENT_DATE
-                        WHEN %s = 'active' THEN NULL
-                        ELSE end_date
-                    END,
-                    updated_at = NOW()
-                WHERE id = %s
-                """,
-                (status, status, status, client_id),
-            )
-            return cursor.rowcount > 0
-
-
 def create_weekly_checkin(
     client_id: int,
     call_date,
@@ -2692,3 +2686,51 @@ def get_transformation_interest_by_id(
                 (interest_id,),
             )
             return cursor.fetchone()
+
+
+def create_transformation_interest_payment_record(*, interest_id: int, razorpay_payment_link_id: str, payment_url: str, reference_id: str) -> None:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO transformation_interest_payments
+                    (interest_id, razorpay_payment_link_id, payment_url, reference_id, status)
+                VALUES (%s, %s, %s, %s, 'created')
+                ON CONFLICT (interest_id) DO UPDATE SET
+                    razorpay_payment_link_id = EXCLUDED.razorpay_payment_link_id,
+                    payment_url = EXCLUDED.payment_url,
+                    reference_id = EXCLUDED.reference_id,
+                    status = 'created',
+                    updated_at = NOW()
+                """,
+                (interest_id, razorpay_payment_link_id, payment_url, reference_id),
+            )
+        connection.commit()
+
+def get_transformation_interest_payment(interest_id: int) -> dict[str, Any] | None:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM transformation_interest_payments WHERE interest_id = %s",
+                (interest_id,),
+            )
+            return cursor.fetchone()
+
+def mark_transformation_interest_paid(*, payment_link_id: str | None, reference_id: str | None, payment_id: str | None, amount: int | None = None) -> bool:
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE transformation_interest_payments
+                SET status = 'paid', payment_id = COALESCE(%s, payment_id),
+                    amount = COALESCE(%s, amount), paid_at = COALESCE(paid_at, NOW()),
+                    updated_at = NOW()
+                WHERE (razorpay_payment_link_id = %s AND %s IS NOT NULL)
+                   OR (reference_id = %s AND %s IS NOT NULL)
+                RETURNING interest_id
+                """,
+                (payment_id, amount, payment_link_id, payment_link_id, reference_id, reference_id),
+            )
+            row = cursor.fetchone()
+        connection.commit()
+    return bool(row)

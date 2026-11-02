@@ -5,8 +5,8 @@ from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Header, HTTPException, Request
 
-from app.config import SYNAMATE_SECRET_WEBHOOK
-from app.database import upsert_clarity_call_appointment
+from app.config import SYNAMATE_SECRET_WEBHOOK, RAZORPAY_WEBHOOK_SECRET
+from app.database import upsert_clarity_call_appointment, mark_transformation_interest_paid
 
 
 logger = logging.getLogger(__name__)
@@ -252,3 +252,47 @@ async def receive_synamate_calendar_webhook(
         "status": "saved",
         "appointment_id": appointment_id,
     }
+
+
+@router.post("/webhooks/razorpay")
+async def receive_razorpay_webhook(request: Request):
+    import hashlib
+    import hmac
+
+    if not RAZORPAY_WEBHOOK_SECRET:
+        raise HTTPException(status_code=500, detail="Razorpay webhook secret is not configured")
+
+    raw_body = await request.body()
+    signature = request.headers.get("x-razorpay-signature")
+    if not signature:
+        raise HTTPException(status_code=400, detail="Missing Razorpay signature")
+
+    expected = hmac.new(
+        RAZORPAY_WEBHOOK_SECRET.encode("utf-8"),
+        raw_body,
+        hashlib.sha256,
+    ).hexdigest()
+    if not hmac.compare_digest(expected, signature):
+        raise HTTPException(status_code=400, detail="Invalid Razorpay signature")
+
+    payload = await request.json()
+    event = payload.get("event")
+    if event not in {"payment_link.paid", "payment.captured"}:
+        return {"status": "ignored"}
+
+    payment_link_entity = ((payload.get("payload") or {}).get("payment_link") or {}).get("entity") or {}
+    payment_entity = ((payload.get("payload") or {}).get("payment") or {}).get("entity") or {}
+
+    payment_link_id = payment_link_entity.get("id")
+    reference_id = payment_link_entity.get("reference_id")
+    payment_id = payment_entity.get("id")
+    amount = payment_entity.get("amount") or payment_link_entity.get("amount_paid")
+
+    updated = mark_transformation_interest_paid(
+        payment_link_id=str(payment_link_id) if payment_link_id else None,
+        reference_id=str(reference_id) if reference_id else None,
+        payment_id=str(payment_id) if payment_id else None,
+        amount=int(amount) if amount else None,
+    )
+
+    return {"status": "processed" if updated else "unmatched"}
