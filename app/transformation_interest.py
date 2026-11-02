@@ -116,33 +116,86 @@ def transformation_interest_application_prefill(token: str):
     }
 
 
-def _sync_payment_from_razorpay(payment: dict) -> bool:
-    """Ask Razorpay for the authoritative Payment Link status and sync our DB."""
+def _sync_payment_from_razorpay(
+    payment: dict,
+    callback_payment_id: str | None = None,
+) -> bool:
+    """Verify payment with Razorpay and sync our local payment record.
+
+    We never trust the browser callback parameters by themselves.  We use
+    Razorpay's server-side API to verify either the Payment Link status or,
+    when available, the specific payment returned by the callback.
+    """
     link_id = payment.get("razorpay_payment_link_id")
-    if not link_id or not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
+    payment_id = callback_payment_id
+
+    if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
         return payment.get("status") == "paid"
 
     try:
+        # First verify the specific payment returned by Razorpay's callback.
+        # This is useful because the Payment Link status can briefly lag the
+        # payment itself.
+        if payment_id:
+            payment_response = requests.get(
+                f"https://api.razorpay.com/v1/payments/{payment_id}",
+                auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET),
+                timeout=15,
+            )
+
+            if payment_response.ok:
+                payment_data = payment_response.json()
+                payment_status = str(payment_data.get("status", "")).lower()
+
+                if payment_status in {"captured", "authorized"}:
+                    marked = mark_transformation_interest_paid(
+                        payment_link_id=link_id,
+                        reference_id=payment.get("reference_id"),
+                        payment_id=payment_id,
+                        amount=payment_data.get("amount"),
+                    )
+                    if marked:
+                        return True
+
+        # Fall back to the authoritative Payment Link status.
+        if not link_id:
+            return payment.get("status") == "paid"
+
         response = requests.get(
             f"https://api.razorpay.com/v1/payment_links/{link_id}",
             auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET),
             timeout=15,
         )
+
         if not response.ok:
             return payment.get("status") == "paid"
 
         data = response.json()
-        if str(data.get("status", "")).lower() != "paid":
+        link_status = str(data.get("status", "")).lower()
+
+        if link_status != "paid":
             return payment.get("status") == "paid"
+
+        # The Payment Link response may include the payment ID. Prefer it,
+        # otherwise keep the ID supplied by the callback.
+        link_payments = data.get("payments")
+        if isinstance(link_payments, list) and link_payments:
+            first_payment = link_payments[0]
+            if isinstance(first_payment, dict):
+                payment_id = payment_id or first_payment.get("id")
 
         marked = mark_transformation_interest_paid(
             payment_link_id=link_id,
             reference_id=payment.get("reference_id"),
-            payment_id=data.get("payments", [{}])[0].get("id") if isinstance(data.get("payments"), list) and data.get("payments") else None,
+            payment_id=payment_id,
             amount=data.get("amount"),
         )
+
         return marked or payment.get("status") == "paid"
+
     except Exception:
+        # The frontend will keep polling payment-status.  A temporary
+        # Razorpay/API failure should never falsely unlock booking.
         return payment.get("status") == "paid"
 
 
@@ -282,7 +335,10 @@ def transformation_interest_payment_callback(
     if not payment:
         raise HTTPException(status_code=404, detail="Payment record not found.")
 
-    paid = _sync_payment_from_razorpay(payment)
+    paid = _sync_payment_from_razorpay(
+        payment,
+        callback_payment_id=razorpay_payment_id,
+    )
     if paid:
         return {
             "status": "paid",
