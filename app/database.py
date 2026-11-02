@@ -1642,6 +1642,26 @@ def get_client(client_id):
 
         return cursor.fetchone()
         
+def update_client_status(client_id: int, status: str) -> bool:
+    """Update a client's dashboard status."""
+    allowed_statuses = {"active", "inactive"}
+    if status not in allowed_statuses:
+        raise ValueError(f"Invalid client status: {status}")
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE clients
+                SET status = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+                """,
+                (status, client_id),
+            )
+            return cursor.rowcount > 0
+
+
 def update_client_start_date(client_id: int, start_date) -> bool:
     with get_connection() as connection:
         with connection.cursor() as cursor:
