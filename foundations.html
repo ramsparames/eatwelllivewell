@@ -112,14 +112,116 @@ fbq('track', 'PageView');
     padding-left:20px;
   }
   .foundation-compare-card li { margin:10px 0; }
+  .foundation-hero-grid {
+    align-items:start;
+  }
+  .foundation-visual {
+    align-self:start;
+  }
+  .foundation-visual-content {
+    min-height:auto !important;
+    height:auto !important;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    padding:40px 42px !important;
+  }
+  .foundation-visual-content h2,
+  .foundation-visual-content p {
+    margin:0;
+  }
+  .foundation-visual-content h2 {
+    max-width:10ch;
+  }
+  .game-elements {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+    margin-top:8px;
+  }
+  .game-element {
+    background:rgba(255,255,255,.78);
+    border:1px solid rgba(74,42,59,.10);
+    border-radius:18px;
+    padding:18px 16px;
+  }
+  .game-element strong {
+    display:block;
+    margin-bottom:6px;
+    font-size:1rem;
+  }
+  .game-element span {
+    display:block;
+    font-size:.96rem;
+    line-height:1.55;
+    color:var(--muted);
+  }
+  .footer {
+    background:linear-gradient(90deg,#11211d 0%,#10251e 48%,#12201b 100%);
+    color:rgba(255,255,255,.82);
+    padding:16px 0 0;
+  }
+  .footer-grid {
+    border-top:1px solid rgba(255,255,255,.14);
+    padding:30px 0 28px;
+    display:grid;
+    grid-template-columns:1.35fr 1fr 1fr .9fr;
+    gap:28px;
+    align-items:start;
+  }
+  .footer-logo,
+  .footer h3 {
+    color:#fff;
+  }
+  .footer p {
+    color:rgba(255,255,255,.72);
+  }
+  .footer a {
+    color:rgba(255,255,255,.78);
+    text-decoration:none;
+  }
+  .footer a:hover {
+    color:#fff;
+  }
+  .footer-grid > div {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .footer-grid h3 {
+    margin:0 0 4px;
+  }
+  .footer-grid p {
+    margin:0;
+  }
+  .footer-bottom {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    padding:18px 0 24px;
+    font-size:14px;
+    color:rgba(255,255,255,.72);
+  }
   @media (max-width: 900px) {
     .foundation-support-grid,
     .foundation-phases { grid-template-columns:1fr 1fr; }
+    .game-elements,
+    .footer-grid { grid-template-columns:1fr 1fr; }
   }
   @media (max-width: 640px) {
     .foundation-support-grid,
     .foundation-phases,
-    .foundation-compare { grid-template-columns:1fr; }
+    .foundation-compare,
+    .game-elements,
+    .footer-grid { grid-template-columns:1fr; }
+    .foundation-visual-content {
+      padding:32px 26px !important;
+    }
+    .footer-bottom {
+      flex-direction:column;
+      align-items:flex-start;
+    }
   }
 </style>
 </head>
@@ -392,11 +494,15 @@ fbq('track', 'PageView');
         <a href="/join">NourisHer Transformation</a>
         <a href="/assessment">NourisHer Snapshot™</a>
       </div>
+      <div>
+        <h3>Legal</h3>
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/terms-and-conditions">Terms and Conditions</a>
+      </div>
     </div>
     <div class="footer-bottom">
       <span>© 2026 Eat Well Live Well · Coaching by Sushma</span>
-      <span>Made with care · Chennai, India</span>
-      <span class="footer-legal"><a href="/privacy-policy">Privacy Policy</a> · <a href="/terms-and-conditions">Terms &amp; Conditions</a> · Chennai, India</span>
+      <span>Chennai, India</span>
     </div>
   </div>
 </footer>
