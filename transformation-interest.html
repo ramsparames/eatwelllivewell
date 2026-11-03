@@ -394,12 +394,20 @@ fbq('track', 'PageView');
   <p><strong>Payment received ✓</strong></p>
   <p id="booking-amount" style="font-size:0.95em;">Your ₹499 commitment has been received.</p>
   <p style="font-size:0.95em;">You're ready to book your Clarity Call with Sushma.</p>
-  <a class="btn btn-secondary" href="https://share.synamate.com/widget/booking/IBwI80BhwMVqhD9qvMXF" target="_blank" rel="noopener">Book my Clarity Call →</a>
+  <a class="btn btn-secondary" href="https://share.synamate.com/widget/booking/IBwI80BhwMVqhD9qvMXF" id="clarity-booking-button" target="_blank" rel="noopener">Book my Clarity Call →</a>
+  <div id="booking-confirming" class="hidden" style="margin-top:24px;">
+    <p><strong>Waiting for your booking confirmation…</strong></p>
+    <p style="font-size:0.95em;">Once Synamate confirms your appointment, this page will update automatically.</p>
+  </div>
+  <div id="booking-complete" class="hidden" style="margin-top:24px;">
+    <p><strong>Clarity Call booked ✓</strong></p>
+    <p style="font-size:0.95em;">You are all set. Sushma has your details and your booking.</p>
+  </div>
 </div>
 
 <p id="payment-error" class="hidden" style="color:#a34b58;"></p>
 </div></section>
 </div></main>
-<script src="/static/transformation-interest.js?v=4"></script>
+<script src="/static/transformation-interest.js?v=5"></script>
 </body>
 </html>

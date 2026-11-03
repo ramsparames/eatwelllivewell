@@ -101,3 +101,29 @@ def sync_transformation_applicant(
     except Exception:
         logger.exception("Synamate contact sync failed")
         return None
+
+
+def get_synamate_contact(contact_id: str) -> dict | None:
+    """Fetch one Synamate contact so webhook bookings can be matched reliably."""
+    if not contact_id or not SYNAMATE_API_TOKEN:
+        return None
+
+    headers = {
+        "Authorization": f"Bearer {SYNAMATE_API_TOKEN}",
+        "Version": "2021-04-15",
+        "Accept": "application/json",
+    }
+
+    try:
+        response = httpx.get(
+            f"{SYNAMATE_BASE_URL}/contacts/{contact_id}",
+            headers=headers,
+            timeout=15.0,
+        )
+        response.raise_for_status()
+        data = response.json()
+        contact = data.get("contact") if isinstance(data, dict) else None
+        return contact if isinstance(contact, dict) else None
+    except Exception:
+        logger.exception("Synamate contact lookup failed for %s", contact_id)
+        return None

@@ -72,6 +72,31 @@
     }
   }
 
+  async function pollBooking(interestId) {
+    const bookingButton = document.getElementById("clarity-booking-button");
+    const confirming = document.getElementById("booking-confirming");
+    const complete = document.getElementById("booking-complete");
+    if (confirming) confirming.classList.remove("hidden");
+
+    let attempts = 0;
+    const maxAttempts = 200;
+    while (attempts++ < maxAttempts) {
+      try {
+        const response = await fetch(`/transformation-interest/booking-status?interest_id=${encodeURIComponent(interestId)}`, { cache: "no-store" });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.booked) {
+            if (confirming) confirming.classList.add("hidden");
+            if (bookingButton) bookingButton.classList.add("hidden");
+            if (complete) complete.classList.remove("hidden");
+            return;
+          }
+        }
+      } catch (_) {}
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+  }
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -125,6 +150,18 @@
       if (successName) successName.textContent = payload.name || "there";
 
       setPaymentAmount(paymentData.amount_rupees);
+
+      const bookingButton = document.getElementById("clarity-booking-button");
+      if (bookingButton) {
+        try {
+          const bookingUrl = new URL(bookingButton.href);
+          bookingUrl.searchParams.set("name", payload.name);
+          bookingUrl.searchParams.set("full_name", payload.name);
+          bookingUrl.searchParams.set("phone", payload.phone);
+          bookingButton.href = bookingUrl.toString();
+        } catch (_) {}
+        bookingButton.addEventListener("click", () => pollBooking(interestId), { once: true });
+      }
 
       const payButton = document.getElementById("pay-button");
       if (payButton) {

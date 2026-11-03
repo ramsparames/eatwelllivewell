@@ -8,6 +8,7 @@ from fastapi import APIRouter, Header, HTTPException, Request
 from app.config import SYNAMATE_SECRET_WEBHOOK, RAZORPAY_WEBHOOK_SECRET
 from app.database import upsert_clarity_call_appointment, mark_transformation_interest_paid
 from app.transformation_interest import qualify_transformation_interest_if_ready
+from app.synamate import get_synamate_contact
 
 
 logger = logging.getLogger(__name__)
@@ -168,6 +169,17 @@ async def receive_synamate_calendar_webhook(
         custom_data,
         "phone",
     )
+
+    # Some Synamate calendar webhooks include only contactId and omit the
+    # contact's phone/name/email. Resolve the contact so the booking can be
+    # matched back to the paid Transformation interest.
+    if contact_id and (not phone or not name or not email):
+        contact = get_synamate_contact(str(contact_id)) or {}
+        phone = phone or contact.get("phone")
+        email = email or contact.get("email")
+        name = name or contact.get("name") or " ".join(
+            part for part in [contact.get("firstName"), contact.get("lastName")] if part
+        ).strip() or None
 
     appointment_status = (
         first_value(

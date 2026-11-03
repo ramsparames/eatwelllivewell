@@ -7,6 +7,7 @@ from app.database import (
     get_transformation_interest_payment,
     create_transformation_interest_payment_record,
     mark_transformation_interest_paid,
+    get_transformation_interest_by_id,
     promote_transformation_interest_if_qualified,
 )
 from app.email import send_transformation_interest_notification
@@ -370,4 +371,27 @@ def transformation_interest_payment_callback(
     return {
         "status": "received",
         "message": "Payment is being confirmed. Return to the original Eat Well Live Well tab; it will unlock once Razorpay confirms payment.",
+    }
+
+
+@router.get("/transformation-interest/booking-status")
+def transformation_interest_booking_status(interest_id: int):
+    interest = get_transformation_interest_by_id(interest_id)
+    if not interest:
+        raise HTTPException(status_code=404, detail="Transformation enquiry not found.")
+
+    payment = get_transformation_interest_payment(interest_id)
+    if not payment or payment.get("status") != "paid":
+        return {"booked": False, "qualified": False, "interest_id": interest_id}
+
+    # Re-run promotion on every poll. This makes the flow resilient to a
+    # Synamate webhook arriving a few seconds after the booking is completed.
+    qualify_transformation_interest_if_ready(interest_id=interest_id)
+    refreshed = get_transformation_interest_by_id(interest_id) or interest
+    qualified = (refreshed.get("status") or "pending") != "pending"
+    return {
+        "booked": qualified,
+        "qualified": qualified,
+        "status": refreshed.get("status"),
+        "interest_id": interest_id,
     }
