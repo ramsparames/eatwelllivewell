@@ -208,6 +208,138 @@ fbq('track', 'PageView');
   .interest-testimonial-grid { grid-template-columns: 1fr; }
 }
 
+
+.interest-success-card {
+  max-width: 980px;
+  margin: 0 auto;
+}
+.interest-success-card > p,
+.interest-success-card > h2 {
+  text-align: center;
+}
+.interest-success-card > p {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.interest-step-block {
+  max-width: 700px;
+  margin: 26px auto 0;
+  padding: 24px 26px;
+  background: #ffffff;
+  border: 1px solid #e5e3da;
+  border-radius: 24px;
+  box-shadow: 0 14px 34px rgba(38, 57, 46, 0.06);
+  text-align: center;
+}
+.interest-step-block.hidden {
+  display: none;
+}
+.interest-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #edf5ef;
+  color: #2b6b52;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.interest-step-badge.soft {
+  background: #f7f5ef;
+  color: #6e756e;
+}
+.interest-step-title {
+  margin: 14px 0 10px;
+  color: var(--ink);
+  font-size: clamp(30px, 3vw, 42px);
+  line-height: 1.08;
+}
+.interest-step-copy {
+  margin: 0 auto;
+  max-width: 620px;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.65;
+}
+.interest-helper-note {
+  margin: 14px auto 0;
+  max-width: 580px;
+  color: #6e756e;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.interest-commit-note {
+  margin: 0 auto 18px;
+  max-width: 560px;
+  padding: 14px 16px;
+  background: #f7f5ef;
+  border: 1px solid #ece8db;
+  border-radius: 18px;
+  color: #5f665f;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.interest-status-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+.interest-status-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 28px;
+  border-radius: 999px;
+  border: 1px solid #d4e6d8;
+  background: #edf7ef;
+  color: #24543f;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+.interest-status-button.waiting {
+  border-color: #e6dfcb;
+  background: #fbf8ef;
+  color: #6d664f;
+}
+.interest-status-button.complete {
+  border-color: #cfe4d7;
+  background: linear-gradient(180deg,#eef8f0 0%,#e5f4e9 100%);
+}
+.interest-action-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.interest-error-copy {
+  max-width: 700px;
+  margin: 18px auto 0;
+  text-align: center;
+  color: #a34b58;
+  font-weight: 600;
+}
+@media (max-width: 640px) {
+  .interest-step-block {
+    padding: 22px 18px;
+    border-radius: 20px;
+  }
+  .interest-status-button {
+    width: 100%;
+    max-width: 100%;
+    font-size: 17px;
+  }
+}
+
 @media (max-width: 700px) {
   .pain-grid {
     grid-template-columns: 1fr;
@@ -379,36 +511,53 @@ fbq('track', 'PageView');
 <p><strong>Ready to take the next step?</strong></p>
 <p>The Clarity Call with Sushma is a focused conversation to understand where you are, what you are looking for and whether NourisHer Transformation is the right fit for you.</p>
 
-<div id="payment-step" style="margin:28px 0 12px;">
-  <p style="font-size:0.95em; margin:0 0 14px; color:var(--muted);">The ₹499 is not an additional programme charge. If you join NourisHer Transformation™, it will be adjusted against your programme fee.</p>
-  <a class="btn btn-primary" href="#" id="pay-button" target="_blank" rel="noopener">Pay ₹499 commitment</a>
-</div>
-
-<p id="payment-wait" style="font-size:0.95em;"><span id="payment-copy">Complete the payment in the new tab. This page will automatically confirm your payment.</span></p>
-
-<div id="payment-confirming" class="hidden" style="margin:28px 0 12px;">
-  <p><strong>Confirming your payment…</strong></p>
-  <p style="font-size:0.95em;">This usually takes a few moments.</p>
-</div>
-
-<div id="booking-step" class="hidden" style="margin-top:28px;">
-  <p><strong>Payment received ✓</strong></p>
-  <p id="booking-amount" style="font-size:0.95em;">Your ₹499 commitment has been received. If you join NourisHer Transformation™, it will be adjusted against your programme fee.</p>
-  <p style="font-size:0.95em;">You're ready to book your Clarity Call with Sushma.</p>
-  <a class="btn btn-secondary" href="https://share.synamate.com/widget/booking/IBwI80BhwMVqhD9qvMXF" id="clarity-booking-button" target="_blank" rel="noopener">Book my Clarity Call →</a>
-  <div id="booking-confirming" class="hidden" style="margin-top:24px;">
-    <p><strong>Waiting for your booking confirmation…</strong></p>
-    <p style="font-size:0.95em;">Once Synamate confirms your appointment, this page will update automatically.</p>
-  </div>
-  <div id="booking-complete" class="hidden" style="margin-top:24px;">
-    <p><strong>Clarity Call booked ✓</strong></p>
-    <p style="font-size:0.95em;">You are all set. Sushma has your details and your booking.</p>
+<div id="payment-step" class="interest-step-block">
+  <span class="interest-step-badge">Step 1</span>
+  <h3 class="interest-step-title">Secure your Clarity Call</h3>
+  <p class="interest-step-copy">Make the ₹499 commitment to continue. This confirms you are serious about exploring NourisHer Transformation™ with Sushma.</p>
+  <p class="interest-commit-note">The ₹499 is not an additional programme charge. If you join NourisHer Transformation™, it will be adjusted against your programme fee.</p>
+  <div class="interest-action-row">
+    <a class="btn btn-primary" href="#" id="pay-button" target="_blank" rel="noopener">Pay ₹499 commitment</a>
   </div>
 </div>
 
-<p id="payment-error" class="hidden" style="color:#a34b58;"></p>
+<p id="payment-wait" class="interest-helper-note"><span id="payment-copy">Complete the payment in the new tab. This page will automatically confirm your payment.</span></p>
+
+<div id="payment-confirming" class="interest-step-block hidden">
+  <span class="interest-step-badge soft">Confirming</span>
+  <div class="interest-status-row">
+    <div class="interest-status-button waiting">Confirming your payment…</div>
+  </div>
+  <p class="interest-helper-note">This usually takes a few moments.</p>
+</div>
+
+<div id="booking-step" class="interest-step-block hidden">
+  <span class="interest-step-badge">Step 2</span>
+  <div class="interest-status-row">
+    <div class="interest-status-button complete">Payment received ✓</div>
+  </div>
+  <p id="booking-amount" class="interest-helper-note">Your ₹499 commitment has been received. If you join NourisHer Transformation™, it will be adjusted against your programme fee.</p>
+  <p class="interest-step-copy">You are ready to book your Clarity Call with Sushma.</p>
+  <div class="interest-action-row">
+    <a class="btn btn-secondary" href="https://share.synamate.com/widget/booking/IBwI80BhwMVqhD9qvMXF" id="clarity-booking-button" target="_blank" rel="noopener">Book my Clarity Call →</a>
+  </div>
+  <div id="booking-confirming" class="interest-step-block hidden">
+    <div class="interest-status-row">
+      <div class="interest-status-button waiting">Waiting for your booking confirmation…</div>
+    </div>
+    <p class="interest-helper-note">Once Synamate confirms your appointment, this page will update automatically.</p>
+  </div>
+  <div id="booking-complete" class="interest-step-block hidden">
+    <div class="interest-status-row">
+      <div class="interest-status-button complete">Clarity Call booked ✓</div>
+    </div>
+    <p class="interest-helper-note">You are all set. Sushma has your details and your booking.</p>
+  </div>
+</div>
+
+<p id="payment-error" class="interest-error-copy hidden"></p>
 </div></section>
 </div></main>
-<script src="/static/transformation-interest.js?v=6"></script>
+<script src="/static/transformation-interest.js?v=7"></script>
 </body>
 </html>
