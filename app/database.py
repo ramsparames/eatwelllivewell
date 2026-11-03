@@ -2802,22 +2802,22 @@ def promote_transformation_interest_if_qualified(
                 WHERE p.interest_id = i.id
                   AND p.status = 'paid'
                   AND i.status = 'pending'
-                  AND (%s IS NULL OR i.id = %s)
+                  AND (%s::bigint IS NULL OR i.id = %s::bigint)
                   AND (
-                      %s IS NULL
+                      %s::text IS NULL
                       OR regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g') =
-                         regexp_replace(%s, '[^0-9]', '', 'g')
+                         regexp_replace(%s::text, '[^0-9]', '', 'g')
                       OR (
                           length(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g')) >= 10
-                          AND length(regexp_replace(%s, '[^0-9]', '', 'g')) >= 10
+                          AND length(regexp_replace(%s::text, '[^0-9]', '', 'g')) >= 10
                           AND right(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g'), 10) =
-                              right(regexp_replace(%s, '[^0-9]', '', 'g'), 10)
+                              right(regexp_replace(%s::text, '[^0-9]', '', 'g'), 10)
                       )
                   )
                   AND EXISTS (
                       SELECT 1
                       FROM clarity_call_appointments AS c
-                      WHERE c.calendar_id = %s
+                      WHERE c.calendar_id = %s::text
                         AND c.created_at >= i.submitted_at
                         AND lower(COALESCE(c.appointment_status, '')) NOT IN ('cancelled', 'canceled')
                         AND (
