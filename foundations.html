@@ -44,7 +44,7 @@ fbq('track', 'PageView');
 
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>NourisHer Foundations | 16 Week Group Coaching</title>
+<title>NourisHer Foundations™ | 16 Week Group Coaching</title>
 <meta content="A 16 week small group coaching programme for women 40+ to build sustainable nutrition, strength, movement, recovery and consistency habits that work in real life." name="description"/>
 <link href="/static/styles.css" rel="stylesheet"/>
 <style>
@@ -117,21 +117,37 @@ fbq('track', 'PageView');
   }
   .foundation-visual {
     align-self:start;
+    overflow:hidden;
+    padding:0 !important;
+    border:1px solid rgba(33,92,73,.14) !important;
+    border-radius:32px !important;
+    background:linear-gradient(145deg,#f6e8eb 0%,#faf4ed 52%,#eaf4ef 100%) !important;
+    box-shadow:0 24px 60px rgba(38,53,46,.10) !important;
+  }
+  .foundation-visual::before {
+    display:none !important;
   }
   .foundation-visual-content {
     min-height:auto !important;
     height:auto !important;
     display:flex;
     flex-direction:column;
-    gap:18px;
-    padding:40px 42px !important;
+    gap:16px;
+    padding:42px !important;
   }
   .foundation-visual-content h2,
   .foundation-visual-content p {
     margin:0;
   }
   .foundation-visual-content h2 {
-    max-width:10ch;
+    max-width:12ch;
+    font-size:clamp(2.15rem,3vw,3.35rem) !important;
+    line-height:1.02;
+  }
+  .foundation-visual-content > p:not(.eyebrow) {
+    max-width:48ch;
+    font-size:1rem !important;
+    line-height:1.7 !important;
   }
   .game-elements {
     display:grid;
@@ -140,21 +156,29 @@ fbq('track', 'PageView');
     margin-top:8px;
   }
   .game-element {
-    background:rgba(255,255,255,.78);
-    border:1px solid rgba(74,42,59,.10);
-    border-radius:18px;
-    padding:18px 16px;
+    background:rgba(255,255,255,.58) !important;
+    border:1px solid rgba(33,92,73,.12) !important;
+    border-radius:20px !important;
+    padding:20px 18px !important;
+    min-height:150px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
   }
-  .game-element strong {
+  .foundation-visual .game-element strong {
     display:block;
-    margin-bottom:6px;
-    font-size:1rem;
+    margin-bottom:8px;
+    color:var(--green-800,#215c49) !important;
+    font-family:var(--serif) !important;
+    font-size:1.22rem !important;
+    line-height:1.2;
   }
-  .game-element span {
+  .foundation-visual .game-element span {
     display:block;
-    font-size:.96rem;
-    line-height:1.55;
-    color:var(--muted);
+    margin-top:0 !important;
+    font-size:.95rem !important;
+    line-height:1.55 !important;
+    color:var(--muted) !important;
   }
   .footer {
     background:linear-gradient(90deg,#11211d 0%,#10251e 48%,#12201b 100%);
@@ -254,7 +278,7 @@ fbq('track', 'PageView');
     <div class="wrap foundation-hero-grid">
       <div class="foundation-hero-copy">
         <p class="eyebrow">For women 40+ who want health habits that last</p>
-        <h1>NourisHer Foundations.<em>Learn it. Practise it. Make it yours.</em></h1>
+        <h1>NourisHer Foundations™.<em>Learn it. Practise it. Make it yours.</em></h1>
         <p>
           A 16 week small group coaching programme that helps you build the nutrition, strength, movement and recovery habits you need to take care of yourself with more confidence and consistency.
         </p>
@@ -266,14 +290,14 @@ fbq('track', 'PageView');
       </div>
       <div class="foundation-visual">
         <div class="foundation-visual-content">
-          <p class="eyebrow">The goal</p>
-          <h2>Know how to take care of yourself.</h2>
-          <p>Foundations is not about following another short term plan. It is about learning a practical system you can continue using when life is busy, social or imperfect.</p>
+          <p class="eyebrow">What you build</p>
+          <h2>A health system that works in real life.</h2>
+          <p>Not another short term plan. You learn a small set of practical skills and habits that can keep working through busy weeks, social occasions and imperfect days.</p>
           <div class="game-elements">
-            <div class="game-element"><strong>Nutrition</strong><span>Build meals that work with the foods you already eat.</span></div>
-            <div class="game-element"><strong>Strength and movement</strong><span>Build a realistic routine and learn how to become stronger.</span></div>
-            <div class="game-element"><strong>Consistency</strong><span>Move away from perfection and learn how to reset.</span></div>
-            <div class="game-element"><strong>Recovery</strong><span>Support sleep, energy and stress with practical habits.</span></div>
+            <div class="game-element"><strong>Eat well</strong><span>Build balanced meals with the foods you already enjoy.</span></div>
+            <div class="game-element"><strong>Get stronger</strong><span>Learn strength and movement in a realistic, progressive way.</span></div>
+            <div class="game-element"><strong>Stay consistent</strong><span>Move away from all or nothing thinking and learn how to reset.</span></div>
+            <div class="game-element"><strong>Recover better</strong><span>Support sleep, energy and stress with practical routines.</span></div>
           </div>
         </div>
       </div>
@@ -422,7 +446,7 @@ fbq('track', 'PageView');
       </div>
       <div class="foundation-compare">
         <article class="foundation-compare-card">
-          <p class="eyebrow">NourisHer Foundations</p>
+          <p class="eyebrow">NourisHer Foundations™</p>
           <h3>Learn the skills and build sustainable habits.</h3>
           <ul>
             <li>16 week small group programme</li>
@@ -433,7 +457,7 @@ fbq('track', 'PageView');
           </ul>
         </article>
         <article class="foundation-compare-card">
-          <p class="eyebrow">NourisHer Transformation</p>
+          <p class="eyebrow">NourisHer Transformation™</p>
           <h3>Personalise the skills to your body, goals and life.</h3>
           <ul>
             <li>Six months of deeper coaching support</li>
@@ -455,7 +479,7 @@ fbq('track', 'PageView');
         <p>Foundations is for women who want to understand what works, practise it with support and leave with a system they can keep using.</p>
       </div>
       <div class="foundation-pricing-card">
-        <span class="programme-tag">NourisHer Foundations</span>
+        <span class="programme-tag">NourisHer Foundations™</span>
         <h3 class="foundation-enrolment-status">Enrolment details coming soon</h3>
         <p>16 weeks · Maximum 10 women · Weekly group coaching · Two strength sessions each week · Individual check ins every two weeks</p>
         <ul class="foundation-pricing-list">
@@ -490,8 +514,8 @@ fbq('track', 'PageView');
       </div>
       <div>
         <h3>Programmes</h3>
-        <a href="/foundations">NourisHer Foundations</a>
-        <a href="/join">NourisHer Transformation</a>
+        <a href="/foundations">NourisHer Foundations™</a>
+        <a href="/join">NourisHer Transformation™</a>
         <a href="/assessment">NourisHer Snapshot™</a>
       </div>
       <div>

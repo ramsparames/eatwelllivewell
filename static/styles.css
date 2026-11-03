@@ -1088,6 +1088,10 @@ button {
   border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 
+.footer-grid.footer-grid-four {
+  grid-template-columns: 1.35fr 0.9fr 0.9fr 0.72fr;
+}
+
 .footer-logo {
   color: #fff;
   font-family: var(--serif);
@@ -1299,6 +1303,10 @@ button {
     grid-template-columns: 1fr 1fr;
   }
 
+  .footer-grid.footer-grid-four {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .footer-grid > div:first-child {
     grid-column: 1 / -1;
   }
@@ -1399,6 +1407,10 @@ button {
   }
 
   .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid.footer-grid-four {
     grid-template-columns: 1fr;
   }
 
