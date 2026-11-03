@@ -69,10 +69,14 @@ async def receive_synamate_calendar_webhook(
             detail="Webhook payload must be a JSON object",
         )
 
-    calendar = payload.get("calendar")
-
-    if not isinstance(calendar, dict):
-        calendar = {}
+    # HighLevel/Synamate AppointmentCreate webhooks use a nested
+    # `appointment` object. Keep accepting the older `calendar` shape too
+    # because existing Synamate workflow webhooks may still send it.
+    appointment = payload.get("appointment")
+    if not isinstance(appointment, dict):
+        appointment = payload.get("calendar")
+    if not isinstance(appointment, dict):
+        appointment = {}
 
     custom_data = payload.get("customData")
 
@@ -81,7 +85,8 @@ async def receive_synamate_calendar_webhook(
 
     external_appointment_id = (
         first_value(
-            calendar,
+            appointment,
+            "id",
             "appointmentId",
             "appointment_id",
         )
@@ -94,7 +99,7 @@ async def receive_synamate_calendar_webhook(
 
     start_time = (
         first_value(
-            calendar,
+            appointment,
             "startTime",
             "start_time",
         )
@@ -107,7 +112,7 @@ async def receive_synamate_calendar_webhook(
 
     end_time = (
         first_value(
-            calendar,
+            appointment,
             "endTime",
             "end_time",
         )
@@ -124,14 +129,10 @@ async def receive_synamate_calendar_webhook(
             detail="Appointment start time is missing",
         )
 
-    contact_id = first_value(
-        payload,
-        "contact_id",
-        "contactId",
-    ) or first_value(
-        custom_data,
-        "contactId",
-        "contact_id",
+    contact_id = (
+        first_value(appointment, "contactId", "contact_id")
+        or first_value(payload, "contact_id", "contactId")
+        or first_value(custom_data, "contactId", "contact_id")
     )
 
     if not external_appointment_id:
@@ -183,7 +184,7 @@ async def receive_synamate_calendar_webhook(
 
     appointment_status = (
         first_value(
-            calendar,
+            appointment,
             "appoinmentStatus",
             "appointmentStatus",
             "status",
@@ -197,7 +198,7 @@ async def receive_synamate_calendar_webhook(
 
     title = (
         first_value(
-            calendar,
+            appointment,
             "title",
             "calendarName",
         )
@@ -206,7 +207,7 @@ async def receive_synamate_calendar_webhook(
 
     meeting_location = (
         first_value(
-            calendar,
+            appointment,
             "address",
             "meetingLocation",
             "location",
@@ -218,6 +219,17 @@ async def receive_synamate_calendar_webhook(
         )
     )
 
+    incoming_calendar_id = (
+        first_value(appointment, "calendarId", "calendar_id")
+        or first_value(custom_data, "calendarId", "calendar_id")
+        or CLARITY_CALENDAR_ID
+    )
+
+    # Ignore appointments from other calendars if this endpoint receives a
+    # broader appointment feed. They must never qualify a Transformation lead.
+    if str(incoming_calendar_id) != CLARITY_CALENDAR_ID:
+        return {"status": "ignored", "reason": "not_clarity_calendar"}
+
     start_time = add_timezone(str(start_time))
     end_time = add_timezone(
         str(end_time) if end_time else None
@@ -227,7 +239,7 @@ async def receive_synamate_calendar_webhook(
         external_appointment_id=str(
             external_appointment_id
         ),
-        calendar_id=CLARITY_CALENDAR_ID,
+        calendar_id=str(incoming_calendar_id),
         contact_id=(
             str(contact_id)
             if contact_id
