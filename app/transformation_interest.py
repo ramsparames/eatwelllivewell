@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Request, HTTPException
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from app.config import SESSION_SECRET, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, APP_BASE_URL
@@ -9,8 +10,10 @@ from app.database import (
     mark_transformation_interest_paid,
     get_transformation_interest_by_id,
     promote_transformation_interest_if_qualified,
+    upsert_clarity_call_appointment,
 )
 from app.email import send_transformation_interest_notification
+from app.synamate import find_matching_clarity_event
 import os
 import requests
 
@@ -374,6 +377,48 @@ def transformation_interest_payment_callback(
     }
 
 
+def reconcile_paid_interest_from_synamate(interest: dict) -> bool:
+    """Backfill a Clarity Call directly from Synamate when the webhook was missed."""
+    match = find_matching_clarity_event(
+        calendar_id=CLARITY_CALENDAR_ID,
+        phone=interest.get("phone") or "",
+        submitted_at=interest.get("submitted_at"),
+    )
+    if not match:
+        return False
+
+    event, contact = match
+    start_time = event.get("startTime") or event.get("start_time")
+    if not start_time:
+        return False
+
+    external_id = event.get("id") or event.get("appointmentId")
+    if not external_id:
+        external_id = f"{CLARITY_CALENDAR_ID}:{start_time}:{event.get('contactId') or 'contact'}"
+
+    upsert_clarity_call_appointment(
+        external_appointment_id=str(external_id),
+        calendar_id=str(event.get("calendarId") or CLARITY_CALENDAR_ID),
+        contact_id=str(event.get("contactId")) if event.get("contactId") else None,
+        name=(
+            contact.get("name")
+            or " ".join(
+                part for part in [contact.get("firstName"), contact.get("lastName")] if part
+            ).strip()
+            or interest.get("name")
+        ),
+        email=contact.get("email"),
+        phone=contact.get("phone") or interest.get("phone"),
+        appointment_status=event.get("appointmentStatus") or event.get("status"),
+        title=event.get("title") or "Clarity Call with Sushma",
+        meeting_location=event.get("address") or event.get("meetingLocation"),
+        start_time=str(start_time),
+        end_time=str(event.get("endTime")) if event.get("endTime") else None,
+        raw_payload={"appointment": event, "contact": contact, "source": "synamate_reconciliation"},
+    )
+    return True
+
+
 @router.get("/transformation-interest/booking-status")
 def transformation_interest_booking_status(interest_id: int):
     interest = get_transformation_interest_by_id(interest_id)
@@ -384,10 +429,17 @@ def transformation_interest_booking_status(interest_id: int):
     if not payment or payment.get("status") != "paid":
         return {"booked": False, "qualified": False, "interest_id": interest_id}
 
-    # Re-run promotion on every poll. This makes the flow resilient to a
-    # Synamate webhook arriving a few seconds after the booking is completed.
+    # First try the normal webhook-backed local appointment record.
     qualify_transformation_interest_if_ready(interest_id=interest_id)
     refreshed = get_transformation_interest_by_id(interest_id) or interest
+
+    # If the webhook was missed, reconcile directly against Synamate so a paid
+    # prospect is not stuck forever. This also lets an already-paid test record
+    # such as Kavya7 recover without another Razorpay payment.
+    if (refreshed.get("status") or "pending") == "pending":
+        if reconcile_paid_interest_from_synamate(refreshed):
+            qualify_transformation_interest_if_ready(interest_id=interest_id)
+            refreshed = get_transformation_interest_by_id(interest_id) or refreshed
     qualified = (refreshed.get("status") or "pending") != "pending"
     return {
         "booked": qualified,
