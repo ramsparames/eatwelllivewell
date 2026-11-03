@@ -2678,6 +2678,33 @@ def get_transformation_interests() -> list[dict[str, Any]]:
             return cursor.fetchall()
 
 
+def get_pending_paid_transformation_interests() -> list[dict[str, Any]]:
+    """Return paid Transformation interests still waiting for booking recovery."""
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    i.id,
+                    i.name,
+                    i.phone,
+                    i.status,
+                    i.source,
+                    i.submitted_at,
+                    p.payment_id,
+                    p.amount,
+                    p.paid_at
+                FROM transformation_interest_leads AS i
+                INNER JOIN transformation_interest_payments AS p
+                    ON p.interest_id = i.id
+                WHERE i.status = 'pending'
+                  AND p.status = 'paid'
+                ORDER BY COALESCE(p.paid_at, i.submitted_at) DESC
+                """
+            )
+            return cursor.fetchall()
+
+
 def get_transformation_interest_by_id(
     interest_id: int,
 ) -> dict[str, Any] | None:

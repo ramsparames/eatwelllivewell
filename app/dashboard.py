@@ -7,6 +7,9 @@ from zoneinfo import ZoneInfo
 from app.auth import coach_is_logged_in
 from app.database import (
     get_transformation_interests,
+    get_pending_paid_transformation_interests,
+    get_transformation_interest_payment,
+    upsert_clarity_call_appointment,
     get_all_leads,
     get_lead_profile,
     get_lead_events,
@@ -30,7 +33,15 @@ from app.services.client_nudge_service import (
 from fastapi import Form
 from app.config import APP_BASE_URL
 from app.database import get_transformation_interest_by_id
-from app.transformation_interest import make_interest_application_token
+from app.transformation_interest import (
+    make_interest_application_token,
+    qualify_transformation_interest_if_ready,
+    CLARITY_CALENDAR_ID,
+)
+from app.admin_recovery import (
+    can_manually_recover,
+    build_manual_recovery_appointment,
+)
 
 router = APIRouter()
 
@@ -46,6 +57,7 @@ def set_templates(template_engine: Jinja2Templates) -> None:
 def dashboard(
     request: Request,
     q: str = "",
+    recovery: str = "",
 ):
     if not coach_is_logged_in(request):
         return RedirectResponse(
@@ -58,6 +70,7 @@ def dashboard(
 
     all_leads = get_all_leads()
     transformation_interests = get_transformation_interests()
+    pending_paid_interests = get_pending_paid_transformation_interests()
     today = date.today()
 
     interest_lead_items = []
@@ -439,11 +452,57 @@ def dashboard(
             "new_applications": new_applications,
             "priority_applicants": priority_applicants,
             "transformation_interests": transformation_interests,
+            "pending_paid_interests": pending_paid_interests,
+            "recovery_result": recovery,
             "new_lead_items": new_lead_items,
             "application_leads": application_leads,
         },
     )
     
+@router.post("/dashboard/leads/interest/{interest_id}/recover-booking")
+def recover_transformation_interest_booking(
+    request: Request,
+    interest_id: int,
+):
+    """Admin-only escape hatch for a paid booking visible in Synamate."""
+    if not coach_is_logged_in(request):
+        return RedirectResponse("/coach/login", status_code=303)
+
+    interest = get_transformation_interest_by_id(interest_id)
+    if interest is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Transformation enquiry not found",
+        )
+
+    payment = get_transformation_interest_payment(interest_id)
+    if not can_manually_recover(interest, payment):
+        reason = (
+            "already_qualified"
+            if (interest.get("status") or "pending") != "pending"
+            else "payment_missing"
+        )
+        return RedirectResponse(
+            f"/dashboard/leads?recovery={reason}",
+            status_code=303,
+        )
+
+    appointment = build_manual_recovery_appointment(
+        interest,
+        calendar_id=CLARITY_CALENDAR_ID,
+    )
+    upsert_clarity_call_appointment(**appointment)
+
+    qualified = qualify_transformation_interest_if_ready(
+        interest_id=interest_id
+    )
+    outcome = "recovered" if qualified else "failed"
+    return RedirectResponse(
+        f"/dashboard/leads?recovery={outcome}",
+        status_code=303,
+    )
+
+
 @router.get(
     "/dashboard/leads/interest/{interest_id}",
     response_class=HTMLResponse,

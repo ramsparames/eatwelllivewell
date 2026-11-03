@@ -141,6 +141,17 @@
 }
 .lead-empty{padding:28px;text-align:center;color:var(--coach-muted);font-size:13px}
 
+.recovery-panel{padding:20px 22px;border-color:#ead9b9;background:#fffdf8}
+.recovery-panel .panel-heading{margin-bottom:12px}
+.recovery-list{display:grid;gap:9px}
+.recovery-row{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:16px;align-items:center;padding:12px 14px;border:1px solid #efe1c8;border-radius:12px;background:#fff}
+.recovery-row strong{display:block;font-size:14px}
+.recovery-row span{display:block;margin-top:3px;color:var(--coach-muted);font-size:11px}
+.recovery-form button{border:0;cursor:pointer}
+.recovery-alert{padding:11px 14px;border-radius:11px;font-size:12px;font-weight:750}
+.recovery-alert.success{background:#eef8f1;color:#2c6a43;border:1px solid #cfe6d5}
+.recovery-alert.warning{background:#fff6e6;color:#78551f;border:1px solid #efd9ad}
+
 /* Hide filterable rows */
 .lead-row.is-hidden{display:none!important}
 
@@ -209,6 +220,41 @@
       <small>See today's actions ↓</small>
     </a>
   </section>
+
+  {% if recovery_result == "recovered" %}
+    <div class="recovery-alert success">Booking recovered. The paid Transformation interest has been qualified and moved into Leads.</div>
+  {% elif recovery_result == "payment_missing" %}
+    <div class="recovery-alert warning">Recovery was blocked because the Transformation interest is not marked paid.</div>
+  {% elif recovery_result == "already_qualified" %}
+    <div class="recovery-alert success">This Transformation interest is already qualified.</div>
+  {% elif recovery_result == "failed" %}
+    <div class="recovery-alert warning">The recovery record was created, but qualification did not complete. Check the booking/payment record before trying again.</div>
+  {% endif %}
+
+  {% if pending_paid_interests %}
+  <section class="leads-panel recovery-panel" id="booking-recovery">
+    <div class="panel-heading">
+      <div>
+        <h2>Recovery needed</h2>
+        <p>Paid Transformation interests still waiting for a local Clarity Call confirmation.</p>
+      </div>
+      <span class="panel-count">{{ pending_paid_interests|length }}</span>
+    </div>
+    <div class="recovery-list">
+      {% for interest in pending_paid_interests %}
+      <div class="recovery-row">
+        <div>
+          <strong>{{ interest.name }}</strong>
+          <span>{{ interest.phone }} · Payment received{% if interest.paid_at %} · {{ interest.paid_at.strftime('%d %b %Y') }}{% endif %}</span>
+        </div>
+        <form class="recovery-form" method="post" action="/dashboard/leads/interest/{{ interest.id }}/recover-booking" onsubmit="return confirm('Only confirm this if you can see this person's Clarity Call booked in Synamate. This will qualify the paid interest and add it to Leads.');">
+          <button class="lead-button secondary" type="submit">Confirm booked in Synamate</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 
   <!-- Master pipeline -->
   <section class="leads-panel all-leads-panel" id="all-leads">
