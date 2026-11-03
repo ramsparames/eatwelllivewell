@@ -57,6 +57,7 @@
             if (confirming) confirming.classList.add("hidden");
             if (error) error.classList.add("hidden");
             if (bookingStep) bookingStep.classList.remove("hidden");
+            startBookingWatch(interestId);
             return;
           }
         }
@@ -72,30 +73,88 @@
     }
   }
 
-  async function pollBooking(interestId) {
+  let bookingWatchInterestId = null;
+  let bookingWatchRunning = false;
+
+  function showBookedState() {
     const bookingButton = document.getElementById("clarity-booking-button");
     const confirming = document.getElementById("booking-confirming");
     const complete = document.getElementById("booking-complete");
+    if (confirming) confirming.classList.add("hidden");
+    if (bookingButton) bookingButton.classList.add("hidden");
+    if (complete) complete.classList.remove("hidden");
+  }
+
+  async function checkBookingOnce(interestId) {
+    try {
+      const response = await fetch(`/transformation-interest/booking-status?interest_id=${encodeURIComponent(interestId)}`, { cache: "no-store" });
+      if (!response.ok) return false;
+      const data = await response.json();
+      if (data.booked || data.qualified) {
+        showBookedState();
+        return true;
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  async function startBookingWatch(interestId) {
+    bookingWatchInterestId = String(interestId);
+    sessionStorage.setItem("transformation_interest_id", bookingWatchInterestId);
+
+    const confirming = document.getElementById("booking-confirming");
     if (confirming) confirming.classList.remove("hidden");
 
+    if (bookingWatchRunning) {
+      await checkBookingOnce(bookingWatchInterestId);
+      return;
+    }
+
+    bookingWatchRunning = true;
     let attempts = 0;
     const maxAttempts = 200;
-    while (attempts++ < maxAttempts) {
-      try {
-        const response = await fetch(`/transformation-interest/booking-status?interest_id=${encodeURIComponent(interestId)}`, { cache: "no-store" });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.booked) {
-            if (confirming) confirming.classList.add("hidden");
-            if (bookingButton) bookingButton.classList.add("hidden");
-            if (complete) complete.classList.remove("hidden");
-            return;
-          }
-        }
-      } catch (_) {}
+    while (bookingWatchInterestId && attempts++ < maxAttempts) {
+      if (await checkBookingOnce(bookingWatchInterestId)) {
+        bookingWatchRunning = false;
+        return;
+      }
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }
+    bookingWatchRunning = false;
   }
+
+  async function restoreInterestState() {
+    const storedInterestId = sessionStorage.getItem("transformation_interest_id");
+    if (!storedInterestId) return;
+
+    const storedName = sessionStorage.getItem("transformation_interest_name") || "there";
+    try {
+      const response = await fetch(`/transformation-interest/payment-status?interest_id=${encodeURIComponent(storedInterestId)}`, { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (!data.paid) return;
+
+      form.classList.add("hidden");
+      if (success) success.classList.remove("hidden");
+      if (successName) successName.textContent = storedName;
+
+      const paymentStep = document.getElementById("payment-step");
+      const bookingStep = document.getElementById("booking-step");
+      if (paymentStep) paymentStep.classList.add("hidden");
+      if (bookingStep) bookingStep.classList.remove("hidden");
+      setPaymentAmount(data.amount_rupees || 499);
+
+      startBookingWatch(storedInterestId);
+    } catch (_) {}
+  }
+
+  window.addEventListener("focus", () => {
+    if (bookingWatchInterestId) checkBookingOnce(bookingWatchInterestId);
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && bookingWatchInterestId) checkBookingOnce(bookingWatchInterestId);
+  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -160,7 +219,7 @@
           bookingUrl.searchParams.set("phone", payload.phone);
           bookingButton.href = bookingUrl.toString();
         } catch (_) {}
-        bookingButton.addEventListener("click", () => pollBooking(interestId), { once: true });
+        bookingButton.addEventListener("click", () => startBookingWatch(interestId));
       }
 
       const payButton = document.getElementById("pay-button");
@@ -182,4 +241,6 @@
       submit.textContent = "I'd like to explore NourisHer →";
     }
   });
+
+  restoreInterestState();
 })();
