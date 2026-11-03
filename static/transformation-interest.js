@@ -4,6 +4,9 @@
   const successName = document.getElementById("success-name");
   if (!form) return;
 
+  sessionStorage.removeItem("transformation_interest_id");
+  sessionStorage.removeItem("transformation_interest_name");
+
   const params = new URLSearchParams(window.location.search);
   const source = params.get("source") || params.get("utm_source") || "direct";
   const querySnapshotId = params.get("snapshot_id");
@@ -123,30 +126,6 @@
     bookingWatchRunning = false;
   }
 
-  async function restoreInterestState() {
-    const storedInterestId = sessionStorage.getItem("transformation_interest_id");
-    if (!storedInterestId) return;
-
-    const storedName = sessionStorage.getItem("transformation_interest_name") || "there";
-    try {
-      const response = await fetch(`/transformation-interest/payment-status?interest_id=${encodeURIComponent(storedInterestId)}`, { cache: "no-store" });
-      if (!response.ok) return;
-      const data = await response.json();
-      if (!data.paid) return;
-
-      form.classList.add("hidden");
-      if (success) success.classList.remove("hidden");
-      if (successName) successName.textContent = storedName;
-
-      const paymentStep = document.getElementById("payment-step");
-      const bookingStep = document.getElementById("booking-step");
-      if (paymentStep) paymentStep.classList.add("hidden");
-      if (bookingStep) bookingStep.classList.remove("hidden");
-      setPaymentAmount(data.amount_rupees || 499);
-
-      startBookingWatch(storedInterestId);
-    } catch (_) {}
-  }
 
   window.addEventListener("focus", () => {
     if (bookingWatchInterestId) checkBookingOnce(bookingWatchInterestId);
@@ -242,5 +221,4 @@
     }
   });
 
-  restoreInterestState();
 })();
