@@ -7,6 +7,7 @@ from fastapi import APIRouter, Header, HTTPException, Request
 
 from app.config import SYNAMATE_SECRET_WEBHOOK, RAZORPAY_WEBHOOK_SECRET
 from app.database import upsert_clarity_call_appointment, mark_transformation_interest_paid
+from app.transformation_interest import qualify_transformation_interest_if_ready
 
 
 logger = logging.getLogger(__name__)
@@ -248,6 +249,9 @@ async def receive_synamate_calendar_webhook(
         external_appointment_id,
     )
 
+    if phone:
+        qualify_transformation_interest_if_ready(phone=str(phone))
+
     return {
         "status": "saved",
         "appointment_id": appointment_id,
@@ -294,5 +298,7 @@ async def receive_razorpay_webhook(request: Request):
         payment_id=str(payment_id) if payment_id else None,
         amount=int(amount) if amount else None,
     )
+    if updated:
+        qualify_transformation_interest_if_ready(interest_id=updated)
 
     return {"status": "processed" if updated else "unmatched"}

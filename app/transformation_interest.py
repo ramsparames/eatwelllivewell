@@ -7,6 +7,7 @@ from app.database import (
     get_transformation_interest_payment,
     create_transformation_interest_payment_record,
     mark_transformation_interest_paid,
+    promote_transformation_interest_if_qualified,
 )
 from app.email import send_transformation_interest_notification
 import os
@@ -48,20 +49,38 @@ def receive_transformation_interest(request: Request, submission: Transformation
         source=submission.source.strip() or "direct",
     )
 
-    send_transformation_interest_notification(
-        interest_id=interest_id,
-        name=submission.name.strip(),
-        phone=submission.phone.strip(),
-        occupation=submission.occupation.strip(),
-        goals=submission.goals,
-        frustration=submission.frustration.strip(),
-        readiness=submission.readiness.strip(),
-        timeline=submission.timeline.strip(),
-        why_now=submission.why_now.strip(),
-        source=submission.source.strip() or "direct",
-    )
-
     return {"status": "saved", "interest_id": interest_id, "name": submission.name.strip()}
+
+
+CLARITY_CALENDAR_ID = "IBwI80BhwMVqhD9qvMXF"
+
+
+def qualify_transformation_interest_if_ready(
+    *,
+    interest_id: int | None = None,
+    phone: str | None = None,
+) -> dict | None:
+    qualified = promote_transformation_interest_if_qualified(
+        interest_id=interest_id,
+        phone=phone,
+        clarity_calendar_id=CLARITY_CALENDAR_ID,
+    )
+    if not qualified:
+        return None
+
+    send_transformation_interest_notification(
+        interest_id=qualified["id"],
+        name=qualified.get("name") or "",
+        phone=qualified.get("phone") or "",
+        occupation=qualified.get("occupation") or "",
+        goals=qualified.get("goals") or [],
+        frustration=qualified.get("frustration") or "",
+        readiness=qualified.get("readiness") or "",
+        timeline=qualified.get("timeline") or "",
+        why_now=qualified.get("why_now") or "",
+        source=qualified.get("source") or "direct",
+    )
+    return qualified
 
 
 _APPLICATION_TOKEN_MAX_AGE = 60 * 60 * 24 * 90
@@ -155,6 +174,7 @@ def _sync_payment_from_razorpay(
                         amount=payment_data.get("amount"),
                     )
                     if marked:
+                        qualify_transformation_interest_if_ready(interest_id=marked)
                         return True
 
         # Fall back to the authoritative Payment Link status.
@@ -190,8 +210,10 @@ def _sync_payment_from_razorpay(
             payment_id=payment_id,
             amount=data.get("amount"),
         )
+        if marked:
+            qualify_transformation_interest_if_ready(interest_id=marked)
 
-        return marked or payment.get("status") == "paid"
+        return bool(marked) or payment.get("status") == "paid"
 
     except Exception:
         # The frontend will keep polling payment-status.  A temporary

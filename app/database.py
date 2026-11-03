@@ -932,11 +932,12 @@ def save_transformation_interest(
                     readiness,
                     timeline,
                     why_now,
-                    source
+                    source,
+                    status
                 )
                 VALUES (
                     %s, %s, %s, %s, %s, %s::jsonb,
-                    %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, 'pending'
                 )
                 RETURNING id
                 """,
@@ -2670,6 +2671,7 @@ def get_transformation_interests() -> list[dict[str, Any]]:
                     LIMIT 1
                 ) AS a ON TRUE
 
+                WHERE i.status <> 'pending'
                 ORDER BY i.submitted_at DESC
                 """
             )
@@ -2736,7 +2738,7 @@ def get_transformation_interest_payment(interest_id: int) -> dict[str, Any] | No
             )
             return cursor.fetchone()
 
-def mark_transformation_interest_paid(*, payment_link_id: str | None, reference_id: str | None, payment_id: str | None, amount: int | None = None) -> bool:
+def mark_transformation_interest_paid(*, payment_link_id: str | None, reference_id: str | None, payment_id: str | None, amount: int | None = None) -> int | None:
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -2753,4 +2755,69 @@ def mark_transformation_interest_paid(*, payment_link_id: str | None, reference_
             )
             row = cursor.fetchone()
         connection.commit()
-    return bool(row)
+    return int(row["interest_id"]) if row else None
+
+
+def promote_transformation_interest_if_qualified(
+    *,
+    interest_id: int | None,
+    phone: str | None,
+    clarity_calendar_id: str,
+) -> dict[str, Any] | None:
+    """Promote a pending interest only after both payment and booking exist."""
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE transformation_interest_leads AS i
+                SET status = 'new', updated_at = NOW()
+                FROM transformation_interest_payments AS p
+                WHERE p.interest_id = i.id
+                  AND p.status = 'paid'
+                  AND i.status = 'pending'
+                  AND (%s IS NULL OR i.id = %s)
+                  AND (
+                      %s IS NULL
+                      OR regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g') =
+                         regexp_replace(%s, '[^0-9]', '', 'g')
+                      OR (
+                          length(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g')) >= 10
+                          AND length(regexp_replace(%s, '[^0-9]', '', 'g')) >= 10
+                          AND right(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g'), 10) =
+                              right(regexp_replace(%s, '[^0-9]', '', 'g'), 10)
+                      )
+                  )
+                  AND EXISTS (
+                      SELECT 1
+                      FROM clarity_call_appointments AS c
+                      WHERE c.calendar_id = %s
+                        AND c.created_at >= i.submitted_at
+                        AND lower(COALESCE(c.appointment_status, '')) NOT IN ('cancelled', 'canceled')
+                        AND (
+                            regexp_replace(COALESCE(c.phone, ''), '[^0-9]', '', 'g') =
+                            regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g')
+                            OR (
+                                length(regexp_replace(COALESCE(c.phone, ''), '[^0-9]', '', 'g')) >= 10
+                                AND length(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g')) >= 10
+                                AND right(regexp_replace(COALESCE(c.phone, ''), '[^0-9]', '', 'g'), 10) =
+                                    right(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g'), 10)
+                            )
+                        )
+                  )
+                RETURNING
+                    i.id, i.name, i.phone, i.occupation, i.goals,
+                    i.frustration, i.readiness, i.timeline, i.why_now, i.source
+                """,
+                (
+                    interest_id,
+                    interest_id,
+                    phone,
+                    phone,
+                    phone,
+                    phone,
+                    clarity_calendar_id,
+                ),
+            )
+            row = cursor.fetchone()
+        connection.commit()
+    return row
