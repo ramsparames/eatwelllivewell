@@ -69,32 +69,45 @@ async def receive_synamate_calendar_webhook(
             detail="Webhook payload must be a JSON object",
         )
 
-    # HighLevel/Synamate AppointmentCreate webhooks use a nested
-    # `appointment` object. Keep accepting the older `calendar` shape too
-    # because existing Synamate workflow webhooks may still send it.
-    appointment = payload.get("appointment")
-    if not isinstance(appointment, dict):
-        appointment = payload.get("calendar")
-    if not isinstance(appointment, dict):
-        appointment = {}
+    # Support both payload shapes used by this project:
+    # 1) current AppointmentCreate webhooks: payload["appointment"]
+    # 2) the existing Synamate workflow webhook: payload["calendar"]
+    #
+    # Important: in the legacy `calendar` shape, `calendar.id` is the
+    # CALENDAR id, not the appointment id. Do not treat it as an event id.
+    native_appointment = payload.get("appointment")
+    if not isinstance(native_appointment, dict):
+        native_appointment = None
+
+    legacy_calendar = payload.get("calendar")
+    if not isinstance(legacy_calendar, dict):
+        legacy_calendar = None
+
+    appointment = native_appointment or legacy_calendar or {}
 
     custom_data = payload.get("customData")
 
     if not isinstance(custom_data, dict):
         custom_data = {}
 
-    external_appointment_id = (
-        first_value(
-            appointment,
+    if native_appointment is not None:
+        external_appointment_id = first_value(
+            native_appointment,
             "id",
             "appointmentId",
             "appointment_id",
         )
-        or first_value(
-            custom_data,
+    else:
+        external_appointment_id = first_value(
+            appointment,
             "appointmentId",
             "appointment_id",
         )
+
+    external_appointment_id = external_appointment_id or first_value(
+        custom_data,
+        "appointmentId",
+        "appointment_id",
     )
 
     start_time = (
@@ -219,16 +232,30 @@ async def receive_synamate_calendar_webhook(
         )
     )
 
+    # Resolve the best calendar identity we have, but do NOT reject here.
+    # The existing Synamate workflow can put a workflow-level id in
+    # customData.calendarId. The database upsert deliberately reads the true
+    # calendar identity from raw_payload["calendar"] when present, and the
+    # qualification SQL only promotes against the actual Clarity calendar.
+    if native_appointment is not None:
+        incoming_calendar_id = first_value(
+            native_appointment,
+            "calendarId",
+            "calendar_id",
+        )
+    else:
+        incoming_calendar_id = first_value(
+            appointment,
+            "id",
+            "calendarId",
+            "calendar_id",
+        )
+
     incoming_calendar_id = (
-        first_value(appointment, "calendarId", "calendar_id")
+        incoming_calendar_id
         or first_value(custom_data, "calendarId", "calendar_id")
         or CLARITY_CALENDAR_ID
     )
-
-    # Ignore appointments from other calendars if this endpoint receives a
-    # broader appointment feed. They must never qualify a Transformation lead.
-    if str(incoming_calendar_id) != CLARITY_CALENDAR_ID:
-        return {"status": "ignored", "reason": "not_clarity_calendar"}
 
     start_time = add_timezone(str(start_time))
     end_time = add_timezone(
