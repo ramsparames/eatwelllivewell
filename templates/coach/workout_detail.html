@@ -44,7 +44,7 @@
     <div class="wd-stat"><span>Exercises</span><strong>{{ workout.exercises|length }}</strong></div>
     <div class="wd-stat"><span>Sets completed</span><strong>{{ workout.completed_sets }}/{{ workout.total_sets }}</strong></div>
     <div class="wd-stat"><span>Progress</span><strong>{{ workout.completion_percent }}%</strong></div>
-    <div class="wd-stat"><span>Workout date</span><strong style="font-size:15px">{% if workout.workout_date %}{{ workout.workout_date.strftime("%d %b %Y") }}{% else %}Not recorded yet{% endif %}</strong></div>
+    <div class="wd-stat"><span>Workout date</span><strong style="font-size:15px">{% if workout.workout_date %}{{ workout.viewed_session_date.strftime("%d %b %Y") if workout.viewed_session_date else workout.workout_date.strftime("%d %b %Y") }}{% else %}Not recorded yet{% endif %}</strong></div>
   </div>
 
   {% if workout.total_sets %}
@@ -97,5 +97,22 @@
     </section>
     {% endfor %}
   </div>
+  {% if session_history %}
+  <section class="wd-panel wd-pad" style="margin-top:18px">
+    <h2>Workout session history ({{ session_history|length }})</h2>
+    {% for session in session_history %}
+    <details style="padding:12px;margin-top:10px;border:1px solid #eee7f0;border-radius:12px">
+      <summary style="cursor:pointer;font-weight:800">{{ session.date.strftime("%d %b %Y") if session.date else "Date not recorded" }} · Session {{ session_history|length - loop.index0 }}</summary>
+      {% for exercise in session.exercises %}
+      <h3 style="margin:12px 0 5px">{{ exercise.title }}</h3>
+      {% for log in exercise.sets %}
+      <p style="margin:4px 0;font-size:13px">Set {{ log.set_number }} · {{ log.weight_kg if log.weight_kg is not none else "—" }} kg · {{ log.reps if log.reps is not none else "—" }} reps{% if log.completed %} ✓{% endif %}</p>
+      {% endfor %}
+      {% if exercise.notes %}<p class="wd-note">{{ exercise.notes }}</p>{% endif %}
+      {% endfor %}
+    </details>
+    {% endfor %}
+  </section>
+  {% endif %}
 </div>
 {% endblock %}

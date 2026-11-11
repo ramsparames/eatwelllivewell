@@ -207,30 +207,29 @@ def get_dashboard_coaching_attention(clients: list[dict]) -> list[dict]:
 
 
 def get_previous_exercise_performance(client_id: int, assignment_id: int, exercise_title: str):
+    """Most recent completed session (including this workout assignment)."""
     rows = _rows("""
-        SELECT a.workout_date, sl.set_number, sl.weight_kg, sl.reps, sl.completed
-        FROM client_workout_set_logs sl
-        JOIN client_workout_assignments a ON a.id = sl.assignment_id
-        JOIN workout_exercises e ON e.id = sl.exercise_id
-        WHERE a.client_id = %s
-          AND a.id <> %s
+        SELECT s.id AS session_id, s.workout_date, l.set_number,
+               l.weight_kg, l.reps, l.completed
+        FROM client_workout_session_sets l
+        JOIN client_workout_sessions s ON s.id = l.session_id
+        JOIN client_workout_assignments a ON a.id = s.assignment_id
+        JOIN workout_exercises e ON e.id = l.exercise_id
+        WHERE a.client_id = %s AND s.completed_at IS NOT NULL
           AND LOWER(TRIM(e.title)) = LOWER(TRIM(%s))
-          AND a.status = 'completed'
-        ORDER BY a.workout_date DESC NULLS LAST, a.id DESC, sl.set_number
-    """, (client_id, assignment_id, exercise_title))
+        ORDER BY s.workout_date DESC NULLS LAST, s.id DESC, l.set_number
+    """, (client_id, exercise_title))
     if not rows:
         return None
-    latest_date = rows[0]["workout_date"]
-    same = [r for r in rows if r["workout_date"] == latest_date]
+    latest = rows[0]['session_id']
     return {
-        "date": latest_date,
-        "sets": [
-            {"set_number": r["set_number"],
-             "weight_kg": float(r["weight_kg"]) if r.get("weight_kg") is not None else None,
-             "reps": r.get("reps"),
-             "completed": bool(r.get("completed"))}
-            for r in same
-        ]
+        'date': rows[0]['workout_date'],
+        'sets': [
+            {'set_number': r['set_number'],
+             'weight_kg': float(r['weight_kg']) if r['weight_kg'] is not None else None,
+             'reps': r['reps'], 'completed': bool(r['completed'])}
+            for r in rows if r['session_id'] == latest
+        ],
     }
 
 

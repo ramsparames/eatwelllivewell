@@ -203,7 +203,7 @@
         <div class="ph-next">
           <a href="/client/{{ access_token }}/data"><div><strong>Update today’s data</strong><small>Actions, steps{% if summary.latest_weight is not none %}, weight{% endif %}</small></div><span class="ph-arrow">→</span></a>
           {% if active_workouts %}
-          <a href="/client/{{ access_token }}/workouts?workout={{ active_workouts[0].assignment_id }}"><div><strong>{{ active_workouts[0].title }}</strong><small>{{ active_workouts|length }} workout{% if active_workouts|length != 1 %}s{% endif %} remaining</small></div><span class="ph-arrow">→</span></a>
+          <a href="/client/{{ access_token }}/workouts?workout={{ active_workouts[0].assignment_id }}"><div><strong>{{ active_workouts[0].title }}</strong><small>{{ active_workouts|length }} reusable workout{% if active_workouts|length != 1 %}s{% endif %}</small></div><span class="ph-arrow">→</span></a>
           {% endif %}
           <a href="#weekly-reflection"><div><strong>Weekly reflection</strong><small>{% if weekly_reflection %}Submitted — update anytime this week{% else %}Tell Sushma how the week is going{% endif %}</small></div><span class="ph-arrow">→</span></a>
 

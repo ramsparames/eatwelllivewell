@@ -20,6 +20,7 @@ from app.services.workout_service import (
     create_workout_tables,
     get_client_workout_assignment,
     get_client_workouts,
+    get_workout_session_history,
     reopen_workout,
     save_set_log,
     save_exercise_log,
@@ -116,10 +117,8 @@ def client_portal_home(request: Request, access_token: str):
         action["completed_selected"] = bool(logs.get(action["id"], False))
 
     workouts = get_client_workouts(client["id"])
-    active_workouts = [
-        workout for workout in workouts
-        if workout.get("status") != "completed"
-    ]
+    # Completed assignments remain available for a fresh session.
+    active_workouts = workouts
     current_reflection = get_weekly_reflection(
         client["id"],
         week_completion["week_start"],
@@ -402,6 +401,7 @@ def client_workouts_page(
             )["week_number"],
             "workouts": workouts,
             "selected_workout": selected_workout,
+            "session_history": get_workout_session_history(selected_assignment_id, client["id"]) if selected_assignment_id else [],
             "selected_assignment_id": selected_assignment_id,
             "today": today,
             "saved": request.query_params.get("saved") == "1",
@@ -604,11 +604,8 @@ def complete_client_workout(
             detail="Workout date cannot be in the future",
         )
 
-    complete_workout(
-        assignment_id,
-        client["id"],
-        actual_workout_date,
-    )
+    if not complete_workout(assignment_id, client["id"], actual_workout_date):
+        raise HTTPException(status_code=404, detail="Workout assignment not found")
     sync_strength_action_from_workout(
         assignment_id,
         client["id"],
@@ -625,10 +622,6 @@ def reopen_client_workout(access_token: str, assignment_id: int):
     client = get_client_by_token(access_token)
     if not client:
         raise HTTPException(status_code=404, detail="Client access link not found")
-    unsync_strength_action_from_workout(
-        assignment_id,
-        client["id"],
-    )
     reopen_workout(assignment_id, client["id"])
     return RedirectResponse(
         f"/client/{access_token}/workouts?workout={assignment_id}",

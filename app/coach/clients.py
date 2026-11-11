@@ -45,6 +45,7 @@ from app.services.workout_service import (
     create_workout_tables,
     get_client_workouts,
     get_workout_assignment_progress,
+    get_workout_session_history,
     list_workouts,
 )
 
@@ -2002,6 +2003,7 @@ def coach_client_workout_detail(
             "request": request,
             "client": profile["client"],
             "workout": workout,
+            "session_history": get_workout_session_history(assignment_id, client_id),
         },
     )
 

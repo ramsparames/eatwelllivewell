@@ -369,7 +369,7 @@
 </style>
 
 <div class="wk">
-  {% set active_workout_count = workouts|selectattr("status","ne","completed")|list|length %}
+  {% set active_workout_count = workouts|length %}
 {% include "client/_portal_nav.html" %}
 <div class="wk-page-intro">
   <div><p class="wk-kicker">WORKOUTS</p><h1>Strength sessions</h1><p>Choose a workout on the left, follow Sushma’s demos, and log your sets on the right.</p></div>
@@ -386,11 +386,11 @@
 
       {% if workouts %}
       <div class="wk-list">
-        {% for workout in workouts if workout.status != "completed" %}
+        {% for workout in workouts %}
         <a class="wk-item {% if workout.assignment_id == selected_assignment_id %}active{% endif %}"
            href="/client/{{ access_token }}/workouts?workout={{ workout.assignment_id }}">
           <div class="wk-item-top">
-            <span class="wk-status {{ workout.status }}">{{ workout.status|replace("_"," ")|title }}</span>
+            <span class="wk-status {{ workout.status }}">{{ "Ready to repeat" if workout.status == "completed" else workout.status|replace("_"," ")|title }}</span>
             
           </div>
           <h3>{{ workout.title }}</h3>
@@ -398,20 +398,6 @@
         </a>
         {% endfor %}
 
-        {% set completed = workouts|selectattr("status","equalto","completed")|list %}
-        {% if completed %}
-        <div class="wk-section-label">Completed</div>
-        {% for workout in completed %}
-        <a class="wk-item {% if workout.assignment_id == selected_assignment_id %}active{% endif %}"
-           href="/client/{{ access_token }}/workouts?workout={{ workout.assignment_id }}">
-          <div class="wk-item-top">
-            <span class="wk-status completed">Completed</span>
-          </div>
-          <h3>{{ workout.title }}</h3>
-          <div class="wk-item-meta">{{ workout.exercise_count }} exercises{% if workout.workout_date %} · Done {{ workout.workout_date.strftime("%d %b") }}{% endif %}</div>
-        </a>
-        {% endfor %}
-        {% endif %}
       </div>
       {% else %}
       <div class="wk-empty">No workouts have been assigned yet.</div>
@@ -436,11 +422,10 @@
             <div class="wk-detail-meta">
               {{ selected_workout.exercises|length }} exercises
               {% if selected_workout.duration_minutes %} · {{ selected_workout.duration_minutes }} min{% endif %}
-              {% if selected_workout.workout_date %} · Done {{ selected_workout.workout_date.strftime("%d %b %Y") }}{% endif %}
+              {% if selected_workout.session_count %} · {{ selected_workout.session_count }} completed session{{ "s" if selected_workout.session_count != 1 else "" }}{% endif %}
             </div>
           </div>
           <div class="wk-head-actions">
-            {% if selected_workout.status != "completed" %}
             <label class="wk-head-date">
               <span>Workout date</span>
               <input class="wk-date-input"
@@ -451,13 +436,7 @@
                      form="complete-workout-form"
                      required>
             </label>
-            {% else %}
-            <div class="wk-recorded-date">
-              <span>Workout date</span>
-              <strong>{{ selected_workout.workout_date.strftime("%d %b %Y") if selected_workout.workout_date else "Not recorded" }}</strong>
-            </div>
-            {% endif %}
-            <span class="wk-status {{ selected_workout.status }}">{{ selected_workout.status|replace("_"," ")|title }}</span>
+            <span class="wk-status {{ selected_workout.status }}">{{ "Ready to repeat" if selected_workout.status == "completed" and not selected_workout.current_session_id else selected_workout.status|replace("_"," ")|title }}</span>
           </div>
         </div>
 
@@ -542,19 +521,31 @@
 
         <section class="wk-complete">
           <div>
-            <h3>{% if selected_workout.status == "completed" %}Workout completed ✓{% else %}Finished this workout?{% endif %}</h3>
+            <h3>Finished this session?</h3>
             <p data-workout-progress-text>{{ ns.done }} of {{ ns.total }} sets marked done.</p>
           </div>
-          {% if selected_workout.status == "completed" %}
-          <form method="post" action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/reopen">
-            <button class="wk-complete-btn" type="submit">Reopen workout</button>
-          </form>
-          {% else %}
           <form id="complete-workout-form" class="wk-complete-form" method="post" action="/client/{{ access_token }}/workouts/{{ selected_workout.id }}/complete">
-            <button class="wk-complete-btn" type="submit">Complete workout ✓</button>
+            <button class="wk-complete-btn" type="submit">Complete this session ✓</button>
           </form>
-          {% endif %}
         </section>
+        {% if session_history %}
+        <section class="wk-complete" style="display:block;margin-top:16px">
+          <h3>Previous sessions ({{ session_history|length }})</h3>
+          <p>Every completed session is saved separately. Compare sets, reps and weights for each exercise.</p>
+          {% for session in session_history %}
+          <details style="margin-top:12px;padding:12px;border:1px solid #e9dfea;border-radius:10px">
+            <summary style="cursor:pointer;font-weight:750">Session {{ session_history|length - loop.index0 }} · {{ session.date.strftime("%d %b %Y") if session.date else "Date not recorded" }}</summary>
+            {% for exercise in session.exercises %}
+              <div style="margin-top:12px"><strong>{{ exercise.title }}</strong></div>
+              {% for setlog in exercise.sets %}
+                <div style="margin-top:4px;font-size:13px">Set {{ setlog.set_number }}: {{ setlog.weight_kg if setlog.weight_kg is not none else "—" }} kg × {{ setlog.reps if setlog.reps is not none else "—" }} reps{% if setlog.completed %} ✓{% endif %}</div>
+              {% endfor %}
+              {% if exercise.notes %}<p>{{ exercise.notes }}</p>{% endif %}
+            {% endfor %}
+          </details>
+          {% endfor %}
+        </section>
+        {% endif %}
       {% else %}
       <div class="wk-empty">
         <strong>No workout selected.</strong><br>
