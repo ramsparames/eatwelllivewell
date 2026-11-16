@@ -2813,15 +2813,12 @@ def promote_transformation_interest_if_qualified(
                 """
                 UPDATE transformation_interest_leads AS i
                 SET status = 'new', updated_at = NOW()
-                WHERE i.status = 'pending'
+                FROM transformation_interest_payments AS p
+                WHERE p.interest_id = i.id
+                  AND i.status = 'pending'
                   AND (
-                      i.source LIKE 'international%'
-                      OR EXISTS (
-                          SELECT 1
-                          FROM transformation_interest_payments AS p
-                          WHERE p.interest_id = i.id
-                            AND p.status = 'paid'
-                      )
+                      i.source LIKE 'international%%'
+                      OR p.status = 'paid'
                   )
                   AND (%s::bigint IS NULL OR i.id = %s::bigint)
                   AND (
