@@ -440,12 +440,27 @@ fbq('track', 'PageView');
 <div class="interest-note" style="margin-top: 24px;">
   <strong>Before we talk about Transformation,</strong> tell Sushma a little about where you are right now. This takes about 2 minutes.
   <div style="margin-top: 12px; font-size: 0.96em; line-height: 1.6;">
-    If what you have read resonates with you, the next step is a <strong>Clarity Call with Sushma</strong>. There is no payment required to book the call for international clients at this time.
+    If what you have read resonates with you, the next step is a <strong>Clarity Call with Sushma</strong>. 
   </div>
 </div>
 <form class="interest-form journey-card" id="transformation-interest" style="margin-top: 34px;" novalidate="">
 <section class="interest-question"><p class="eyebrow">1 · About you</p><h2>What should Sushma call you?</h2>
-<div class="field-grid"><div class="form-field"><label for="interest-name">Your name</label><input autocomplete="name" id="interest-name" maxlength="120" name="name" required=""/></div>
+<div class="field-grid"><div class="form-field"><label for="interest-name">Your name</label><input autocomplete="name" id="interest-name" maxlength="120" name="name" required=""/>
+<div class="form-group">
+  <label for="country">Country</label>
+  <select id="country" name="country" required>
+    <option value="">Select your country</option>
+    <option>United States</option>
+    <option>Canada</option>
+    <option>United Kingdom</option>
+    <option>United Arab Emirates</option>
+    <option>Singapore</option>
+    <option>Australia</option>
+    <option>New Zealand</option>
+    <option>Other</option>
+  </select>
+</div>
+</div>
 <div class="form-field"><label for="interest-phone">Best WhatsApp number</label><input autocomplete="tel" id="interest-phone" maxlength="30" name="phone" required="" type="tel"/></div></div>
 <p class="helper">Which age group are you in?</p>
 <div class="interest-options">
