@@ -2801,35 +2801,32 @@ def promote_transformation_interest_if_qualified(
     phone: str | None,
     clarity_calendar_id: str,
 ) -> dict[str, Any] | None:
-    """Promote a pending interest after the required qualification step.
+    """Promote a transformation enquiry only after its required qualification.
 
-    Indian enquiries require both the ₹499 payment and a Clarity Call booking.
-    International enquiries currently require the Clarity Call booking only;
-    this can be changed later when international payments are enabled.
+    India:
+        payment marked paid + Clarity Call booked
+
+    International:
+        Clarity Call booked
+
+    The appointment is matched against the enquiry's stored phone number.
     """
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
                 UPDATE transformation_interest_leads AS i
-                SET status = 'new', updated_at = NOW()
-                FROM transformation_interest_payments AS p
-                WHERE p.interest_id = i.id
-                  AND i.status = 'pending'
+                SET status = 'new',
+                    updated_at = NOW()
+                WHERE i.status = 'pending'
+                  AND i.id = %s::bigint
                   AND (
-                      i.source LIKE 'international%%'
-                      OR p.status = 'paid'
-                  )
-                  AND (%s::bigint IS NULL OR i.id = %s::bigint)
-                  AND (
-                      %s::text IS NULL
-                      OR regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g') =
-                         regexp_replace(%s::text, '[^0-9]', '', 'g')
-                      OR (
-                          length(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g')) >= 10
-                          AND length(regexp_replace(%s::text, '[^0-9]', '', 'g')) >= 10
-                          AND right(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g'), 10) =
-                              right(regexp_replace(%s::text, '[^0-9]', '', 'g'), 10)
+                      i.source LIKE 'international:%%'
+                      OR EXISTS (
+                          SELECT 1
+                          FROM transformation_interest_payments AS p
+                          WHERE p.interest_id = i.id
+                            AND p.status = 'paid'
                       )
                   )
                   AND EXISTS (
@@ -2837,32 +2834,43 @@ def promote_transformation_interest_if_qualified(
                       FROM clarity_call_appointments AS c
                       WHERE c.calendar_id = %s::text
                         AND c.created_at >= i.submitted_at
-                        AND lower(COALESCE(c.appointment_status, '')) NOT IN ('cancelled', 'canceled')
+                        AND lower(COALESCE(c.appointment_status, ''))
+                            NOT IN ('cancelled', 'canceled')
                         AND (
-                            regexp_replace(COALESCE(c.phone, ''), '[^0-9]', '', 'g') =
+                            regexp_replace(COALESCE(c.phone, ''), '[^0-9]', '', 'g')
+                            =
                             regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g')
                             OR (
                                 length(regexp_replace(COALESCE(c.phone, ''), '[^0-9]', '', 'g')) >= 10
                                 AND length(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g')) >= 10
-                                AND right(regexp_replace(COALESCE(c.phone, ''), '[^0-9]', '', 'g'), 10) =
-                                    right(regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g'), 10)
+                                AND right(
+                                    regexp_replace(COALESCE(c.phone, ''), '[^0-9]', '', 'g'),
+                                    10
+                                )
+                                =
+                                right(
+                                    regexp_replace(COALESCE(i.phone, ''), '[^0-9]', '', 'g'),
+                                    10
+                                )
                             )
                         )
                   )
                 RETURNING
-                    i.id, i.name, i.phone, i.occupation, i.goals,
-                    i.frustration, i.readiness, i.timeline, i.why_now, i.source
+                    i.id,
+                    i.name,
+                    i.phone,
+                    i.occupation,
+                    i.goals,
+                    i.frustration,
+                    i.readiness,
+                    i.timeline,
+                    i.why_now,
+                    i.source
                 """,
-                (
-                    interest_id,
-                    interest_id,
-                    phone,
-                    phone,
-                    phone,
-                    phone,
-                    clarity_calendar_id,
-                ),
+                (interest_id, clarity_calendar_id),
             )
             row = cursor.fetchone()
+
         connection.commit()
+
     return row
