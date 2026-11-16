@@ -945,7 +945,7 @@ def save_transformation_interest(
                     status
                 )
                 VALUES (
-                    %s, %s, %s, %s, %s, %s::jsonb,
+                    %s, %s, %s, %s, %s, %s, %s::jsonb,
                     %s, %s, %s, %s, %s, 'pending'
                 )
                 RETURNING id
