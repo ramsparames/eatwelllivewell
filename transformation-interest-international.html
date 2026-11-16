@@ -353,6 +353,54 @@ fbq('track', 'PageView');
     margin-top: 38px;
   }
 }
+
+<style>
+/* International enquiry: keep the About You fields aligned with the site's
+   existing two-column visual language while giving Country its own field. */
+.international-about-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.international-about-grid .form-field {
+  min-width: 0;
+}
+
+.international-about-grid select {
+  width: 100%;
+  min-height: 58px;
+  padding: 0 46px 0 18px;
+  border: 1px solid #e3e0d8;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+  appearance: auto;
+}
+
+.international-about-grid select:focus {
+  outline: none;
+  border-color: #2b7964;
+  box-shadow: 0 0 0 4px rgba(43,121,100,.10);
+}
+
+@media (max-width: 850px) {
+  .international-about-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .international-about-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+</style>
+
 </style>
 </head>
 <body class="journey-page transformation-interest-page transformation-interest-international-page">
@@ -445,23 +493,30 @@ fbq('track', 'PageView');
 </div>
 <form class="interest-form journey-card" id="transformation-interest" style="margin-top: 34px;" novalidate="">
 <section class="interest-question"><p class="eyebrow">1 · About you</p><h2>What should Sushma call you?</h2>
-<div class="field-grid"><div class="form-field"><label for="interest-name">Your name</label><input autocomplete="name" id="interest-name" maxlength="120" name="name" required=""/>
-<div class="form-group">
-  <label for="country">Country</label>
-  <select id="country" name="country" required>
+<div class="international-about-grid">
+<div class="form-field">
+  <label for="interest-name">Your name</label>
+  <input autocomplete="name" id="interest-name" maxlength="120" name="name" required=""/>
+</div>
+<div class="form-field">
+  <label for="interest-country">Country</label>
+  <select id="interest-country" name="country" required>
     <option value="">Select your country</option>
-    <option>United States</option>
-    <option>Canada</option>
-    <option>United Kingdom</option>
-    <option>United Arab Emirates</option>
-    <option>Singapore</option>
-    <option>Australia</option>
-    <option>New Zealand</option>
-    <option>Other</option>
+    <option value="United States">United States</option>
+    <option value="Canada">Canada</option>
+    <option value="United Kingdom">United Kingdom</option>
+    <option value="United Arab Emirates">United Arab Emirates</option>
+    <option value="Singapore">Singapore</option>
+    <option value="Australia">Australia</option>
+    <option value="New Zealand">New Zealand</option>
+    <option value="Other">Other</option>
   </select>
 </div>
+<div class="form-field">
+  <label for="interest-phone">Best WhatsApp number</label>
+  <input autocomplete="tel" id="interest-phone" maxlength="30" name="phone" required="" type="tel"/>
 </div>
-<div class="form-field"><label for="interest-phone">Best WhatsApp number</label><input autocomplete="tel" id="interest-phone" maxlength="30" name="phone" required="" type="tel"/></div></div>
+</div>
 <p class="helper">Which age group are you in?</p>
 <div class="interest-options">
 <label class="interest-option"><input name="age_range" required="" type="radio" value="Under 30"/><span>Under 30</span></label>
@@ -531,7 +586,7 @@ fbq('track', 'PageView');
   <div class="interest-status-row">
     <div class="interest-status-button complete">You're ready to book ✓</div>
   </div>
-  <p class="interest-step-copy">Choose a convenient time to speak with Sushma. There is no payment required for international clients at this time.</p>
+  <p class="interest-step-copy">Choose a convenient time to speak with Sushma. </p>
   <div class="interest-action-row">
     <a class="btn btn-secondary" href="https://share.synamate.com/widget/booking/IBwI80BhwMVqhD9qvMXF" id="clarity-booking-button" target="_blank" rel="noopener">Book my Clarity Call →</a>
   </div>

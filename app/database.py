@@ -152,6 +152,13 @@ def create_database() -> None:
 
             cursor.execute(
                 """
+                ALTER TABLE transformation_interest_leads
+                ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT ''
+                """
+            )
+
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS transformation_interest_payments (
                     id BIGSERIAL PRIMARY KEY,
                     interest_id BIGINT NOT NULL UNIQUE
@@ -872,6 +879,7 @@ def save_transformation_interest(
     snapshot_id: int | None,
     name: str,
     phone: str,
+    country: str,
     age_range: str,
     occupation: str,
     goals: list[str],
@@ -925,6 +933,7 @@ def save_transformation_interest(
                     snapshot_id,
                     name,
                     phone,
+                    country,
                     age_range,
                     occupation,
                     goals,
@@ -945,6 +954,7 @@ def save_transformation_interest(
                     linked_snapshot_id,
                     name,
                     phone,
+                    country,
                     age_range,
                     occupation,
                     json.dumps(goals),
