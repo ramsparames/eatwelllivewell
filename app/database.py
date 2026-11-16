@@ -945,7 +945,7 @@ def save_transformation_interest(
                     status
                 )
                 VALUES (
-                    %s, %s, %s, %s, %s, %s, %s::jsonb,
+                    %s, %s, %s, %s, %s, %s::jsonb,
                     %s, %s, %s, %s, %s, 'pending'
                 )
                 RETURNING id
@@ -2813,12 +2813,15 @@ def promote_transformation_interest_if_qualified(
                 """
                 UPDATE transformation_interest_leads AS i
                 SET status = 'new', updated_at = NOW()
-                FROM transformation_interest_payments AS p
-                WHERE p.interest_id = i.id
-                  AND i.status = 'pending'
+                WHERE i.status = 'pending'
                   AND (
                       i.source LIKE 'international%'
-                      OR p.status = 'paid'
+                      OR EXISTS (
+                          SELECT 1
+                          FROM transformation_interest_payments AS p
+                          WHERE p.interest_id = i.id
+                            AND p.status = 'paid'
+                      )
                   )
                   AND (%s::bigint IS NULL OR i.id = %s::bigint)
                   AND (
