@@ -151,6 +151,10 @@ def join_form():
 def transformation_interest():
     return FileResponse(BASE_DIR / "transformation-interest.html")
 
+@app.get("/transformation-interest-international")
+def transformation_interest_international():
+    return FileResponse(BASE_DIR / "transformation-interest-international.html")
+
 @app.get("/join")
 def join():
     return FileResponse(BASE_DIR / "join.html")

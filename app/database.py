@@ -2791,7 +2791,12 @@ def promote_transformation_interest_if_qualified(
     phone: str | None,
     clarity_calendar_id: str,
 ) -> dict[str, Any] | None:
-    """Promote a pending interest only after both payment and booking exist."""
+    """Promote a pending interest after the required qualification step.
+
+    Indian enquiries require both the ₹499 payment and a Clarity Call booking.
+    International enquiries currently require the Clarity Call booking only;
+    this can be changed later when international payments are enabled.
+    """
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -2800,8 +2805,11 @@ def promote_transformation_interest_if_qualified(
                 SET status = 'new', updated_at = NOW()
                 FROM transformation_interest_payments AS p
                 WHERE p.interest_id = i.id
-                  AND p.status = 'paid'
                   AND i.status = 'pending'
+                  AND (
+                      i.source LIKE 'international%'
+                      OR p.status = 'paid'
+                  )
                   AND (%s::bigint IS NULL OR i.id = %s::bigint)
                   AND (
                       %s::text IS NULL

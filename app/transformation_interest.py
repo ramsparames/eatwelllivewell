@@ -426,16 +426,17 @@ def transformation_interest_booking_status(interest_id: int):
         raise HTTPException(status_code=404, detail="Transformation enquiry not found.")
 
     payment = get_transformation_interest_payment(interest_id)
-    if not payment or payment.get("status") != "paid":
+    is_international = str(interest.get("source") or "").lower().startswith("international")
+    if not is_international and (not payment or payment.get("status") != "paid"):
         return {"booked": False, "qualified": False, "interest_id": interest_id}
 
     # First try the normal webhook-backed local appointment record.
+    # International enquiries do not currently require payment.
     qualify_transformation_interest_if_ready(interest_id=interest_id)
     refreshed = get_transformation_interest_by_id(interest_id) or interest
 
-    # If the webhook was missed, reconcile directly against Synamate so a paid
-    # prospect is not stuck forever. This also lets an already-paid test record
-    # such as Kavya7 recover without another Razorpay payment.
+    # If the webhook was missed, reconcile directly against Synamate so a prospect
+    # is not stuck forever. International enquiries can use this without payment.
     if (refreshed.get("status") or "pending") == "pending":
         if reconcile_paid_interest_from_synamate(refreshed):
             qualify_transformation_interest_if_ready(interest_id=interest_id)
